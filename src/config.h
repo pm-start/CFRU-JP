@@ -67,6 +67,7 @@
 #define FLAG_TERA_ORB_NO_COST 0x92C
 #define FLAG_CUSTOM_TERA_TYPE 0x92D
 #define FLAG_DAILY_EVENTS_START 0xE00 //To flag + 0xFF, resets every new day.
+#define FLAG_DONT_OFFER_NICKNAMES_BATTLE 0xF8E //[hack] patches/0405: set = never ask "give a nickname?" (battle catch, egg hatch, and gift scripts via the msgbox yes/no wrapper). Settings screen row "ニックネーム". Clear (default, old saves) = ask as before. 5e ledger 0xF8E
 
 /*===== Start Menu/Poketools Flags =====*/
 #define FLAG_SYS_BAG_HIDE 0x91B		//Toggle bag off
@@ -124,7 +125,7 @@ enum //These vars need to be one after the other (hence the enum)
 /*===== TM/HM/Tutor Options (Vastly improved from other versions!) =====*/
 #define EXPANDED_TMSHMS  //Comment this out if you want to keep 50 tms/8 hms
 #define EXPANDED_MOVE_TUTORS //Comment this out if you want to keep 16 move tutors and the ultimate elemental moves being exclusive to Kantonian starters
-#define NUM_TMS 120	//keep this defined even if EXPANDED_TMSHMS is not!!
+#define NUM_TMS 127 /*[hack] patches/0861 120→127 TM121〜127 (SV)*/	//keep this defined even if EXPANDED_TMSHMS is not!!
 #define NUM_HMS 8	//keep this defined even if EXPANDED_TMSHMS is not!!
 #define NUM_MOVE_TUTORS 152 //keep this defined even if EXPANDED_MOVE_TUTORS is not!! If using DPE, set to 128.
 #define LAST_TOTAL_TUTOR_NUM 160 //Should be equal to (NUM_MOVE_TUTORS - 1) + 9. Must be set to an actual integer or the compilation will not work.
@@ -140,12 +141,13 @@ enum //These vars need to be one after the other (hence the enum)
 
 /*===== General Number Options =====*/
 #define KANTO_DEX_COUNT 151
-#define NATIONAL_DEX_COUNT 1029
+#define NATIONAL_DEX_COUNT 1050
 
-#define MAX_LEVEL 200 //Also change this in the file "asm_defines.asm" found in the root //[hack] patches/0236 100 → 200（2026-10-09）
-#define NUM_TRAINER_CLASSES 107 //Vanilla FR has 107
+#include "hack_stat_caps.h" //[hack] patches/0677 上限の正本 tools/stat_caps/stat_caps.json（生成物）
+#define MAX_LEVEL HACK_MAX_LEVEL //[hack] patches/0236 100 → 200（2026-10-09）→ patches/0677 値は stat_caps.json の 1 か所（asm_defines.s も hack_stat_caps.inc から）
+#define NUM_TRAINER_CLASSES 111 //[hack] patches/0348 2026-10-12 Vanilla FR has 107 + Galactic grunt/admin/boss (0x6B-0x6D) + patches/0817 CLASS_YARTIE (0x6E)
 #define EVOS_PER_MON 16 //The number of maximum evolutions per Pokemon. Vanilla FR has 5. DPE has 16!!!
-#define EV_CAP 252 //Also change this in the file "asm_defines.s" found in the root
+#define EV_CAP HACK_EV_PER_STAT_CAP //[hack] patches/0677 値は stat_caps.json の 1 か所（asm_defines.s も hack_stat_caps.inc から）
 #define POWER_ITEM_EV_YIELD 8 //Set to 4 for older mechanic
 
 #define DUSK_BALL_MULTIPLIER 30 //Change this line to 35 to make the catch rate for the Dusk Ball 3.5x like before Gen 7
@@ -160,10 +162,10 @@ enum //These vars need to be one after the other (hence the enum)
 // follow saved values: normal, easy, medium, hard, Momo Ice, Riru Ice (6 entries).
 #define AI_RANK_LEVEL_STEP 10
 #define AI_SWITCH_COOLDOWN_TURNS 5
-#define AI_RANK_LEVEL_CAP 200
-#define AI_RANK_DIFFICULTY_OFFSETS {0, -4, -2, 3, 0, -24} //[hack] patches/0321 6 つ目 = りるアイス（5）: いつも 0（いちばん弱い）
-#define AI_RANK_DIFFICULTY_FLOORS {0, 0, 0, 8, 24, 0}
-#define AI_RANK_DIFFICULTY_CAPS {20, 16, 18, 23, 24, 0}
+#define AI_RANK_LEVEL_CAP HACK_MAX_LEVEL //[hack] patches/0677 stat_caps.json の MAX_LEVEL から
+#define AI_RANK_DIFFICULTY_OFFSETS {0, -4, -2, 3, 0, -24, 0} //[hack] patches/0321 6 つ目 = りるアイス（5）: いつも 0（いちばん弱い）・7 つ目 = しゃかりき（6）: ももアイスと同じ
+#define AI_RANK_DIFFICULTY_FLOORS {0, 0, 0, 8, 24, 0, 24}
+#define AI_RANK_DIFFICULTY_CAPS {20, 16, 18, 23, 24, 0, 24}
 #define AI_RANK_WILD_LEVEL_STEP AI_RANK_LEVEL_STEP
 #define AI_RANK_WILD_DIFFICULTY_OFFSETS AI_RANK_DIFFICULTY_OFFSETS
 #define AI_RANK_WILD_DIFFICULTY_FLOORS AI_RANK_DIFFICULTY_FLOORS
@@ -270,6 +272,7 @@ enum //These vars need to be one after the other (hence the enum)
 #define FRLG_ROAMING //When a roaming Pokemon is created, it will either be a Entei, Raikou, or Suicune, depending on the player's starter choice
 #define FRLG_ROAMING_ALL_BEASTS //[hack] All three beasts roam at once, instead of only the one picked by the starter. Requires FRLG_ROAMING.
 //[hack] build_rom.py --demo（デモ版ビルド.bat）は -DHACK_DEMO_BUILD を渡して、下の 2 つのデバッグを切る（2026-10-01）
+// ジョウトの開閉は実行時の判定 HackJohto_Open（src/hack_johto.c・patches/0986）。以前の #define HACK_OMIT_JOHTO（コンパイル時）は廃止。
 #if !defined(HACK_DEMO_BUILD) && !defined(HACK_NO_DEBUG) //[hack] patches/0340 2026-10-12 build_rom.py --no-debug でも切る（デモ版でない通しの確かめ）
 #define JOHTO_TOWNMAP_DEBUG //[hack] Debug: the Kanto town map always scrolls west to show Johto (normally only after flag 0x13E2). Comment out for release.
 #define SINNOH_TOWNMAP_DEBUG //[hack] Debug: the town map switch menu always offers Sinnoh (normally only after flag 0x13E1). Comment out for release.
@@ -293,6 +296,7 @@ enum //These vars need to be one after the other (hence the enum)
 #define CAN_ONLY_USE_OMNIDRECTIONAL_JUMP_ON_HEIGHT_2 //The omnidirectional jump tiles can only be used if the player is standing on a tile of height 2 (movement permission 0xC in AdvanceMap)
 #define HOOPA_CHANGE_IN_PC //Hoopa-Unbound will revert to confined form when placed in or withdrawn from a box
 #define SHAYMIN_CHANGE_IN_PC //Shaymin-Sky will revert to sky from when placed in or withdrawn from a box
+#define PLA_HELD_ORIGIN_ORBS //[hack] patches/0810 2026-10-25 ユーザー「オリジンフォルムになるように」: こんごうだま／しらたまを持たせたディアルガ／パルキアがオリジンフォルムになる（form_change.c・battle_util.c。ギラティナのはっきんだまと同じ作り）
 #define HIGH_PITCH_MEGA_PRIMAL_CRY //Mega Pokemon cries will be higher pitched. This is useful if you're using the base form cries for Mega Evolutions
 #define CUSTOM_MULTICHOICE //Adds JPAN's custom multichoice menus (see documentation)
 //#define SCROLLING_MULTICHOICE //Enables scrolling multichoice menus by using special 0x158.
@@ -326,7 +330,7 @@ enum //These vars need to be one after the other (hence the enum)
 //#define OLD_PRANKSTER //Uncomment this line if you want Prankster to be able to affect Dark-Types
 //#define OLD_INTREPID_SWORD
 //#define OLD_DAUNTLESS_SHIELD
-//#define OLD_PROTEAN
+#define OLD_PROTEAN //★ patches/0650: へんげんじざい／リベロを第6〜8世代の仕様（技を出すたびにタイプが変わる）に戻す。コメントを外しただけ
 //#define OLD_TRANSISTOR
 
 /*===== Damage Calculation Options =====*/
@@ -389,3 +393,6 @@ enum //These vars need to be one after the other (hence the enum)
 //See "include/new/dexnav_config.h"
 
 //#define INSTANT_TEXT // Enable Instant Text. Some Hack Authors might want this disabled because of the effects instant text has on pacing
+
+//[hack] patches/0956 FEAT-shadow-c 段C オーラ（src/hack_aura.c）: 印つきポケモンのオーラ（ヌシ・デルタ・ダーク）。つよさをみる側は段 H
+#define HACK_AURA

@@ -19,7 +19,7 @@
 
 u16 SecondAbility_OfBank(u8 bank);
 u16 SecondAbility_OfMon(struct Pokemon* mon);
-bool8 SecondAbility_IsUnlocked(u8 level);
+bool8 SecondAbility_IsUnlocked(u16 level);
 u16 HackGibleEgg_SpecialAbility(const struct Pokemon* mon, u16 species);
 
 bool8 HackDragonBoulder_Bank(u8 bank)

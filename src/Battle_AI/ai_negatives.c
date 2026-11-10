@@ -1,4 +1,6 @@
+#include "../lv200_custom_move_ai.h"
 #include "../defines.h"
+#include "../lv200_custom_move_ai.h"
 #include "../defines_battle.h"
 #include "../../include/random.h"
 #include "../../include/constants/items.h"
@@ -34,37 +36,37 @@ ai_negatives.c
 
 #define TARGETING_PARTNER (bankDef == bankAtkPartner)
 #define PARTNER_MOVE_EFFECT_IS_SAME (IS_DOUBLE_BATTLE \
-									&& gBattleMoves[move].effect == gBattleMoves[partnerMove].effect \
+									&& gBattleMoves[Lv200MoveAIBase(move)].effect == gBattleMoves[Lv200MoveAIBase(partnerMove)].effect \
 									&& gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE \
 									&& gBattleStruct->moveTarget[bankAtkPartner] == bankDef)
 #define PARTNER_MOVE_EFFECT_IS_SAME_NO_TARGET (IS_DOUBLE_BATTLE \
-									&& gBattleMoves[move].effect == gBattleMoves[partnerMove].effect \
+									&& gBattleMoves[Lv200MoveAIBase(move)].effect == gBattleMoves[Lv200MoveAIBase(partnerMove)].effect \
 									&& gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE)
 #define PARTNER_MOVE_EFFECT_IS_STATUS_SAME_TARGET (IS_DOUBLE_BATTLE \
 									&& gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE \
 									&& gBattleStruct->moveTarget[bankAtkPartner] == bankDef \
-									&& (gBattleMoves[partnerMove].effect == EFFECT_SLEEP \
-									 || gBattleMoves[partnerMove].effect == EFFECT_POISON \
-									 || gBattleMoves[partnerMove].effect == EFFECT_TOXIC \
-									 || gBattleMoves[partnerMove].effect == EFFECT_PARALYZE \
-									 || gBattleMoves[partnerMove].effect == EFFECT_WILL_O_WISP \
-									 || gBattleMoves[partnerMove].effect == EFFECT_YAWN \
+									&& (gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_SLEEP \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_POISON \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_TOXIC \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_PARALYZE \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_WILL_O_WISP \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_YAWN \
 									 || IsMaxMoveWithStatusEffect(partnerMove))) \
 
 #define PARTNER_MOVE_EFFECT_IS_WEATHER (IS_DOUBLE_BATTLE \
 									&& gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE \
-									&& (gBattleMoves[partnerMove].effect == EFFECT_SUNNY_DAY \
-									 || gBattleMoves[partnerMove].effect == EFFECT_RAIN_DANCE \
-									 || gBattleMoves[partnerMove].effect == EFFECT_SANDSTORM \
-									 || gBattleMoves[partnerMove].effect == EFFECT_HAIL \
+									&& (gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_SUNNY_DAY \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_RAIN_DANCE \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_SANDSTORM \
+									 || gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_HAIL \
 									 || IsMaxMoveWithWeatherEffect(partnerMove)))
 #define PARTNER_MOVE_EFFECT_IS_TERRAIN (IS_DOUBLE_BATTLE \
 									&& gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE \
-									&& (gBattleMoves[partnerMove].effect == EFFECT_SET_TERRAIN \
+									&& (gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_SET_TERRAIN \
 									 || IsMaxMoveWithTerrainEffect(partnerMove)))
 #define PARTNER_MOVE_IS_TAILWIND_TRICKROOM (IS_DOUBLE_BATTLE \
 									&& gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE \
-									&& (partnerMove == MOVE_TAILWIND || partnerMove == MOVE_TRICKROOM))
+									&& (Lv200MoveAIBase(partnerMove) == MOVE_TAILWIND || Lv200MoveAIBase(partnerMove) == MOVE_TRICKROOM))
 
 #define PARTNER_MOVE_IS_CONFUSION_MAX_MOVE (IS_DOUBLE_BATTLE \
 									&& gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE \
@@ -115,7 +117,7 @@ u8 AIScript_Negatives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 	&& data->defItemEffect != ITEM_EFFECT_ABILITY_SHIELD)
 		data->defAbility = ABILITY_NONE;
 
-	u8 moveEffect = gBattleMoves[move].effect;
+	u8 moveEffect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 	u8 moveSplit = CalcMoveSplit(bankAtk, move, bankDef);
 	u8 moveTarget = gBattleMoves[move].target;
 	u8 moveType = GetMoveTypeSpecial(bankAtk, move);
@@ -200,7 +202,7 @@ u8 AIScript_Negatives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 	//Target Ability Checks
 	if (NO_MOLD_BREAKERS(data->atkAbility, move))
 	{
-		switch (data->defAbility) { //Type-specific ability checks - primordial weather handled separately
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (data->defAbility) : SecondAbility_OfBank(bankDef); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) { //Type-specific ability checks - primordial weather handled separately
 
 			//Electric
 			case ABILITY_VOLTABSORB:
@@ -406,7 +408,7 @@ u8 AIScript_Negatives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 
 			case ABILITY_HYPERCUTTER:
 				if ((moveEffect == EFFECT_ATTACK_DOWN ||  moveEffect == EFFECT_ATTACK_DOWN_2)
-				&& move != MOVE_PLAYNICE && move != MOVE_NOBLEROAR && move != MOVE_TEARFULLOOK && move != MOVE_VENOMDRENCH)
+				&& move != MOVE_PLAYNICE && Lv200MoveAIBase(move) != MOVE_NOBLEROAR && move != MOVE_TEARFULLOOK && move != MOVE_VENOMDRENCH)
 				{
 					DECREASE_VIABILITY(10);
 					return viability;
@@ -475,7 +477,7 @@ u8 AIScript_Negatives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 					return viability;
 				}
 				break;
-		}
+		} }
 
 		//Target Partner Ability Check
 		if (IS_DOUBLE_BATTLE && !TARGETING_PARTNER)
@@ -544,7 +546,7 @@ u8 AIScript_Negatives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			if (ITEM_EFFECT(bankDef) == ITEM_EFFECT_CLEAR_AMULET)
 			{
 				if (CheckTableForMoveEffect(move, gStatLoweringMoveEffects)
-					|| move == MOVE_PARTINGSHOT)
+					|| Lv200MoveAIBase(move) == MOVE_PARTINGSHOT)
 					{
 						DECREASE_VIABILITY(10);
 						return viability;
@@ -625,7 +627,7 @@ MOVESCR_CHECK_0:
 	}
 
 	//Primal Weather Check
-	if (gBattleWeather & WEATHER_SUN_PRIMAL && moveType == TYPE_WATER && moveSplit != SPLIT_STATUS)
+	if (gBattleWeather & WEATHER_SUN_PRIMAL && moveType == TYPE_WATER && move != MOVE_HYDROSTEAM && moveSplit != SPLIT_STATUS)
 	{
 		DECREASE_VIABILITY(20);
 		return viability;
@@ -657,7 +659,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_ABSORB:
-			if (data->defAbility == ABILITY_LIQUIDOOZE)
+			if ((data->defAbility == ABILITY_LIQUIDOOZE || SecondAbility_OfBank(bankDef) == ABILITY_LIQUIDOOZE))
 				DECREASE_VIABILITY(6);
 
 			if (move == MOVE_STRENGTHSAP)
@@ -848,7 +850,7 @@ MOVESCR_CHECK_0:
 
 		case EFFECT_SPECIAL_ATTACK_UP:
 		case EFFECT_SPECIAL_ATTACK_UP_2:
-			switch(move) {
+			switch(Lv200MoveAIBase(move)) {
 				case MOVE_GROWTH:
 				case MOVE_WORKUP:
 				AI_WORK_UP_CHECK: ;
@@ -919,7 +921,7 @@ MOVESCR_CHECK_0:
 		case EFFECT_EVASION_UP:
 		case EFFECT_EVASION_UP_2:
 		case EFFECT_MINIMIZE:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_ACUPRESSURE:
 					if (StatsMaxed(bankDef) || data->defAbility == ABILITY_CONTRARY)
 						DECREASE_VIABILITY(10);
@@ -934,7 +936,7 @@ MOVESCR_CHECK_0:
 		case EFFECT_ATTACK_DOWN:
 		case EFFECT_ATTACK_DOWN_2:
 			decreased = FALSE;
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_VENOMDRENCH:
 					if (!(data->defStatus1 & STATUS_PSN_ANY))
 					{
@@ -993,7 +995,7 @@ MOVESCR_CHECK_0:
 
 		case EFFECT_SPECIAL_ATTACK_DOWN:
 		case EFFECT_SPECIAL_ATTACK_DOWN_2:
-			if (move == MOVE_CAPTIVATE
+			if (Lv200MoveAIBase(move) == MOVE_CAPTIVATE
 			&& (data->atkGender == MON_GENDERLESS || data->defGender == MON_GENDERLESS || data->atkGender == data->defGender))
 				DECREASE_VIABILITY(10);
 			else if (STAT_STAGE(bankDef, STAT_STAGE_SPATK) == STAT_STAGE_MIN || !SpecialMoveInMoveset(bankDef)
@@ -1077,7 +1079,7 @@ MOVESCR_CHECK_0:
 			||  GetPoisonDamage(bankDef) >= gBattleMons[bankDef].maxHP / 4)
 				DECREASE_VIABILITY(10);
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_DRAGONTAIL:
 				case MOVE_CIRCLETHROW:
 					goto AI_STANDARD_DAMAGE;
@@ -1167,12 +1169,12 @@ MOVESCR_CHECK_0:
 
 		case EFFECT_0HKO:
 			if (AI_SpecialTypeCalc(move, bankAtk, bankDef) & (MOVE_RESULT_NO_EFFECT | MOVE_RESULT_MISSED)
-			|| (NO_MOLD_BREAKERS(data->atkAbility, move) && data->defAbility == ABILITY_STURDY))
+			|| (NO_MOLD_BREAKERS(data->atkAbility, move) && (data->defAbility == ABILITY_STURDY || SecondAbility_OfBank(bankDef) == ABILITY_STURDY)))
 				DECREASE_VIABILITY(10);
 			break;
 
 		case EFFECT_RECOIL_IF_MISS:
-			if (data->atkAbility == ABILITY_MAGICGUARD)
+			if ((data->atkAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtk) == ABILITY_MAGICGUARD))
 				goto AI_STANDARD_DAMAGE;
 			else if (moveAcc < 75)
 				DECREASE_VIABILITY(6);
@@ -1191,7 +1193,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_RECOIL:
-			if (data->atkAbility == ABILITY_MAGICGUARD || data->atkAbility == ABILITY_ROCKHEAD)
+			if ((data->atkAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtk) == ABILITY_MAGICGUARD) || data->atkAbility == ABILITY_ROCKHEAD)
 				goto AI_STANDARD_DAMAGE;
 
 			u32 dmg = GetFinalAIMoveDamage(move, bankAtk, bankDef, 1, NULL);
@@ -1233,7 +1235,7 @@ MOVESCR_CHECK_0:
 				break;
 			}
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_TEETERDANCE: //Check if can affect either target
 					if ((IsConfused(bankDef)
 					  || (NO_MOLD_BREAKERS(data->atkAbility, move) && data->defAbility == ABILITY_OWNTEMPO)
@@ -1264,7 +1266,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_REFLECT:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_AURORAVEIL:
 					if (gNewBS->AuroraVeilTimers[SIDE(bankAtk)]
 					|| !(gBattleWeather & WEATHER_HAIL_ANY)
@@ -1286,7 +1288,7 @@ MOVESCR_CHECK_0:
 			|| MoveBlockedBySubstitute(move, bankAtk, bankDef)
 			|| PARTNER_MOVE_EFFECT_IS_STATUS_SAME_TARGET)
 				DECREASE_VIABILITY(10);
-			else if (move != MOVE_GLARE
+			else if (Lv200MoveAIBase(move) != MOVE_GLARE
 				&& AI_SpecialTypeCalc(move, bankAtk, bankDef) & MOVE_RESULT_NO_EFFECT)
 			{
 				DECREASE_VIABILITY(10);
@@ -1309,7 +1311,7 @@ MOVESCR_CHECK_0:
 			if (data->atkStatus2 & STATUS2_SUBSTITUTE
 			|| GetHealthPercentage(bankAtk) <= 25)
 				DECREASE_VIABILITY(10);
-			else if (ABILITY(bankDef) == ABILITY_INFILTRATOR
+			else if (BankHasAbility(bankDef, ABILITY_INFILTRATOR)
 			|| SoundMoveInMoveset(bankDef))
 				DECREASE_VIABILITY(8);
 			break;
@@ -1339,7 +1341,7 @@ MOVESCR_CHECK_0:
 		case EFFECT_LEECH_SEED:
 			if (IsOfType(bankDef, TYPE_GRASS)
 			|| data->defStatus3 & STATUS3_LEECHSEED
-			|| data->defAbility == ABILITY_LIQUIDOOZE
+			|| (data->defAbility == ABILITY_LIQUIDOOZE || SecondAbility_OfBank(bankDef) == ABILITY_LIQUIDOOZE)
 			|| PARTNER_MOVE_EFFECT_IS_SAME)
 				DECREASE_VIABILITY(10);
 			break;
@@ -1407,11 +1409,11 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_LOCK_ON:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_LASERFOCUS:
 					if (IsLaserFocused(bankAtk))
 						DECREASE_VIABILITY(10);
-					else if (data->defAbility == ABILITY_SHELLARMOR || data->defAbility == ABILITY_BATTLEARMOR)
+					else if ((data->defAbility == ABILITY_SHELLARMOR || SecondAbility_OfBank(bankDef) == ABILITY_SHELLARMOR) || data->defAbility == ABILITY_BATTLEARMOR)
 						DECREASE_VIABILITY(8);
 					break;
 
@@ -1497,7 +1499,7 @@ MOVESCR_CHECK_0:
 
 		case EFFECT_PROTECT:
 			decreased = FALSE;
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_QUICKGUARD:
 				case MOVE_WIDEGUARD:
 				case MOVE_CRAFTYSHIELD:
@@ -1534,13 +1536,13 @@ MOVESCR_CHECK_0:
 			}
 
 			if (gBattleMoves[gLastResultingMoves[bankAtk]].effect == EFFECT_PROTECT
-			&&  move != MOVE_QUICKGUARD
-			&&  move != MOVE_WIDEGUARD
+			&&  Lv200MoveAIBase(move) != MOVE_QUICKGUARD
+			&&  Lv200MoveAIBase(move) != MOVE_WIDEGUARD
 			&&  move != MOVE_CRAFTYSHIELD) //These moves have infinite usage
 			{
 				if (WillFaintFromSecondaryDamage(bankAtk)
-				&&  data->defAbility != ABILITY_MOXIE
-				&&  data->defAbility != ABILITY_BEASTBOOST)
+				&&  (data->defAbility != ABILITY_MOXIE && SecondAbility_OfBank(bankDef) != ABILITY_MOXIE)
+				&&  (data->defAbility != ABILITY_BEASTBOOST && SecondAbility_OfBank(bankDef) != ABILITY_BEASTBOOST))
 				{
 					DECREASE_VIABILITY(10); //Don't protect if you're going to faint after protecting
 				}
@@ -1584,7 +1586,7 @@ MOVESCR_CHECK_0:
 				}
 			}
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_STEALTHROCK:
 					if (gSideTimers[SIDE(bankDef)].srAmount > 0
 					|| PARTNER_MOVE_IS_SAME_NO_TARGET //Only one mon needs to set up Stealth Rocks
@@ -1616,7 +1618,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_FORESIGHT:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_MIRACLEEYE:
 					if (data->defStatus3 & STATUS3_MIRACLE_EYED)
 						DECREASE_VIABILITY(10);
@@ -1649,7 +1651,7 @@ MOVESCR_CHECK_0:
 				&&  ViableMonCountFromBank(FOE(bankAtk)) >= 3)
 					DECREASE_VIABILITY(10); //Don't wipe your team if you're going to lose
 
-				else if ((!BATTLER_ALIVE(FOE(bankAtk)) || ABILITY(FOE(bankAtk)) == ABILITY_SOUNDPROOF || gStatuses3[FOE(bankAtk)] & STATUS3_PERISH_SONG)
+				else if ((!BATTLER_ALIVE(FOE(bankAtk)) || BankHasAbility(FOE(bankAtk), ABILITY_SOUNDPROOF) || gStatuses3[FOE(bankAtk)] & STATUS3_PERISH_SONG)
 				&&  (!BATTLER_ALIVE(PARTNER(FOE(bankAtk))) || ABILITY(PARTNER(FOE(bankAtk))) == ABILITY_SOUNDPROOF || gStatuses3[PARTNER(FOE(bankAtk))] & STATUS3_PERISH_SONG))
 					DECREASE_VIABILITY(10); //Both enemies are perish songed
 
@@ -1663,7 +1665,7 @@ MOVESCR_CHECK_0:
 				&&  ViableMonCountFromBank(bankDef) >= 2)
 					DECREASE_VIABILITY(10);
 
-				if (gStatuses3[FOE(bankAtk)] & STATUS3_PERISH_SONG || ABILITY(FOE(bankAtk)) == ABILITY_SOUNDPROOF)
+				if (gStatuses3[FOE(bankAtk)] & STATUS3_PERISH_SONG || BankHasAbility(FOE(bankAtk), ABILITY_SOUNDPROOF))
 					DECREASE_VIABILITY(10);
 			}
 			break;
@@ -1703,7 +1705,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_BATON_PASS:
-			if (move == MOVE_UTURN || move == MOVE_VOLTSWITCH || move == MOVE_FLIPTURN)
+			if (Lv200MoveAIBase(move) == MOVE_UTURN || Lv200MoveAIBase(move) == MOVE_VOLTSWITCH || Lv200MoveAIBase(move) == MOVE_FLIPTURN)
 			{
 				goto AI_STANDARD_DAMAGE;
 			}
@@ -1726,7 +1728,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_RAPID_SPIN:
-			if (move == MOVE_DEFOG)
+			if (Lv200MoveAIBase(move) == MOVE_DEFOG)
 			{
 				if (gSideStatuses[SIDE(bankDef)] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_SAFEGUARD | SIDE_STATUS_MIST)
 				|| gNewBS->AuroraVeilTimers[SIDE(bankDef)] != 0
@@ -1748,7 +1750,7 @@ MOVESCR_CHECK_0:
 
 				if (IS_DOUBLE_BATTLE)
 				{
-					if (gBattleMoves[partnerMove].effect == EFFECT_SPIKES //Partner is going to set up hazards
+					if (gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_SPIKES //Partner is going to set up hazards
 					&& !MoveWouldHitBeforeOtherMove(move, bankAtk, partnerMove, bankAtkPartner)) //Partner is going to set up before the potential Defog
 					{
 						DECREASE_VIABILITY(10);
@@ -1812,11 +1814,11 @@ MOVESCR_CHECK_0:
 		case EFFECT_SEMI_INVULNERABLE: ;
 			if (predictedMove != MOVE_NONE
 			&& MoveWouldHitFirst(move, bankAtk, bankDef)
-			&& gBattleMoves[predictedMove].effect == EFFECT_SEMI_INVULNERABLE)
+			&& gBattleMoves[Lv200MoveAIBase(predictedMove)].effect == EFFECT_SEMI_INVULNERABLE)
 				DECREASE_VIABILITY(10); //Don't Fly if opponent is going to fly after you
 
 			if (WillFaintFromWeatherSoon(bankAtk)
-			&& (move == MOVE_FLY || move == MOVE_BOUNCE))
+			&& (Lv200MoveAIBase(move) == MOVE_FLY || Lv200MoveAIBase(move) == MOVE_BOUNCE))
 				DECREASE_VIABILITY(10); //Attacker will faint while in the air
 
 			goto AI_STANDARD_DAMAGE;
@@ -1824,7 +1826,7 @@ MOVESCR_CHECK_0:
 		case EFFECT_FAKE_OUT:
 			if (!gDisableStructs[bankAtk].isFirstTurn)
 				DECREASE_VIABILITY(10);
-			else if (move == MOVE_FAKEOUT)
+			else if (Lv200MoveAIBase(move) == MOVE_FAKEOUT)
 			{
 				if ((data->atkItemEffect == ITEM_EFFECT_CHOICE_BAND || data->atkAbility == ABILITY_GORILLATACTICS)
 				&& (ViableMonCountFromBank(bankDef) >= 2 || !MoveKnocksOutXHits(MOVE_FAKEOUT, bankAtk, bankDef, 1)))
@@ -1898,7 +1900,7 @@ MOVESCR_CHECK_0:
 				DECREASE_VIABILITY(10);
 				break;
 			}
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_HEALINGWISH:
 				case MOVE_LUNARDANCE:
 					if (TeamFullyHealedMinusBank(bankAtk))
@@ -2023,7 +2025,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_INGRAIN:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_AQUARING:
 					if (data->atkStatus3 & STATUS3_AQUA_RING)
 						DECREASE_VIABILITY(10);
@@ -2080,7 +2082,7 @@ MOVESCR_CHECK_0:
 			data->atkAbility = *GetAbilityLocation(bankAtk); //Get actual abilities
 			data->defAbility = *GetAbilityLocation(bankDef);
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_WORRYSEED:
 					if (data->defAbility == ABILITY_INSOMNIA
 					|| CheckTableForAbility(data->defAbility, gWorrySeedBannedAbilities)
@@ -2137,7 +2139,7 @@ MOVESCR_CHECK_0:
 				DECREASE_VIABILITY(10);
 				break;
 			}
-			else if (move == MOVE_PSYCHOSHIFT)
+			else if (Lv200MoveAIBase(move) == MOVE_PSYCHOSHIFT)
 			{
 				if (data->atkStatus1 & STATUS1_PSN_ANY)
 					goto AI_POISON_CHECK;
@@ -2201,7 +2203,7 @@ MOVESCR_CHECK_0:
 				break;
 			}
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_NORETREAT:
 					if (gNewBS->trappedByNoRetreat & gBitTable[gBankAttacker])
 						DECREASE_VIABILITY(10);
@@ -2218,7 +2220,7 @@ MOVESCR_CHECK_0:
 				DECREASE_VIABILITY(10);
 			else
 			{
-				switch (move) {
+				switch (Lv200MoveAIBase(move)) {
 					case MOVE_COIL:
 						if (STAT_STAGE(bankAtk, STAT_STAGE_ACC) >= STAT_STAGE_MAX
 						&& (STAT_STAGE(bankAtk, STAT_STAGE_ATK) >= STAT_STAGE_MAX && !PhysicalMoveInMoveset(bankAtk))
@@ -2245,7 +2247,7 @@ MOVESCR_CHECK_0:
 					DECREASE_VIABILITY(10);
 			else
 			{
-				switch (move) {
+				switch (Lv200MoveAIBase(move)) {
 					case MOVE_QUIVERDANCE:
 					case MOVE_GEOMANCY:
 						if (STAT_STAGE(bankAtk, STAT_STAGE_SPEED) >= STAT_STAGE_MAX
@@ -2268,7 +2270,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_DRAGON_DANCE:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_SHELLSMASH:
 					if (data->atkAbility == ABILITY_CONTRARY)
 						goto AI_COSMIC_POWER;
@@ -2295,7 +2297,7 @@ MOVESCR_CHECK_0:
 			if (bankDef == bankAtkPartner)
 				break;
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_POWERTRICK:
 				case MOVE_POWERSHIFT:
 					if (gBattleMons[bankAtk].defense >= gBattleMons[bankAtk].attack && !PhysicalMoveInMoveset(bankAtk))
@@ -2396,7 +2398,7 @@ MOVESCR_CHECK_0:
 				break;
 			}
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_ELECTRICTERRAIN:
 					if (gTerrainType == ELECTRIC_TERRAIN)
 						DECREASE_VIABILITY(10);
@@ -2421,7 +2423,7 @@ MOVESCR_CHECK_0:
 			&&  gBattleMons[bankAtkPartner].hp > 0)
 			{
 				if (partnerMove != MOVE_NONE
-				&&  gBattleMoves[partnerMove].effect == EFFECT_PLEDGE
+				&&  gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_PLEDGE
 				&&  move != partnerMove) //Different pledge moves
 				{
 					if (gBattleMons[bankAtkPartner].status1 & (STATUS1_SLEEP | STATUS1_FREEZE)
@@ -2432,7 +2434,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_FIELD_EFFECTS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_TRICKROOM:
 					if (PARTNER_MOVE_IS_TAILWIND_TRICKROOM)
 						DECREASE_VIABILITY(10);
@@ -2517,7 +2519,7 @@ MOVESCR_CHECK_0:
 			goto AI_STANDARD_DAMAGE;
 
 		case EFFECT_ATTACK_BLOCKERS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_EMBARGO:
 					if (data->defAbility == ABILITY_KLUTZ
 					|| IsMagicRoomActive()
@@ -2561,7 +2563,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_TYPE_CHANGES:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_SOAK:
 					if (PARTNER_MOVE_IS_SAME
 					|| (gBattleMons[bankDef].type1 == TYPE_WATER
@@ -2644,7 +2646,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_FAIRY_LOCK_HAPPY_HOUR:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_FAIRYLOCK:
 					if (IsFairyLockActive()
 					||  PARTNER_MOVE_IS_SAME_NO_TARGET)
@@ -2676,7 +2678,7 @@ MOVESCR_CHECK_0:
 			break;
 
 		case EFFECT_INSTRUCT_AFTER_YOU_QUASH:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_INSTRUCT: ;
 					u16 instructedMove;
 
@@ -2747,7 +2749,7 @@ MOVESCR_CHECK_0:
 			goto AI_STANDARD_DAMAGE;
 
 		case EFFECT_TEAM_EFFECTS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_TAILWIND:
 					if (gNewBS->TailwindTimers[SIDE(bankAtk)] != 0
 					||  PARTNER_MOVE_IS_TAILWIND_TRICKROOM
@@ -2825,7 +2827,7 @@ MOVESCR_CHECK_0:
 
 	if (IS_DOUBLE_BATTLE
 	&&  partnerMove != MOVE_NONE
-	&&  gBattleMoves[partnerMove].effect == EFFECT_HELPING_HAND
+	&&  gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_HELPING_HAND
 	&&  moveSplit == SPLIT_STATUS)
 		DECREASE_VIABILITY(10); //Don't use a status move if partner wants to help
 

@@ -321,10 +321,12 @@ bool8 StartRButtonFunc(void)
 			}
 			#endif
 			break;
+		#ifdef HACK_DEBUG_MENU //[hack] patches/0417 CFRU の R ボタンのデバッグ（VAR_R_BUTTON_MODE = 5）はふだんの版では呼ばない
 		case OPTIONS_R_BUTTON_MODE_DEBUG:
 			ScriptContext2_Enable();
 			ScriptContext1_SetupScript(SystemScript_DebugMenu);
 			return TRUE;
+		#endif
 	}
 	#endif
 

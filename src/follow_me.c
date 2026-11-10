@@ -54,6 +54,8 @@ static void SetFollowerSprite(u8 spriteIndex);
 static void TurnNPCIntoFollower(u8 localId, u8 followerFlags);
 
 #define MOVEMENT_INVALID 0xFE
+#define MOVEMENT_ACTION_FOLLOWER_FAST_JUMP_2_DOWN      0xE6 /* 0xE6〜0xE9 下・上・左・右（src/sideways_stairs.c） */
+#define MOVEMENT_ACTION_FOLLOWER_FAST_ACRO_JUMP_DOWN   0xEA /* 0xEA〜0xED */
 
 enum
 {
@@ -86,6 +88,8 @@ static const struct FollowerSprites gFollowerAlternateSprites[] =
 	//{WALKING/RUNNING SPRITE ID, BIKING SPRITE ID, SURFING SPRITE ID},
 	//EXAMPLE: {MALE PLAYER WALKING, MALE PLAYER BIKING, MALE PLAYER SURFING},
 	{0, 1, 2, 2},
+	{0x07A1, 0x07AB, 0x07AD, 0x07A1}, //[hack] patches/0870 #76 ヒカリの連れ歩き: 自転車の絵（表 7 の 0xAB＝HIKARI_BIKE・歩く絵は 0x07A1＝SINNOH_HIKARI）・patches/0923 #195 なみのりの絵（0xAD＝HIKARI_SURFING・案 B）
+	{EVENT_OBJ_GFX_MAY, 0x07AA, 0x07AC, EVENT_OBJ_GFX_MAY}, //[hack] patches/0869 #76 ハルカの連れ歩き: 自転車の絵（表 7 の 0xAA＝MAY_MACH_BIKE・マッハもダートも同じ絵）・patches/0923 #195 なみのりの絵（0xAC＝エメラルドの MAY_SURFING・水中は待機なので歩く絵のまま）
 
 	#ifdef UNBOUND
 	{EVENT_OBJ_GFX_RIVAL, EVENT_OBJ_GFX_RIVAL, EVENT_OBJ_GFX_RIVAL_SURF, EVENT_OBJ_GFX_RED_UNDERWATER},
@@ -147,6 +151,20 @@ void FollowMe_SetIndicatorToComeOutDoor(void)
 {
 	if (gFollowerState.inProgress)
 		gFollowerState.comeOutDoorStairs = 1;
+}
+
+//[hack] patches/0923 #195 連れ歩き中のハルカ／ヒカリ（src/hack_heroine.c）がなみのりに付いて来る。
+//つづきから・ダイビングのあとの浮上・電話で呼んだときは、CFRU の「なみのりを使った瞬間」の合図（FollowMe_FollowerToWater）を通らないので、
+//主人公がなみのり中なのに連れ歩きが歩く絵のまま・台なしで出てしまう。止まっているときに 1 回だけ、台の作り直しの合図（HIDDEN_ON）と絵の差し替えを入れる
+void FollowMe_HeroineSyncSurf(void)
+{
+	if (!gFollowerState.inProgress || !TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
+		return;
+	if (gFollowerState.currentSprite == FOLLOWER_SPRITE_INDEX_SURF || gFollowerState.createSurfBlob != SURF_BLOB_STATE_NONE)
+		return;
+
+	gFollowerState.createSurfBlob = SURF_BLOB_STATE_HIDDEN_ON;
+	SetFollowerSprite(FOLLOWER_SPRITE_INDEX_SURF);
 }
 
 void FollowMe_SetIndicatorToRecreateSurfBlob(void)
@@ -299,6 +317,7 @@ void FollowMe(struct EventObject* npc, u8 state, bool8 ignoreScriptActive)
 	switch (newState) {
 		case MOVEMENT_ACTION_JUMP_2_DOWN ... MOVEMENT_ACTION_JUMP_2_RIGHT:
 		case 0x84 ... 0x87:
+		case MOVEMENT_ACTION_FOLLOWER_FAST_JUMP_2_DOWN ... (MOVEMENT_ACTION_FOLLOWER_FAST_ACRO_JUMP_DOWN + 3):
 		case MOVEMENT_ACTION_WALK_NORMAL_LEFT_DOWN_FACE_DOWN ... MOVEMENT_ACTION_WALK_NORMAL_RIGHT_UP_FACE_RIGHT:
 		case MOVEMENT_ACTION_RUN_LEFT_DOWN_FACE_DOWN ... MOVEMENT_ACTION_RUN_RIGHT_UP_FACE_RIGHT:
 		case MOVEMENT_ACTION_WALK_FAST_LEFT_DOWN_FACE_DOWN ... MOVEMENT_ACTION_WALK_FAST_RIGHT_UP_FACE_RIGHT:
@@ -674,6 +693,10 @@ static bool8 IsStateMovement(u8 state)
 		case MOVEMENT_ACTION_JUMP_IN_PLACE_UP_DOWN:
 		case MOVEMENT_ACTION_JUMP_IN_PLACE_LEFT_RIGHT:
 		case MOVEMENT_ACTION_JUMP_IN_PLACE_RIGHT_LEFT:
+		//[hack] 2026-11-03 fix-teleport-follower: ひでんわざ／テレポートの「ボールを投げるしぐさ」は歩きではない。
+		//ドアを出て1歩も歩かずにテレポートすると、この動きを「ワープ後の一歩目」と数えて Task_FollowerOutOfDoor が起き、
+		//主人公の動き（heldMovement）を毎コマ消すため、しぐさを待つタスクが永久に待って操作できなくなっていた
+		case MOVEMENT_ACTION_START_ANIM_IN_DIRECTION:
 			return FALSE;
 	}
 
@@ -701,6 +724,13 @@ static u8 ReturnFollowerDelayedState(u8 direction)
 {
 	u8 newState = gFollowerState.delayedState;
 	gFollowerState.delayedState = 0;
+
+	/* ★ 2026-10-16 段差のあとの硬直: 主人公が着地して最初の 1 歩（16 コマ）のあいだに連れ歩きが 2 マスをジャンプで追いつく（素のジャンプは 32 コマ）
+	   → 主人公は Task_ReallowPlayerMovement で残り 16 コマ止められていた。同じ動きを 16 コマで跳ぶ版（0xE6〜0xED・src/sideways_stairs.c）にする */
+	if (newState == MOVEMENT_ACTION_JUMP_2_DOWN)
+		return MOVEMENT_ACTION_FOLLOWER_FAST_JUMP_2_DOWN + direction;
+	if (newState == 0x84)
+		return MOVEMENT_ACTION_FOLLOWER_FAST_ACRO_JUMP_DOWN + direction;
 
 	switch (newState) {
 		case MOVEMENT_ACTION_WALK_NORMAL_LEFT_DOWN_FACE_DOWN ... MOVEMENT_ACTION_WALK_NORMAL_RIGHT_UP_FACE_RIGHT:

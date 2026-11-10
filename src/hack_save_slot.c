@@ -20,6 +20,8 @@
  * ぼうけんのしょ 2 つ（ドラクエ式・2026-10-09 ユーザー「セーブデータを２個用意できる　１ゲーム対して２個イメージとしてはドラクエ」
  * →「B: 先に 6MB に広げてから 2 つ目のセーブを作る」→「やって」）。docs/research/2026-10-09_save-6mb-two-slots.md
  *
+ * ★ 2026-10-23 B2（Redmine #38・配置版 2）: 16MB（256 バンク）に広げ、ぼうけんのしょ 2 は +SLOT2_BANK_OFFSET（128）バンク（バンク 128〜255）。
+ *   ぼうけんのしょ 1 は 0〜127（追加の区画は EXT_SECTOR_COUNT = 2016 個）。以下の 48／6MB／95 の数字は旧配置（配置版 1）の説明。正本は tools/save_layout/ext_sector_map.json。
  * - 直した mGBA（tools/mgba/save1m.patch）の 6MB のフラッシュを半分に分ける: ぼうけんのしょ 1 はバンク 0〜47（今までと同じ場所）、
  *   2 はバンク 48〜95。素のフラッシュの読み書きは全部 SwitchFlashBank（081C27DC）でバンクを選ぶので（呼び元 6 か所・
  *   ReadFlash／VerifyFlashSector／書き込み／区画の消去）、そこを差し替えて 2 のときだけ 48 を足す（hooks）。
@@ -37,8 +39,8 @@
 
 #define HACK_SAVE_SLOT_WORD (*(vu32*) 0x03003FD4)   //gLinkFiller3（上）
 #define SLOT2_MAGIC 0x534C5432                      //'SLT2'＝ぼうけんのしょ 2。ほかの値は全部 1
-#define SLOT2_BANK_OFFSET 48
-#define PROBE_SECTOR_1 32                           //追加の区画 0（バンク 2 の頭）＝確かめ用に取ってある（src/hack_ext_save.c）
+//SLOT2_BANK_OFFSET（48）は hack_ext_sector_map.h（生成物・正本 tools/save_layout/ext_sector_map.json）
+#define PROBE_SECTOR_1 (EXT_FIRST_SECTOR + EXT_PROBE_SECTOR)                           //追加の区画 0（バンク 2 の頭）＝確かめ用に取ってある（src/hack_ext_save.c）
 #define PROBE_SECTOR_2 (PROBE_SECTOR_1 + SLOT2_BANK_OFFSET * 16)
 #define PROBE_OFFSET 0xFF0
 #define PROBE_SIZE 16
@@ -60,16 +62,26 @@
 #define SAVE_STATUS_EMPTY 0
 #define SAVE_STATUS_OK 1
 #define SAVE_STATUS_INVALID 2
+#define SAVE_STATUS_NEEDS_CONVERT 3   //★ 2026-10-23 B3: 旧配置（6MB）のぼうけんのしょ 2 に中身がある＝セーブの変換が要る（ゲームは新配置の 2 しか読まない）
 
 extern const u8 gText_HackSlot_Title[];
 extern const u8 gText_HackSlot_Slot1[];
 extern const u8 gText_HackSlot_Slot2[];
 extern const u8 gText_HackSlot_Empty[];
+extern const u8 gText_HackSlot_Convert[];
+extern const u8 gText_HackSlot_ConvertHint1[];
+extern const u8 gText_HackSlot_ConvertHint2[];
 extern const u8 gText_HackSlot_Broken[];
 extern const u8 gText_HackSlot_NoTitle[];
 extern const u8 gText_HackSlot_NoLine1[];
 extern const u8 gText_HackSlot_NoLine2[];
 extern const u8 gText_HackSlot_NoPressA[];
+extern const u8 gText_HackSlot_WaitTitle[];
+extern const u8 gText_HackSlot_WaitLine1[];
+extern const u8 gText_HackSlot_WaitLine2[];
+extern const u8 gText_HackSlot_OldTitle[];
+extern const u8 gText_HackSlot_OldLine1[];
+extern const u8 gText_HackSlot_OldLine2[];
 
 //---------------------------------------------------------------- フラッシュ
 
@@ -104,38 +116,48 @@ static bool8 SameBytes(const u8* a, const u8* b, u32 n)
 	return TRUE;
 }
 
-//6MB 版の mGBA か（バンク 50 へ切り替えられるか）。ぼうけんのしょ 1 のまま呼ぶ
-static bool8 HackSaveSlot_Probe(void)
+#define SLOT_OK 0
+#define SLOT_NO 1        //使えない版の mGBA（さいしんの mGBA を）
+#define SLOT_UNKNOWN 2   //6MB 版かもしれないが、まだ決められない（ぼうけんのしょ 1 で最初のレポートを書いてから）
+#define SLOT_OLDROM 3    //★ 2026-10-23 128MB の ROM を窓 2・3 の無い古い mGBA で開いた（さいしんの mGBA で あそんでください・A でも先へ進めない）
+
+bool8 HackSplit_OldMgbaRom128(void);   //src/hack_split_pics.c
+
+//6MB 版の mGBA か（バンク 50 へ切り替えられるか）。ぼうけんのしょ 1 のまま呼ぶ。SLOT_OK のときだけ ぼうけんのしょ 2 を出す
+static u8 HackSaveSlot_Probe(void)
 {
 	u8 a[PROBE_SIZE], b[PROBE_SIZE];
 	u8* sector;
 	u32 i;
 	bool8 ok;
+	u8 check;
 
 	//★ 2026-10-11 HackExtSave_Available は「読むだけ」でバンクの切り替えが効くかも見る（効かない mGBA では下の印の書き込みが
 	//  今のバンクの区画 0＝物理 16 に落ちて棚のページを壊した・docs/research/2026-10-11_save-shelf-page-corruption.md）
-	if (!HackExtSave_Available())
-		return FALSE;
+	//★ 2026-10-16 比べる相手の本体の区画がまだ無い（最初のレポートの前）ときは、使えない版と分けて案内を変える
+	check = HackExtSave_Check();
+	if (check != 1)
+		return (check == 2) ? SLOT_UNKNOWN : SLOT_NO;
 	ReadFlashVanilla(PROBE_SECTOR_1, PROBE_OFFSET, a, PROBE_SIZE);
 	ReadFlashVanilla(PROBE_SECTOR_2, PROBE_OFFSET, b, PROBE_SIZE);   //前の版は切り替えを無視＝a と同じものが読める
 	if (!SameBytes(a, b, PROBE_SIZE))
-		return TRUE;
+		return SLOT_OK;
 
 	//同じだった（どちらも消えたまま など）→ 確かめ用の区画（バンク 2）に印を書いて読み比べる（1 度だけ・あとは違うまま）
 	sector = Malloc(0x1000);
 	if (sector == NULL)
-		return FALSE;
+		return SLOT_NO;
 	for (i = 0; i < 0x1000; ++i)
 		sector[i] = 0xFF;
 	for (i = 0; i < PROBE_SIZE; ++i)
 		sector[PROBE_OFFSET + i] = 0x50 + i + b[i];      //必ず b と違う値
-	ok = HackExtSave_WriteSector(PROBE_SECTOR_1 - 32, sector);
+	ok = HackExtSave_WriteSector(EXT_PROBE_SECTOR, sector);
 	Free(sector);
 	if (!ok)
-		return FALSE;
+		return SLOT_NO;
 	ReadFlashVanilla(PROBE_SECTOR_1, PROBE_OFFSET, a, PROBE_SIZE);
 	ReadFlashVanilla(PROBE_SECTOR_2, PROBE_OFFSET, b, PROBE_SIZE);
-	return !SameBytes(a, b, PROBE_SIZE);
+	return SameBytes(a, b, PROBE_SIZE) ? SLOT_NO : SLOT_OK;
 }
 
 //---------------------------------------------------------------- 画面
@@ -153,7 +175,7 @@ struct SlotScreen
 	struct SlotInfo info[2];
 	u8 cursor;
 	u8 exiting;
-	u8 unavailable;   //6MB 版の mGBA でない＝「さいしんの mGBA を」の案内だけ出す（2026-10-10）
+	u8 unavailable;   //0 = 使える・1 = 6MB 版の mGBA でない＝「さいしんの mGBA を」の案内だけ出す（2026-10-10）・2 = まだ決められない（最初のレポートのあとで）の案内（2026-10-16）
 };
 
 enum
@@ -185,6 +207,8 @@ static struct SlotScreen* ScreenOf(u8 taskId)
 	return (struct SlotScreen*) (((u32) (u16) gTasks[taskId].data[0]) | ((u32) (u16) gTasks[taskId].data[1] << 16));
 }
 
+bool8 HackSaveCrypt_NewerKeyPresent(void);   //src/hack_save_crypt.c
+
 static void ReadSlotInfo(struct SlotInfo* info, u8 slot)
 {
 	u32 i;
@@ -193,6 +217,8 @@ static void ReadSlotInfo(struct SlotInfo* info, u8 slot)
 	Save_ResetSaveCounters();
 	Save_LoadGameDataVanilla(SAVE_NORMAL);
 	info->status = gSaveFileStatusVanilla;
+	if (HackSaveCrypt_NewerKeyPresent())   //★ 2026-10-21 段階 3: この ROM が鍵を持たない新しい版のレポートは「からっぽ」に見せない（さいしょから で上書きさせない）
+		info->status = 0xFF;   //SAVE_STATUS_ERROR（このファイルは save.h を読まない）
 	for (i = 0; i < 8; ++i)
 		info->name[i] = gSaveBlock2->playerName[i];
 	info->name[7] = EOS;
@@ -212,9 +238,19 @@ static void PrintScreen(struct SlotScreen* s)
 	if (s->unavailable)
 	{
 		static const u8 sRed[3] = {TEXT_COLOR_WHITE, TEXT_COLOR_RED, TEXT_COLOR_LIGHT_RED};   //★ 2026-10-10 ユーザー「赤文字で」
-		AddTextPrinterParameterized3(WIN_MAIN, 2, 8, 1, sRed, 0xFF, gText_HackSlot_NoTitle);
-		AddTextPrinterParameterized(WIN_MAIN, 2, gText_HackSlot_NoLine1, 8, 36, 0xFF, NULL);
-		AddTextPrinterParameterized(WIN_MAIN, 2, gText_HackSlot_NoLine2, 8, 52, 0xFF, NULL);
+		bool8 wait = (s->unavailable == SLOT_UNKNOWN);
+
+		if (s->unavailable == SLOT_OLDROM)
+		{
+			AddTextPrinterParameterized3(WIN_MAIN, 2, 8, 1, sRed, 0xFF, gText_HackSlot_OldTitle);
+			AddTextPrinterParameterized(WIN_MAIN, 2, gText_HackSlot_OldLine1, 8, 36, 0xFF, NULL);
+			AddTextPrinterParameterized(WIN_MAIN, 2, gText_HackSlot_OldLine2, 8, 52, 0xFF, NULL);
+			CopyWindowToVram(WIN_MAIN, 3);
+			return;
+		}
+		AddTextPrinterParameterized3(WIN_MAIN, 2, 8, 1, sRed, 0xFF, wait ? gText_HackSlot_WaitTitle : gText_HackSlot_NoTitle);
+		AddTextPrinterParameterized(WIN_MAIN, 2, wait ? gText_HackSlot_WaitLine1 : gText_HackSlot_NoLine1, 8, 36, 0xFF, NULL);
+		AddTextPrinterParameterized(WIN_MAIN, 2, wait ? gText_HackSlot_WaitLine2 : gText_HackSlot_NoLine2, 8, 52, 0xFF, NULL);
 		AddTextPrinterParameterized(WIN_MAIN, 2, gText_HackSlot_NoPressA, 8, 100, 0xFF, NULL);
 		CopyWindowToVram(WIN_MAIN, 3);
 		return;
@@ -240,9 +276,15 @@ static void PrintScreen(struct SlotScreen* s)
 		}
 		else
 		{
-			AddTextPrinterParameterized(WIN_MAIN, 2, info->status == SAVE_STATUS_EMPTY ? gText_HackSlot_Empty : gText_HackSlot_Broken,
+			AddTextPrinterParameterized(WIN_MAIN, 2, info->status == SAVE_STATUS_EMPTY ? gText_HackSlot_Empty
+			                            : info->status == SAVE_STATUS_NEEDS_CONVERT ? gText_HackSlot_Convert : gText_HackSlot_Broken,
 			                            32, y + 16, 0xFF, NULL);
 		}
+	}
+	if (s->info[1].status == SAVE_STATUS_NEEDS_CONVERT)
+	{
+		AddTextPrinterParameterized(WIN_MAIN, 2, gText_HackSlot_ConvertHint1, 8, 100, 0xFF, NULL);
+		AddTextPrinterParameterized(WIN_MAIN, 2, gText_HackSlot_ConvertHint2, 8, 114, 0xFF, NULL);
 	}
 	CopyWindowToVram(WIN_MAIN, 3);
 }
@@ -293,6 +335,8 @@ static void Task_HackSaveSlot(u8 taskId)
 		LoadChosenAndGoToMainMenu(slot);
 		return;
 	}
+	if (s->unavailable == SLOT_OLDROM)
+		return;       //先へ進ませない（A／B／START でも進まない）
 	if (s->unavailable)
 	{
 		if (JOY_NEW(A_BUTTON | B_BUTTON | START_BUTTON))   //ぼうけんのしょ 1 のまま進む
@@ -310,6 +354,10 @@ static void Task_HackSaveSlot(u8 taskId)
 		s->cursor ^= 1;
 		PrintScreen(s);
 	}
+	else if (JOY_NEW(A_BUTTON) && s->cursor == 1 && s->info[1].status == SAVE_STATUS_NEEDS_CONVERT)
+	{
+		PlaySE(SE_ERROR);   //変換が要る 2 は選べない（旧配置の中身を残したまま新しいセーブを作らせない）
+	}
 	else if (JOY_NEW(A_BUTTON))
 	{
 		PlaySE(SE_SELECT);
@@ -318,7 +366,7 @@ static void Task_HackSaveSlot(u8 taskId)
 	}
 }
 
-static bool8 CreateSlotScreen(u8 wasSlot2, bool8 unavailable)
+static bool8 CreateSlotScreen(u8 wasSlot2, u8 unavailable)
 {
 	struct SlotScreen* s = AllocZeroed(sizeof(struct SlotScreen));
 	u8 taskId;
@@ -334,6 +382,10 @@ static bool8 CreateSlotScreen(u8 wasSlot2, bool8 unavailable)
 	{
 		ReadSlotInfo(&s->info[1], 1);
 		ReadSlotInfo(&s->info[0], 0);
+		//★ 2026-10-23 B3: 新配置の 2 が空でも、旧配置（6MB・+48 バンク）の 2 に中身が残っていれば、「まだありません」でなく変換が要ると案内する
+		//  （ぼうけんのしょ 1 の側＝今の SetSlot(0) で旧位置を読む）。選ぶと新配置に別のセーブができて両方に残ってしまうので、A ボタンでは選べなくする
+		if (s->info[1].status == SAVE_STATUS_EMPTY && HackExtSave_LegacySlot2Present())
+			s->info[1].status = SAVE_STATUS_NEEDS_CONVERT;
 		s->cursor = wasSlot2;
 	}
 	return TRUE;
@@ -349,7 +401,7 @@ static void SkipSlotScreen(u8 slot)
 void CB2_HackSaveSlotSelect(void)
 {
 	u8 wasSlot2;
-	bool8 unavailable;
+	u8 unavailable;
 
 	switch (gMain.state)
 	{
@@ -359,7 +411,7 @@ void CB2_HackSaveSlotSelect(void)
 		SetSlot(0);
 		//★ 2026-10-10 ユーザー「ぼうけんのしょが出せないときは最新のmGBAを使用してくださいを表示してほしい」:
 		//  使えない版（6MB 版でない mGBA・64MB の後ろ半分が見えない）は、黙って飛ばさず案内を出して A でぼうけんのしょ 1 へ
-		unavailable = !HackSaveSlot_Probe();
+		unavailable = HackSplit_OldMgbaRom128() ? SLOT_OLDROM : HackSaveSlot_Probe();
 		SetVBlankCallback(NULL);
 		SetHBlankCallback(NULL);
 		CpuFill32(0, (void*) VRAM, VRAM_SIZE);

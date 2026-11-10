@@ -343,3 +343,13 @@ gAbilityDescriptions:
 .word DESC_HACK_SUN_BUTTERFLY
 .word DESC_HACK_MIWAKUNOUROKO
 .word DESC_HACK_TSUKINOMAMORI
+.word DESC_HACK_WARMUP
+.word DESC_HACK_WORKBUG
+.word DESC_HACK_REITONOOU	@ 329 れーとのおう（2026-10-23・自作）
+.word DESC_HACK_GEKIKOU	@ 330 げきこう（2026-10-25・イワオロチ）
+.word DESC_HACK_HOMURANOAGO	@ 331 ほむらのあご（ゲンシガチゴラス）
+.word DESC_HACK_HAKUANOOU	@ 332 はくあのおう（ゲンシガチゴラス）
+.word DESC_HACK_GENSHINOUZU	@ 333 ゲンシのうず（ゲンシオルカイザー）
+.word DESC_GOOEY	@ 334 もちはだ（バブチフ・オモチフワ・ぬめぬめと同じ効果・説明文も同じ）
+.word DESC_HACK_YOROIPLATE	@ 335 よろいプレート（ステゴラドン）
+.word DESC_HACK_KOORINOUROKO	@ 336 こおりのうろこ（プレチルド）

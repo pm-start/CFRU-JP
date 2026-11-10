@@ -4,9 +4,12 @@
 TagTeamExecutionCompleteHook 802DB60
 
 ##Script Commands
-ScrCmd_message 8162E60
+##[hack] FEAT-player-mei-3 patches/0614: 素の ScrCmd_message（src/scripting.c）の代わり。メイのときだけ文を差し替える
+HackMeiDialog_ScrCmdMessage 8162E60
 ScrCmd_fadescreenswapbuffers 8162EA0
 ScrCmd_hidemappopup 8162F88
+##[hack] FEAT-sinnoh-underground patches/0872: 命令 0xB2 startmining（素は未実装の空き）→ 化石ほりの画面。命令表の底 08162CC4 + 0xB2 * 4 = 08162F8C
+InitStartUndergroundMining 8162F8C
 CreateSpriteLoadTable 08162F6C
 WaitForAorBPress 806B33C
 
@@ -281,3 +284,14 @@ HackMG_ShouldShowDeliveryman 8163668
 HackMomoIce_GetTradeSpecies 8163464
 ## [hack] 2026-10-09 タイトルで START のあとの行き先（08078A28 SetMainCallback2 の r0 の語 08078A54・素の値 0800BCE1 CB2_InitMainMenu）-> ぼうけんのしょを選ぶ画面（src/hack_save_slot.c）
 CB2_HackSaveSlotSelect 08078A54
+
+##[hack] 2026-10-16 patches/0550 縛り C おみせきんし: script コマンド 0x86 pokemart（表 08162CC4 の 0x86 番＝08162EDC・素の値 0806BBA1）
+HackChallengeC_ScrCmdPokemart 8162EDC
+
+##[hack] 2026-10-23 patches/0672 FEAT-link-battle-select（Redmine #50）: 通信対戦の選出画面（src/link_select_screen.c・上流 kapibarasan000/LinkBattleSelectScreen）。素の gSpecials の special 0x21 のスロット（08163064 + 0x21*4）
+EnterColosseumPlayerSpot 81630E8
+
+##[hack] 2026-10-26 patches/0860 FEAT-midbattle-evo-s1（Redmine #91）: 戦闘中の進化。素の BattleTurnPassed（080134xx）が最後に gBattleMainFunc へ入れる語（08013564・素の値 08013861 HandleTurnActionSelectionState）を PlayerTryEvolution（src/hack_mid_battle_evo.c）に。08013324 は BattleBeginFirstTurn 側なので触らない
+PlayerTryEvolution 08013564
+##[hack] 2026-11-09 patches/0978 FEAT-pokeblock 段 6: 戦闘のアクション表（0x0820CAB0・素の HandleAction_ThrowBait 08016331 が [6]）の語 0820CAC8 を、ポロックの引数があれば投げる版に（無ければ素を呼ぶ・src/hack_safari_pokeblock.c）
+HackSafari_HandleActionBait 820CAC8

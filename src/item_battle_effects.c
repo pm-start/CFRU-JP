@@ -1,11 +1,13 @@
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
 #include "../include/battle_anim.h"
 #include "../include/battle_string_ids.h"
 #include "../include/random.h"
 #include "../include/string_util.h"
 #include "../include/constants/items.h"
 #include "hack_danger_leaf.h"
+#include "hack_difficulty.h" //[hack] patches/0616 しゃかりき: 回復の道具は キズぐすりだけ
 
 #include "../include/new/battle_util.h"
 #include "../include/new/util.h"
@@ -74,6 +76,11 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 	{
 		bankHoldEffect = ItemId_GetHoldEffect(gLastUsedItem);
 		bankQuality = ItemId_GetHoldEffectParam(gLastUsedItem);
+		if (HackDifficulty_HeldRecoveryNullified(bank, bankHoldEffect)) //[hack] patches/0616 しゃかりき: むしくい・ついばむ などで 自分の側が食べる回復のきのみも こうかなし
+		{
+			bankHoldEffect = 0;
+			bankQuality = 0;
+		}
 	}
 	else
 	{
@@ -239,7 +246,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 				break;
 
 			case ITEM_EFFECT_BOOSTER_ENERGY:
-				if ((ABILITY(bank) == ABILITY_PROTOSYNTHESIS && !(WEATHER_HAS_EFFECT && (gBattleWeather & WEATHER_SUN_ANY)))
+				if ((BankHasAbility(bank, ABILITY_PROTOSYNTHESIS) && !(WEATHER_HAS_EFFECT && (gBattleWeather & WEATHER_SUN_ANY)))
 				|| (ABILITY(bank) == ABILITY_QUARKDRIVE && gTerrainType != ELECTRIC_TERRAIN))
 				{
 					if (gNewBS->paradoxBoostStats[bank] == 0 && !gDisableStructs[bank].boosterEnergyActive && !IS_TRANSFORMED(bank))
@@ -449,8 +456,8 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 
 			case ITEM_EFFECT_RANDOM_STAT_UP:
 				if ((PINCH_BERRY_CHECK(bank) || doPluck)
-				&& !((MainStatsMaxed(bank) && ABILITY(bank) != ABILITY_CONTRARY)
-				  || (MainStatsMinned(bank) && ABILITY(bank) == ABILITY_CONTRARY)))
+				&& !((MainStatsMaxed(bank) && !BankHasAbility(bank, ABILITY_CONTRARY))
+				  || (MainStatsMinned(bank) && BankHasAbility(bank, ABILITY_CONTRARY))))
 				{
 					u8 buff = (ABILITY(bank) == ABILITY_RIPEN) ? 4 : 2;
 
@@ -614,6 +621,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 					else
 						gBattleCommunication[MULTISTRING_CHOOSER] = 1;
 					gBattleMons[bank].status1 = 0;
+					Lv200CustomMove_OnStatusCured(bank);
 					gBattleMons[bank].status2 &= ~(STATUS2_CONFUSION);
 					if (moveTurn || doPluck) {
 						BattleScriptPushCursor();
@@ -742,6 +750,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 				LEFTOVERS_HEAL:
 					if (!moveTurn && !BATTLER_MAX_HP(bank)
 					&&  !IsHealBlocked(bank)
+					&&  !HackDifficulty_HeldRegenBlocked(bank, bankHoldEffect) //[hack] patches/0616 しゃかりき: くりーぱーアイスの回復だけ止める（たべのこし・くろいヘドロは対象外）
 					&&  !gNewBS->leftoverHealingDone[bank])
 					{
 						gBattleMoveDamage = MathMax(1, GetBaseMaxHP(bank) / 16);
@@ -758,6 +767,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 				case ITEM_EFFECT_MOMO_ICE: //[hack] patches/0175 ももアイスは毎ターン最大 HP の 1/3 回復（たべのこしと同じ流れ）
 					if (!moveTurn && !BATTLER_MAX_HP(bank)
 					&&  !IsHealBlocked(bank)
+					&&  !HackDifficulty_HeldRegenBlocked(bank, bankHoldEffect) //[hack] patches/0616 しゃかりき
 					&&  !gNewBS->leftoverHealingDone[bank])
 					{
 						gBattleMoveDamage = MathMax(1, GetBaseMaxHP(bank) / 3);
@@ -774,6 +784,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 				case ITEM_EFFECT_MOMO_SHERBET: //[hack] 2026-10-11 ももシャーベット（ももアイスの下位版）は毎ターン最大 HP の 1/6 回復（src/hack_momo_ice.c）
 					if (!moveTurn && !BATTLER_MAX_HP(bank)
 					&&  !IsHealBlocked(bank)
+					&&  !HackDifficulty_HeldRegenBlocked(bank, bankHoldEffect) //[hack] patches/0616 しゃかりき
 					&&  !gNewBS->leftoverHealingDone[bank])
 					{
 						gBattleMoveDamage = MathMax(1, GetBaseMaxHP(bank) / 6);
@@ -792,7 +803,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 					{
 						if (IsOfType(bank, TYPE_POISON))
 							goto LEFTOVERS_HEAL;
-						else if (!moveTurn && ABILITY(bank) != ABILITY_MAGICGUARD
+						else if (!moveTurn && !BankHasAbility(bank, ABILITY_MAGICGUARD)
 						&& !gNewBS->leftoverHealingDone[bank])
 						{
 							gBattleMoveDamage = MathMax(1, GetBaseMaxHP(bank) / 8);
@@ -840,7 +851,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 			case ITEM_EFFECT_ROCKY_HELMET:
 				if (TOOK_DAMAGE(bank)
 				&& MOVE_HAD_EFFECT
-				&& ABILITY(gBankAttacker) != ABILITY_MAGICGUARD
+				&& !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD)
 				&& CheckContact(gCurrentMove, gBankAttacker, bank)
 				&& ITEM_EFFECT(gBankAttacker) != ITEM_EFFECT_PROTECTIVE_PADS
 				&& !MoveBlockedBySubstitute(gCurrentMove, gBankAttacker, bank)
@@ -1002,7 +1013,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 			switch (atkHoldEffect)
 			{
 				case ITEM_EFFECT_FLINCH:
-					if (ABILITY(gBankAttacker) == ABILITY_SERENEGRACE || BankSideHasRainbow(gBankAttacker))
+					if (BankHasAbility(gBankAttacker, ABILITY_SERENEGRACE) || BankSideHasRainbow(gBankAttacker))
 						bankQuality *= 2;
 					if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
 					&& ABILITY(gBankTarget) != ABILITY_STENCH
@@ -1046,7 +1057,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 					&& moveEffect != EFFECT_LEVEL_DAMAGE
 					&& moveEffect != EFFECT_PSYWAVE
 					&& gCurrentMove != MOVE_FINALGAMBIT
-					&& ABILITY(bank) != ABILITY_MAGICGUARD
+					&& !BankHasAbility(bank, ABILITY_MAGICGUARD)
 					&& BATTLER_ALIVE(bank)
 					&& !SheerForceCheck())
 					{
@@ -1143,7 +1154,7 @@ u8 ItemBattleEffects(u8 caseID, u8 bank, bool8 moveTurn, bool8 doPluck)
 					{
 						if (gNewBS->opportunistBoostStats[bank][statId] != 0)
 						{
-							if (ABILITY(bank) == ABILITY_CONTRARY
+							if (BankHasAbility(bank, ABILITY_CONTRARY)
 							&& gBattleMons[bank].statStages[statId] > STAT_STAGE_MIN)
 							{
 								effect = ITEM_STATS_CHANGE;

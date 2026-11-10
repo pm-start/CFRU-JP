@@ -3,6 +3,7 @@
 #include "../include/battle_setup.h"
 #include "../include/bg.h"
 #include "../include/daycare.h"
+#include "hack_daycare_region.h" //[hack] patches/0640
 #include "../include/event_data.h"
 #include "../include/event_object_movement.h"
 #include "../include/field_control_avatar.h"
@@ -58,6 +59,8 @@
 #include "../include/new/read_keys.h"
 #include "../include/new/wild_encounter.h"
 #include "hack_debug_menu.h" //[hack] patches/0342
+#include "hack_safari_pokeblock.h" //[hack] patches/0978 ホウエンのサファリのポロックおき場（FEAT-pokeblock 段 6）
+extern const u8 HoennSafari_EventScript_PokeblockFeeder[]; //assembly/hoenn_safari/safari_pokeblock.s
 
 u16 HoennTrainerFlag(u16 trainerId);   /* src/hoenn_trainer_flags.c（#2 ジム・0x500+id の置き換え）*/
 //[hack] patches/0130 バトルピラミッド（src/hoenn_pyramid.c）
@@ -68,6 +71,8 @@ void HoennPyramid_CB2_EndTrainerBattle(void);
 //[hack] patches/0143 トレーナーヒル（src/hoenn_trainer_hill.c）
 bool8 HoennHill_OnFloor(void);
 bool8 HackKanto_IsGymLeaderBattle(void); //[hack] patches/0144 src/hack_kanto_dynamax.c
+bool8 HackDynamax_IsChampionBattle(void); //[hack] patches/0400 src/hack_kanto_dynamax.c
+bool8 HackDynamax_IsWatashitachiBattle(void); //[hack] patches/0402 src/hack_kanto_dynamax.c
 void HoennHill_ResolveOpponent(void);
 void HoennHill_ResolveOpponentB(void);
 void HoennHill_CB2_EndTrainerBattle(void);
@@ -126,12 +131,14 @@ static const u8* const sDefaultWalkingScripts[] =
 };
 #endif
 
+extern const u8 HackScr_Challenge_Pc[]; //[hack] patches/0510 assembly/hack_challenge/challenge_scripts.s
+
 //Table full of pointers of scripts run when talking to tiles with certain behaviour bytes
 static const u8* const sMetatileInteractionScripts[] =
 {
 	[MB_BOOKSHELF] = (void*) 0x8194BB0,
 	[MB_POKEMART_SHELF] = (void*) 0x8194BB9,
-	[MB_PC] = (void*) 0x8194221,
+	[MB_PC] = (void*) HackScr_Challenge_Pc, //[hack] patches/0510 PC りょうきん（しばり）: 台本が料金を取ってから素の 0x08194221 へ
 	[MB_REGION_MAP] = (void*) 0x81944FE,
 	[MB_CABINET] = (void*) 0x8194C01,
 	[MB_KITCHEN] = (void*) 0x8194C0A,
@@ -642,6 +649,15 @@ static const struct TrainerBattleParameter sTagBattleParams[] =
 	{&sTrainerBattleEndScript,	   		TRAINER_PARAM_LOAD_SCRIPT_RET_ADDR},
 };
 
+static bool8 IsDoubleBattleScriptType(u8 type) //[hack] patches/0450 trainerbattle の型が「1 人でダブルバトル」か
+{
+	return type == TRAINER_BATTLE_DOUBLE
+		|| type == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE
+		|| type == TRAINER_BATTLE_REMATCH_DOUBLE
+		|| type == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC
+		|| type == TRAINER_BATTLE_DOUBLE_SCALED;
+}
+
 u8 CheckForTrainersWantingBattle(void)
 {
 	u8 viableMons = 0xFF;
@@ -702,6 +718,13 @@ u8 CheckForTrainersWantingBattle(void)
 		if (ExtensionState.spotted.trainers[0].script[1] == TRAINER_BATTLE_TWO_OPPONENTS
 		||  ExtensionState.spotted.trainers[1].script[1] == TRAINER_BATTLE_TWO_OPPONENTS
 		||  HoennPyramid_OnFloor()) //[hack] patches/0130 ピラミッドは 1 人ずつ（相手 2 人の戦いにしない）
+			ExtensionState.spotted.count = 1;
+
+		//[hack] patches/0450 ダブルバトルの人（型 4・6・7・8・14）は 1 人ずつ。2 人同時に見つかると Task_OverworldMultiTrainers が
+		//  「相手 2 人」の戦いにするが、型 4 の台本は gTrainerBattleOpponent_B を書かない（前の値のまま＝別の人が出る）・同じ組の 2 人目が連戦になる
+		if (ExtensionState.spotted.count == 2
+		&& (IsDoubleBattleScriptType(ExtensionState.spotted.trainers[0].script[1])
+		 || IsDoubleBattleScriptType(ExtensionState.spotted.trainers[1].script[1])))
 			ExtensionState.spotted.count = 1;
 	}
 
@@ -877,6 +900,8 @@ static void SetUpTwoTrainersBattle(void)
 	DismissMapNamePopup();
 }
 
+bool8 HackVs_TryRematch(u16 opponent); //[hack] patches/0352 src/hack_vs_seeker.c
+
 const u8* BattleSetup_ConfigureTrainerBattle(const u8* data)
 {
 	InitTrainerBattleVariables(); //0x8080110
@@ -895,6 +920,12 @@ const u8* BattleSetup_ConfigureTrainerBattle(const u8* data)
 				SetMapVarsToTrainer(); //0x80801F0
 				HoennPyramid_ResolveOpponent(); //[hack] patches/0130 ピラミッドの 0x7F0 + n → フロンティアの 300 人
 				HoennHill_ResolveOpponent(); //[hack] patches/0143 トレーナーヒルの 0x7F8 + n → 特別なトレーナーの 300 番から
+				if (HackVs_TryRematch(gTrainerBattleOpponent_A)) //[hack] patches/0352 ホウエン・シンオウの人のバトルサーチャーの再戦（台本に再戦の枝が無い）
+				{
+					sTrainerBattleMode = TRAINER_BATTLE_REMATCH;
+					gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
+					return EventScript_TryDoRematchBattle;
+				}
 			}
 			else
 			{
@@ -1003,6 +1034,12 @@ const u8* BattleSetup_ConfigureTrainerBattle(const u8* data)
 			{
 				TrainerBattleLoadArgs(sOrdinaryBattleParams, data);
 				SetMapVarsToTrainer();
+				if (HackVs_TryRematch(gTrainerBattleOpponent_A)) //[hack] patches/0352 ホウエン・シンオウの人のバトルサーチャーの再戦（台本に再戦の枝が無い）
+				{
+					sTrainerBattleMode = TRAINER_BATTLE_REMATCH;
+					gTrainerBattleOpponent_A = GetRematchTrainerId(gTrainerBattleOpponent_A);
+					return EventScript_TryDoRematchBattle;
+				}
 			}
 			else
 			{
@@ -1054,6 +1091,10 @@ void ClearTwoOpponentFlag(void)
 {
 	FlagClear(FLAG_TWO_OPPONENTS);
 }
+
+bool8 HackHeroine_Active(void);   //[hack] patches/0865 #76 src/hack_heroine.c
+void HackHeroine_Prepare(void);
+bool8 HackHeroine_BattleAllowed(void);   //[hack] patches/0867 #76 段 2b
 
 void BattleSetup_StartTrainerBattle(void)
 {
@@ -1119,6 +1160,9 @@ void BattleSetup_StartTrainerBattle(void)
 		else
 			gBattleTypeFlags = (BATTLE_TYPE_TRAINER);
 
+		if (HackHeroine_Active() && !(gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS) && HackHeroine_BattleAllowed()) //[hack] patches/0865・0867 #76 連れ歩き中のハルカはトレーナー戦もダブル（相方つき・戦闘が終わると旗は消える）。ボス・ストーリー・施設・相手 2 人の戦いは相方なし（段 2b）
+			HackHeroine_Prepare();
+
 		if (FlagGet(FLAG_TAG_BATTLE))
 			gBattleTypeFlags |= (BATTLE_TYPE_DOUBLE | BATTLE_TYPE_INGAME_PARTNER /* | BATTLE_TYPE_MULTI*/);
 
@@ -1161,7 +1205,7 @@ void BattleSetup_StartTrainerBattle(void)
 	}
 
 	#ifdef FLAG_DYNAMAX_BATTLE
-	if (FlagGet(FLAG_DYNAMAX_BATTLE) || HackKanto_IsGymLeaderBattle()) //[hack] patches/0144 カントーのジムリーダーは 1 回目から
+	if (FlagGet(FLAG_DYNAMAX_BATTLE) || HackKanto_IsGymLeaderBattle() || HackDynamax_IsChampionBattle() || HackDynamax_IsWatashitachiBattle()) //[hack] patches/0144 カントーのジムリーダーは 1 回目から・patches/0400 全地方のチャンピオン戦・patches/0402 わたしたち 10 人（相手だけ）
 		gBattleTypeFlags |= BATTLE_TYPE_DYNAMAX;
 	#endif
 
@@ -1533,8 +1577,13 @@ extern void __attribute__((long_call)) UpdateHappinessStepCounter(void);
 extern bool8 __attribute__((long_call)) CheckVSSeeker(void);
 extern bool8 __attribute__((long_call)) UpdatePoisonStepCounter(void);
 //Hack take step function to include custom walking scripts
+extern bool8 EggBox_OnStep(void);       //[hack] src/hack_egg_box.c
+void Relive_OnStep(void);               //[hack] patches/0965 段 G src/shadow_relive.c
+extern const u8 EggBoxScript_Hatched[]; //[hack] assembly/hack_egg_box/egg_box_scripts.s
 bool8 TryStartStepCountScript(u16 metatileBehavior)
 {
+	bool8 hatchedInEggBox = FALSE;
+
 	if (InUnionRoom() == TRUE
 	||  gQuestLogMode == 2)
 		return FALSE;
@@ -1558,12 +1607,21 @@ bool8 TryStartStepCountScript(u16 metatileBehavior)
 			return TRUE;
 		}
 
+		hatchedInEggBox = EggBox_OnStep(); //[hack] 卵専用ボックスの歩数（src/hack_egg_box.c・FEAT-save16-B4）。手持ちの卵より先に数える
+		Relive_OnStep(); //[hack] patches/0965 段 G リライブボックスの 128 歩（SaveBlock1 +0x3A20・src/shadow_relive.c）
 		if (ShouldEggHatch())
 		{
 			sp09A_StopSounds();
 			PlaySE(SE_EXCLAIM);
 			IncrementGameStat(GAME_STAT_HATCHED_EGGS);
 			ScriptContext1_SetupScript(EventScript_EggHatch);
+			return TRUE;
+		}
+
+		if (hatchedInEggBox)
+		{
+			PlaySE(SE_EXCLAIM);
+			ScriptContext1_SetupScript(EggBoxScript_Hatched); //「たまごボックスの たまごが かえった！」（assembly/hack_egg_box/egg_box_scripts.s）
 			return TRUE;
 		}
 
@@ -1657,6 +1715,10 @@ static const u8* GetCustomWalkingScript(void)
 
 static bool8 SafariZoneTakeStep(void)
 {
+	//[hack] 2026-11-09 patches/0978 ポロックのおき場の歩数だけは減らす（原文 SafariZoneTakeStep の DecrementFeederStepCounters・おき場が 0 台のカントーでは何も起きない）
+	if (GetSafariZoneFlag())
+		HackSafari_DecrementFeeders();
+
 	//[hack] 2026-10-10 ユーザー「サファリゾーンの歩数制限なくして」: 歩数では終わらない（ボールが無くなるか やめる で終わる）
 	if (TRUE)
 		return FALSE;
@@ -1690,8 +1752,14 @@ static const u8* TryUseFlashInDarkCave(void)
 }
 #endif
 
+void HackRamCheat_OnMapLoad(void); //[hack] patches/0682 src/hack_ram_cheat.c
+void HackContest_Reset(void); //[hack] patches/0985 src/hack_contest.c
+void HoennFacility_ResumeAfterSave(void); //[hack] patches/0730 src/hoenn_tower.c
 void RunOnTransitionMapScript(void)
 {
+	HackDaycare_SyncRegion(); //[hack] patches/0640: 育て屋を地方ごとに入れ替える（他のマップスクリプトより前）
+	HackContest_Reset(); //[hack] patches/0985 コンテストの状態の語は地図の読み込みで必ず NULL（ヒープが消えるので残すと IsContest が 1 のまま）
+	HackRamCheat_OnMapLoad(); //[hack] patches/0682 RAM チート検出（地図の読み込みの機会・通常版だけ）
 	//Reset streaks upon moving to a new map
 	gCurrentDexNavChain = 0;
 	gFishingStreak = 0;
@@ -1704,8 +1772,15 @@ void RunOnTransitionMapScript(void)
 
 void RunOnResumeMapScript(void)
 {
+	HackDaycare_SyncRegion(); //[hack] patches/0640: つづきから・戦闘復帰でも地方の食い違いを直す
+	HackContest_Reset(); //[hack] patches/0985 同上（つづきから・戦闘復帰）
+	HackRamCheat_OnMapLoad(); //[hack] patches/0682 同上
+	HoennFacility_ResumeAfterSave(); //[fix] patches/0730 施設の中のレポートからの「つづきから」は ON_TRANSITION が走らない（素の InitMapFromSavedGame）ので、ここで挑戦のチームを作り直す。印が無ければ何もしない
 	ForceClockUpdate();
 	MapHeaderRunScriptByTag(5);
+	#ifndef DISABLE_ACHIEVEMENTS
+	Achievements_Notify(ACH_EV_ALL); //[hack] 2026-10-16 patches/0500 フィールドに戻ったとき（戦闘・メニュー・手持ち・バッグ・孵化のあと）に全部の出来事を 1 回確かめる
+	#endif
 }
 
 bool8 TryRunOnFrameMapScript(void)
@@ -2293,6 +2368,10 @@ const u8* GetInteractedMetatileScript(unusedArg struct MapPosition* position, u8
 	gSpecialVar_PlayerFacing = direction;
 
 	switch (metatileBehavior) {
+		case HOENN_MB_POKEBLOCK_FEEDER: //[hack] 2026-11-09 patches/0978 ポロックのおき場（EM MB_POKEBLOCK_FEEDER・全方向から・原文 GetInteractedMetatileScript）。0xEE はカントーに 0 マス。ジョウト・シンオウの変換元の 0x87 も 0xEE になるので、サファリの中だけ（原文もおき場の床はサファリにしか無い）
+			if (GetSafariZoneFlag())
+				return HoennSafari_EventScript_PokeblockFeeder;
+			break;
 		case MB_TELEVISION:
 		case MB_BERRY_CRUSH_RECORDS:
 		case MB_BATTLE_RECORDS:
@@ -2341,9 +2420,13 @@ const u8* GetInteractedMetatileScript(unusedArg struct MapPosition* position, u8
 	return NULL;
 }
 
+//[hack] patches/0395: 自前のタイルセット（ホウエン・ジョウト・シンオウ・キタカミ）の切れる草の表（tools/rom/build_cut_grass.py が生成・assembly/hoenn/cut_grass.s）
+extern const struct CutGrass gHackCutGrassTiles[];
+
 void SetCutGrassMetatile(s16 x, s16 y)
 {
 	u32 i;
+	const struct CutGrass* extra;
 	s32 metatileId = MapGridGetMetatileIdAt(x, y);
 
 	for (i = 0; i < ARRAY_COUNT(sCutGrassTiles); ++i)
@@ -2353,7 +2436,19 @@ void SetCutGrassMetatile(s16 x, s16 y)
 		 || gMapHeader.mapLayout->secondaryTileset == sCutGrassTiles[i].tilesetPtr))
 		{
 			MapGridSetMetatileIdAt(x, y, sCutGrassTiles[i].newMetatileId);
-			break;
+			return;
+		}
+	}
+
+	//[hack] patches/0395: 素の表（FR のタイルセット 4 本）に無ければ、自前のタイルセットの表を引く
+	for (extra = gHackCutGrassTiles; extra->originalMetatileId != 0xFFFF; ++extra)
+	{
+		if (extra->originalMetatileId == metatileId
+		&& (gMapHeader.mapLayout->primaryTileset == extra->tilesetPtr
+		 || gMapHeader.mapLayout->secondaryTileset == extra->tilesetPtr))
+		{
+			MapGridSetMetatileIdAt(x, y, extra->newMetatileId);
+			return;
 		}
 	}
 }

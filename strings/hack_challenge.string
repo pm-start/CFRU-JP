@@ -1,0 +1,75 @@
+// しばり（#118・src/hack_challenge.c・assembly/hack_challenge/challenge_scripts.s）の文。会話の窓の幅（CLAUDE.md 6.25）。
+
+#org @gText_Challenge_PaidCenter
+ポケモンセンターの りようりょう\n100えんを はらった！
+
+#org @gText_Challenge_CantPayCenter
+りようりょうの 100えんが はらえない！
+
+#org @gText_Challenge_PaidPc
+パソコンの りようりょう 500えんを\nはらった！
+
+#org @gText_Challenge_CantPayPc
+りようりょうの 500えんが はらえない！
+
+#org @gText_Challenge_Appear
+なぞの ？？？が あらわれた！
+
+#org @gText_Challenge_CantUseItem
+しばりちゅうは つかえない！
+
+#org @gText_Shakariki_CantUseItem
+しゃかりきでは つかえない！
+
+#org @gText_Challenge_Name
+？？？
+
+#org @gText_Challenge_OtName
+liru
+
+#org @gText_Challenge_Finale1
+さいごの バッジを てにいれた！\nこれで すべての ジムを せいはした！
+
+#org @gText_Challenge_FinaleCount
+[BUFFER1]この しばりを ひとつも\nはずさずに ここまで きたのね！
+
+#org @gText_Challenge_FinaleAll
+すべての しばりを ひとつも はずさずに\nここまで きたのね！
+#org @gText_Challenge_FinaleItems
+『アイテムきんし』を まもりぬいた！
+
+#org @gText_Challenge_FinaleHeld
+『もちものきんし』を まもりぬいた！
+
+#org @gText_Challenge_FinaleCenter
+『ポケセンりょうきん』を まもりぬいた！
+
+#org @gText_Challenge_FinalePc
+『PCりょうきん』を まもりぬいた！
+
+#org @gText_Challenge_FinaleLentrant
+『ポケセンの ？？？』を まもりぬいた！
+
+#org @gText_Challenge_FinaleCall
+……ピリリリ！\nモモカはかせから でんわだ！
+
+#org @gText_Challenge_FinaleProf
+キミの たびは ほんもの だった！\nしばりを まもりぬいた きろくは わたしが\lずっと のこしておくよ！
+
+#org @gText_Challenge_FinaleDeath
+『ひんしで おわかれ』を まもりぬいた！
+
+#org @gText_Challenge_FinaleFirstOnly
+『はじめの 1ぴきだけ』を まもりぬいた！
+
+#org @gText_Challenge_FinaleNickname
+『ニックネームひっす』を まもりぬいた！
+
+#org @gText_Challenge_Farewell
+ひんしの ポケモンと おわかれした……
+
+#org @gText_Challenge_GameOver
+たたかえる ポケモンが いない……\nゲームオーバー！
+
+#org @gText_Challenge_NickAsk
+[BUFFER1]に ニックネームを\nつけよう！

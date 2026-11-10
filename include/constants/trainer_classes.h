@@ -109,6 +109,10 @@ enum
 	CLASS_RUIN_MANIAC, 		//0x68
 	CLASS_LADY, 			//0x69
 	CLASS_PAINTER, 			//0x6A
+	CLASS_GALACTIC_GRUNT, 	//0x6B [hack] patches/0348 2026-10-12 ギンガだんしたっぱ（クラス名は tools/rom/build_trainer_class_names.py）
+	CLASS_GALACTIC_ADMIN, 	//0x6C [hack] ギンガだんかんぶ
+	CLASS_GALACTIC_BOSS, 	//0x6D [hack] ギンガだんボス
+	CLASS_YARTIE, 	//0x6E [hack] patches/0817 ロンジャ（ロジックアリーナの相手）
 };
 
 #define CLASS_GAMER CLASS_GAMBLER

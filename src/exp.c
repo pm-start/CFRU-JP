@@ -14,6 +14,12 @@
 #include "../include/new/dynamax.h"
 #include "../include/new/exp.h"
 #include "../include/new/util.h"
+#include "hack_challenge_b.h" //[hack] patches/0540 しばり B（レベルキャップ・やせいけいけんなし）
+#include "hack_dummy_battle.h" //[hack] patches/0602 ポケセン 3F のダミー（経験値も努力値も入れない）
+#include "hack_fuuin.h" //[hack] patches/0560 縛り ふういんルーレット（レベルアップを数える）
+#include "Tables/hack_exp_boost.h" //[hack] patches/0592 経験値ペース（戦闘経験値だけ）
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダークの子の成長止め
 
 /*
 exp.c
@@ -76,6 +82,7 @@ void atk23_getexp(void)
 	case GetExp_Start: // check if should receive exp at all
 
 		if (SIDE(gBankFainted) != B_SIDE_OPPONENT
+		|| HackDummy_Active() //[hack] patches/0602 ポケセン 3F のダミーは 経験値も努力値も入らない（分配ごと飛ばす）
 		|| gBattleStruct->givenExpMons & gBitTable[gBattlerPartyIndexes[gBankFainted]]
 		|| IsFrontierRaidBattle()
 		|| (gBattleTypeFlags &
@@ -101,6 +108,7 @@ void atk23_getexp(void)
 		break;
 
 	case GetExp_CheckCurrentMonDeserving: //Check if Current mon deserves EXP
+		if (gBattleExecBuffer) break; //[hack] patches/0540 しばり B: 前の子の「これいじょう あがらない」の一言が出終わるまで待つ
 		if (GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_SPECIES, NULL) == SPECIES_NONE
 		||  GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_HP, NULL) == 0
 		||  GetMonData(&gPlayerParty[gBattleStruct->expGetterMonId], MON_DATA_IS_EGG, 0))
@@ -135,9 +143,12 @@ void atk23_getexp(void)
 		}
 		#endif
 
-		if (gPlayerParty[gBattleStruct->expGetterMonId].level >= MAX_LEVEL) //Max level mons still gain EVs
+		u8 chbBlock = HackChallengeB_ExpBlocked(gBattleStruct->expGetterMonId, *expGiveType == GiveExpBattlePariticpants); //[hack] patches/0540 しばり B: 1 上限・2 やせいけいけんなし
+		bool8 shadowBlock = Shadow_RefusesGrowth(&gPlayerParty[gBattleStruct->expGetterMonId]); //[hack] patches/0963 段 E ダークの子は経験値も努力値も入らない（リライブまで）
+		if (gPlayerParty[gBattleStruct->expGetterMonId].level >= MAX_LEVEL || chbBlock || shadowBlock) //Max level mons still gain EVs
 		{
-			MonGainEVs(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMons[gBankFainted].species);
+			if (chbBlock != 2 && !shadowBlock) //[hack] patches/0540 やせいけいけんなしは努力値も入れない
+				MonGainEVs(&gPlayerParty[gBattleStruct->expGetterMonId], gBattleMons[gBankFainted].species);
 			gBattleStruct->sentInPokes >>= 1; //One less pokemon to distribute exp to
 			gBattleScripting.expStateTracker = GetExp_PrepareLoop;
 			gBattleMoveDamage = 0; // used for exp
@@ -207,7 +218,7 @@ void atk23_getexp(void)
 		}
 
 		//Level of Fainted Mon
-		defLevel = gBattleMons[gBankFainted].level;
+		defLevel = BM_LEVEL(gBattleMons[gBankFainted]);
 
 		//Level of Victorious Mon
 		pokeLevel = gPlayerParty[gBattleStruct->expGetterMonId].level;
@@ -256,6 +267,11 @@ void atk23_getexp(void)
 		#endif
 
 		calculatedExp = ExpCalculator(trainerBonus, tradeBonus, baseExp, eggBoost, defLevel, pokeLevel, passPower, affection, evolutionBoost, divisor);
+
+		/* Lv100 より上の重い経験値表に向けて Lv80 から滑らかに補う。共通経路なので、
+		 * 場に出た子と学習装置の子へ同じ補正が掛かる。 */
+		calculatedExp = MathMin(1640000,
+			(calculatedExp * HackExpBoostPercent(pokeLevel)) / 100);
 
 	SKIP_EXP_CALC:
 		calculatedExp = MathMax(1, calculatedExp);
@@ -386,6 +402,7 @@ void atk23_getexp(void)
 
 			BattleScriptPushCursor();
 			gLeveledUpInBattle |= gBitTable[gBattleStruct->expGetterMonId];
+			HackFuuin_OnLevelsGained(gPlayerParty[gBattleStruct->expGetterMonId].level - 1, gPlayerParty[gBattleStruct->expGetterMonId].level); //[hack] patches/0560 ふういんルーレット: 戦闘のレベルアップ 1 回（10 の倍数に達したときだけ数える・封印は戦闘のあと）
 			gBattlescriptCurrInstr = BattleScript_LevelUp;
 			gBattleMoveDamage = (gBattleBufferB[gActiveBattler][2] | (gBattleBufferB[gActiveBattler][3] << 8) | (gBattleBufferB[gActiveBattler][4] << 0x10) | (gBattleBufferB[gActiveBattler][5] << 0x18));
  			AdjustFriendship(&gPlayerParty[gBattleStruct->expGetterMonId], FRIENDSHIP_EVENT_GROW_LEVEL);
@@ -398,7 +415,7 @@ void atk23_getexp(void)
 
 			if (leveledUpBank != 0xFF)
 			{
-				gBattleMons[leveledUpBank].level = gPlayerParty[gBattleStruct->expGetterMonId].level;
+				BM_SET_LEVEL(gBattleMons[leveledUpBank], gPlayerParty[gBattleStruct->expGetterMonId].level);
 				gBattleMons[leveledUpBank].hp = gPlayerParty[gBattleStruct->expGetterMonId].hp;
 				gBattleMons[leveledUpBank].maxHP = gPlayerParty[gBattleStruct->expGetterMonId].maxHP;
 
@@ -562,6 +579,9 @@ static bool8 MonGetsAffectionBoost(struct Pokemon* mon)
 
 static bool8 IsAffectedByHardLevelCap(unusedArg struct Pokemon* mon)
 {
+	if (HackChallengeB_AtLevelCap(mon)) //[hack] patches/0540 しばり B レベルキャップ: 上限のレベルに上がったら あまりの経験値は入れない
+		return TRUE;
+
 	#ifdef FLAG_HARD_LEVEL_CAP
 	extern u8 GetCurrentLevelCap(void); //Must be implemented yourself
 	if (FlagGet(FLAG_HARD_LEVEL_CAP))
@@ -654,7 +674,7 @@ static void Task_GiveExpToMon(u8 taskId)
 
 	struct Pokemon* mon = &gPlayerParty[monId];
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-	u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	u16 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
 	u32 currExp = GetMonData(mon, MON_DATA_EXP, NULL);
 	u32 nextLvlExp = GetExpToLevel(level + 1, gBaseStats[species].growthRate);
 
@@ -719,7 +739,7 @@ static void sub_802F874(u8 taskId)
 		{
 			struct Pokemon* mon = &gPlayerParty[monId];
 			u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-			u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+			u16 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
 			u32 currExp = GetMonData(mon, MON_DATA_EXP, NULL);
 			u32 nextLvlExp = GetExpToLevel(level + 1, gBaseStats[species].growthRate);
 
@@ -773,12 +793,15 @@ static void MonGainEVs(struct Pokemon *mon, u16 defeatedSpecies)
 	u8 itemQuality = ItemId_GetHoldEffectParam(heldItem);
 	u8 pkrsMultiplier = (CheckPartyHasHadPokerus(mon, 0)) ? 2 : 1;
 
+	if (Shadow_RefusesGrowth(mon)) //[hack] patches/0963 段 E ダークの子は努力値も入らない（exp.c の 2 か所の呼び元の両方を ここで止める）
+		return;
+
 	if (GetMonEVCount(mon) >= MAX_TOTAL_EVS)
 		return;
 
 	for (u8 stat = 0; stat < NUM_STATS; ++stat, evIncrease = 0)
 	{
-		if (GetMonData(mon, MON_DATA_HP_EV + stat, NULL) >= EV_CAP)
+		if (HackMon_GetEv(mon, stat) >= EV_CAP)
 			continue;
 
 		//Get EV yield
@@ -837,7 +860,7 @@ static void MonGainEVs(struct Pokemon *mon, u16 defeatedSpecies)
 
 bool8 AddEVs(struct Pokemon* mon, u8 statId, u16 numToAdd)
 {
-	u8 currentEv = GetMonData(mon, MON_DATA_HP_EV + statId, NULL);
+	u16 currentEv = HackMon_GetEv(mon, statId);
 	u16 totalEvs = GetMonEVCount(mon);
 
 	if (totalEvs < MAX_TOTAL_EVS
@@ -850,7 +873,7 @@ bool8 AddEVs(struct Pokemon* mon, u8 statId, u16 numToAdd)
 			numToAdd = EV_CAP - currentEv; //Lower amount
 
 		currentEv += numToAdd;
-		SetMonData(mon, MON_DATA_HP_EV + statId, &currentEv);
+		HackMon_SetEv(mon, statId, currentEv);
 
 		if (numToAdd > 0)
 			return TRUE; //Evs successfully added

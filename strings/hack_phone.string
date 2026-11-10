@@ -25,6 +25,21 @@ A はっしん   B もどる
 #org @gText_HackPhone_MomRing
 ママから でんわだ！\nでんわに でますか？
 
+#org @gText_HackPhone_OakClass
+はかせ
+
+#org @gText_HackPhone_OakName
+オーキド
+
+#org @gText_HackPhone_OakRing
+オーキドはかせから でんわだ！\nでんわに でますか？
+
+#org @gText_HackPhone_OakIntro
+ここまで きたのなら\nしょうぶ しよう！
+
+#org @gText_HackPhone_OakDefeat
+すごい じゃ ないか！
+
 #org @gText_HackPhone_MomOut1
 もしもし？ ママよ！\nげんきに している？
 
@@ -36,3 +51,30 @@ A はっしん   B もどる
 
 #org @gText_HackPhone_MomIn2
 ポケモンたちも げんき？\nからだに きを つけてね！
+
+#org @gText_HackPhone_LeaderGet1
+[BUFFER1]から でんわばんごうが\nとどいた！ でんわちょうに\lとうろくしました
+
+#org @gText_HackPhone_LeaderGetMany
+ジムリーダーたちから でんわばんごうが\nとどいた！ でんわちょうに\lとうろくしました
+
+#org @gText_HackPhone_MenuWhich
+どうしますか？
+
+#org @gText_HackPhone_MenuCall
+かける
+
+#org @gText_HackPhone_MenuInvite
+さいせんに さそう
+
+#org @gText_HackPhone_MenuCancel
+やめる
+
+#org @gText_HackPhone_InviteHint
+さいせんは でんわちょうの\n『さいせんに さそう』から！
+
+#org @gText_HackPhone_TierUp1
+まえより つよく なって\nまって いますよ！
+
+#org @gText_HackPhone_TierUp2
+もう まえの わたしとは\nくらべものに なりません！

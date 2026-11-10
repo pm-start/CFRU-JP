@@ -38,3 +38,4 @@ u8 RegionFlyCityType(u8 region, u8 mapsec);     /* 町なら 2（訪問済み）
 bool8 RegionFlySetWarp(u8 region, u8 mapsec);   /* 町なら行き先を決めて TRUE */
 void RegionFlyVisitTick(void);
 void RegionHealTick(void);
+void RegionMapTick(s16 *cache);              /* 上の 2 つをまとめた版（歩きタスクの data[6] に空振りの地図を覚える・2026-11-03） */

@@ -364,11 +364,8 @@ u8 ReformatItemDescription(u16 itemId, u8* dest, u8 maxWidth)
 }
 
 //////////////////////////TM + HMs////////////////////////////////////////////////
-#ifdef EXPANDED_TMSHMS
-	typedef u32 TM_HM_T[4]; //extern const u32 gTMHMLearnsets[NUM_SPECIES][4];
-#else
-	typedef u32 TM_HM_T[2]; //extern const u32 gTMHMLearnsets[NUM_SPECIES][2];
-#endif
+//[hack] patches/0861: わざマシンの適性表を u32[4]（16 バイト）の行で読んでいたが、NUM_TMSHMS が 135 になり 17 バイトの行になる
+//（DPE-JP scripts/tm_tutor.py は 1 種族 (n + 7) / 8 バイトで書く）＝教え技（patches/0172）と同じくバイトの行で読む。
 
 #if (NUM_MOVE_TUTORS > 64) //Round up to the nearest multiple of 32
 	typedef u32 ExpandedTutor_T[(NUM_MOVE_TUTORS % 32 != 0) ? NUM_MOVE_TUTORS / 32 + 1 : NUM_MOVE_TUTORS / 32]; //extern const u32 gTutorMoves[NUM_SPECIES][];
@@ -376,7 +373,7 @@ u8 ReformatItemDescription(u16 itemId, u8* dest, u8 maxWidth)
 	typedef u32 ExpandedTutor_T[2]; //extern const u32 gTutorMoves[NUM_SPECIES][2];
 #endif
 
-#define gTMHMLearnsets ((TM_HM_T*) *((u32*) 0x80432B4))
+#define gTMHMLearnsets ((const u8*) *((u32*) 0x80432B4))
 #define gTutorLearnsets ((ExpandedTutor_T*) *((u32*) 0x8121420))
 
 u32 CanMonLearnTMHM(struct Pokemon* mon, u8 tm)
@@ -387,31 +384,13 @@ u32 CanMonLearnTMHM(struct Pokemon* mon, u8 tm)
 		return 0;
 	}
 
-	u32 mask;
-	if (tm < 32)
-	{
-		mask = 1u << tm;
-		return (gTMHMLearnsets[species][0] & mask) != 0 ? TRUE : FALSE;
-	}
-	else if (tm >= 32 && tm < 64)
-	{
-		mask = 1u << (tm - 32);
-		return (gTMHMLearnsets[species][1] & mask) != 0 ? TRUE : FALSE;
-	}
-	#ifdef EXPANDED_TMSHMS
-	else if (tm >= 64 && tm < 96)
-	{
-		mask = 1u << (tm - 64);
-		return (gTMHMLearnsets[species][2] & mask) != 0 ? TRUE : FALSE;
-	}
-	else if (tm >= 96 && tm < 128)
-	{
-		mask = 1u << (tm - 96);
-		return (gTMHMLearnsets[species][3] & mask) != 0 ? TRUE : FALSE;
-	}
-	#endif
-	else
+	if (tm >= NUM_TMSHMS)
 		return 0;
+
+	{
+		const u8* row = gTMHMLearnsets + species * ((NUM_TMSHMS + 7) / 8);
+		return (row[tm / 8] & (1 << (tm % 8))) != 0 ? TRUE : FALSE;
+	}
 }
 
 #ifdef EXPANDED_MOVE_TUTORS
@@ -838,10 +817,17 @@ bool8 CheckSellTmHm(u16 item)
 }
 
 extern const u8 gText_SingleTmBuy[];
+u16 HackLuxrayLove_ShopItem(u16 item); //[hack] patches/0617 src/hack_luxray_love.c
 bool8 MegaShop_CheckPurchase(u16 item, u8 taskId); //[hack] src/mega_shop.c
 u32 MegaShop_Price(u16 item);
 bool8 MegaShop_PrintPrice(u8 windowId, u16 item, u8 y);
 bool8 MegaShop_IsOpen(void);
+extern const u8 gText_BpShopUnit[];
+bool8 BpShop_IsOpen(void); //[hack] patches/0815 src/mega_shop.c 交換所の BP 売り場（代金は BP）
+bool8 BpShop_Enough(u32 price);
+void BpShop_Subtract(u32 price);
+void BpShop_NotEnoughMessage(u8 taskId);
+void Task_BpShopSubtract(u8 taskId);
 void CheckTmPurchase(u16 item, u8 taskId)
 {
 	if (MegaShop_CheckPurchase(item, taskId)) //[hack] 2026-10-01 メガストーン売り場は 1 個ずつ・自前の値段
@@ -876,6 +862,13 @@ bool8 CheckBuyableTm(u16 item, u8 taskId)
 		{
 			u32 price = MegaShop_Price(item); //[hack] メガストーン売り場は自前の値段（ほかは ItemId_GetPrice）
 			gShopData.itemPrice = price;
+			if (BpShop_IsOpen()) //[hack] patches/0815 交換所は代金が BP
+			{
+				if (BpShop_Enough(price))
+					return FALSE;
+				BpShop_NotEnoughMessage(taskId);
+				return TRUE;
+			}
 			if (IsEnoughMoney(&gSaveBlock1->money, price))
 				return FALSE;
 			else
@@ -887,6 +880,13 @@ bool8 CheckBuyableTm(u16 item, u8 taskId)
 	#else
 		u32 price = MegaShop_Price(item); //[hack] 〃
 		gShopData.itemPrice = price;
+		if (BpShop_IsOpen()) //[hack] patches/0815
+		{
+			if (BpShop_Enough(price))
+				return FALSE;
+			BpShop_NotEnoughMessage(taskId);
+			return TRUE;
+		}
 		if (IsEnoughMoney(&gSaveBlock1->money, price))
 			return FALSE;
 		else
@@ -898,6 +898,7 @@ bool8 CheckBuyableTm(u16 item, u8 taskId)
 }
 
 extern const u8 gText_Purchased[];
+extern const u8 gText_BpShopPurchased[]; //[hack] patches/0918
 void PrintTmPriceOrPurchased(u8 windowId, u16 item, u8 y)
 {
 	s32 x;
@@ -909,17 +910,25 @@ void PrintTmPriceOrPurchased(u8 windowId, u16 item, u8 y)
 	#ifdef REUSABLE_TMS
 		if (GetPocketByItemId(item) == POCKET_TM_CASE && CheckBagHasItem(item, 1))
 		{
-			BuyMenuPrint(windowId, 0, gText_Purchased, 0x58, y, 0, 0, 0xFF, 1);
+			BuyMenuPrint(windowId, 0, BpShop_IsOpen() ? gText_BpShopPurchased : gText_Purchased, 0x58, y, 0, 0, 0xFF, 1); //[hack] patches/0918 交換所は「ーーーーBP」（素は「ーーーー円」）
 			return;
 		}
 	#endif
 	
-	ConvertIntToDecimalStringN(gStringVar1, ItemId_GetPrice(item), 0, 5);
+	ConvertIntToDecimalStringN(gStringVar1, MegaShop_Price(item), 0, 5); //[hack] patches/0815 交換所のわざマシンは BP の値段（ほかは ItemId_GetPrice と同じ）
 	x = 5 - StringLength(gStringVar1);
+	if (BpShop_IsOpen() && x > 0)
+		--x; //[hack] patches/0861 「BP」は「円」より 1 字長く、窓の右の端で「P」が切れていた（「48B」に見えた）＝空白を 1 字減らして収める
 	loc = gStringVar4;
-	while (x-- != 0)
+	while (x-- > 0)
 		*loc++ = 0;
 	
+	if (BpShop_IsOpen()) //[hack] patches/0815 「n」＋「BP」
+	{
+		loc = StringCopy(loc, gStringVar1);
+		StringAppend(loc, gText_BpShopUnit);
+	}
+	else
 	StringExpandPlaceholders(loc, (void*) 0x83DDDAB);
 	BuyMenuPrint(windowId, 0, gStringVar4, 0x58, y, 0, 0, 0xFF, 1);
 }
@@ -940,10 +949,15 @@ u8 CheckSingleBagTm(unusedArg u16 item)
 }
 
 extern const u16 Fairy_TM_DiskPal[];
+extern const u16 Ril_TM_DiskPal[]; //[hack] patches/0408 #110: graphics/Other/Type_Icons/Palette Only/Ril_TM_Disk.png
 const void* FixTmHmDiscPalette(u8 type)
 {
 	if (type == TYPE_FAIRY)
 		return &Fairy_TM_DiskPal[0];
+	else if (type == TYPE_RIL) //素の表（0x84255C4・18 タイプぶん）にリル 0x19 の行は無いので、必ずここで返す
+		return &Ril_TM_DiskPal[0];
+	else if (type == TYPE_SHADOW) //[hack] patches/0955 段 D: ダーク技のわざマシンは無い（表の外を読まないための穴埋めにリルの盤の色）
+		return &Ril_TM_DiskPal[0];
 	else
 		return 0;
 }
@@ -980,7 +994,7 @@ void Task_ReturnToItemListAfterItemPurchase(u8 taskId)
 	if (gMain.newKeys & (A_BUTTON | B_BUTTON))
 	{
 		PlaySE(SE_SELECT);
-		if (GetPocketByItemId(tItemId) == POCKET_POKE_BALLS)
+		if (GetPocketByItemId(tItemId) == POCKET_POKE_BALLS && HackLuxrayLove_ShopItem(tItemId) == tItemId) //[hack] patches/0617 しばり「ぜんぶレントラー」: 置き換えられた（モンスターボール以外の）ボールにはおまけのプレミアボールを付けない
 		{
 			#ifdef MULTIPLE_PREMIER_BALLS_AT_ONCE
 			u8 nPremier = tItemCount / 10;
@@ -1018,7 +1032,10 @@ void Task_ReturnToSellListAfterTmPurchase(u8 taskId)
 	if (gMain.newKeys & (A_BUTTON | B_BUTTON))
 	{
 		IncrementGameStat(GAME_STAT_SHOPPED);
-		RemoveMoney(&gSaveBlock1->money, gShopData.itemPrice);
+		if (BpShop_IsOpen()) //[hack] patches/0815 交換所は BP から引く（窓は PrintMoneyAmountInMoneyBox の置き換えが BP を出す）
+			BpShop_Subtract(gShopData.itemPrice);
+		else
+			RemoveMoney(&gSaveBlock1->money, gShopData.itemPrice);
 		PlaySE(SE_MONEY);
 		PrintMoneyAmountInMoneyBox(0, GetMoney(&gSaveBlock1->money), 0);
 		RedrawListMenu(tListTaskId);
@@ -1038,7 +1055,7 @@ void ReloadMartListForTmPurchase(u8 taskId)
 		BuyMenuDisplayMessage(taskId, (void*) 0x83DDC75, Task_ReturnToSellListAfterTmPurchase);
 	else
 	#endif
-		BuyMenuDisplayMessage(taskId, (void*) 0x83DDC75, (TaskFunc) (0x809B8FC | 1)); //BuyMenuSubtractMoney
+		BuyMenuDisplayMessage(taskId, (void*) 0x83DDC75, BpShop_IsOpen() ? Task_BpShopSubtract : (TaskFunc) (0x809B8FC | 1)); //BuyMenuSubtractMoney（[hack] patches/0815 交換所は BP から引く自前）
 }
 #undef tItemId
 
@@ -1163,8 +1180,8 @@ void HandleItemRegistration(u16 item)
     0x203C6B4  （12 B の空き。下の変数を守る緩衝）
     0x203C6C0  gLastUsedRepel / sBagItemAmounts / gSelectedOrderFromParty
                gDontFadeWhite / gWindowsLitUp / gWildDataSwitch  ← 20 B・動かさない
-    0x203C6D4  モンスターボール 50 枠 × 4 =   200 B   ← 元 gDexNavSearchLevels
-    0x203C79C  わざマシン      128 枠 × 4 =   512 B
+    0x203C6D4  モンスターボール 43 枠 × 4 =   172 B   ← 元 gDexNavSearchLevels（patches/0861 で 50 → 43）
+    0x203C780  わざマシン      135 枠 × 4 =   540 B   （patches/0861 で 0x203C79C・128 枠 → 0x203C780・135 枠）
     0x203C99C  きのみ           72 枠 × 4 =   288 B
     0x203CABC  ボックス 20〜22（ここから先は触らない）
 
@@ -1173,7 +1190,13 @@ void HandleItemRegistration(u16 item)
     だから変数を 1 つも動かさずに済んだ。
   ★ きのみだけ 75 → 72（実在 67 種なので余裕は残る）。
     後ろの枠がちょうど 250 枠ぶんしか無いための調整。
-  ★ わざマシンの 128 は `NUM_TMS 120 + NUM_HMS 8` と一致していて削れない。
+  ★ わざマシンの枠は `NUM_TMS + NUM_HMS` と一致していて削れない。
+  ★★ [hack] patches/0861（2026-10-26・Redmine #59 本物の技マシン TM121〜127）: NUM_TMS 120 → 127 で 128 → 135 枠。
+    後ろの塊（250 枠）に入れるため、ボールを 50 → 43 枠にして 7 枠譲った（ボールの種類は 38・余り 5）。
+    きのみの始まり 0x203C99C は変わらない（43 + 135 = 178 = 50 + 128）。
+    **0.60.0 のセーブは移行なしで読める**: 旧わざマシン欄 0〜127 番がそのまま新欄の 7〜134 番に重なり、新欄の 0〜6 番は
+    旧ボール欄の 43〜49 番（種類が 38 なので必ず空）。バッグを開くと詰め直し（CompactItemsInBagPocket）と並べ替え
+    （SortBerriesOrTMHMs）が走り、空きが後ろへ寄る。
 */
 #define sBagRegularItems ((struct ItemSlot*) 0x203BA98)
 #define sBagKeyItems (sBagRegularItems + NUM_REGULAR_ITEMS)
@@ -1186,7 +1209,7 @@ void HandleItemRegistration(u16 item)
 
 #define NUM_REGULAR_ITEMS 700
 #define NUM_KEY_ITEMS 75
-#define NUM_POKE_BALLS 50
+#define NUM_POKE_BALLS 43 //[hack] patches/0861 50→43（わざマシン欄を 128→135 枠にするため 7 枠を譲る・ボールの種類は 38）
 #define NUM_BERRIES 72
 
 #define LARGEST_POCKET_NUM NUM_REGULAR_ITEMS
@@ -1243,6 +1266,7 @@ static const struct BagPockets sBagPocketArrangement =
 };
 
 void HoennPyramid_ApplyBag(void); //[hack] patches/0131 src/hoenn_pyramid.c
+bool8 HoennPyramid_BagIsApplied(void); //[hack] BUG-pyramid-held-items-B src/hoenn_pyramid.c
 
 void SetMemoryForBagStorage(void)
 {
@@ -1256,6 +1280,7 @@ extern u8 (*sBagListMenuItemStrings)[15];
 
 bool8 AllocateBagItemListBuffers(void)
 {
+	HoennPyramid_ApplyBag(); //[hack] patches/0131 バッグを開くたびにバトルバッグへ向け直す（歩いて入った床では地図の読み込みで表が素のバッグに戻る・IN_USE が無ければ何もしない）
 	sItemDescriptionPocket = 0; //Reset item description printer
 
 	/*if (sBagBgTilemapBuffer != NULL)
@@ -1433,6 +1458,7 @@ u16 HackTrainingPouch_Arrange(struct ItemSlot* slots, u16 capacity); //[hack] pa
 
 void StoreBagItemCount(void)
 {
+	HoennPyramid_ApplyBag(); //[hack] FIX-pyramid-bag-walkin バッグ画面は個数を数えてから一覧を作る＝数える前にバトルバッグへ向け直す（歩いて入った床では表が素のバッグに戻っている・IN_USE が無ければ何もしない）
 	//[hack] patches/0302 今のポケットの表（gBagPockets）を見る。固定の sBagPocketArrangement を数えると、バトルピラミッドで付け替えた
 	//  バトルバッグ（ほかのポケットは 0 枠・src/hoenn_pyramid.c）が効かず、ボールを持ち込めて「どうぐ」も 10 枠の後ろまで並んだ
 	struct ItemSlot* itemMem;
@@ -1455,6 +1481,12 @@ void StoreBagItemCount(void)
 			default:
 				itemMem = gBagPockets->pokeBallRam;
 				itemAmount = gBagPockets->pokeBallAmount;
+		}
+
+		if (pocket != 0 && HoennPyramid_BagIsApplied()) //[hack] BUG-pyramid-held-items-B: バトルバッグは 5 つのポケットの表が同じ 10 枠を指す（エメラルドは種類を問わず入れる）。一覧に出すのは「どうぐ」だけ
+		{
+			sBagItemAmounts[pocket] = 0;
+			continue;
 		}
 
 		if (itemAmount == 0) //[hack] patches/0302 枠の無いポケット（バトルピラミッドのキーアイテム・ボール）は 0 匹（下の数え方は枠の数を見ない）
@@ -1584,12 +1616,15 @@ static void Task_WipeSingleUseItems(u8 taskId)
 #define gMenuText_Deselect (const u8*) 0x83DD82D
 #define gText_EmptyString2 (const u8*) 0x83DD809
 
-#define ItemMenu_UseOutOfBattle (void*) 0x810A74D
+//[hack] patches/0510 しばり「アイテムきんし」: 「つかう」を自作の関数に包む（元の 0x810A74D／0x810AE21 は src/hack_challenge.c が呼ぶ）
+void HackChallenge_ItemMenuUseOutOfBattle(u8 taskId);
+void HackChallenge_ItemMenuUseInBattle(u8 taskId);
+#define ItemMenu_UseOutOfBattle HackChallenge_ItemMenuUseOutOfBattle
 #define ItemMenu_Toss (void*) 0x810A7BD
 #define ItemMenu_Register (void*) 0x810AAFD
 #define ItemMenu_Give (void*) 0x810ABA5
 #define ItemMenu_Cancel (void*) 0x810ADD9
-#define ItemMenu_UseInBattle (void*) 0x810AE21
+#define ItemMenu_UseInBattle HackChallenge_ItemMenuUseInBattle
 #define ItemMenu_Register (void*) 0x810AAFD
 
 extern const u8 gText_WantToSortItems[];

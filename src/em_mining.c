@@ -26,7 +26,7 @@
 #include "../include/new/em_mining.h"
 #include "../include/new/util.h"
 
-//#define FLAG_EXPLAINED_MINING_RULES 0x1 //UNCOMMENT AND CHANGE THIS IF YOU WANT
+#include "hack_mining.h" //[hack] patches/0872 FLAG_EXPLAINED_MINING_RULES（旗 0xFDE・生成ヘッダの HACK_FLAG_MINING_EXPLAINED）
 
 #define NUM_ROWS 8
 #define NUM_COLS 12
@@ -1281,6 +1281,9 @@ static u8 GetModifiedPrizeId(u8 prizeId)
 		case PRIZE_FIRST_EVO_STONE:
 			numOfType = PRIZE_LAST_EVO_STONE + 1;
 			break;
+		case PRIZE_FIRST_FOSSIL: //[hack] patches/0952 化石の枠（10%）は 16 種（ひみつのコハク〜かけら 4 種）を等分。化石の enum は連続
+			numOfType = PRIZE_LAST_FOSSIL + 1;
+			break;
 		default:
 			return prizeId;
 	}
@@ -1758,6 +1761,7 @@ static void Task_UndergroundMiningExecute(u8 taskId)
 
 bool8 InitStartUndergroundMining(void)
 {
+	HackMining_MarkDug(); //[hack] patches/0872 ほり始めた目の前のかべを今日ほった印に
 	FadeScreen(1,0);
 	CreateTask(Task_UndergroundMiningExecute, 0);
 	return FALSE;

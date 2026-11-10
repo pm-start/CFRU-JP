@@ -1,5 +1,9 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
+#include "shadow_moves.h" //[hack] patches/0955 段 D ダーク技
+#include "lv200_custom_common.h"
 #include "../include/random.h"
 #include "../include/string_util.h"
 #include "../include/constants/items.h"
@@ -19,6 +23,10 @@
 #include "../include/new/multi.h"
 #include "../include/new/terastal.h"
 #include "../include/new/util.h"
+#include "hack_challenge.h" //[hack] patches/0510 しばり
+#include "hack_difficulty.h" //[hack] patches/0616 しゃかりき: 回復の道具は キズぐすりだけ
+#include "hack_fuuin.h" //[hack] patches/0560 縛り ふういんルーレット
+#include "hack_dummy_battle.h" //[hack] patches/0602 ポケセン 3F のダミー
 
 bool8 HackDragonBoulder_Bank(u8 bank); //[hack] patches/0207 りゅうのいわお（src/hack_dragon_boulder.c）
 bool8 HackDragonBoulder_Mon(struct Pokemon* mon);
@@ -176,10 +184,33 @@ void ClearBattlerAbilityHistory(u8 bank)
 
 item_effect_t GetBankItemEffect(u8 bank)
 {
+	u16 item;
+	if (!Lv200CustomMove_IsItemActive(bank, TRUE))
+		return 0;
+
 	if (ABILITY(bank) != ABILITY_KLUTZ && !gNewBS->EmbargoTimers[bank] && !IsMagicRoomActive())
-		return ItemId_GetHoldEffect(ITEM(bank));
+	{
+		item_effect_t effect;
+		item = Lv200CustomMove_GetItemForEffect(bank, ITEM(bank));
+		effect = ItemId_GetHoldEffect(item);
+
+		if (HackChallenge_HeldItemNullified(bank, effect)) //[hack] patches/0510 もちものきんし: 自分のポケモンの もちものは戦闘で こうかなし
+			return 0;
+		if (HackDifficulty_HeldRecoveryNullified(bank, effect)) //[hack] patches/0616 しゃかりき: 自分の側の もたせた回復のきのみ系は こうかなし
+			return 0;
+		return effect;
+	}
 
 	return 0;
+}
+
+u8 GetBankItemEffectParam(u8 bank)
+{
+	u16 item;
+	if (!Lv200CustomMove_IsItemActive(bank, TRUE))
+		return 0;
+	item = Lv200CustomMove_GetItemForEffect(bank, ITEM(bank));
+	return ItemId_GetHoldEffectParam(item);
 }
 
 item_effect_t GetMonItemEffect(const struct Pokemon* mon)
@@ -286,14 +317,17 @@ bool8 CanHitSemiInvulnerableTarget(u8 bankAtk, u8 bankDef, u16 move)
 	if (gStatuses3[bankDef] & STATUS3_COMMANDER)
 		return FALSE;
 
-	if (ABILITY(bankAtk) == ABILITY_NOGUARD || ABILITY(bankDef) == ABILITY_NOGUARD)
+	if (BankHasAbility(bankAtk, ABILITY_NOGUARD) || BankHasAbility(bankDef, ABILITY_NOGUARD))
 		return TRUE;
 
-	if (move == MOVE_TOXIC && IsOfType(bankAtk, TYPE_POISON))
+	if (MoveIs(move, MOVE_TOXIC) && IsOfType(bankAtk, TYPE_POISON))
 		return TRUE;
 
 	return gStatuses3[bankDef] & STATUS3_ALWAYS_HITS && gDisableStructs[bankDef].bankWithSureHit == bankAtk;
 }
+
+bool8 HackDelta_MonFlyingCover(const struct Pokemon* mon, u16 species); //[hack] patches/0962 元の種族がひこうのデルタ種（src/hack_delta_battle.c）
+bool8 HackDelta_BankFlyingCover(u8 bank);
 
 bool8 CheckGrounding(u8 bank)
 {
@@ -306,9 +340,11 @@ bool8 CheckGrounding(u8 bank)
 		return GROUNDED;
 
 	else if ((gStatuses3[bank] & (STATUS3_LEVITATING | STATUS3_TELEKINESIS | STATUS3_IN_AIR))
+		   || Lv200CustomMove_IsFlyingBarrier(bank) //[hack] ひこうのけっかい（#35 P2）
 		   || ITEM_EFFECT(bank) == ITEM_EFFECT_AIR_BALLOON
 		   || (ABILITY(bank) == ABILITY_LEVITATE || ABILITY(bank) == ABILITY_EELEVATE)
 		   || HackDragonBoulder_Bank(bank) //[hack] patches/0207 りゅうのいわお ふゆう
+		   || HackDelta_BankFlyingCover(bank) //[hack] patches/0962 元の種族がひこうのデルタ種はひこうタイプ扱い
 		   || IsOfType(bank, TYPE_FLYING))
 				return IN_AIR;
 
@@ -326,15 +362,27 @@ bool8 NonInvasiveCheckGrounding(u8 bank, u16 defAbility, u8 defType1, u8 defType
 		return GROUNDED;
 
 	else if ((gStatuses3[bank] & (STATUS3_LEVITATING | STATUS3_TELEKINESIS | STATUS3_IN_AIR))
+	|| Lv200CustomMove_IsFlyingBarrier(bank) //[hack] ひこうのけっかい（#35 P2）
 	|| GetRecordedItemEffect(bank) == ITEM_EFFECT_AIR_BALLOON
 	|| defAbility == ABILITY_LEVITATE || defAbility == ABILITY_EELEVATE
 	|| HackDragonBoulder_Bank(bank) //[hack] patches/0207 りゅうのいわお ふゆう
+	|| HackDelta_BankFlyingCover(bank) //[hack] patches/0962 元の種族がひこうのデルタ種はひこうタイプ扱い
    	|| defType1 == TYPE_FLYING
    	|| defType2 == TYPE_FLYING
    	|| defType3 == TYPE_FLYING)
 		return IN_AIR;
 
 	return GROUNDED;
+}
+
+u8 HackDelta_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0962 デルタ種のタイプ（src/hack_delta.c・印がデルタでなければ base をそのまま返す）
+
+//[hack] patches/0962 ひこうタイプか（デルタ種の個体は個体のタイプ・mon が NULL なら種族の表）
+static bool8 HasFlyingTypeHack(const struct Pokemon* mon, u16 species)
+{
+	return HackDelta_Type(mon, species, 0, gBaseStats[species].type1) == TYPE_FLYING
+	    || HackDelta_Type(mon, species, 1, gBaseStats[species].type2) == TYPE_FLYING
+	    || HackDelta_MonFlyingCover(mon, species); //[hack] patches/0962 元の種族がひこうのデルタ種はひこうタイプ扱い
 }
 
 bool8 CheckMonGrounding(struct Pokemon* mon)
@@ -348,20 +396,18 @@ bool8 CheckMonGrounding(struct Pokemon* mon)
 
 	else if  ((GetMonAbility(mon) == ABILITY_LEVITATE || GetMonAbility(mon) == ABILITY_EELEVATE)
 		|| HackDragonBoulder_Mon(mon) //[hack] patches/0207 りゅうのいわお ふゆう
-		|| gBaseStats[species].type1 == TYPE_FLYING
-		|| gBaseStats[species].type2 == TYPE_FLYING)
+		|| HasFlyingTypeHack(mon, species)) //[hack] patches/0962 デルタ種
 			return IN_AIR;
 
 	return GROUNDED;
 }
 
-bool8 CheckGroundingByDetails(u16 species, u16 item, u16 ability)
+bool8 CheckGroundingByDetails(u16 species, u16 item, u16 ability, const struct Pokemon* mon) //[hack] patches/0962 mon（NULL でもよい）はデルタ種のタイプを見る
 {
 	if (ability != ABILITY_KLUTZ && ItemId_GetHoldEffect(item) == ITEM_EFFECT_IRON_BALL)
 		return GROUNDED;
 	else if (ability == ABILITY_LEVITATE || ability == ABILITY_EELEVATE
-	|| gBaseStats[species].type1 == TYPE_FLYING
-	|| gBaseStats[species].type2 == TYPE_FLYING)
+	|| HasFlyingTypeHack(mon, species))
 		return IN_AIR;
 
 	return GROUNDED;
@@ -371,9 +417,9 @@ bool8 IsDamageHalvedDueToFullHP(u8 bank, u16 defAbility, u16 move, u16 atkAbilit
 {
 	if (BATTLER_MAX_HP(bank))
 	{
-		if (defAbility == ABILITY_SHADOWSHIELD)
+		if (defAbility == ABILITY_SHADOWSHIELD || SecondAbility_OfBank(bank) == ABILITY_SHADOWSHIELD) //[hack] 2026-10-20 2 つ目
 			return TRUE;
-		else if ((defAbility == ABILITY_MULTISCALE || defAbility == ABILITY_DRAGONARMOR) && NO_MOLD_BREAKERS(atkAbility, move)) //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150）
+		else if (((defAbility == ABILITY_MULTISCALE || defAbility == ABILITY_DRAGONARMOR) && NO_MOLD_BREAKERS(atkAbility, move)) || (defAbility == ABILITY_REITONOOU && NO_MOLD_BREAKERS(atkAbility, move)) || SecondAbility_OfBank(bank) == ABILITY_MULTISCALE) //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150）
 			return TRUE;
 	}
 
@@ -402,12 +448,19 @@ u8 ViableMonCountFromBankLoadPartyRange(u8 bank)
 	return count;
 }
 
+extern bool8 HoennArena_IsActive(void); //★ src/hoenn_arena.c（patches/0596）
+
 bool8 HasMonToSwitchTo(u8 bank)
 {
 	u8 i, firstMonId, lastMonId;
 	u8 battlerIn1, battlerIn2;
 	u8 foe1, foe2;
-	struct Pokemon* party = LoadPartyRange(bank, &firstMonId, &lastMonId);
+	struct Pokemon* party;
+
+	if (HoennArena_IsActive()) //★ バトルアリーナは技・道具でも入れ替えられない（エメラルドは ほえる／バトンタッチが失敗・patches/0596）
+		return FALSE;
+
+	party = LoadPartyRange(bank, &firstMonId, &lastMonId);
 
 	u8 backupActiveBattler = gActiveBattler;
 	gActiveBattler = bank; //Needed for LoadBattlersAndFoes
@@ -469,8 +522,9 @@ bool8 CheckSoundMove(move_t move)
 
 bool8 SheerForceCheck(void)
 {
-	return (ABILITY(gBankAttacker) == ABILITY_SHEERFORCE
-	     || ABILITY(gBankAttacker) == ABILITY_DRAGONARMOR) //[hack] 2026-10-07 りゅうのよろいに ちからずく（patches/0206）
+	return (BankHasAbility(gBankAttacker, ABILITY_SHEERFORCE)
+	     || ABILITY(gBankAttacker) == ABILITY_DRAGONARMOR //[hack] 2026-10-07 りゅうのよろいに ちからずく（patches/0206）
+	     || ABILITY(gBankAttacker) == ABILITY_REITONOOU) //[hack] 2026-10-23 れーとのおう(patches/0790)
 	    && CheckTableForMove(gCurrentMove, gSheerForceBoostedMoves);
 }
 
@@ -481,23 +535,25 @@ bool8 IsOfType(u8 bank, u8 type)
 	u8 type3 = gBattleMons[bank].type3;
 	u8 teratype = GetBattlerTeraType(bank);
 
+	bool8 result = FALSE;
+
 	if (!IS_BLANK_TYPE(teratype) && teratype != TYPE_STELLAR)
 	{
-		return teratype == type;
+		result = teratype == type;
 	}
 	else
 	{
 		if (!IS_BLANK_TYPE(type1) && type1 == type)
-			return TRUE;
+			result = TRUE;
 
 		if (!IS_BLANK_TYPE(type2) && type2 == type)
-			return TRUE;
+			result = TRUE;
 
 		if (!IS_BLANK_TYPE(type3) && type3 == type)
-			return TRUE;
+			result = TRUE;
 	}
 
-	return FALSE;
+	return Lv200CustomMove_IsBattlerOfType(bank, type, result);
 }
 
 bool8 LiftProtect(u8 bank)
@@ -629,6 +685,9 @@ u8 CountBoosts(u8 bank)
 
 u8 CheckMoveLimitations(u8 bank, u8 unusableMoves, u8 check)
 {
+	if (HackDummy_ForceUsable(bank)) //[hack] patches/0602 ポケセン 3F のダミーは かなしばり・ちょうはつ・じゅうりょく・いちゃもん でも わるあがきにならない（「はねる」のまま）
+		return unusableMoves;
+
 	u16 ability = ABILITY(bank);
 	u8 holdEffect = ITEM_EFFECT(bank);
 	u16 choicedMove = CHOICED_MOVE(bank);
@@ -654,7 +713,7 @@ bool8 IsUnusableMove(u16 move, u8 bank, u8 check, u8 pp, u16 ability, u8 holdEff
 
 	if (move == MOVE_NONE && check & MOVE_LIMITATION_ZEROMOVE)
 		return TRUE;
-	else if (pp == 0 && check & MOVE_LIMITATION_PP)
+	else if (pp == 0 && check & MOVE_LIMITATION_PP && !IsShadowMove(move)) //[hack] patches/0955 段 D ダーク技は PP が 0 でも使える（XD）
 		return TRUE;
 	else if (!isMaxMove && move == gDisableStructs[bank].disabledMove && check & MOVE_LIMITATION_DISABLED)
 		return TRUE;
@@ -691,6 +750,8 @@ bool8 IsUnusableMove(u16 move, u8 bank, u8 check, u8 pp, u16 ability, u8 holdEff
         return TRUE;
 	else if (move == MOVE_BLOODMOON && gLastPrintedMoves[bank] == MOVE_BLOODMOON)
         return TRUE;
+	else if (check & MOVE_LIMITATION_ENCORE && HackFuuin_MoveSealed(bank, move)) //[hack] patches/0560 ふういんルーレット: 封印された技（自分の側）は出せない扱い
+		return TRUE;
 
 	return FALSE;
 }
@@ -810,9 +871,9 @@ u8 GetMoveTarget(u16 move, u8 useMoveTarget)
 				u8 moveType = GetMoveTypeSpecial(bankAtk, move);
 				switch (moveType) {
 					case TYPE_WATER:
-						if (ABILITY(bankDef) != ABILITY_STORMDRAIN)
+						if (!BankHasAbility(bankDef, ABILITY_STORMDRAIN))
 						{
-							if (ABILITY(SIDE(bankAtk) ^ BIT_SIDE) == ABILITY_STORMDRAIN)
+							if (BankHasAbility(SIDE(bankAtk) ^ BIT_SIDE, ABILITY_STORMDRAIN))
 							{
 								bankDef = SIDE(bankAtk) ^ BIT_SIDE;
 								RecordAbilityBattle(bankDef, ABILITY_STORMDRAIN);
@@ -824,7 +885,7 @@ u8 GetMoveTarget(u16 move, u8 useMoveTarget)
 								RecordAbilityBattle(bankDef, ABILITY_STORMDRAIN);
 								gSpecialStatuses[bankDef].lightningRodRedirected = 1;
 							}
-							else if (ABILITY(PARTNER(bankAtk)) == ABILITY_STORMDRAIN)
+							else if (BankHasAbility(PARTNER(bankAtk), ABILITY_STORMDRAIN))
 							{
 								bankDef = PARTNER(bankAtk);
 								RecordAbilityBattle(bankDef, ABILITY_STORMDRAIN);
@@ -834,9 +895,9 @@ u8 GetMoveTarget(u16 move, u8 useMoveTarget)
 						break;
 
 					case TYPE_ELECTRIC:
-						if (ABILITY(bankDef) != ABILITY_LIGHTNINGROD)
+						if (!BankHasAbility(bankDef, ABILITY_LIGHTNINGROD))
 						{
-							if (ABILITY(SIDE(bankAtk) ^ BIT_SIDE) == ABILITY_LIGHTNINGROD)
+							if (BankHasAbility(SIDE(bankAtk) ^ BIT_SIDE, ABILITY_LIGHTNINGROD))
 							{
 								bankDef = SIDE(bankAtk) ^ BIT_SIDE;
 								RecordAbilityBattle(bankDef, ABILITY_LIGHTNINGROD);
@@ -848,7 +909,7 @@ u8 GetMoveTarget(u16 move, u8 useMoveTarget)
 								RecordAbilityBattle(bankDef, ABILITY_LIGHTNINGROD);
 								gSpecialStatuses[bankDef].lightningRodRedirected = 1;
 							}
-							else if (ABILITY(PARTNER(bankAtk)) == ABILITY_LIGHTNINGROD)
+							else if (BankHasAbility(PARTNER(bankAtk), ABILITY_LIGHTNINGROD))
 							{
 								bankDef = PARTNER(bankAtk);
 								RecordAbilityBattle(bankDef, ABILITY_LIGHTNINGROD);
@@ -913,6 +974,12 @@ u8 GetMoveTarget(u16 move, u8 useMoveTarget)
 
 u8 GetBaseMoveTarget(u16 move, u8 bankAtk)
 {
+	if (move == MOVE_LV200_PSYCHIC_170
+	&& IS_DOUBLE_BATTLE
+	&& gTerrainType == PSYCHIC_TERRAIN
+	&& CheckGrounding(bankAtk))
+		return MOVE_TARGET_BOTH;
+
 	if (move == MOVE_EXPANDINGFORCE
 	&& IS_DOUBLE_BATTLE
 	&& gTerrainType == PSYCHIC_TERRAIN
@@ -930,6 +997,12 @@ u8 GetBaseMoveTarget(u16 move, u8 bankAtk)
 
 u8 GetBaseMoveTargetByGrounding(u16 move, bool8 atkIsGrounded)
 {
+	if (move == MOVE_LV200_PSYCHIC_170
+	&& IS_DOUBLE_BATTLE
+	&& gTerrainType == PSYCHIC_TERRAIN
+	&& atkIsGrounded)
+		return MOVE_TARGET_BOTH;
+
 	if (move == MOVE_EXPANDINGFORCE
 	&& IS_DOUBLE_BATTLE
 	&& gTerrainType == PSYCHIC_TERRAIN
@@ -1199,6 +1272,10 @@ bool8 CanTransferItem(u16 species, u16 item)
 
 	if (item == ITEM_NONE || IsMail(item))
 		return FALSE;
+	if (item == ITEM_GARCHOMPITE_X) //[hack] patches/0813 ガブリアスナイトXは どろぼう・はたきおとす・トリック・なげつけるなど どの技でも動かない（持ち主は とくべつなガブリアスだけ）
+		return FALSE;
+	if (item == ITEM_RIRU_LOVE) //[hack] patches/0617 リルの あいじょうは どろぼう・はたきおとす・トリック・なげつけるなど どの技でも動かない（しばり「ぜんぶレントラー」の固定の持ち物）
+		return FALSE;
 
 	switch (effect) {
 		case ITEM_EFFECT_Z_CRYSTAL:
@@ -1447,12 +1524,12 @@ bool8 MoveIgnoresSubstitutes(u16 move, u16 atkAbility)
 
 bool8 MoveBlockedBySubstitute(u16 move, u8 bankAtk, u8 bankDef)
 {
-	return IS_BEHIND_SUBSTITUTE(bankDef) && !MoveIgnoresSubstitutes(move, ABILITY(bankAtk));
+	return IS_BEHIND_SUBSTITUTE(bankDef) && !MoveIgnoresSubstitutes(move, SecondAbility_AsIf(bankAtk, ABILITY_INFILTRATOR));
 }
 
 bool8 MonMoveBlockedBySubstitute(u16 move, struct Pokemon* monAtk, u8 bankDef)
 {
-	return IS_BEHIND_SUBSTITUTE(bankDef) && !MoveIgnoresSubstitutes(move, GetMonAbility(monAtk));
+	return IS_BEHIND_SUBSTITUTE(bankDef) && !MoveIgnoresSubstitutes(move, SecondAbility_OfMonActive(monAtk) == ABILITY_INFILTRATOR ? ABILITY_INFILTRATOR : GetMonAbility(monAtk));
 }
 
 bool8 IsAuraBoss(u8 bank)
@@ -1575,6 +1652,12 @@ u8 AttacksThisTurn(u8 bank, u16 move) // Note: returns 1 if it's a charging turn
 {
 	u8 moveEffect = gBattleMoves[move].effect;
 
+	//[hack] 独自効果は effect=HACK_CUSTOM なので、溜めの2ターン技(ほりすすむ・サンライズフレア)は元技の枝で数える（#35 P2）
+	if (move == MOVE_LV200_GROUND_120)
+		moveEffect = EFFECT_SEMI_INVULNERABLE;
+	else if (move == MOVE_LV200_FIRE_200)
+		moveEffect = EFFECT_SOLARBEAM;
+
 	// first argument is unused
 	if (ITEM_EFFECT(bank) == ITEM_EFFECT_POWER_HERB
 	||  ITEM_EFFECT(bank) == ITEM_EFFECT_MAISEN) //[hack] patches/0292 まいせん
@@ -1582,6 +1665,11 @@ u8 AttacksThisTurn(u8 bank, u16 move) // Note: returns 1 if it's a charging turn
 
 	if (moveEffect == EFFECT_SOLARBEAM && (((gBattleWeather & WEATHER_SUN_ANY) && WEATHER_HAS_EFFECT) || ABILITY(bank) == ABILITY_MEGA_SOL)) //★ ZA メガ（patches/0069）
 		return 2;
+
+	if (move == MOVE_LV200_GRASS_180 && (gBattleWeather & (WEATHER_SUN_ANY | WEATHER_RAIN_ANY)) && WEATHER_HAS_EFFECT) //[hack] #35 P5 ゆうだちのもり: 雨でもためなし
+		return 2;
+	else if (move == MOVE_LV200_GRASS_180)
+		moveEffect = EFFECT_SOLARBEAM;
 
 	if (move == MOVE_ELECTROSHOT && (gBattleWeather & WEATHER_RAIN_ANY) && WEATHER_HAS_EFFECT)
 		return 2;
@@ -1593,7 +1681,7 @@ u8 AttacksThisTurn(u8 bank, u16 move) // Note: returns 1 if it's a charging turn
 	||  moveEffect == EFFECT_SEMI_INVULNERABLE
 	||  moveEffect == EFFECT_BIDE
 	||  moveEffect == EFFECT_SKY_DROP
-	||	move == MOVE_GEOMANCY)
+	||	MoveIs(move, MOVE_GEOMANCY))
 	{
 		if (gBattleMons[bank].status2 & STATUS2_MULTIPLETURNS)
 			return 2;
@@ -1628,15 +1716,15 @@ void HandleUnburdenBoost(u8 bank)
 	//2. Losing Unburden clears the boost, even if the Pokemon gets Unburden back.
 	//3. If Unburden is suppressed, the boost isn't lost if Unburden returns,
 	//   but a new one can't be gained during the suppression.
-	if (ABILITY(bank) == ABILITY_UNBURDEN && ITEM(bank) == ITEM_NONE)
+	if (BankHasAbility(bank, ABILITY_UNBURDEN) && ITEM(bank) == ITEM_NONE)
 		gNewBS->UnburdenBoosts |= gBitTable[bank];
-	else if (*GetAbilityLocation(bank) != ABILITY_UNBURDEN || ITEM(bank) != ITEM_NONE)
+	else if ((*GetAbilityLocation(bank) != ABILITY_UNBURDEN && SecondAbility_OfBank(bank) != ABILITY_UNBURDEN) || ITEM(bank) != ITEM_NONE) //[hack] 2026-10-20 2 つ目のかるわざ
 		gNewBS->UnburdenBoosts &= ~gBitTable[bank];
 }
 
 static void TryRemoveUnburdenBoost(u8 bank)
 {
-	if (*GetAbilityLocation(bank) != ABILITY_UNBURDEN || ITEM(bank) != ITEM_NONE)
+	if ((*GetAbilityLocation(bank) != ABILITY_UNBURDEN && SecondAbility_OfBank(bank) != ABILITY_UNBURDEN) || ITEM(bank) != ITEM_NONE) //[hack] 2026-10-20 2 つ目のかるわざ
 		gNewBS->UnburdenBoosts &= ~gBitTable[bank];
 }
 
@@ -1700,6 +1788,7 @@ u8 GetTopOfPickupStackNotIncludingBank(const u8 bank)
 
 void RemoveScreensFromSide(const u8 side)
 {
+	Lv200CustomMove_OnScreensRemoved(side);
 	gSideStatuses[side] &= ~(SIDE_STATUS_REFLECT);
 	gSideStatuses[side] &= ~(SIDE_STATUS_LIGHTSCREEN);
 	gSideTimers[side].reflectTimer = 0;
@@ -1943,14 +2032,19 @@ bool8 DoesSleepClausePrevent(u8 bank)
 	return FALSE;
 }
 
-bool8 CanBeGeneralStatused(u8 bankDef, u16 defAbility, u16 atkAbility, bool8 checkFlowerVeil)
+static bool8 AtkInfiltrates(u8 bankAtk, u16 atkAbility) //[hack] 2026-10-22 2 つ目のすりぬけ（bankAtk が場にいないときは 1 つ目だけ）
+{
+	return atkAbility == ABILITY_INFILTRATOR || (bankAtk < gBattlersCount && SecondAbility_OfBank(bankAtk) == ABILITY_INFILTRATOR);
+}
+
+bool8 CanBeGeneralStatused(u8 bankDef, u16 defAbility, u16 atkAbility, bool8 checkFlowerVeil, u8 bankAtk)
 {
 	if (ITEM_EFFECT(bankDef) == ITEM_EFFECT_MOMO_ICE) //[hack] patches/0175 ももアイスは状態異常にならない
 		return FALSE;
 
 	if (!IsTargetAbilityIgnoredNoMove(defAbility, atkAbility)) //Target's Ability is not ignored
 	{
-		switch (defAbility) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (defAbility) : SecondAbility_OfBank(bankDef); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_COMATOSE:
 			case ABILITY_PURIFYINGSALT:
 				return FALSE;
@@ -1971,12 +2065,12 @@ bool8 CanBeGeneralStatused(u8 bankDef, u16 defAbility, u16 atkAbility, bool8 che
 					return FALSE;
 				break;
 			#endif
-		}
+		} }
 	}
 
 	if (checkFlowerVeil
 	&& IS_DOUBLE_BATTLE
-	&& ABILITY(PARTNER(bankDef)) == ABILITY_FLOWERVEIL //Check target partner Flower Veil
+	&& BankHasAbility(PARTNER(bankDef), ABILITY_FLOWERVEIL) //Check target partner Flower Veil
 	&& IsOfType(bankDef, TYPE_GRASS)
 	&& !IsTargetAbilityIgnoredNoMove(ABILITY_FLOWERVEIL, atkAbility)
 	&& !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD))
@@ -1988,7 +2082,7 @@ bool8 CanBeGeneralStatused(u8 bankDef, u16 defAbility, u16 atkAbility, bool8 che
 	if (gBattleMons[bankDef].status1 != STATUS1_NONE)
 		return FALSE;
 
-	if (checkFlowerVeil && BankSideHasSafeguard(bankDef) && atkAbility != ABILITY_INFILTRATOR && !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD))
+	if (checkFlowerVeil && BankSideHasSafeguard(bankDef) && !AtkInfiltrates(bankAtk, atkAbility) && !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD))
 		return FALSE;
 
 	return TRUE;
@@ -1999,7 +2093,7 @@ bool8 CanBePutToSleep(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil)
 	u16 atkAbility = ABILITY(bankAtk);
 	u16 defAbility = ABILITY(bankDef);
 
-	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil))
+	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil, bankAtk))
 		return FALSE;
 
 	if (!IsTargetAbilityIgnoredNoMove(defAbility, atkAbility)) //Target's Ability is not ignored
@@ -2041,13 +2135,13 @@ bool8 CanBeYawned(u8 bankDef, u8 bankAtk)
 		return FALSE;
 
 	u16 atkAbility = ABILITY(bankAtk);
-	if (BankSideHasSafeguard(bankDef) && atkAbility != ABILITY_INFILTRATOR && !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD))
+	if (BankSideHasSafeguard(bankDef) && !AtkInfiltrates(bankAtk, atkAbility) && !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD))
 		return FALSE;
 
 	u16 defAbility = ABILITY(bankDef);
 	if (!IsTargetAbilityIgnoredNoMove(defAbility, atkAbility)) //Target's Ability is not ignored
 	{
-		switch (defAbility) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (defAbility) : SecondAbility_OfBank(bankDef); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_INSOMNIA:
 			#ifdef ABILITY_VITALSPIRIT
 			case ABILITY_VITALSPIRIT:
@@ -2070,7 +2164,7 @@ bool8 CanBeYawned(u8 bankDef, u8 bankAtk)
 					return FALSE;
 				break;
 			#endif
-		}
+		} }
 	}
 
 	if (IS_DOUBLE_BATTLE)
@@ -2098,7 +2192,7 @@ bool8 CanBePoisoned(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil)
 	u16 atkAbility = (bankAtk > gBattlersCount) ? 0 : ABILITY(bankAtk); //bankAtk == 0xFF means no attacker - eg. Toxic Spikes
 	u16 defAbility = ABILITY(bankDef);
 
-	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil))
+	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil, bankAtk))
 		return FALSE;
 
 	if (!IsTargetAbilityIgnoredNoMove(defAbility, atkAbility)) //Target's Ability is not ignored
@@ -2115,7 +2209,9 @@ bool8 CanBePoisoned(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil)
 
 	if (atkAbility != ABILITY_CORROSION)
 	{
-		if (IsOfType(bankDef, TYPE_POISON) || IsOfType(bankDef, TYPE_STEEL))
+		if (IsOfType(bankDef, TYPE_POISON))
+			return FALSE;
+		if (IsOfType(bankDef, TYPE_STEEL) && !Lv200Common_PoisonIgnoresSteel()) //[hack] ひふくぶんかい(#35 P4): はがねにも毒が通る
 			return FALSE;
 	}
 
@@ -2127,7 +2223,7 @@ bool8 CanBeParalyzed(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil)
 	u16 atkAbility = ABILITY(bankAtk);
 	u16 defAbility = ABILITY(bankDef);
 
-	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil))
+	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil, bankAtk))
 		return FALSE;
 
 	if (IsOfType(bankDef, TYPE_ELECTRIC))
@@ -2149,7 +2245,7 @@ bool8 CanBeBurned(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil)
 	u16 atkAbility = ABILITY(bankAtk);
 	u16 defAbility = ABILITY(bankDef);
 
-	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil))
+	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil, bankAtk))
 		return FALSE;
 
 	if (IsOfType(bankDef, TYPE_FIRE))
@@ -2178,7 +2274,7 @@ bool8 CanBeFrozen(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil)
 	u16 atkAbility = ABILITY(bankAtk);
 	u16 defAbility = ABILITY(bankDef);
 
-	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil))
+	if (!CanBeGeneralStatused(bankDef, defAbility, atkAbility, checkFlowerVeil, bankAtk))
 		return FALSE;
 
 	if (IsOfType(bankDef, TYPE_ICE))
@@ -2224,7 +2320,7 @@ bool8 CanBeConfused(u8 bankDef, u8 bankAtk, u8 checkSafeguard)
 		}
 	}
 
-	if (checkSafeguard && BankSideHasSafeguard(bankDef) && atkAbility != ABILITY_INFILTRATOR && !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD))
+	if (checkSafeguard && BankSideHasSafeguard(bankDef) && !AtkInfiltrates(bankAtk, atkAbility) && !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD))
 		return FALSE;
 
 	return TRUE;
@@ -2252,7 +2348,7 @@ bool8 CanBeInfatuated(u8 bankDef, u8 bankAtk)
 
 	return BATTLER_ALIVE(bankDef)
 		&& !(gBattleMons[bankDef].status2 & STATUS2_INFATUATION)
-		&& (ABILITY(bankDef) != ABILITY_OBLIVIOUS || IsTargetAbilityIgnoredNoMove(ABILITY_OBLIVIOUS, ABILITY(bankAtk)))
+		&& (!BankHasAbility(bankDef, ABILITY_OBLIVIOUS) || IsTargetAbilityIgnoredNoMove(ABILITY_OBLIVIOUS, ABILITY(bankAtk)))
 		&& GetGenderFromSpeciesAndPersonality(speciesAttacker, personalityAttacker) != GetGenderFromSpeciesAndPersonality(speciesTarget, personalityTarget)
 		&& GetGenderFromSpeciesAndPersonality(speciesAttacker, personalityAttacker) != MON_GENDERLESS
 		&& GetGenderFromSpeciesAndPersonality(speciesTarget, personalityTarget) != MON_GENDERLESS
@@ -2297,6 +2393,8 @@ bool8 IsFairyLockActive(void)
 
 bool8 IsMudSportActive(void)
 {
+	if (Lv200CustomMove_IsMudFieldActive()) //[hack] ぬかるみ中はどろあそびは無効（#35 P4）
+		return FALSE;
 	return gNewBS->MudSportTimer > 0
 		|| (IS_BATTLE_CIRCUS && gBattleCircusFlags & BATTLE_CIRCUS_MUD_SPORT);
 }
@@ -2379,7 +2477,7 @@ bool8 IsConfused(u8 bank)
 bool8 IsTaunted(u8 bank)
 {
 	return gDisableStructs[bank].tauntTimer > 0
-		|| (IS_BATTLE_CIRCUS && gBattleCircusFlags & BATTLE_CIRCUS_TAUNT && ABILITY(bank) != ABILITY_OBLIVIOUS);
+		|| (IS_BATTLE_CIRCUS && gBattleCircusFlags & BATTLE_CIRCUS_TAUNT && !BankHasAbility(bank, ABILITY_OBLIVIOUS));
 }
 
 bool8 IsTormented(u8 bank)
@@ -2409,7 +2507,8 @@ bool8 IsLaserFocused(u8 bank)
 bool8 IsAbilitySuppressed(u8 bank)
 {
 	return (gStatuses3[bank] & STATUS3_ABILITY_SUPPRESS) != 0
-		|| (IS_BATTLE_CIRCUS && gBattleCircusFlags & BATTLE_CIRCUS_ABILITY_SUPPRESSION);
+		|| (IS_BATTLE_CIRCUS && gBattleCircusFlags & BATTLE_CIRCUS_ABILITY_SUPPRESSION)
+		|| !Lv200CustomMove_IsAbilityActive(bank, TRUE);
 }
 
 bool8 CantScoreACrit(struct Pokemon* mon)

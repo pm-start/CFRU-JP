@@ -101,3 +101,50 @@ void FieldUseFunc_GenderTool(u8 taskId)
 	gItemUseCB = ItemUseCB_GenderTool;
 	SetUpItemUseCallback(taskId);
 }
+
+/* 2026-10-18 しばり『ぜんぶレントラー』: 上の入れ替え（上下 16 ビットに同じ偶数を XOR）で 性別だけが変わる値が無い PID が約 0.2% ある（偶数も奇数も無いのが約 0.05%）。
+ * メスにすると決めた子がオスのまま残らないよう、最後の手として 下位 1 バイトを「メスの側（境より下）」にし、性格（PID % 25）と特性の番号（PID の bit 0）を保つ値を探す。
+ * 色違い・Moémon は自身の ID（HackMonId_Ensure で先に固める・そのあと HackMonId_MakeShinyMoemon が決める）で決まるので PID に縛られない。
+ * 下位 1 バイトを決めたあと 256 の倍数を足して 25 で割った余りをそろえる（256 と 25 は互いに素＝0〜24 回のどれかで合う）。きょせいどうぐ（FindFlippedGender だけ）は変えない */
+static bool8 FindFemalePersonality(struct Pokemon* mon, u32* newPersonality)
+{
+	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+	u8 ratio = gBaseStats[species].genderRatio;
+	u32 pid = mon->personality;
+	u32 b, k, base, cand;
+
+	if (ratio == MON_MALE || ratio == MON_FEMALE || ratio == MON_GENDERLESS)
+		return FALSE;
+	for (b = 0; b < ratio; ++b)   //低いバイトがこの境より下ならメス
+	{
+		if (((b ^ pid) & 1) != 0)
+			continue;   //特性の番号の bit は そのまま
+		base = (pid & 0xFFFFFF00) | b;
+		for (k = 0; k < NUM_NATURES; ++k)
+		{
+			cand = base + (k << 8);
+			if (cand % NUM_NATURES == pid % NUM_NATURES && GetGenderFromSpeciesAndPersonality(species, cand) != MON_MALE)
+			{
+				*newPersonality = cand;
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+/* 最初のポケモン レントラー♀（src/hack_starter_luxray.c）・しばり『ぜんぶレントラー』: オスならメスへ。きょせいどうぐと同じ入れ替え（性格・特性の番号・色違いはそのまま・6.5）。
+ * 入れ替えで届かない約 0.2% は 上の FindFemalePersonality（性格と特性の番号を保つ）。
+ * 裏 ID を先に固める（HackMonId_Ensure）。もうメス・性別なしは何もしない */
+void HackGenderTool_MakeFemale(struct Pokemon* mon)
+{
+	u32 newPersonality;
+
+	if (GetMonGender(mon) != MON_MALE)
+		return;
+	if (!FindFlippedGender(mon, &newPersonality) && !FindFemalePersonality(mon, &newPersonality))
+		return;
+	HackMonId_Ensure((struct BoxPokemon*) mon);
+	SetMonData(mon, MON_DATA_PERSONALITY, &newPersonality);
+	CalculateMonStats(mon);
+}

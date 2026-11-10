@@ -403,9 +403,8 @@ PhysicalSpecialSplitIconRoutine:
 	ldrh r3, [r0]
 	cmp r3, #0x0
 	beq PSSIconRoutineEnd
-	lsl r0, r3, #0x1
-	add r0, r3
-	lsl r0, #0x2
+	@[hack] patches/0582 (#126): 技の表の 1 行は 16 バイト（もとは 12 バイト＝ lsl #1 / add / lsl #2）
+	lsl r0, r3, #0x4
 	ldr r1, =gBattleMoves
 	add r0, r1
 	ldrb r4, [r0, #0xA]
@@ -484,6 +483,7 @@ pcSelect_newBrmTable:
 .word 0x083DF161
 .word select_str	@0x26
 .word gText_HackBoxWall_Peach	@0x27 [hack] patches/0242 壁紙「もも」（壁紙 17 = 0x27 - 0x16・src/hack_box_wallpaper.c）
+.word gText_HackBoxWall_Ori	@0x28 [hack] FEAT-box-wallpaper-ori-pokes 壁紙「オリはいけい」（壁紙 18 = 0x28 - 0x16・strings/hack_boxwall.string）
 
 select_str: .byte S_, e_, l_, e_, c_, t_, 0xff
 

@@ -1,0 +1,85 @@
+// ポケナビのリボン画面（src/hack_pokenav_ribbon.c・FEAT-relive-ribbon 段 2・patches/0977）の文。
+// 説明は「エメラルド日本語版 ROM の gRibbonDescriptionPointers を 1 行ずつ読んだ原文」（docs/research/2026-11-09_ribbon-emerald-jp-text.md・
+// tools/ribbon/read_emerald_ribbons.py）。エメラルドは名前を画面に出さない（説明 2 行だけ）ので、この画面も名前は出さない。
+// ★ gText_PnavRib_Gift1/2: ナショナル以外の配布リボン 6 種（マリン・ランド・スカイ・カントリー・アース・ワールド）の説明。全部同じ文（ユーザー決定 2026-11-09「リボン説明おなじで」）。
+//   変えるときは src/hack_pokenav_ribbon.c の sRibInfo[] の該当行を差し替えるだけ。
+// ★ エメラルドの原文: gText_PnavRib_Count*（エメラルド 0x5CB821「リボン　↑　こ」）・gText_PnavRib_Help（0x5CB77F「↓　リボンをみる　↓あもどる」の ↓ を ボタン記号に）・
+//   gText_PnavRib_None（0x5CB5DC「リボンを　もっている　ポケモンが　いません」＝手持ち全員がリボンなしのとき）
+
+#org @gText_PnavRib_CountHead
+リボン
+
+#org @gText_PnavRib_CountTail
+こ
+
+#org @gText_PnavRib_Help
+[A_BUTTON]リボンをみる [B_BUTTON]もどる
+
+#org @gText_PnavRib_None
+リボンを もっている ポケモンが いません
+
+#org @gText_PnavRib_Champion1
+チャンピオンを たおして
+
+#org @gText_PnavRib_Champion2
+でんどういり した きねんリボン
+
+#org @gText_PnavRib_Cool
+かっこよさコンテスト
+
+#org @gText_PnavRib_Beauty
+うつくしさコンテスト
+
+#org @gText_PnavRib_Cute
+かわいさコンテスト
+
+#org @gText_PnavRib_Smart
+かしこさコンテスト
+
+#org @gText_PnavRib_Tough
+たくましさコンテスト
+
+#org @gText_PnavRib_RankNormal
+ノーマルランク ゆうしょう！
+
+#org @gText_PnavRib_RankSuper
+スーパーランク ゆうしょう！
+
+#org @gText_PnavRib_RankHyper
+ハイパーランク ゆうしょう！
+
+#org @gText_PnavRib_RankMaster
+マスターランク ゆうしょう！
+
+#org @gText_PnavRib_Winning1
+バトルタワー レベル50を
+
+#org @gText_PnavRib_Victory1
+バトルタワー オープンレベルを
+
+#org @gText_PnavRib_Won2
+かちぬいた きねんのリボン
+
+#org @gText_PnavRib_Artist1
+ごうかな にがおえの モデルに
+
+#org @gText_PnavRib_Artist2
+なった きねんの リボン
+
+#org @gText_PnavRib_Effort1
+たくさん どりょく している
+
+#org @gText_PnavRib_Effort2
+ポケモンに おくられる リボン
+
+#org @gText_PnavRib_Gift1
+とくべつな イベントで
+
+#org @gText_PnavRib_Gift2
+もらった きねんの リボン
+
+#org @gText_PnavRib_National1
+ダークの こころを とりもどした
+
+#org @gText_PnavRib_National2
+ポケモンに おくられる リボン

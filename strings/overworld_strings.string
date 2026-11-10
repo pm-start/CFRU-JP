@@ -58,6 +58,9 @@ A second item\nin the Cube can be\lregistered to [L_BUTTON] for\leasy use。
 #org @gText_ObtainedTMHM
 [PLAYER]は[BUFFER][03]\n‘[BUFFER][02]’を みつけた！
 
+#org @gText_HmAlreadyOwned
+[BUFFER][01]は もう もっている！
+
 #org @gText_RegisteredItemSelectButton
 [SELECT_BUTTON] [ALIGN][1E]
 
@@ -240,6 +243,12 @@ You can't reach the\nladder from here！
 
 #org @gText_EnterPassword
 パスワードを にゅうりょく してください
+
+#org @gText_EnterPassword1of2
+パスワード 1/2 を いれてね
+
+#org @gText_EnterPassword2of2
+パスワード 2/2 を いれてね
 
 #org @gText_EnterSpeciesName
 ポケモンの なまえを にゅうりょく してください

@@ -317,6 +317,11 @@ def main():
                         ReplaceBytes(rom, offset, line[9:].strip())
                     except ValueError: #Try loading from the defines dict if unrecognizable character
                         newNumber = definesDict[line[9:].strip()]
+                        for _ in range(8): #[hack] patches/0677 #define A B のように別名で書かれた定義を たどる（EV_CAP → HACK_EV_PER_STAT_CAP）
+                            if isinstance(newNumber, str) and newNumber in definesDict:
+                                newNumber = definesDict[newNumber]
+                            else:
+                                break
                         try:
                             newNumber = int(newNumber)
                         except ValueError:

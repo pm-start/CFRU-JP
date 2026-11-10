@@ -37,9 +37,6 @@ Bボタンを おしながら あるくと\nはしる ことが できる！
 #org @gText_KantoMom_CharmsBye
 タマゴが みつかりやすくなるのと\nいろちがいに であいやすくなる\pおまもり なんだって たいせつに してね
 
-#org @gText_KantoMom_ShiningOffer
-それから これも！ もっと ひかる おまもり\nなんだって
-
 #org @gText_KantoMom_ShiningBye
 いろちがいに もっと であいやすく\nなるそうよ\pいらないときは バッグで つかうと ききめを\nとめられるんだって
 
@@ -56,7 +53,7 @@ Bボタンを おしながら あるくと\nはしる ことが できる！
 それから これは おこづかい たびには\nおかねも いるでしょ
 
 #org @gText_KantoMom_GotMoney
-[PLAYER]は ママから 30まんえん\nもらった！
+[PLAYER]は ママから 1まんえん\nもらった！
 #org @gText_KantoMom_CharmsToo
 それから おまもりも もっていきなさい
 
@@ -65,3 +62,21 @@ Bボタンを おしながら あるくと\nはしる ことが できる！
 
 #org @gText_KantoMom_StartItems
 ぼうけんに つかう どうぐよ\nなくさないように してね
+
+#org @gText_KantoMom_Masks
+オーガポンの おめんも あげるわね\nバッグの どうぐに いれておくわよ
+
+#org @gText_KantoMom_BundleHead
+[PLAYER]は ママから つぎの どうぐを\nもらった！
+
+#org @gText_KantoMom_BundleList1
+[BUFFER1]
+
+#org @gText_KantoMom_BundleList2
+[BUFFER1]・[BUFFER2]
+
+#org @gText_KantoMom_BundleList3
+[BUFFER1]・[BUFFER2]・\n[BUFFER3]
+
+#org @gText_KantoMom_BundlePut
+ぜんぶ バッグに しまった！

@@ -1,0 +1,14 @@
+//ヌシは手持ちに 1 匹だけ（patches/0981・2026-11-09 ユーザー「ヌシポケモン手持ちに1匹だけ」）。PC の画面で、手持ちにヌシがいるのに 2 匹目のヌシを手持ちへ入れようとしたときの断り
+#org @gText_Nushi_PartyOnly
+ヌシポケモンは てもちに 1ぴきまでです
+
+//リライブボックスの「てもちへ」の断り（2 行の窓用・念のための判定）
+#org @gText_Nushi_PartyOnly1
+ヌシポケモンは
+
+#org @gText_Nushi_PartyOnly2
+てもちに 1ぴき までです
+
+//育て屋にあずけられない（手持ちの画面・patches/0981）
+#org @gText_Nushi_NoDaycare
+ヌシポケモンは\nあずけられません[PAUSE_UNTIL_PRESS]

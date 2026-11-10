@@ -20,6 +20,7 @@ cmd49_battle_scripts.s
 .global BattleScript_SilkTrapStatDecrement
 .global BattleScript_RageIsBuilding
 .global BattleScript_BeakBlastBurn
+.global BattleScript_HomuraBurn
 .global BattleScript_Magician
 .global BattleScript_Moxie
 .global BattleScript_MindBlownDamage
@@ -160,6 +161,14 @@ BattleScript_BeakBlastBurn:
 	setbyte EFFECT_BYTE 0x3
 	seteffectprimary
 	swapattackerwithtarget
+	return
+
+@ [hack] 2026-10-25 ほむらのあご（ゲンシガチゴラス）: 相手を やけど（ビーストブラストと同じ書き方・攻撃した側の相手に）
+BattleScript_HomuraBurn:
+	orword HIT_MARKER 0x2100
+	setbyte POISONED_BY 0x1
+	setbyte EFFECT_BYTE 0x3
+	seteffectprimary
 	return
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

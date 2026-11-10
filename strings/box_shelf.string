@@ -3,3 +3,9 @@
 
 #org @gText_BoxShelf_ExtOnly
 このボックスは つかえません
+
+#org @gText_BoxShelf_ReadOnly
+このボックスは みるだけです
+
+#org @gText_BoxShelf_PlaceElsewhere
+べつの ボックスに おいてね

@@ -1,0 +1,44 @@
+#org @gText_Yartie_Welcome
+ようこそ！ ここは ロジックアリーナ！\pロンジャと よばれる ロンリの\nたつじん 7にんと つづけて たたかう\lしせつですぞｗｗｗ\pたたかう ポケモンは 3びき。\nみんな レベル50に なりますぞｗｗｗ
+
+#org @gText_Yartie_WelcomeBack
+おかえりなさいませｗｗｗ\pロンジャとの たたかいの つづき ですな。\n[BUFFER2]にんめの ロンジャが\lまっていますぞｗｗｗ
+
+#org @gText_Yartie_Ask
+ロンジャに ちょうせん しますか？
+
+#org @gText_Yartie_Continue
+つづけますか？
+
+#org @gText_Yartie_Quit
+ちょうせんを あきらめますか？
+
+#org @gText_Yartie_Bye
+また いつでも どうぞｗｗｗ
+
+#org @gText_Yartie_NotEnough
+ちょうせんには たまごでは ない べつべつの\nポケモンが 3びき ひつようですぞｗｗｗ\pもちものも かさならないように\nしてくださいｗｗｗ
+
+#org @gText_Yartie_Next
+[BUFFER2]にんめの ロンジャは\n[BUFFER1]です！\pあいての 6ぴきを みて 3びき\nえらびなさいｗｗｗ
+
+#org @gText_Yartie_CantSelect
+この ポケモンは えらべません
+
+#org @gText_Yartie_Won
+ロンジャに かちましたなｗｗｗ
+
+#org @gText_Yartie_BP
+バトルポイントを [BUFFER1]ポイント\nもらいました！
+
+#org @gText_Yartie_Lost
+ロンジャに まけて しまいましたｗｗｗ\pまた ちょうせん してくださいｗｗｗ
+
+#org @gText_Yartie_Cleared
+ロンジャ 7にん ぜんいんに\nかちましたなｗｗｗ\pみごとな ロンリですぞｗｗｗ
+
+#org @gText_Yartie_Saving
+レポートを かいています……
+
+#org @gText_Yartie_Quit_Done
+ちょうせんを おわります

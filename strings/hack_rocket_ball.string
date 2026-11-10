@@ -1,0 +1,11 @@
+#org @gText_RocketBall_Throw
+[TRAINER1_CLASS]の [TRAINER1_NAME]は\n[BUFFER][00]に ロケットボールを なげた！
+
+#org @gText_RocketBall_Stolen
+[BUFFER][00]は ロケットボールに\nすいこまれて うばわれた！
+
+#org @gText_RocketBall_Miss
+[BUFFER][00]は ロケットボールを\nひらりと よけた！
+
+#org @gText_RocketBall_Repel
+[BUFFER][00]は きずなの ちからで\nロケットボールを はねかえした！

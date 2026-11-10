@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "hack_bugfix_decide.h"
 #include "defines_battle.h"
 #include "../include/battle_transition.h"
 #include "../include/event_object_movement.h"
@@ -32,6 +33,9 @@
 #include "../include/new/wild_encounter.h"
 #include "../include/new/wild_attack_move.h"
 #include "hack_debug_menu.h" //[hack] patches/0342
+#include "hack_wild_chain.h" //[hack] patches/0353 野生のむれ
+#include "hack_safari_pokeblock.h" //[hack] patches/0978 ホウエンのサファリのポロックおき場
+#include "hack_challenge.h" //[hack] patches/0530 しばり「最初の 1 匹だけ」
 /*
 wild_encounter.c
 	handles functions related to wild encounter probability and associated features
@@ -74,7 +78,7 @@ extern const u16 gSwarmTableLength;
 extern bool8 CheckAndSetDailyEvent(u16 eventVar, bool8 setDailyEventVar);
 
 //This file's functions
-static u8 ChooseWildMonLevel(const struct WildPokemon* wildPokemon);
+static u16 ChooseWildMonLevel(const struct WildPokemon* wildPokemon);
 static const struct WildPokemonHeader* GetCurrentMapWildMonHeader(void);
 static const struct WildPokemonHeader* GetCurrentMapWildMonDaytimeHeader(void);
 static u8 PickWildMonNature(void);
@@ -82,18 +86,18 @@ static bool8 TryGenerateWildMon(const struct WildPokemonInfo* wildMonInfo, u8 ar
 static species_t GenerateFishingWildMon(const struct WildPokemonInfo* wildMonInfo, u8 rod);
 static bool8 DoWildEncounterRateTest(u32 encounterRate, bool8 ignoreAbility);
 static bool8 DoWildEncounterRateDiceRoll(u16 encounterRate);
-static bool8 IsAbilityAllowingEncounter(u8 level);
+static bool8 IsAbilityAllowingEncounter(u16 level);
 static bool8 TryGetRandomWildMonIndexByType(const struct WildPokemon* wildMon, u8 type, u8 numMon, u8* monIndex);
 static bool8 TryGetAbilityInfluencedWildMonIndex(const struct WildPokemon* wildMon, u8 type, u16 ability, u8* monIndex, u8 monsCount);
-static void CreateScriptedWildMon(u16 species, u8 level, u16 item, u16* specialMoves, bool8 firstMon);
+static void CreateScriptedWildMon(u16 species, u16 level, u16 item, u16* specialMoves, bool8 firstMon);
 static const struct WildPokemonInfo* LoadProperMonsPointer(const struct WildPokemonHeader* header, const u8 type);
 static void StartRoamerBattle(void);
 
 #ifdef FLAG_SCALE_WILD_POKEMON_LEVELS
-static u8 GetLowestMonLevel(const struct Pokemon* const party);
+static u16 GetLowestMonLevel(const struct Pokemon* const party);
 #endif
 
-static u8 ChooseWildMonLevel(const struct WildPokemon* wildPokemon)
+static u16 ChooseWildMonLevel(const struct WildPokemon* wildPokemon)
 {
 	u8 min;
 	u8 max;
@@ -166,7 +170,9 @@ static u8 ChooseWildMonLevel(const struct WildPokemon* wildPokemon)
 	if (!GetMonData(&gPlayerParty[0], MON_DATA_IS_EGG, NULL))
 	{
 		u16 ability = GetMonAbility(&gPlayerParty[0]);
-		if (ability == ABILITY_HUSTLE || ability == ABILITY_PRESSURE || ability == ABILITY_VITALSPIRIT)
+		u16 ability2 = SecondAbility_OfMonActive(&gPlayerParty[0]); //[hack] 2026-10-20 2 つ目
+		if (ability == ABILITY_HUSTLE || ability == ABILITY_PRESSURE || ability == ABILITY_VITALSPIRIT
+		|| ability2 == ABILITY_HUSTLE || ability2 == ABILITY_PRESSURE || ability2 == ABILITY_VITALSPIRIT)
 		{
 			if (Random() % 2 == 0)
 				return max;
@@ -209,8 +215,8 @@ static const struct WildPokemonHeader* GetCurrentMapWildMonHeader(void)
 		{
 			for (i = 0; headerTable[i].mapGroup != 0xFF; ++i)
 			{
-				if (headerTable[i].mapGroup == gSaveBlock1->location.mapGroup
-				&&  headerTable[i].mapNum == gSaveBlock1->location.mapNum)
+				if (headerTable[i].mapGroup == (u8) gSaveBlock1->location.mapGroup //[hack] 6.60 location.mapNum は s8＝128 以上の番号（ジョウトのダンジョン 165〜）は (u8) で比べる
+				&&  headerTable[i].mapNum == (u8) gSaveBlock1->location.mapNum)
 					return &headerTable[i];
 			}
 		}
@@ -231,23 +237,23 @@ static const struct WildPokemonHeader* GetCurrentMapWildMonDaytimeHeader(void)
 			gWildDataSwitch = NULL;
 	}
 
-	if (gSaveBlock1->location.mapGroup == sSavedWildDataMapGroup
-	&&  gSaveBlock1->location.mapNum == sSavedWildDataMapNum)
+	if ((u8) gSaveBlock1->location.mapGroup == sSavedWildDataMapGroup //[hack] 6.60
+	&&  (u8) gSaveBlock1->location.mapNum == sSavedWildDataMapNum)
 	{
 		return sSavedWildDataDaytimeHeader;
 	}
 	else //Cache data for faster data access
 	{
-		sSavedWildDataMapGroup = gSaveBlock1->location.mapGroup;
-		sSavedWildDataMapNum = gSaveBlock1->location.mapNum;
+		sSavedWildDataMapGroup = (u8) gSaveBlock1->location.mapGroup; //[hack] 6.60
+		sSavedWildDataMapNum = (u8) gSaveBlock1->location.mapNum;
 	}
 
 	for (i = 0; gWildMonHeaders[i].mapGroup != 0xFF; ++i)
 	{
 		const struct WildPokemonHeader* wildHeader = &gWildMonHeaders[i];
 
-		if (wildHeader->mapGroup == gSaveBlock1->location.mapGroup
-		&&  wildHeader->mapNum   == gSaveBlock1->location.mapNum)
+		if (wildHeader->mapGroup == (u8) gSaveBlock1->location.mapGroup //[hack] 6.60
+		&&  wildHeader->mapNum   == (u8) gSaveBlock1->location.mapNum)
 		{
 			#ifdef ALTERING_CAVE_ENABLED
 			if (gSaveBlock1->location.mapGroup == MAP_GROUP(ALTERING_CAVE)
@@ -282,8 +288,16 @@ static const struct WildPokemonHeader* GetCurrentMapWildMonDaytimeHeader(void)
 }
 
 
+u8 HackSafari_PickNature(void); //[hack] patches/0978 src/hack_safari_pokeblock.c
+
 static u8 PickWildMonNature(void)
 {
+	//[hack] 2026-11-09 patches/0978 ポロックおき場の近くでは性格が合う子が出やすい（原文 PickWildMonNature の先頭の枝・ホウエンのサファリだけ。0xFF＝使わない）
+	u8 safariNature = HackSafari_PickNature();
+
+	if (safariNature != 0xFF)
+		return safariNature;
+
 	//Check Synchronize for a pokemon with the same ability
 	if (!GetMonData(&gPlayerParty[0], MON_DATA_IS_EGG, NULL)
 	&&  GetMonAbility(&gPlayerParty[0]) == ABILITY_SYNCHRONIZE
@@ -298,7 +312,28 @@ static u8 PickWildMonNature(void)
 
 void HackDifficulty_WildMon(struct Pokemon* mon); //[hack] patches/0321 src/hack_difficulty.c
 
-void CreateWildMon(u16 species, u8 level, u8 monHeaderIndex, bool8 purgeParty)
+u16 HackChallengeC_RandomWild(u16 species); //[hack] patches/0550 縛り C ランダム（src/hack_challenge_c.c）
+
+//[hack] patches/0940 (CLAUDE.md 6.13): 台本の野生かどうかは static 変数（.bss は ROM に置かれ書き込みが捨てられる）ではなく、呼ぶ関数で分ける。
+//  CreateWildMon = 縛り C の入れ替え + CreateWildMonNoSwap。台本の野生（CreateScriptedWildMon）は NoSwap を直接呼ぶ。
+static void CreateWildMonNoSwap(u16 species, u16 level, u8 monHeaderIndex, bool8 purgeParty);
+
+//[hack] patches/0960 個体の印（ヌシ・デルタ種・ダーク）のランダム付与: 野生の入口はここ 1 か所（src/hack_kind_roll.c）。台本の野生（CreateScriptedWildMon）・レイド・幽霊戦は CreateWildMonNoKind／NoSwap を通る＝付かない
+void HackKind_RollWild(struct Pokemon* mon);
+
+void CreateWildMon(u16 species, u16 level, u8 monHeaderIndex, bool8 purgeParty)
+{
+	CreateWildMonNoKind(species, level, monHeaderIndex, purgeParty);
+	HackKind_RollWild(&gEnemyParty[purgeParty ? 0 : 1]); //[hack] patches/0960 野生の印（1 回だけ・除外は中で）
+}
+
+void CreateWildMonNoKind(u16 species, u16 level, u8 monHeaderIndex, bool8 purgeParty) //[hack] patches/0960 CreateWildMon から印の判定だけ除いた版（レイド・幽霊戦用）
+{
+	species = HackChallengeC_RandomWild(species); //[hack] 草・水・釣り・ずかんナビは入れ替える。台本の野生は入れ替えない
+	CreateWildMonNoSwap(species, level, monHeaderIndex, purgeParty);
+}
+
+static void CreateWildMonNoSwap(u16 species, u16 level, u8 monHeaderIndex, bool8 purgeParty)
 {
 	u8 enemyMonIndex = 0;
 	bool8 checkCuteCharm = TRUE;
@@ -340,7 +375,7 @@ void CreateWildMon(u16 species, u8 level, u8 monHeaderIndex, bool8 purgeParty)
 		CreateMonWithNatureLetter(&gEnemyParty[enemyMonIndex], species, level, 32, PickWildMonNature(), PickUnownLetter(species, monHeaderIndex));
 	}
 
-	HackDifficulty_WildMon(&gEnemyParty[enemyMonIndex]); //[hack] patches/0321 なんいど りるアイス: 野生は 6V（src/hack_difficulty.c）
+	HackDifficulty_WildMon(&gEnemyParty[enemyMonIndex]); //[hack] patches/0321 なんいど りるアイス: 野生は 2V 保証（src/hack_difficulty.c）
 
 	#ifdef FLAG_HIDDEN_ABILITY
 	if (FlagGet(FLAG_HIDDEN_ABILITY))
@@ -418,7 +453,7 @@ void sp117_CreateRaidMon(void)
 	FlagClear(FLAG_WILD_CUSTOM_MOVES); //We'll set custom moves later
 	#endif
 
-	CreateWildMon(gRaidBattleSpecies, gRaidBattleLevel, 0, TRUE);
+	CreateWildMonNoKind(gRaidBattleSpecies, gRaidBattleLevel, 0, TRUE); //[hack] patches/0960 レイドに印は付けない
 
 	if (abilityNum == RAID_ABILITY_1 || abilityNum == RAID_ABILITY_2)
 		GiveMonNatureAndAbility(mon, GetNature(mon), abilityNum - RAID_ABILITY_1, IsMonShiny(mon), FALSE, FALSE);
@@ -606,7 +641,7 @@ bool8 IsValidSwarmIndex(u8 index)
 	return index < gSwarmTableLength;
 }
 
-static bool8 TryGenerateSwarmMon(u8 level, u8 wildMonIndex, bool8 purgeParty)
+static bool8 TryGenerateSwarmMon(u16 level, u8 wildMonIndex, bool8 purgeParty)
 {
 	if (gSwarmTableLength == 0)
 		return FALSE;
@@ -630,7 +665,7 @@ static bool8 TryGenerateSwarmMon(u8 level, u8 wildMonIndex, bool8 purgeParty)
 
 static bool8 TryGenerateWildMon(const struct WildPokemonInfo* wildMonInfo, u8 area, u8 flags)
 {
-	u8 level;
+	u16 level;
 	u8 wildMonIndex = 0;
 	u8 monsCount = 0;
 
@@ -730,7 +765,7 @@ SKIP_INDEX_SEARCH:
 static species_t GenerateFishingWildMon(const struct WildPokemonInfo* wildMonInfo, u8 rod)
 {
 	u8 wildMonIndex = ChooseWildMonIndex_Fishing(rod);
-	u8 level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
+	u16 level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
 
 	CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level, wildMonIndex, TRUE);
 
@@ -738,7 +773,7 @@ static species_t GenerateFishingWildMon(const struct WildPokemonInfo* wildMonInf
 	if (FlagGet(FLAG_DOUBLE_WILD_BATTLE))
 	{
 		u8 wildMonIndex = ChooseWildMonIndex_Fishing(rod);
-		u8 level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
+		u16 level = ChooseWildMonLevel(&wildMonInfo->wildPokemon[wildMonIndex]);
 		CreateWildMon(wildMonInfo->wildPokemon[wildMonIndex].species, level, wildMonIndex, FALSE);
 	}
 	#endif
@@ -870,6 +905,8 @@ u8 GetAbilityEncounterRateModType(void)
     return sWildEncounterData.abilityEffect;
 }
 
+bool8 HackHeroine_Active(void);   //[hack] patches/0865 #76 src/hack_heroine.c
+void HackHeroine_Prepare(void);
 bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMetaTileBehavior)
 {
 #ifdef HACK_DEBUG_MENU
@@ -879,6 +916,7 @@ bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMe
 	const struct WildPokemonInfo* landMonsInfo, *waterMonsInfo;
 	struct Roamer* roamer;
 	bool8 clearDoubleFlag = FALSE;
+	bool8 clearHeroineTag = FALSE; //[hack] patches/0865 #76
 	const u8 lowerByte = GetMetatileAttributeFromRawMetatileBehavior(currMetaTileBehavior, METATILE_ATTRIBUTE_ENCOUNTER_TYPE);
 
 	if (sWildEncountersDisabled == TRUE)
@@ -938,6 +976,14 @@ bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMe
 			//Try a regular wild land encounter
 			#ifdef FLAG_DOUBLE_WILD_BATTLE
 			if (!FlagGet(FLAG_DOUBLE_WILD_BATTLE) //Flag hasn't already been set by user
+			&&  HackHeroine_Active()) //[hack] patches/0865 #76 連れ歩き中のハルカ／ヒカリは野生も必ずダブル（相方つき）
+			{
+				FlagSet(FLAG_DOUBLE_WILD_BATTLE);
+				HackHeroine_Prepare();
+				clearDoubleFlag = TRUE;
+				clearHeroineTag = TRUE;
+			}
+			else if (!FlagGet(FLAG_DOUBLE_WILD_BATTLE) //Flag hasn't already been set by user
 			&&  ViableMonCount(gPlayerParty) >= 2
 			&&  (lowerByte & TILE_FLAG_WILD_DOUBLE)
 			&&  Random() % 100 < WILD_DOUBLE_RANDOM_CHANCE)
@@ -949,6 +995,7 @@ bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMe
 
 			if (TryGenerateWildMon(landMonsInfo, WILD_AREA_LAND, WILD_CHECK_REPEL | WILD_CHECK_KEEN_EYE) == TRUE)
 			{
+				HackWildChain_MarkEligible(); //[hack] patches/0353
 				BattleSetup_StartWildBattle();
 				return TRUE;
 			}
@@ -956,6 +1003,8 @@ bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMe
 			#ifdef FLAG_DOUBLE_WILD_BATTLE
 			if (clearDoubleFlag)
 				FlagClear(FLAG_DOUBLE_WILD_BATTLE); //Battle didn't start so restart the flag
+			if (clearHeroineTag)
+				FlagClear(FLAG_TAG_BATTLE); //[hack] patches/0865 戦闘が始まらなかったので相方の旗も戻す
 			#endif
 
 			AddToWildEncounterRateBuff(landMonsInfo->encounterRate);
@@ -989,6 +1038,14 @@ bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMe
 		{
 			#ifdef FLAG_DOUBLE_WILD_BATTLE
 			if (!FlagGet(FLAG_DOUBLE_WILD_BATTLE) //Flag hasn't already been set by user
+			&&  HackHeroine_Active()) //[hack] patches/0923 #195 なみのり中も連れ歩き中のハルカ／ヒカリは野生が必ずダブル（相方つき・草むらと同じ）
+			{
+				FlagSet(FLAG_DOUBLE_WILD_BATTLE);
+				HackHeroine_Prepare();
+				clearDoubleFlag = TRUE;
+				clearHeroineTag = TRUE;
+			}
+			else if (!FlagGet(FLAG_DOUBLE_WILD_BATTLE) //Flag hasn't already been set by user
 			&&  ViableMonCount(gPlayerParty) >= 2
 			&&  lowerByte & TILE_FLAG_WILD_DOUBLE
 			&&  Random() % 100 < WILD_DOUBLE_RANDOM_CHANCE)
@@ -1000,6 +1057,7 @@ bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMe
 
 			if (TryGenerateWildMon(waterMonsInfo, WILD_AREA_WATER, WILD_CHECK_REPEL | WILD_CHECK_KEEN_EYE) == TRUE)
 			{
+				HackWildChain_MarkEligible(); //[hack] patches/0353
 				BattleSetup_StartWildBattle();
 				return TRUE;
 			}
@@ -1007,6 +1065,8 @@ bool8 StandardWildEncounter(const u32 currMetaTileBehavior, const u16 previousMe
 			#ifdef FLAG_DOUBLE_WILD_BATTLE
 			if (clearDoubleFlag)
 				FlagClear(FLAG_DOUBLE_WILD_BATTLE); //Battle didn't start so restart the flag
+			if (clearHeroineTag)
+				FlagClear(FLAG_TAG_BATTLE); //[hack] patches/0923 戦闘が始まらなかったので相方の旗も戻す
 			#endif
 
 			return FALSE;
@@ -1218,7 +1278,7 @@ bool8 StartRandomWildEncounter(bool8 waterMon)
 	return FALSE;
 }
 
-static bool8 IsAbilityAllowingEncounter(u8 level)
+static bool8 IsAbilityAllowingEncounter(u16 level)
 {
 	u16 ability;
 
@@ -1271,6 +1331,8 @@ static bool8 TryGetAbilityInfluencedWildMonIndex(const struct WildPokemon* wildM
 
 void DoStandardWildBattle(void)
 {
+	bool8 wildChain = FlagGet(HACK_FLAG_WILD_CHAIN_ELIGIBLE); //[hack] patches/0353 野生のむれ（旗はここで必ず消す）
+	FlagClear(HACK_FLAG_WILD_CHAIN_ELIGIBLE);
 	WildMon_EnsureAttackMove(&gEnemyParty[0]);
 	ScriptContext2_Enable();
 	FreezeEventObjects();
@@ -1299,10 +1361,23 @@ void DoStandardWildBattle(void)
 		gBattleTypeFlags |= BATTLE_TYPE_BATTLE_TOWER;
 		gMain.savedCallback = HoennPike_CB2_EndWildBattle;
 	}
+	else if (wildChain)
+		gMain.savedCallback = HackWildChain_CB2_EndWildBattle; //[hack] patches/0353
 
+	HackChallenge_OnWildBattleStart(); //[hack] patches/0530 しばり「最初の 1 匹だけ」: 使い切りの地図は 旗 FLAG_NO_CATCHING（戦いの終わりで下りる）
 	CreateBattleStartTask(GetWildBattleTransition(), GetMUS_ForBattle());
 	IncrementGameStat(GAME_STAT_TOTAL_BATTLES);
 	IncrementGameStat(GAME_STAT_WILD_BATTLES);
+}
+
+//[hack] patches/0353 野生のむれ: 同じ地図の表から次の 1 匹を gEnemyParty[0] に作る（StandardWildEncounter と同じ表の引き方）
+bool8 HackWildChain_GenerateNext(bool8 water)
+{
+	const struct WildPokemonInfo* info = LoadProperMonsData(water ? WATER_MONS_HEADER : LAND_MONS_HEADER);
+
+	if (info == NULL)
+		return FALSE;
+	return TryGenerateWildMon(info, water ? WILD_AREA_WATER : WILD_AREA_LAND, WILD_CHECK_REPEL | WILD_CHECK_KEEN_EYE) == TRUE;
 }
 
 static void StartRoamerBattle(void)
@@ -1367,7 +1442,7 @@ void sp156_StartGhostBattle(void)
 	if (Var8004 == 0 || Var8004 >= NUM_SPECIES) //Default is Marowak
 		CreateMonWithGenderNatureLetter(&gEnemyParty[0], SPECIES_MAROWAK, 30, 31, MON_FEMALE, NATURE_SERIOUS, 0);
 	else
-		CreateWildMon(Var8004, Var8005, 0, TRUE);
+		CreateWildMonNoKind(Var8004, Var8005, 0, TRUE); //[hack] patches/0960 幽霊戦（固定）に印は付けない
 
 	SetMonData(&gEnemyParty[0], MON_DATA_NICKNAME, gText_Ghost);
 	SetMonData(&gEnemyParty[0], MON_DATA_HELD_ITEM, &Var8006);
@@ -1387,6 +1462,10 @@ void sp118_StartRaidBattle(void)
 
 	ScriptContext2_Enable();
 	gMain.savedCallback = CB2_EndScriptedWildBattle_2;
+
+	//[hack] BUG-raid-party-order: レイドには手持ちを選ぶ画面が無い。施設の戦い（special 0x2F）で残った「選んだ順番」を信じると、
+	//  build_pokemon.c が先頭 3 匹を選ばずに残りの並びで手持ちを並べ替え、先頭以外の子が最初に出る。戦闘の前に捨てる
+	Memset(gSelectedOrderFromParty, 0, PARTY_SIZE);
 
 	gBattleTypeFlags = BATTLE_TYPE_SCRIPTED_WILD_1 | BATTLE_TYPE_DYNAMAX;
 
@@ -1429,7 +1508,7 @@ void sp118_StartRaidBattle(void)
 bool8 ScrCmd_setwildbattle(struct ScriptContext* ctx)
 {
 	u16 species, item;
-	u8 level;
+	u16 level;
 	u16 specialMoves[MAX_MON_MOVES * 2];
 	int i;
 
@@ -1483,7 +1562,7 @@ bool8 ScrCmd_setwildbattle(struct ScriptContext* ctx)
 	return FALSE;
 }
 
-static void CreateScriptedWildMon(u16 species, u8 level, u16 item, u16* moves, bool8 firstMon)
+static void CreateScriptedWildMon(u16 species, u16 level, u16 item, u16* moves, bool8 firstMon)
 {
 	u8 index = firstMon ? 0 : 1;
 	bool8 customMoves = FlagGet(FLAG_WILD_CUSTOM_MOVES); //Backup flag status
@@ -1492,7 +1571,7 @@ static void CreateScriptedWildMon(u16 species, u8 level, u16 item, u16* moves, b
 		ZeroEnemyPartyMons();
 
 	FlagClear(FLAG_WILD_CUSTOM_MOVES); //Make sure custom moves aren't set in next function
-	CreateWildMon(species, level, 0, firstMon);
+	CreateWildMonNoSwap(species, level, 0, firstMon); //[hack] 台本の野生は入れ替えない（patches/0940）
 	if (customMoves)
 		FlagSet(FLAG_WILD_CUSTOM_MOVES); //Reset custom move state if necessary
 
@@ -1632,7 +1711,7 @@ static const struct WildPokemonInfo* LoadProperMonsPointer(const struct WildPoke
 }
 
 #ifdef FLAG_SCALE_WILD_POKEMON_LEVELS
-static u8 GetLowestMonLevel(const struct Pokemon* const party)
+static u16 GetLowestMonLevel(const struct Pokemon* const party)
 {
 	u8 min = party[0].level;
 

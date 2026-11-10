@@ -2,6 +2,8 @@
 #include "../../include/data2.h"
 #include "../../include/sprite.h"
 #include "../../include/constants/trainers.h"
+#include "../hack_player_mei_pics.h" //★ FEAT-player-mei-2: TRAINER_BACK_PIC_MEI（メイ）
+#include "../hack_heroine_back_pic.h" //★ FEAT-heroine-76-s3: TRAINER_BACK_PIC_HIKARI（ヒカリ・相方だけ）
 /*
 back_pic_tables.c
 	Set up tables to switch the player's back sprite
@@ -56,6 +58,8 @@ const struct CompressedSpritePalette gTrainerBackPicPaletteTable[] =
 	[TRAINER_BACK_PIC_MAY] =		{gTrainerPalette_May, 			TRAINER_BACK_PIC_MAY},
 	[TRAINER_BACK_PIC_POKE_DUDE] =	{gTrainerPalette_PokeDude, 		TRAINER_BACK_PIC_POKE_DUDE},
 	[TRAINER_BACK_PIC_OLD_MAN] =	{gTrainerPalette_OldMan, 		TRAINER_BACK_PIC_OLD_MAN},
+	[TRAINER_BACK_PIC_MEI] =		{gBwMeiBackPal, 				TRAINER_BACK_PIC_MEI}, //★ FEAT-player-mei-2
+	[TRAINER_BACK_PIC_HIKARI] =	{gBwHikariBackPal, 			TRAINER_BACK_PIC_HIKARI}, //★ FEAT-heroine-76-s3
 
 #ifdef UNBOUND //For Pokemon Unbound
 	[TRAINER_BACK_PIC_MARLON] =		{gTrainerPalette_Marlon, 		TRAINER_BACK_PIC_MARLON},
@@ -98,6 +102,8 @@ const union AnimCmd* const* const gTrainerBackAnimsPtrTable[] =
 	[TRAINER_BACK_PIC_MAY] = gTrainerBackAnims_May,
 	[TRAINER_BACK_PIC_POKE_DUDE] = gTrainerBackAnims_PokeDude,
 	[TRAINER_BACK_PIC_OLD_MAN] = gTrainerBackAnims_OldMan,
+	[TRAINER_BACK_PIC_MEI] = gBwMeiBackAnims, //★ FEAT-player-mei-2（立ち＋投げ 22/6/4/24/1）
+	[TRAINER_BACK_PIC_HIKARI] = gBwHikariBackAnims, //★ FEAT-heroine-76-s3（同じ 22/6/4/24/1）
 
 #ifdef UNBOUND
 	[TRAINER_BACK_PIC_MARLON] = gTrainerBackAnims_Marlon,
@@ -122,6 +128,8 @@ const struct MonCoords gTrainerBackPicCoords[] =
 	[TRAINER_BACK_PIC_MAY] = 		{.coords = 8, .y_offset = 4},
 	[TRAINER_BACK_PIC_POKE_DUDE] = 	{.coords = 8, .y_offset = 4},
 	[TRAINER_BACK_PIC_OLD_MAN] = 	{.coords = 8, .y_offset = 4},
+	[TRAINER_BACK_PIC_MEI] = 		{.coords = 8, .y_offset = 5}, //★ FEAT-player-mei-2（素のレッド／リーフと同じ）
+	[TRAINER_BACK_PIC_HIKARI] = 	{.coords = 8, .y_offset = 5}, //★ FEAT-heroine-76-s3（メイと同じ）
 
 #ifdef UNBOUND
 	[TRAINER_BACK_PIC_MARLON] = 	{.coords = 8, .y_offset = 4},
@@ -169,6 +177,26 @@ static const struct SpriteFrameImage sTrainerBackPicTable_Brendan[] =
 	{gTrainerBackPic_BrendanTiles + 0x0800, 0x800, 0},
 	{gTrainerBackPic_BrendanTiles + 0x1000, 0x800, 0},
 	{gTrainerBackPic_BrendanTiles + 0x1800, 0x800, 0},
+};
+
+//★ FEAT-player-mei-2: メイ（5 コマ・tools/bwplayer/build_mei_battle.py）
+static const struct SpriteFrameImage sTrainerBackPicTable_Mei[] =
+{
+	{gBwMeiBack, 			0x800, 0},
+	{gBwMeiBack + 0x0800, 	0x800, 0},
+	{gBwMeiBack + 0x1000, 	0x800, 0},
+	{gBwMeiBack + 0x1800, 	0x800, 0},
+	{gBwMeiBack + 0x2000, 	0x800, 0},
+};
+
+//★ FEAT-heroine-76-s3: ヒカリ（5 コマ・tools/bwplayer/build_hikari_battle.py）
+static const struct SpriteFrameImage sTrainerBackPicTable_Hikari[] =
+{
+	{gBwHikariBack, 			0x800, 0},
+	{gBwHikariBack + 0x0800, 	0x800, 0},
+	{gBwHikariBack + 0x1000, 	0x800, 0},
+	{gBwHikariBack + 0x1800, 	0x800, 0},
+	{gBwHikariBack + 0x2000, 	0x800, 0},
 };
 
 static const struct SpriteFrameImage sTrainerBackPicTable_May[] =
@@ -338,6 +366,26 @@ const struct SpriteTemplate gSpriteTemplateTable_TrainerBackSprites[] =
 		.oam = gOamData_TrainerBacksprite,
 		.anims = NULL,
 		.images = gTrainerBackPicTable_OldMan,
+		.affineAnims = gAffineAnims_TrainerBacksprite,
+		.callback = gSpriteCB_TrainerBacksprite,
+	},
+	[TRAINER_BACK_PIC_MEI] = //★ FEAT-player-mei-2
+	{
+		.tileTag = 0xFFFF,
+		.paletteTag = 0,
+		.oam = gOamData_TrainerBacksprite,
+		.anims = NULL,
+		.images = sTrainerBackPicTable_Mei,
+		.affineAnims = gAffineAnims_TrainerBacksprite,
+		.callback = gSpriteCB_TrainerBacksprite,
+	},
+	[TRAINER_BACK_PIC_HIKARI] = //★ FEAT-heroine-76-s3
+	{
+		.tileTag = 0xFFFF,
+		.paletteTag = 0,
+		.oam = gOamData_TrainerBacksprite,
+		.anims = NULL,
+		.images = sTrainerBackPicTable_Hikari,
 		.affineAnims = gAffineAnims_TrainerBacksprite,
 		.callback = gSpriteCB_TrainerBacksprite,
 	},

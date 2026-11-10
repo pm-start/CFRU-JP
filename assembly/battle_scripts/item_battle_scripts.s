@@ -530,6 +530,7 @@ BattleScript_RedCard:
 	forcerandomswitch BANK_ATTACKER BANK_TARGET RedCardEnd
 
 RedCardEnd:
+	setbyte FORCE_SWITCH_HELPER 0x0 @;[hack] patches/0619 失敗（ねをはる・きゅうばん・ダイマックス等）でも戻す。残ると次の ほえる等が レッドカードの入れ替え台本へ行く
 	removeitem BANK_SCRIPTING
 	
 RedCardRet:
@@ -636,6 +637,7 @@ BattleScript_AIUseXstat:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 BattleScript_AIUseGuardSpec:
+	callasm HackRocketBall_ScriptEntry @[hack] patches/0914 ロケットボールの予約があるときだけ 専用の台本へ（無ければそのまま下へ）
 	printstring 304 @;STRINGID_EMPTYSTRING3
 	pause DELAY_HALFSECOND
 	playse 0x1 @;SE_USE_ITEM

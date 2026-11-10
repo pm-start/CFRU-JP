@@ -22,6 +22,8 @@
 #include "../include/new/multi.h"
 #include "../include/new/new_bs_commands.h"
 #include "../include/new/switching.h"
+#include "hack_chf_rotgacha.h" //[hack] 縛り F
+#include "hack_snatch_ball.h" //[hack] patches/0961 スナッチボール
 bool8 HackAI_PreferTerastal(u8 bankAtk, u8 bankDef); //[hack] patches/0121・src/ai_hack.c
 /*
 multi.c
@@ -99,6 +101,8 @@ void MultiInitPokemonOrder(void)
 
 	if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER)
 		gBattlerPartyIndexes[BANK_PLAYER_ALLY] = 3;
+
+	HackChFRotation_OnPartyIndexes(); //[hack] 縛り F ローテーション: 最初に出す子を 1→2→3… と回す（src/hack_chf_rotgacha.c）
 }
 
 void MultiBattleAddSecondOpponent(void)
@@ -489,12 +493,53 @@ u8* GetTrainerBLoseText(void)
 	return sTrainerDefeatSpeech_B; //ExtensionState.trainerBDefeatSpeech
 }
 
+//[hack] patches/0385 2026-10-15 ユーザー「賞金 = max(今の賞金 × 2, 2000)」＋同日の判断「下限は 1 人ずつ」「道具の倍率があるときの下限は 3000」:
+//  トレーナー 1 人ごとに 額 = 基本額（最後の子の Lv × 4 × クラスの倍率・1 人の相手のダブルは ×2）× 2 × 道具の倍率
+//  （おまもりこばん・おうごんのカプセル・ハッピータイム＝gBattleStruct->moneyMultiplier）を出し、
+//  道具の倍率が 1 なら 2000 円・1 より大きければ 3000 円より少ないときその額に。2 人組・マルチは 1 人ずつ下限をかけて足す。
+//  基本額が 0（手持ちが無い等）のときは 0 のまま。
+//[hack] #130 (2026-10-17 ユーザー案 B): 倍率 × 2 → × 1.5（(基本額 × 3 × 道具の倍率) >> 1）・下限 2000/3000 → 800/1200（比は同じ 1:1.5）。以下の「× 2」「2000」「3000」は 0385 の最初の決めの説明\n//  施設（フロンティア・トレーナーヒル）・トレーナータワー・カードe・通信・野生・レイドは戦闘の台本が getmoneyreward を通らない（et_battle_scripts.s）。
+//  ここへは素の getmoneyreward（080250A0）の CFRU の差し込み（hooks の MultiMoneyCalcHook 080250F4）から来る。
+//  トレーナー 0x400（ホウエンのダイジロウ）は素の「ひみつきち」の枝（080250C4）に落ちてここを通らなかったので、bytereplacement で枝を外した。
+#define PRIZE_MONEY_MIN 800
+#define PRIZE_MONEY_MIN_BOOSTED 1200
+//[hack] patches/0470 ジムリーダーの再戦の段階（#117）: 段階ごとの倍率（%・src/hack_gym_tiers.c）を最後に掛け、お金の上限（9,999,999）で止める
+extern u32 HackGymTier_PrizePercent(u16 id);
+u32 HackChallengeF_PrizeBonus(u32 money);   //[hack] src/hack_challenge_f.c
+#define PRIZE_MONEY_MAX 9999999
+static u32 PrizeForOneTrainer(u32 base, u16 trainerId)
+{
+	u32 mult = gBattleStruct->moneyMultiplier;
+	u32 floor = (mult > 1) ? PRIZE_MONEY_MIN_BOOSTED : PRIZE_MONEY_MIN;
+	u32 money, percent;
+
+	if (base == 0)
+		return 0;
+
+	money = (base * 3 * mult) >> 1;   //× 1.5（#130 ユーザー案 B・割り算を使わない＝6.83）。端数は切り捨て
+	if (money < floor)
+		money = floor;
+	percent = HackGymTier_PrizePercent(trainerId);
+	if (percent != 100)
+	{
+		if (money > PRIZE_MONEY_MAX)
+			money = PRIZE_MONEY_MAX;   //掛け算があふれないように先に止める（最大 1,280,000 × 250 は u32 に収まる）
+		money = money * percent / 100;
+		if (money > PRIZE_MONEY_MAX)
+			money = PRIZE_MONEY_MAX;
+	}
+	money = HackChallengeF_PrizeBonus(money);   //[hack] 縛り F しばりボーナス（0.63.0）: ON の しばり 1 つにつき +10%（ボーナス自身は数えない・BROKEN は 0）。ここでも上限で止める
+	if (money > PRIZE_MONEY_MAX)
+		money = PRIZE_MONEY_MAX;
+	return money;
+}
+
 u32 MultiMoneyCalc(void)
 {
-	u32 money = CalcMultiMoneyForTrainer(gTrainerBattleOpponent_A);
+	u32 money = PrizeForOneTrainer(CalcMultiMoneyForTrainer(gTrainerBattleOpponent_A), gTrainerBattleOpponent_A);
 
 	if (gBattleTypeFlags & (BATTLE_TYPE_MULTI | BATTLE_TYPE_TWO_OPPONENTS))
-		money += CalcMultiMoneyForTrainer(VarGet(VAR_SECOND_OPPONENT));
+		money += PrizeForOneTrainer(CalcMultiMoneyForTrainer(VarGet(VAR_SECOND_OPPONENT)), VarGet(VAR_SECOND_OPPONENT));
 
 	return money;
 }
@@ -552,8 +597,8 @@ static u32 CalcMultiMoneyForTrainer(u16 trainerId)
 		}
 	}
 
-	//Final calc
-	u32 money = (rate * 4) * level * gBattleStruct->moneyMultiplier;
+	//Final calc（[hack] patches/0385: 道具の倍率 moneyMultiplier と下限は PrizeForOneTrainer で掛ける）
+	u32 money = (rate * 4) * level;
 
 	if (IS_DOUBLE_BATTLE && !(gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS))
 		money *= 2;
@@ -817,7 +862,8 @@ static void PlayerPartnerHandleChooseAction(void)
 	else if (gChosenActionByBank[partner] == ACTION_RUN
 	|| (!IsBagDisabled()
 	 && gChosenActionByBank[partner] == ACTION_USE_ITEM
-	 && GetPocketByItemId(itemId) == POCKET_POKEBALLS)) //mon 2 doesn't get to do anything.
+	 && GetPocketByItemId(itemId) == POCKET_POKEBALLS
+	 && !HackSnatch_IsSnatchBall(itemId))) //mon 2 doesn't get to do anything.（[hack] patches/0961 スナッチボールは戦闘が続くので相方も行動する）
 	{
 		gNewBS->NoMoreMovingThisTurn |= gBitTable[gActiveBattler];
 

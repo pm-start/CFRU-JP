@@ -1,6 +1,11 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
 #include "hack_difficulty.h"
+#include "hack_challenge.h" //[hack] patches/0510 しばり
+#include "hack_snatch_ball.h" //[hack] patches/0961 スナッチボール
+#include "hack_challenge_b.h" //[hack] patches/0540 しばり B（こうたいきんし）
+#include "hack_fuuin.h" //[hack] patches/0560 縛り ふういんルーレット（封印された技を出せない）
 #include "Tables/hoenn_script_flags.h"
 #include "../include/menu.h"
 #include "../include/sprite.h"
@@ -28,7 +33,9 @@
 #include "../include/new/text.h"
 #include "../include/new/util.h"
 #include "../include/new/z_move_effects.h"
+#include "shadow_moves.h" //[hack] patches/0963 段 E
 
+u8 HackDelta_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0962 デルタ種のタイプ（src/hack_delta.c）
 u8 HackDragonBoulder_Type2(const struct Pokemon* mon, u16 species, u8 type2); //[hack] patches/0207 りゅうのいわお（src/hack_dragon_boulder.c・特別なガブリアスZ は 2 つ目のタイプが いわ）
 
 bool8 HoennPyramid_BagUsableInBattle(void); //[hack] patches/0131 src/hoenn_pyramid.c
@@ -61,7 +68,7 @@ extern const u8 PSSIconsTiles[];
 //This file's functions:
 static bool8 TriggerMegaEvolution(void);
 static void MoveNameToDisplayedStringBattle(u8 moveIndex);
-static void MoveSelectionDisplayMoveNames(void);
+void MoveSelectionDisplayMoveNames(void);
 static void MoveSelectionDisplayMoveType(void);
 static bool8 MoveSelectionDisplayZMove(void);
 static bool8 MoveSelectionDisplayMaxMove(void);
@@ -79,6 +86,7 @@ static void SpriteCB_CamomonsTypeIcon(struct Sprite* sprite);
 static void TriggerTerastal(void);
 u8 HackMomoIce_MegaCount(u8 bank); //[hack] patches/0183 src/mega.c（0192 で START からも使うので上へ）
 static bool8 HackMomoIce_CanViewMaxMove(void); //[hack] patches/0192
+bool8 HackDynamax_PlayerBlocked(u8 bank); //[hack] patches/0402 src/hack_kanto_dynamax.c
 
 static const struct Coords16 sTypeIconPositions[][/*IS_SINGLE_BATTLE*/2] =
 {
@@ -134,7 +142,7 @@ static const struct OamData sTypeIconOAM =
 
 #define type_icon_frame(ptr, frame) {.data = (u8 *)ptr + (1 * 2 * frame * 32), .size = 1 * 2 * 32}
 //[hack] patches/0275: 上流は長さ指定なし＝TYPE_FAIRY + 1（24）で、タイプの数（TYPE_STELLAR まで 25）より 1 つ短かった。
-//ステラの絵は無いので、使わない番号と同じ「？？？」の絵にする
+//ステラの絵は無いので、使わない番号と同じ「？？？」の絵にする（リル 0x19 は #110 で 26 コマ目に絵を足した）
 static const struct SpriteFrameImage sTypeIconPicTable[NUMBER_OF_MON_TYPES] =
 {
 	[TYPE_NORMAL] =		type_icon_frame(CamomonsTypeIconsTiles, TYPE_NORMAL),
@@ -162,6 +170,8 @@ static const struct SpriteFrameImage sTypeIconPicTable[NUMBER_OF_MON_TYPES] =
 	[0x16] = 			type_icon_frame(CamomonsTypeIcons2Tiles, TYPE_MYSTERY),
 	[TYPE_FAIRY] = 		type_icon_frame(CamomonsTypeIconsTiles, TYPE_FAIRY),
 	[TYPE_STELLAR] = 	type_icon_frame(CamomonsTypeIcons2Tiles, TYPE_MYSTERY),
+	[TYPE_RIL] = 		type_icon_frame(CamomonsTypeIcons2Tiles, TYPE_RIL), //[hack] patches/0408 #110: リル（CamomonsTypeIcons2.bmp の 26 コマ目・パレット 6 番が藤色）
+	[TYPE_SHADOW] = 	type_icon_frame(CamomonsTypeIcons2Tiles, TYPE_SHADOW), //[hack] patches/0955 段 D: ダーク（27 コマ目・パレット 7 番が暗い紫）
 };
 
 static struct SpriteTemplate sTypeIconSpriteTemplate =
@@ -253,14 +263,14 @@ void HandleInputChooseMove(void)
 		u16 chosenMove = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
 
 		PlaySE(SE_SELECT);
-		if (chosenMove == MOVE_CURSE)
+		if (MoveIs(chosenMove, MOVE_CURSE))
 		{
 			if (moveInfo->monType1 != TYPE_GHOST && moveInfo->monType2 != TYPE_GHOST && moveInfo->monType3 != TYPE_GHOST)
 				moveTarget = MOVE_TARGET_USER;
 			else
 				moveTarget = MOVE_TARGET_SELECTED;
 		}
-		else if (chosenMove == MOVE_ACUPRESSURE && !(IS_DOUBLE_BATTLE))
+		else if (MoveIs(chosenMove, MOVE_ACUPRESSURE) && !(IS_DOUBLE_BATTLE))
 			moveTarget = MOVE_TARGET_USER; //Only can target yourself in singles
 		else
 			moveTarget = GetBaseMoveTarget(chosenMove, gActiveBattler);
@@ -413,7 +423,8 @@ void HandleInputChooseMove(void)
 		&& gDisableStructs[gActiveBattler].encoreTimer == 0 //Breaks the Encore otherwise
 		&& !gNewBS->dynamaxData.viewing
 		&& !gNewBS->zMoveData.viewing
-		&& !gNewBS->zMoveData.viewingDetails)
+		&& !gNewBS->zMoveData.viewingDetails
+		&& !Shadow_IsBattlerDark(gActiveBattler)) //[hack] patches/0963 段 E ダークの子の技の並びは組み立てた物なので 並べ替えない
 		{
 			MoveSelectionCreateCursorAt(gMoveSelectionCursor[gActiveBattler], 29);
 
@@ -433,7 +444,7 @@ void HandleInputChooseMove(void)
 		{
 			//[hack] patches/0192: ももアイスは START でダイマックス（メガシンカは R・2026-10-06 ユーザー「ももアイスがメガストーン扱いになっている
 			//メガ進化できるダイマックスできる両方対応」）。ダイマックスを見るときはメガとテラスタルの選択を外す
-			if (HackMomoIce_MegaCount(gActiveBattler) != 0 && (gBattleTypeFlags & BATTLE_TYPE_DYNAMAX)
+			if (HackMomoIce_MegaCount(gActiveBattler) != 0 && (gBattleTypeFlags & BATTLE_TYPE_DYNAMAX) && !HackDynamax_PlayerBlocked(gActiveBattler) //[hack] patches/0402
 			&& HackMomoIce_CanViewMaxMove())
 			{
 				gNewBS->megaData.chosen[gActiveBattler] = 0;
@@ -441,7 +452,7 @@ void HandleInputChooseMove(void)
 				MoveSelectionDisplayMoveType(); //メガのタイプの表示を技のタイプに戻す
 				MoveSelectionDisplayMaxMove();
 			}
-			else if (!TriggerMegaEvolution() && gBattleTypeFlags & BATTLE_TYPE_DYNAMAX)
+			else if (!TriggerMegaEvolution() && gBattleTypeFlags & BATTLE_TYPE_DYNAMAX && !HackDynamax_PlayerBlocked(gActiveBattler)) //[hack] patches/0402
 				MoveSelectionDisplayMaxMove();
 		}
 	}
@@ -468,7 +479,12 @@ static bool8 HackMomoIce_CanViewMaxMove(void)
 	return moveInfo->possibleMaxMoves[gMoveSelectionCursor[gActiveBattler]] != MOVE_NONE;
 }
 
-//[hack] patches/0183: ももアイスで選んだメガのタイプを、技のタイプの枠に出す（メガの名前は元と同じなので X／Y が見分けられない）
+//[hack] patches/0183: ももアイスで選んだメガのタイプを、右の枠に技の枠と同じタイプのアイコン（32x12）で出す（メガの名前は元と同じなので X／Y が見分けられない）
+//[hack] patches/0930: 右の枠は 効き目の言葉（1 画素上げる）・PP の行（2 画素上げる）・アイコン 1〜2 つ。2 つ並べて重ならずに収まる（アイコンは y=22 と 34・枠の内側は y=45 まで）
+static void MsDrawPills(u8 win, u8 x, u8 y0, u8 type0, u8 y1, u8 type1);
+static void MsDrawPanelBase(u8 win);
+static void MsDrawPpRow(u8 win, u8 y, bool8 zView);
+static void MsEffectivenessImpl(u8 dy);
 static void HackMomoIce_ShowMegaTypes(void)
 {
 	const struct Evolution* evo = CanMegaEvolve(gActiveBattler, FALSE);
@@ -477,14 +493,17 @@ static void HackMomoIce_ShowMegaTypes(void)
 	if (evo == NULL)
 		return;
 
-	type1 = gBaseStats[evo->targetSpecies].type1;
-	type2 = HackDragonBoulder_Type2(GetBankPartyData(gActiveBattler), evo->targetSpecies, gBaseStats[evo->targetSpecies].type2); //[hack] patches/0207 りゅうのいわお
-	FillWindowPixelBuffer(8, PIXEL_FILL(15)); //White
-	blit_move_info_icon(8, type1 + 1, 2, 3);
+	type1 = HackDelta_Type(GetBankPartyData(gActiveBattler), evo->targetSpecies, 0, gBaseStats[evo->targetSpecies].type1); //[hack] patches/0962 デルタ種
+	type2 = HackDelta_Type(GetBankPartyData(gActiveBattler), evo->targetSpecies, 1, HackDragonBoulder_Type2(GetBankPartyData(gActiveBattler), evo->targetSpecies, gBaseStats[evo->targetSpecies].type2)); //[hack] patches/0207 りゅうのいわお・patches/0962 デルタ種
+	MsDrawPanelBase(7);
+	MsDrawPpRow(7, 10, FALSE);
+	MsEffectivenessImpl(1);
 	if (type2 != type1)
-		blit_move_info_icon(8, type2 + 1, 36, 3);
-	CopyWindowToVram(8, COPYWIN_BOTH);
-	PutWindowTilemap(8);
+		MsDrawPills(7, 16, 22, type1, 34, type2);
+	else
+		MsDrawPills(7, 16, 28, type1, 0, 0xFF);
+	CopyWindowToVram(7, COPYWIN_BOTH);
+	PutWindowTilemap(7);
 }
 
 static bool8 TriggerMegaEvolution(void)
@@ -743,7 +762,7 @@ void EmitChooseMove(u8 bufferId, bool8 isDoubleBattle, bool8 NoPpNumber, struct 
 				tempMoveStruct->moveResults[foePosition][i] = tempMoveStruct->zMoveResults[foePosition][i] = moveResult;
 
 				//All Z-Moves have the same type as their base move except for these two moves
-				if ((move == MOVE_FREEZEDRY || move == MOVE_FLYINGPRESS)
+				if ((move == MOVE_FREEZEDRY || MOVE_SECOND_TYPE(move) != 0xFF) //[hack] patches/0630 (#142)
 				&& tempMoveStruct->possibleZMoves[i] != MOVE_NONE)
 					tempMoveStruct->zMoveResults[foePosition][i] =  VisualTypeCalc(tempMoveStruct->zMoveResults[foePosition][i], gActiveBattler, j);
 			}
@@ -767,7 +786,7 @@ void EmitChooseMove(u8 bufferId, bool8 isDoubleBattle, bool8 NoPpNumber, struct 
 			tempMoveStruct->moveResults[foePosition][i] = tempMoveStruct->zMoveResults[foePosition][i] = moveResult;
 
 			//All Z-Moves have the same type as their base move except for these two moves
-			if ((move == MOVE_FREEZEDRY || move == MOVE_FLYINGPRESS)
+			if ((move == MOVE_FREEZEDRY || MOVE_SECOND_TYPE(move) != 0xFF) //[hack] patches/0630 (#142)
 			&& tempMoveStruct->possibleZMoves[i] != MOVE_NONE)
 				tempMoveStruct->zMoveResults[foePosition][i] = VisualTypeCalc(tempMoveStruct->zMoveResults[foePosition][i], gActiveBattler, foe);
 		}
@@ -825,7 +844,314 @@ static void MoveNameToDisplayedStringBattle(u8 moveIndex)
 		StringCopy(gDisplayedStringBattle, gMoveNames[moveInfo->moves[moveIndex]]);
 }
 
-static void MoveSelectionDisplayMoveNames(void)
+//[hack] patches/0930 (FEAT-move-select-ui・Redmine #201): 戦闘の技を選ぶ画面を「技ごとのタイプ色の枠＋タイプの札＋ぶつり／とくしゅ／へんかの絵＋技名、右の枠に PP・PW（威力）・HIT（命中）」の形にする。
+//  窓（bytereplacement の 0x0820520C の表）: 3〜6＝技の枠 4 つ（11x3 タイル・パレット 10〜13・技のタイプ色に毎回塗る）・7／11＝右の枠（8x6・パレット 14）・8〜10＝使わない（1x1）。
+//  BG のパレット 10〜15 は戦闘中だれも使っていない（mGBA で 0 を確認）。カーソルは枠の線（選ぶ=濃い赤＋白・入れ替えでつかんだ技=だいだい・相手側=白＋赤）。
+//  窓 3〜6 の文字の色番号は上流の表のまま（13＝文字・14＝地・15＝かげ）なので、Z 技・ダイマックス技・詳細（L）の文章も枠の色の上にそのまま出る。
+#define MS_FONT 0 //技名・札・数字の小さい文字
+#define MS_CELL_W 88
+#define MS_CELL_H 24
+#define MS_PANEL_W 64
+#define MS_PANEL_H 48
+#define MS_PANEL_WIN 7
+#define MS_PANEL_PAL 14
+
+//技の枠の地の色（2026-10-28 ユーザー: タイプはアイコンで分かるので背景色はつけない＝右の枠と同じ窓の地）
+#define MS_CELL_GROUND RGB(30, 28, 24)
+
+//右の枠のパレット（0 透明・1 白・2 枠・3 PP 少ない・4 PP 0・6/7 STAB・8/9 相性・5/10/11/12 札（タイプのアイコン）の絵の色・13 文字・14 地・15 かげ）
+static const u16 sMsPanelPal[16] =
+{
+	0, RGB(31, 31, 31), RGB(18, 7, 6), RGB(30, 17, 0), RGB(27, 4, 4), 0, RGB(27, 27, 27), RGB(4, 4, 4),
+	RGB(26, 26, 25), RGB(5, 5, 5), 0, RGB(22, 22, 22), RGB(8, 8, 8), RGB(5, 5, 6), RGB(30, 28, 24), RGB(21, 20, 19),
+};
+
+//ぶつり／とくしゅ／へんかの絵（PSSIcons・色番号 1 3 10 13 15）を技の枠のパレット番号 2 3 4 5 1 に付け替える
+static const u8 sMsSplitMap[16] = {14, 2, 14, 3, 14, 14, 14, 14, 14, 14, 4, 14, 14, 5, 14, 1};
+
+//右の枠は 4 行（効き目の言葉・PP・いりょく・めいちゅう）。2026-10-28 ユーザー決定（FEAT-move-select-panel-a・A 案）
+//  文字の箱は透明（段の間隔が文字の高さより狭く、前の段の文字や枠の線を消さないため）
+#define MS_ROW0_Y 2 //効き目の言葉の段
+#define MS_ROW1_Y 12
+#define MS_ROW2_Y 23
+#define MS_ROW3_Y 33
+#define MS_PANEL_RIGHT 62
+#define MS_TXT_BG 0
+#define MS_LS 0xFF //字間 -1（めいちゅう と 100 が重ならないように）
+#define MS_LABEL_X 3
+#define MS_COL_BLACK 13 //黒い文字・縁取りの色（右の枠のパレット 13）
+
+static const u8 sMsTextPW[] = {0x02, 0x28, 0x36, 0x08, 0xFF};        //いりょく
+static const u8 sMsTextHIT[] = {0x22, 0x02, 0x11, 0x35, 0x03, 0xFF}; //めいちゅう
+static const u8 sMsTextPP[] = {0xCA, 0xCA, 0xFF};                    //PP
+static const u8 sMsTextSE[] = {0x46, 0x12, 0x39, 0x2E, 0xFF};        //ばつぐん
+static const u8 sMsTextNVE[] = {0x02, 0x1F, 0x1B, 0x14, 0x12, 0xFF}; //いまひとつ
+static const u8 sMsTextNO[] = {0x0A, 0x03, 0x06, 0x15, 0x0C, 0xFF};  //こうかなし
+static const u8 sMsTextNORMAL[] = {0x1C, 0x12, 0x03, 0xFF};          //ふつう
+
+#define SUPER_EFFECTIVE_COLOURS 0
+#define NOT_VERY_EFFECTIVE_COLOURS 4
+#define NO_EFFECT_COLOURS 8
+#define REGULAR_COLOURS 12
+//[hack] patches/0930: 2タイプの技（patches/0630）の 2 つ目は「効果でそのタイプも持つ」だけなので、技を選ぶ画面は元の技のタイプ（1 つ目）だけを出す
+//  （2026-10-27 ユーザー決定。patches/0641 の交互表示は取りやめ。battle.h の hackDualKey／Phase／Timer は欄の位置を保つため残す・使わない）
+#define SUPER_EFFECTIVE_COLOURS 0
+#define NOT_VERY_EFFECTIVE_COLOURS 4
+#define NO_EFFECT_COLOURS 8
+#define REGULAR_COLOURS 12
+
+static u8 MsSlotType(const struct ChooseMoveStruct* moveInfo, u8 slot)
+{
+	u16 move = moveInfo->moves[slot];
+
+	#ifdef DISPLAY_REAL_MOVE_TYPE_ON_MENU
+	if ((move == MOVE_TERABLAST || move == MOVE_TERASTARSTORM) && gNewBS->terastalData.chosen[gActiveBattler])
+		return moveInfo->monTeraType;
+	return moveInfo->moveTypes[slot];
+	#else
+	if (!moveInfo->dynamaxed)
+		return gBattleMoves[move].type;
+	return gBattleMoves[moveInfo->possibleMaxMoves[slot]].type;
+	#endif
+}
+
+static void MsLoadCellPalette(u8 slot, u8 type, bool8 empty)
+{
+	u16 pal[16];
+	u16 bg = empty ? RGB(9, 9, 10) : MS_CELL_GROUND; //type は使わない（呼び元を変えないため残す）
+	(void)type;
+	u32 r = bg & 31, g = (bg >> 5) & 31, b = (bg >> 10) & 31;
+	bool8 dark = (r * 3 + g * 6 + b) < 135;
+	u32 i;
+
+	for (i = 0; i < 16; ++i)
+		pal[i] = 0;
+	pal[1] = RGB(31, 31, 31);
+	pal[2] = RGB(29, 6, 0);
+	pal[3] = RGB(31, 24, 6);
+	pal[4] = RGB(27, 27, 24);
+	pal[5] = RGB(10, 15, 17);
+	pal[6] = RGB(18, 7, 6);
+	pal[7] = RGB(31, 20, 0);
+	pal[11] = RGB(22, 22, 22);
+	pal[12] = RGB(8, 8, 8);
+	pal[14] = bg;
+	if (dark)
+	{
+		pal[13] = RGB(31, 31, 31);
+		pal[15] = RGB(6, 6, 7);
+	}
+	else
+	{
+		pal[13] = RGB(3, 3, 4);
+		pal[15] = RGB((r + 31) / 2, (g + 31) / 2, (b + 31) / 2);
+	}
+	LoadPalette(pal, (10 + slot) * 16, 32);
+}
+
+//タイプの札: 今のゲームにあるタイプアイコン（Type_Icons・32x12）をそのまま使う。絵の色の番号は技の枠のパレット（地が 14・文字が 13）に合わせて付け替える
+//  0（四隅）→14（枠の地）・15（白）→1・14（暗い縁）→12・残りの色（絵ごとに 2 色まで）→extraA／extraB（技の枠は 8・9／右の枠は 10・5）
+struct MsInfoIcon { u8 width; u8 height; u16 offset; };
+extern const struct MsInfoIcon gMoveMenuInfoIcons[]; //assembly/data/type_tables.s
+extern const u8 Type_IconsTiles[]; //graphics/Other/Type_Icons
+static const u16 sMsIconColour[16] = //Type_Icons.bmp のパレット
+{
+	RGB(15, 19, 16), RGB(30, 10, 6), RGB(20, 10, 7), RGB(31, 24, 6), RGB(27, 28, 6), RGB(15, 25, 10), RGB(19, 27, 27), RGB(13, 18, 30),
+	RGB(20, 8, 20), RGB(30, 22, 30), RGB(24, 24, 24), RGB(23, 20, 7), RGB(31, 11, 17), RGB(10, 15, 17), RGB(8, 8, 8), RGB(31, 31, 31),
+};
+
+//札（タイプのアイコン）を 1 つか 2 つ描く（type1 が 0xFF なら 1 つ）。2 つのとき色の番号の割り当てを共有する（右の枠は 1 つのパレットなので、別々に割り当てると 2 つ目が 1 つ目の色を上書きする）
+//  技の枠: 絵の色 2 つを 8・9・暗い縁を 12 / 右の枠: 絵の色を 10・5・11・12（最大 4 色）・暗い縁は 13（黒い文字の色）
+static void MsDrawPills(u8 win, u8 x, u8 y0, u8 type0, u8 y1, u8 type1)
+{
+	u8 buf[8 * 32];
+	u8 map[16];
+	u8 palBase = (win == MS_PANEL_WIN) ? MS_PANEL_PAL * 16 : (10 + (win - 3)) * 16;
+	u8 pool[4] = {8, 9, 0, 0};
+	u8 npool = 2;
+	u8 dark = 12;
+	u8 nextra = 0;
+	u32 tx, ty, i, k;
+
+	if (win == MS_PANEL_WIN)
+	{
+		pool[0] = 10;
+		pool[1] = 5;
+		pool[2] = 11;
+		pool[3] = 12;
+		npool = 4;
+		dark = MS_COL_BLACK;
+	}
+	for (i = 0; i < 16; ++i)
+		map[i] = 0xFF;
+	map[0] = 14;
+	map[15] = 1;
+	map[14] = dark;
+	for (k = 0; k < 2; ++k)
+	{
+		u8 type = k ? type1 : type0;
+		const struct MsInfoIcon* icon;
+
+		if (type == 0xFF)
+			break;
+		if (type > TYPE_SHADOW || type == TYPE_STELLAR)
+			type = TYPE_MYSTERY;
+		icon = &gMoveMenuInfoIcons[type + 1];
+		for (ty = 0; ty < 2; ++ty)
+		{
+			for (tx = 0; tx < 4; ++tx)
+			{
+				const u8* src = Type_IconsTiles + (icon->offset + ty * 16 + tx) * 32;
+				u8* dst = buf + (ty * 4 + tx) * 32;
+
+				for (i = 0; i < 32; ++i)
+				{
+					u8 n, j;
+
+					for (j = 0; j < 2; ++j)
+					{
+						n = j ? (src[i] >> 4) : (src[i] & 0xF);
+						if (map[n] == 0xFF && nextra < npool)
+						{
+							map[n] = pool[nextra];
+							LoadPalette(&sMsIconColour[n], palBase + pool[nextra], 2);
+							++nextra;
+						}
+						if (map[n] == 0xFF)
+							map[n] = 1;
+					}
+					dst[i] = map[src[i] & 0xF] | (map[src[i] >> 4] << 4);
+				}
+			}
+		}
+		BlitBitmapToWindow(win, buf, x, k ? y1 : y0, 32, 12);
+	}
+	if (dark == 12)
+		LoadPalette(&sMsIconColour[14], palBase + 12, 2);
+}
+
+static void MsDrawSplit(u8 win, u8 x, u8 y, u8 split)
+{
+	u8 buf[24 * 8];
+	const u8* src = PSSIconsTiles + 24 * 8 * split;
+	u32 i;
+
+	for (i = 0; i < sizeof(buf); ++i)
+		buf[i] = sMsSplitMap[src[i] & 0xF] | (sMsSplitMap[src[i] >> 4] << 4);
+	BlitBitmapToWindow(win, buf, x, y, 24, 12);
+}
+
+//Z 技・ダイマックス技を見ている間は技名が窓 3（22 タイル）に出るので、1 つ目の枠のカーソルは 2 マスぶん（その行の横いっぱい）にする
+static u8 MsCellWidth(u8 slot)
+{
+	if (slot == 0 && (gNewBS->zMoveData.viewing || gNewBS->dynamaxData.viewing))
+		return MS_CELL_W * 2;
+	return MS_CELL_W;
+}
+
+static void MsDrawBorder(u8 slot, u8 outer, u8 inner)
+{
+	u8 win = 3 + slot;
+	u8 w = MsCellWidth(slot);
+
+	FillWindowPixelRect(win, outer, 0, 0, w, 1);
+	FillWindowPixelRect(win, outer, 0, MS_CELL_H - 1, w, 1);
+	FillWindowPixelRect(win, outer, 0, 0, 1, MS_CELL_H);
+	FillWindowPixelRect(win, outer, w - 1, 0, 1, MS_CELL_H);
+	FillWindowPixelRect(win, inner, 1, 1, w - 2, 1);
+	FillWindowPixelRect(win, inner, 1, MS_CELL_H - 2, w - 2, 1);
+	FillWindowPixelRect(win, inner, 1, 1, 1, MS_CELL_H - 2);
+	FillWindowPixelRect(win, inner, w - 2, 1, 1, MS_CELL_H - 2);
+}
+
+//2x2 の 4 つの枠の間の十字線（各枠の中心側の縁 1 画素ずつ＝全体で 2 画素の線）
+static void MsDrawCross(u8 slot)
+{
+	u8 win = 3 + slot;
+
+	if (slot & 1)
+		FillWindowPixelRect(win, 6, 0, 0, 1, MS_CELL_H);
+	else
+		FillWindowPixelRect(win, 6, MS_CELL_W - 1, 0, 1, MS_CELL_H);
+	if (slot & 2)
+		FillWindowPixelRect(win, 6, 0, 0, MS_CELL_W, 1);
+	else
+		FillWindowPixelRect(win, 6, 0, MS_CELL_H - 1, MS_CELL_W, 1);
+}
+
+//[hack] patches/0930 選んでいる技の枠は濃い青で塗り、文字を白にする（2026-10-29 ユーザー決定「案2」・FEAT-move-select-cursor）。ほかの枠は今まで通り
+#define MS_SELECT_BG RGB(12, 5, 4) //濃いえんじ（2026-10-29 ユーザー決定「えんじかな」・枠の茶色い線に合わせた）
+
+static void MsApplyCellBg(u8 slot, bool8 selected)
+{
+	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
+	u16 base = (10 + slot) * 16;
+	u16 bg = (moveInfo->moves[slot] == MOVE_NONE) ? RGB(9, 9, 10) : MS_CELL_GROUND;
+	u16 text = RGB(3, 3, 4);
+	u16 shadow = RGB(30, 29, 27);
+
+	if (selected && moveInfo->moves[slot] != MOVE_NONE)
+	{
+		bg = MS_SELECT_BG;
+		text = RGB(31, 31, 31);
+		shadow = RGB(5, 2, 2);
+	}
+	else if (moveInfo->moves[slot] == MOVE_NONE)
+	{
+		text = RGB(31, 31, 31);
+		shadow = RGB(6, 6, 7);
+	}
+	LoadPalette(&bg, base + 14, 2);
+	LoadPalette(&text, base + 13, 2);
+	LoadPalette(&shadow, base + 15, 2);
+}
+
+//mode: 0 なし・1 選んでいる・2 入れ替えでつかんだ技・3 入れ替え先
+static void MsApplyBorder(u8 slot)
+{
+	MsApplyCellBg(slot, gNewBS->hackMsMode[slot] == 1);
+	switch (gNewBS->hackMsMode[slot]) {
+		case 1: MsDrawBorder(slot, 14, 14); MsDrawCross(slot); break;
+		case 2: MsDrawBorder(slot, 7, 7); break;
+		case 3: MsDrawBorder(slot, 1, 6); break;
+		default: MsDrawBorder(slot, 14, 14); MsDrawCross(slot); break;
+	}
+	CopyWindowToVram(3 + slot, COPYWIN_BOTH);
+	//窓 3・5 は Z 技などの長い文のため 22 タイルの幅（上流と同じに隣の枠へ重ねる）。ふだんは自分の枠（11 タイル）だけ地図に置く
+	if (MsCellWidth(slot) > MS_CELL_W)
+		PutWindowTilemap(3 + slot); //2 マスぶんのカーソル（窓 3 全幅）
+	else if (slot == 0 || slot == 2)
+		PutWindowRectTilemap(3 + slot, 0, 0, 11, 3);
+	else
+		PutWindowTilemap(3 + slot);
+}
+
+static void MsDrawCell(u8 slot)
+{
+	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
+	u8 win = 3 + slot;
+	u8 col[3] = {14, 13, 15};
+
+	if (moveInfo->moves[slot] == MOVE_NONE)
+	{
+		MsLoadCellPalette(slot, 0, TRUE);
+		FillWindowPixelBuffer(win, PIXEL_FILL(14));
+	}
+	else
+	{
+		u8 first = MsSlotType(moveInfo, slot);
+
+		MsLoadCellPalette(slot, first, FALSE);
+		FillWindowPixelBuffer(win, PIXEL_FILL(14));
+		MsDrawPills(win, 6, 0, first, 0, 0xFF);
+		MsDrawSplit(win, 44, 0, moveInfo->moveSplit[slot]);
+		MoveNameToDisplayedStringBattle(slot);
+		AddTextPrinterParameterized4(win, MS_FONT, 4, 11, 0, 0, col, -1, gDisplayedStringBattle);
+	}
+	MsApplyBorder(slot);
+}
+
+void MoveSelectionDisplayMoveNames(void)
 {
     s32 i;
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
@@ -833,64 +1159,237 @@ static void MoveSelectionDisplayMoveNames(void)
 
     for (i = 0; i < MAX_MON_MOVES; i++)
     {
-        MoveSelectionDestroyCursorAt(i);
-		MoveNameToDisplayedStringBattle(i);
-        BattlePutTextOnWindow(gDisplayedStringBattle, i + 3);
+        gNewBS->hackMsMode[i] = 0;
+        MsDrawCell(i);
         if (moveInfo->moves[i] != MOVE_NONE)
             gNumberOfMovesToChoose++;
     }
 }
 
-#define SUPER_EFFECTIVE_COLOURS 0
-#define NOT_VERY_EFFECTIVE_COLOURS 4
-#define NO_EFFECT_COLOURS 8
-#define REGULAR_COLOURS 12
-static void MoveSelectionDisplayMoveType(void)
+//カーソルは枠の線だけを描き直す（中の絵・文字には触らない＝Z 技・L の詳細の文章の上でも使える）
+void MoveSelectionCreateCursorAt(u8 cursorPosition, u8 baseTileNum)
 {
-	u8 moveType, split;
-	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
+	u8 slot = cursorPosition & 3;
 
-	#ifdef DISPLAY_REAL_MOVE_TYPE_ON_MENU
-	if ((moveInfo->moves[gMoveSelectionCursor[gActiveBattler]] == MOVE_TERABLAST || moveInfo->moves[gMoveSelectionCursor[gActiveBattler]] == MOVE_TERASTARSTORM)
-	&& gNewBS->terastalData.chosen[gActiveBattler])
-	{
-		moveType = moveInfo->monTeraType;
-		split = CalcMoveSplit(gActiveBattler, moveInfo->moves[gMoveSelectionCursor[gActiveBattler]], gActiveBattler);
-	}
-	else
-	{
-		moveType = moveInfo->moveTypes[gMoveSelectionCursor[gActiveBattler]];
-		split = moveInfo->moveSplit[gMoveSelectionCursor[gActiveBattler]];
-	}
-	#else
-	if (!moveInfo->dynamaxed)
-		moveType = gBattleMoves[moveInfo->moves[gMoveSelectionCursor[gActiveBattler]]].type;
-	else
-		moveType = gBattleMoves[moveInfo->possibleMaxMoves[gMoveSelectionCursor[gActiveBattler]]].type;
-
-	split = moveInfo->moveSplit[gMoveSelectionCursor[gActiveBattler]];
-	#endif
-
-	FillWindowPixelBuffer(8, PIXEL_FILL(15)); //White
-	blit_move_info_icon(8, moveType + 1, 2, 3);
-
-	BlitBitmapToWindow(8, PSSIconsTiles + 24 * 8 * split, 38, 3, 24, 15);
-	CopyWindowToVram(8, COPYWIN_BOTH);
-	PutWindowTilemap(8);
+	gNewBS->hackMsMode[slot] = (baseTileNum == 29) ? 2 : (baseTileNum == 27) ? 3 : 1;
+	MsApplyBorder(slot);
 }
 
-void MoveSelectionDisplayMoveEffectiveness(void)
+void MoveSelectionDestroyCursorAt(u8 cursorPosition)
+{
+	u8 slot = cursorPosition & 3;
+
+	gNewBS->hackMsMode[slot] = 0;
+	MsApplyBorder(slot);
+}
+
+//技の枠の札・分類の絵を全部描き直す（テラスタル・2 タイプの入れ替え・メガの切り替えの後）
+static void MoveSelectionDisplayMoveType(void)
+{
+	u8 slot;
+
+	for (slot = 0; slot < MAX_MON_MOVES; ++slot)
+		MsDrawCell(slot);
+	for (slot = 0; slot < MAX_MON_MOVES; ++slot)
+		MsApplyBorder(slot);
+}
+
+//右の枠の地と縁。パレットも入れ直す
+static void MsDrawPanelBase(u8 win)
+{
+	LoadPalette(sMsPanelPal, 14 * 16, 32);
+	FillWindowPixelBuffer(win, PIXEL_FILL(0));
+	FillWindowPixelRect(win, 2, 1, 0, MS_PANEL_W - 2, MS_PANEL_H);
+	FillWindowPixelRect(win, 2, 0, 1, MS_PANEL_W, MS_PANEL_H - 2);
+	FillWindowPixelRect(win, 14, 2, 2, MS_PANEL_W - 4, MS_PANEL_H - 4);
+}
+
+static void MsPrintRight(u8 win, u8 y, const u8* str, u8 fg)
+{
+	u8 col[3] = {MS_TXT_BG, fg, 15};
+	s32 w = GetStringWidth(MS_FONT, str, (s8)MS_LS);
+
+	AddTextPrinterParameterized4(win, MS_FONT, MS_PANEL_RIGHT - w, y, MS_LS, 0, col, -1, str);
+}
+
+static void MsPrintLeft(u8 win, u8 y, const u8* str)
+{
+	u8 col[3] = {MS_TXT_BG, 13, 15};
+
+	AddTextPrinterParameterized4(win, MS_FONT, MS_LABEL_X, y, MS_LS, 0, col, -1, str);
+}
+
+//右の枠の PP の行（技の枠の右の枠の上の段・メガの札のときは y を 2 画素上げて呼ぶ）
+static void MsDrawPpRow(u8 win, u8 y, bool8 zView)
+{
+	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
+	u8 slot = gMoveSelectionCursor[gActiveBattler];
+	u8 buf[16];
+	u8* p;
+	u8 ppColour = 13;
+
+	if (zView)
+	{
+		p = ConvertIntToDecimalStringN(buf, 1, STR_CONV_MODE_LEFT_ALIGN, 2);
+		*p++ = CHAR_SLASH;
+		p = ConvertIntToDecimalStringN(p, 1, STR_CONV_MODE_LEFT_ALIGN, 2);
+	}
+	else if (gBattleBufferA[gActiveBattler][2] == TRUE) //PP の数を出さない戦い
+	{
+		StringCopy(buf, gText_NoMiss);
+	}
+	else
+	{
+		u8 cur = moveInfo->currentPp[slot], max = moveInfo->maxPp[slot];
+
+		p = ConvertIntToDecimalStringN(buf, cur, STR_CONV_MODE_LEFT_ALIGN, 2);
+		*p++ = CHAR_SLASH;
+		ConvertIntToDecimalStringN(p, max, STR_CONV_MODE_LEFT_ALIGN, 2);
+		if (cur == 0)
+			ppColour = 4;
+		else if (cur * 4 <= max)
+			ppColour = 3;
+	}
+	MsPrintRight(win, y, buf, ppColour);
+	MsPrintLeft(win, y, sMsTextPP);
+}
+
+//[hack] patches/0930: ダイマックス技・Z 技を見ている間の右の枠の威力。戻り値 0 は「ー」（へんか技）
+//  ダイマックス技: EmitChooseMove が戦闘と同じ計算（CalcVisualBasePower→gDynamaxMovePowers）で入れた maxMovePowers。Z 技: 下の Z 技の窓と同じ値
+static u16 MsPanelPower(struct ChooseMoveStruct *moveInfo, u8 slot, bool8 zView)
+{
+	if (moveInfo->moveSplit[slot] == SPLIT_STATUS)
+		return 0;
+	if (zView)
+	{
+		u16 zmove = moveInfo->possibleZMoves[slot];
+
+		if (zmove >= MOVE_CATASTROPIKA)
+			return MOVE_POWER(zmove); //[hack] patches/0582 (#126)
+		return gBattleMoves[moveInfo->moves[slot]].z_move_power;
+	}
+	if (moveInfo->dynamaxed || gNewBS->dynamaxData.viewing)
+		return moveInfo->maxMovePowers[slot];
+	return moveInfo->movePowers[slot];
+}
+
+//右の枠: 上の段 PP・中の段 PW（威力）・下の段 HIT（命中）。威力・命中が無い技は「ー」
+//  ダイマックス技・Z 技を見ている間はその技の値（命中は必中なので「ー」・PP は元の技のまま）
+static void MsDrawPanel(bool8 zView)
+{
+	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
+	u8 slot = gMoveSelectionCursor[gActiveBattler];
+	u8 buf[16];
+	u16 power, acc;
+	bool8 maxView = moveInfo->dynamaxed || gNewBS->dynamaxData.viewing;
+
+	MsDrawPanelBase(MS_PANEL_WIN);
+	MsDrawPpRow(MS_PANEL_WIN, MS_ROW1_Y, zView);
+
+	if (moveInfo->moves[slot] != MOVE_NONE)
+	{
+		//威力
+		power = MsPanelPower(moveInfo, slot, zView);
+		MsPrintLeft(MS_PANEL_WIN, MS_ROW2_Y, sMsTextPW);
+		if (power == 0)
+			StringCopy(buf, gText_NoMiss);
+		else
+			ConvertIntToDecimalStringN(buf, power, STR_CONV_MODE_LEFT_ALIGN, 3);
+		MsPrintRight(MS_PANEL_WIN, MS_ROW2_Y, buf, 13);
+
+		//命中
+		acc = moveInfo->moveAcc[slot];
+		MsPrintLeft(MS_PANEL_WIN, MS_ROW3_Y, sMsTextHIT);
+		if (zView || maxView || acc == 0xFFFF || acc == 0)
+			StringCopy(buf, gText_NoMiss);
+		else
+			ConvertIntToDecimalStringN(buf, acc, STR_CONV_MODE_LEFT_ALIGN, 3);
+		MsPrintRight(MS_PANEL_WIN, MS_ROW3_Y, buf, 13);
+	}
+	CopyWindowToVram(MS_PANEL_WIN, COPYWIN_BOTH);
+	PutWindowTilemap(MS_PANEL_WIN);
+}
+
+void MoveSelectionDisplayPpNumber(void)
+{
+	MsDrawPanel(FALSE);
+}
+
+//効き目の言葉の文字の色（熟練度などで数字の色を変えるときもここのような関数に分ける）。fg は右の枠のパレットの番号
+//  ばつぐん・いまひとつ・こうかなしは相性の色（パレット 9）を黒で縁取る（読みやすくする）・ふつうは黒い文字（縁取りなし）
+static u8 MsEffFgColour(u8 effKind)
+{
+	return (effKind == 0) ? MS_COL_BLACK : 9;
+}
+
+static bool8 MsEffOutlined(u8 effKind)
+{
+	return effKind != 0;
+}
+
+//黒の縁取りの文字: 黒を上下左右の 4 方向（2026-10-28 ユーザー決定）にずらして描いてから、色の文字を重ねる
+static void MsPrintOutlined(u8 win, u8 font, u8 x, u8 y, const u8* str, u8 fg)
+{
+	u8 black[3] = {0, MS_COL_BLACK, MS_COL_BLACK};
+	u8 mainCol[3] = {0, 0, 0};
+	s32 dx, dy;
+
+	mainCol[1] = fg;
+	for (dy = -1; dy <= 1; ++dy)
+		for (dx = -1; dx <= 1; ++dx)
+			if ((dx == 0) != (dy == 0)) //上下左右の 4 方向だけ
+				AddTextPrinterParameterized4(win, font, x + dx, y + dy, 0, 0, black, -1, str);
+	AddTextPrinterParameterized4(win, font, x, y, 0, 0, mainCol, -1, str);
+}
+
+//効き目を言葉で出す。effKind: 0 ふつう・1 ばつぐん・2 いまひとつ・3 こうかなし・0xFF 出さない（へんか技・相手が決まらない）。STAB の印（F9 04）は別に出す
+static void MsDrawEffText(u8 effKind, bool8 stab, u8 dy)
+{
+	const u8* word = (effKind == 1) ? sMsTextSE : (effKind == 2) ? sMsTextNVE : (effKind == 3) ? sMsTextNO : (effKind == 0) ? sMsTextNORMAL : NULL;
+	u8 col[3] = {0, 9, 8};
+
+	//枠の線（上・左右の 2 画素）には触らない（2026-10-28 直し: 以前は y=1 から塗って上の線が欠けていた）
+	FillWindowPixelRect(MS_PANEL_WIN, 14, 2, 2, MS_PANEL_W - 4, 11);
+	if (word != NULL)
+	{
+		if (MsEffOutlined(effKind))
+			MsPrintOutlined(MS_PANEL_WIN, MS_FONT, MS_LABEL_X + 1, MS_ROW0_Y - dy, word, MsEffFgColour(effKind));
+		else
+		{
+			col[1] = MsEffFgColour(effKind);
+			col[2] = 0;
+			AddTextPrinterParameterized4(MS_PANEL_WIN, MS_FONT, MS_LABEL_X + 1, MS_ROW0_Y - dy, 0, 0, col, -1, word);
+		}
+	}
+	if (stab)
+	{
+		col[1] = 9;
+		col[2] = 8;
+		AddTextPrinterParameterized4(MS_PANEL_WIN, 1, 46, 0, 0, 0, col, -1, gText_BattleUI_STAB);
+	}
+}
+
+//相性（▲▼＊）と STAB の印は右の枠の左上に出す（上の段の PP の左）
+//dy: 効き目の言葉を上げる画素数（メガの札のときだけ 1）
+static void MsEffectivenessImpl(u8 dy)
 {
 	u8 *txtPtr, moveType, split;
 	const u8* string;
 	bool8 stab = FALSE;
-	u8 stabPalIndex = 5 * 0x10 + 6;
+	u8 effKind = 0xFF; //0 ふつう・1 ばつぐん・2 いまひとつ・3 こうかなし・0xFF 出さない
+	u8 stabPalIndex = MS_PANEL_PAL * 0x10 + 6;
 	u8 palIndex = stabPalIndex + 2;
 	struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
 	u16 move = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
+	//[hack] patches/0930: ダイマックス技を見ている間（まだ ダイマックス していない）は、効き目も STAB もダイマックス技で見る
+	bool8 maxView = gNewBS->dynamaxData.viewing && !moveInfo->dynamaxed
+		&& moveInfo->possibleMaxMoves[gMoveSelectionCursor[gActiveBattler]] != MOVE_NONE;
+	u16 maxMove = moveInfo->possibleMaxMoves[gMoveSelectionCursor[gActiveBattler]];
 
 	#ifdef DISPLAY_REAL_MOVE_TYPE_ON_MENU
-	if ((move == MOVE_TERABLAST || move == MOVE_TERASTARSTORM)
+	if (maxView)
+		moveType = GetMoveTypeSpecial(gActiveBattler, maxMove);
+	else if ((move == MOVE_TERABLAST || move == MOVE_TERASTARSTORM)
 	&& gNewBS->terastalData.chosen[gActiveBattler])
 		moveType = moveInfo->monTeraType;
 	else
@@ -909,13 +1408,14 @@ void MoveSelectionDisplayMoveEffectiveness(void)
 	{
 		u8 foePosition;
 		u8 moveResult = 0;
+		bool8 known = TRUE; //相手が決まらない（2 体以上の相手）ときは効き目を出さない
 		const u16* palPtr = gUserInterfaceGfx_TypeHighlightingPal;
 		stab = split != SPLIT_STATUS
 			&& (moveType == moveInfo->monType1
 			 || moveType == moveInfo->monType2
 			 || moveType == moveInfo->monType3
 			 || (moveType == moveInfo->monTeraType && TeraTypeActive(gActiveBattler)))
-			&& !CheckTableForMoveEffect(move, gMoveEffectsThatIgnoreWeaknessResistance); //These moves can't have STAB
+			&& !CheckTableForMoveEffect(maxView ? maxMove : move, gMoveEffectsThatIgnoreWeaknessResistance); //These moves can't have STAB
 
 		if (IS_SINGLE_BATTLE)
 		{
@@ -934,9 +1434,14 @@ void MoveSelectionDisplayMoveEffectiveness(void)
 			foePosition = GetBattlerPosition(bankDef);
 		}
 		else
-			goto SKIP_LOAD_MOVE_RESULT;
+		{
+				known = FALSE;
+				goto SKIP_LOAD_MOVE_RESULT;
+			}
 
-		if (gNewBS->zMoveData.viewing)
+		if (maxView)
+			moveResult = VisualTypeCalc(maxMove, gActiveBattler, GetBattlerAtPosition(foePosition)); //戦闘と同じ計算をダイマックス技で
+		else if (gNewBS->zMoveData.viewing)
 			moveResult = moveInfo->zMoveResults[foePosition][gMoveSelectionCursor[gActiveBattler]];
 		else
 			moveResult = moveInfo->moveResults[foePosition][gMoveSelectionCursor[gActiveBattler]];
@@ -944,6 +1449,7 @@ void MoveSelectionDisplayMoveEffectiveness(void)
 		SKIP_LOAD_MOVE_RESULT:
 		if (moveResult & MOVE_RESULT_NO_EFFECT) //Comes first because overrides all others
 		{
+			effKind = 3;
 			gPlttBufferUnfaded[palIndex + 0] = palPtr[NO_EFFECT_COLOURS + 0]; //No STAB for moves with no effect
 			gPlttBufferUnfaded[palIndex + 1] = palPtr[NO_EFFECT_COLOURS + 1];
 			string = gText_BattleUI_NoEffect;
@@ -951,12 +1457,14 @@ void MoveSelectionDisplayMoveEffectiveness(void)
 		}
 		else if (moveResult & MOVE_RESULT_SUPER_EFFECTIVE)
 		{
+			effKind = 1;
 			gPlttBufferUnfaded[palIndex + 0] = palPtr[SUPER_EFFECTIVE_COLOURS + 0];
 			gPlttBufferUnfaded[palIndex + 1] = palPtr[SUPER_EFFECTIVE_COLOURS + 1];
 			string = gText_BattleUI_SuperEffective;
 		}
 		else if (moveResult & MOVE_RESULT_NOT_VERY_EFFECTIVE)
 		{
+			effKind = 2;
 			gPlttBufferUnfaded[palIndex + 0] = palPtr[NOT_VERY_EFFECTIVE_COLOURS + 0];
 			gPlttBufferUnfaded[palIndex + 1] = palPtr[NOT_VERY_EFFECTIVE_COLOURS + 1];
 			string = gText_BattleUI_NotVeryEffective;
@@ -965,6 +1473,8 @@ void MoveSelectionDisplayMoveEffectiveness(void)
 		{
 			gPlttBufferUnfaded[palIndex + 0] = palPtr[REGULAR_COLOURS + 0];
 			gPlttBufferUnfaded[palIndex + 1] = palPtr[REGULAR_COLOURS + 1];
+			if (known && split != SPLIT_STATUS)
+				effKind = 0; //ふつう（へんか技・相手が決まらないときは出さない）
 			string = StringNull;
 		}
 	}
@@ -990,8 +1500,15 @@ void MoveSelectionDisplayMoveEffectiveness(void)
 		StringCopy(txtPtr, gText_BattleUI_STAB);
 	}
 
-    BattlePutTextOnWindow(gDisplayedStringBattle, 7);
+	MsDrawEffText(effKind, stab, dy);
+	CopyWindowToVram(MS_PANEL_WIN, COPYWIN_BOTH);
+	PutWindowTilemap(MS_PANEL_WIN);
 	CpuCopy16(&gPlttBufferUnfaded[stabPalIndex], &gPlttBufferFaded[stabPalIndex], sizeof(u16) * 4);
+}
+
+void MoveSelectionDisplayMoveEffectiveness(void)
+{
+	MsEffectivenessImpl(0);
 }
 
 static bool8 MoveSelectionDisplayZMove(void)
@@ -1314,9 +1831,11 @@ static bool8 MoveSelectionDisplayMaxMove(void)
 
 		BattlePutTextOnWindow(gDisplayedStringBattle, 3);
 		MaxMoveSelectionDisplayPower();
+		gNewBS->dynamaxData.viewing = TRUE; //[hack] patches/0930: カーソルの幅（2 マス）が見ている状態を読むので、先に立てる
 		MoveSelectionCreateCursorAt(0, 0);
-		gNewBS->dynamaxData.viewing = TRUE;
 		gNewBS->terastalData.chosen[gActiveBattler] = FALSE;
+		MoveSelectionDisplayPpNumber(); //[hack] patches/0930: 右の枠もダイマックス技の値で描き直す
+		MoveSelectionDisplayMoveEffectiveness();
 
 		if (!moveInfo->dynamaxed) //Don't play sound if already Dynamaxed
 			PlaySE(2); //Turn On
@@ -1328,23 +1847,7 @@ static bool8 MoveSelectionDisplayMaxMove(void)
 
 static void ZMoveSelectionDisplayPpNumber(void)
 {
-	u8 *txtPtr;
-	const u16* palPtr = Pal_PPDisplay;
-
-	//Remove Palette Fading On The PP
-	gPlttBufferUnfaded[5 * 0x10 + 12] = palPtr[(3 * 2) + 0];
-	gPlttBufferUnfaded[5 * 0x10 + 11] = palPtr[(3 * 2) + 1];
-
-	CpuCopy16(&gPlttBufferUnfaded[5 * 0x10 + 12], &gPlttBufferFaded[5 * 0x10 + 12], sizeof(u16));
-	CpuCopy16(&gPlttBufferUnfaded[5 * 0x10 + 11], &gPlttBufferFaded[5 * 0x10 + 11], sizeof(u16));
-
-	//Load PP Text
-	txtPtr = ConvertIntToDecimalStringN(gDisplayedStringBattle, 1, STR_CONV_MODE_RIGHT_ALIGN, 2);
-	txtPtr[0] = CHAR_SLASH;
-	txtPtr++;
-	ConvertIntToDecimalStringN(txtPtr, 1, STR_CONV_MODE_RIGHT_ALIGN, 2);
-
-	BattlePutTextOnWindow(gDisplayedStringBattle, 9);
+	MsDrawPanel(TRUE); //[hack] patches/0930: 右の枠に 1/1
 }
 
 static void ZMoveSelectionDisplayPower(void)
@@ -1357,7 +1860,7 @@ static void ZMoveSelectionDisplayPower(void)
 	u16 zmove = moveInfo->possibleZMoves[gMoveSelectionCursor[gActiveBattler]];
 
 	if (zmove >= MOVE_CATASTROPIKA)
-		power = gBattleMoves[zmove].power;
+		power = MOVE_POWER(zmove); //[hack] patches/0582 (#126)
 
 	if (moveInfo->moveSplit[gMoveSelectionCursor[gActiveBattler]] != SPLIT_STATUS)
 	{
@@ -1448,7 +1951,7 @@ static void MoveSelectionDisplayDetails(void)
 			if (moveInfo->dynamaxed)
 				power = gDynamaxMovePowers[moveInfo->moves[gMoveSelectionCursor[gActiveBattler]]];
 			else
-				power = gBattleMoves[moveInfo->moves[gMoveSelectionCursor[gActiveBattler]]].power;
+				power = MOVE_POWER(moveInfo->moves[gMoveSelectionCursor[gActiveBattler]]); //[hack] patches/0582 (#126)
 		#endif
 		ConvertIntToDecimalStringN(txtPtr, power, STR_CONV_MODE_LEFT_ALIGN, 3);
 	}
@@ -1718,7 +2221,7 @@ void HandleInputChooseTarget(void)
 			u8 currSelIdentity = GetBattlerPosition(gMultiUsePlayerCursor);
 
 			u16 move = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
-			switch (move) {
+			switch (EffectiveMove(move)) {
 				case MOVE_ACUPRESSURE:
 					if (!(gAbsentBattlerFlags & gBitTable[gMultiUsePlayerCursor ^ BIT_FLANK]))
 					{
@@ -1787,7 +2290,7 @@ void HandleInputChooseTarget(void)
 			u8 currSelIdentity = GetBattlerPosition(gMultiUsePlayerCursor);
 
 			u16 move = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
-			switch (move) {
+			switch (EffectiveMove(move)) {
 				case MOVE_ACUPRESSURE:
 					if (!(gAbsentBattlerFlags & gBitTable[gMultiUsePlayerCursor ^ BIT_FLANK]))
 					{
@@ -1858,7 +2361,7 @@ static void HighlightPossibleTargets(void)
 		struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleBufferA[gActiveBattler][4]);
 		u16 chosenMove = moveInfo->moves[gMoveSelectionCursor[gActiveBattler]];
 
-		if (chosenMove == MOVE_CURSE)
+		if (MoveIs(chosenMove, MOVE_CURSE))
 		{
 			if (TeraTypeActive(gActiveBattler))
 			{
@@ -1897,7 +2400,7 @@ static void HighlightPossibleTargets(void)
 				startY = 8;
 				break;
 			case MOVE_TARGET_USER:
-				switch (chosenMove)
+				switch (EffectiveMove(chosenMove))
 				{
 					//Moves that affect the whole field
 					case MOVE_HAZE:
@@ -2075,6 +2578,11 @@ u8 TrySetCantSelectMoveBattleScript(void)
 		gSelectionBattleScripts[gActiveBattler] = BattleScript_SelectingNotAllowedHealBlock;
 		++limitations;
 	}
+	else if (HackFuuin_MoveSealed(gActiveBattler, move)) //[hack] patches/0560 ふういんルーレット: 封印された技は選べない（全部封印なら 素の わるあがき）
+	{
+		gSelectionBattleScripts[gActiveBattler] = BattleScript_SelectingSealedMove;
+		++limitations;
+	}
 	else if (gBattleMons[gActiveBattler].pp[gBattleBufferB[gActiveBattler][2]] == 0)
 	{
 		gSelectionBattleScripts[gActiveBattler] = BattleScript_SelectingMoveWithNoPP;
@@ -2134,7 +2642,8 @@ void PlayerHandleChooseAction(void)
 			//Running or using balls cancels the second mon's attack
 			if (!IsBagDisabled()
 			&&  gBattleBufferA[gActiveBattler][1] == ACTION_USE_ITEM //If mon 1 used a ball, then
-			&&  GetPocketByItemId(itemId) == POCKET_POKEBALLS)		 //mon 2 doesn't get to do anything.
+			&&  GetPocketByItemId(itemId) == POCKET_POKEBALLS		 //mon 2 doesn't get to do anything.
+			&&  !HackSnatch_IsSnatchBall(itemId))					 //[hack] patches/0961 ただしスナッチボールは戦闘が続くので 相方は普通に行動する
 			{
 				gNewBS->NoMoreMovingThisTurn |= gBitTable[gActiveBattler];
 
@@ -2261,7 +2770,12 @@ void HandleInputChooseAction(void)
 					gNewBS->megaData.chosen[gActiveBattler] = FALSE;
 					gNewBS->ultraData.chosen[gActiveBattler] = FALSE;
 					gNewBS->terastalData.chosen[gActiveBattler] = FALSE;
-					EmitTwoReturnValues(1, ACTION_SWITCH, 0);
+					if (HackChallengeB_SwitchBlocked()) //[hack] patches/0540 しばり B こうたいきんし: 入れ替えない（音と一言・もう一度えらべる）
+						{
+							HackChallengeB_ShowSwitchBlocked();
+							return;
+						}
+						EmitTwoReturnValues(1, ACTION_SWITCH, 0);
 					break;
 				case 3:
 					gNewBS->megaData.chosen[gActiveBattler] = FALSE;
@@ -2383,6 +2897,8 @@ bool8 CheckCantMoveThisTurn(void)
 
 bool8 IsBagDisabled(void)
 {
+	if (HackChallenge_BagClosedInBattle()) //[hack] patches/0510 アイテムきんし: トレーナー戦はバッグごと閉じる（野生はボールのために開く）
+		return TRUE;
 	if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER))   //[hack] 2026-10-11 野生戦でも数える（ボールは数に入れない＝battle_start_turn_start.c）
 	&& !FlagGet(FLAG_BATTLE_FACILITY)
 	&& HackDifficulty_BagLimitReached(VarGet(HOENN_VAR_DIFFICULTY), gNewBS->playerItemUsedCount))
@@ -2471,6 +2987,8 @@ static void TryLoadTypeIcons(void)
 					case TYPE_MYSTERY:
 					case TYPE_ROOSTLESS:
 					case TYPE_BLANK:
+					case TYPE_RIL: //[hack] patches/0408 #110: リルの札は CamomonsTypeIcons2（パレット 2）の絵
+					case TYPE_SHADOW: //[hack] patches/0955 段 D: ダークの札も CamomonsTypeIcons2
 						spriteId = CreateSpriteAtEnd(&sTypeIconSpriteTemplate2, x, y, 0xFF);
 						break;
 					default:

@@ -32,6 +32,28 @@ TIER_C = {t: "ACH_TIER_" + t for t in TIERS}
 KIND_C = {"FLAG": "ACH_KIND_FLAG", "STAT": "ACH_KIND_STAT", "DEX": "ACH_KIND_DEX_COUNT",
           "SPECIES": "ACH_KIND_SPECIES", "FUNC": "ACH_KIND_FUNC", "ITEM": "ACH_KIND_ITEM"}
 
+# 「何が起きたら確かめるか」(2026-10-16・include/new/achievements.h の ACH_EV_*)。じっせきごとに gAchEvents[] へ出す
+# 種別から決まるもの（FUNC だけは下の表で 1 つずつ）。FUNC を足したらここにも足す（無いと生成が止まる）
+KIND_EVENTS = {"FLAG": "ACH_EV_FLAG", "STAT": "ACH_EV_STAT", "DEX": "ACH_EV_DEX",
+               "SPECIES": "ACH_EV_DEX", "ITEM": "ACH_EV_BAG"}
+FUNC_EVENTS = {}
+for _f in ("KANTO_DEX", "LEGEND_BIRDS", "LEGEND_BEASTS", "ALL_REGIONS", "EEVEELUTIONS", "WEATHER_TRIO", "REGI_TRIO",
+           "LAKE_TRIO", "CREATION_TRIO", "TAO_TRIO", "XY_DUO", "SUN_MOON_DUO", "HERO_DUO", "PSEUDO_LEGENDS",
+           "ALL_STARTERS", "ULTRA_BEAST"):
+    FUNC_EVENTS["ACH_FUNC_" + _f] = "ACH_EV_DEX"
+for _f in ("SHINY", "LEVEL_100", "SURF_PIKACHU", "PARTY_ALL_LEVEL_100", "PARTY_SAME_TYPE", "NICKNAME", "MEGA_STONE",
+           "Z_CRYSTAL", "GIGANTAMAX", "HIDDEN_ABILITY", "MAX_FRIENDSHIP", "POKERUS", "PERFECT_IV", "MAX_EV"):
+    FUNC_EVENTS["ACH_FUNC_" + _f] = "ACH_EV_PARTY"
+for _f in ("TM_10", "TM_30", "TM_50", "MEGA_RING", "Z_RING", "DYNAMAX_BAND", "TERA_ORB", "SHINY_CHARM", "OVAL_CHARM"):
+    FUNC_EVENTS["ACH_FUNC_" + _f] = "ACH_EV_BAG"
+FUNC_EVENTS["ACH_FUNC_ALL_OTHERS"] = "ACH_EV_UNLOCK"
+
+def events_of(a):
+    """じっせき 1 つの「確かめる出来事」(ACH_EV_* の名前)"""
+    if a["kind"] == "FUNC":
+        return FUNC_EVENTS[str(a["param"]).strip()]
+    return KIND_EVENTS[a["kind"]]
+
 # その他のUI文字列 (ラベル, 本文)  ※改行は \\n (同じ窓で改行) / \\p (次の窓へ送る)。本物の改行は不可
 UI = [
  ("gText_MenuAchievements",        "じっせき"),
@@ -199,6 +221,8 @@ def validate(data, symbols=None, charset=None):
             pass
         elif param not in symbols.get(kind, []):
             errors.append("%s: %s が見つかりません (つづりを確認してください)" % (where, param))
+        elif kind == "FUNC" and param not in FUNC_EVENTS:
+            errors.append("%s: %s の「確かめる出来事」が FUNC_EVENTS にありません (scripts/achievements_gen.py に足してください)" % (where, param))
 
         target = a.get("target")
         if not isinstance(target, int) or not (1 <= target <= 0xFFFFFFFF):
@@ -271,6 +295,10 @@ def generate(data, root=ROOT):
                                          rw["held"] if rw["type"] == "MON" else "ITEM_NONE")
         out += "\t[ACH_%s] = {gText_Ach_Name_%s, gText_Ach_Desc_%s, %s, %s, %s, %d, %s},\n" % (
             a["id"], a["id"], a["id"], TIER_C[a["tier"]], KIND_C[a["kind"]], param, a["target"], reward)
+    out += "};\n\n"
+    out += "//Which events can make each achievement true (include/new/achievements.h ACH_EV_*; Achievements_Notify re-checks only these)\n"
+    out += "static const u8 gAchEvents[ACH_COUNT] =\n{\n"
+    out += "".join("\t[ACH_%s] = %s,\n" % (a["id"], events_of(a)) for a in achs)
     out += "};\n"
     _write(os.path.join(root, "src", "achievements_data.h"), out)
 

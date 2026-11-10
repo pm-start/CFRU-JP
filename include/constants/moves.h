@@ -1025,14 +1025,4235 @@
 #define MOVE_URASHINEN 0x3E8
 #define MOVE_ENBUCHO 0x3E9   // えんぶちょう: ほのお 特殊 80 100・自分の とくこう とくぼう すばやさ +1・相手を ほのおのうず に（特別なウルガモスだけ・2026-10-11・#95）
 #define MOVE_MIWAKUNOSENRITSU 0x3EA   // ミワクノセンリツ: フェアリー 特殊 75 95・20% で相手の こうげき／とくこう の高いほうを 1 さげる（ツキノウロコ・2026-10-11）
-#define MOVE_FRUITCANNON 0x3EB   // フルーツカノン: フェアリー 特殊 90 100・30% で とくぼう -1（バイバニラ（かいはつしゃのすがた）・2026-10-11）
+#define MOVE_FRUITCANNON 0x3EB   // くだものカノン: フェアリー 特殊 90 100・30% で とくぼう -1（バイバニラ（かいはつしゃのすがた）・2026-10-11）
+#define MOVE_TSUKINONAMIDA 0x3EC   // ツキノナミダ: リル 特殊 90 100 PP15・追加効果なしの安定技（リルタイプの技・#110）
+#define MOVE_OMOIDEDUME 0x3ED   // オモイデヅメ: リル 物理 85 100 PP15・20% で相手の ぼうぎょ -1（リルタイプの技・#110）
+#define MOVE_SAMISHIZUKI 0x3EE   // サミシヅキ: GHOST 特殊 威力85 命中100 PP10・BURN_HIT（専用技（liru）・#111 legend-moves）
+#define MOVE_HIMITSUNOSHIRUSHI 0x3EF   // ヒミツノシルシ: PSYCHIC 特殊 威力80 命中100 PP10・SPECIAL_ATTACK_DOWN_HIT（専用技（ui）・#111 legend-moves）
+#define MOVE_FUJINOAME 0x3F0   // フジノアメ: ICE 特殊 威力65 命中95 PP10・SPEED_DOWN_HIT（専用技（shidare）・#111 legend-moves）
+#define MOVE_MILKNOKISS 0x3F1   // ミルクノキス: FAIRY 特殊 威力85 命中100 PP10・ABSORB（専用技（milk）・#111 legend-moves）
+#define MOVE_HAGANENOISHI 0x3F2   // ハガネノイシ: STEEL 物理 威力85 命中90 PP10・DEFENSE_UP_2_HIT（専用技（nao）・#111 legend-moves）
+#define MOVE_HISCORE 0x3F3   // ハイスコア: ELECTRIC 特殊 威力70 命中100 PP10・SPECIAL_ATTACK_UP_CHANCE（専用技（kairi）・#111 legend-moves）
+#define MOVE_DOKUBANANOYUKI 0x3F4   // ドクバナノユキ: POISON 物理 威力85 命中100 PP10・BAD_POISON_HIT（専用技（rikka）・#111 legend-moves）
+#define MOVE_IBARANOCHIKAI 0x3F5   // イバラノチカイ: DARK 物理 威力85 命中100 PP10・ATTACK_UP_HIT（専用技（shii）・#111 legend-moves）
+#define MOVE_KITSUNEBI 0x3F6   // キツネビ: FIRE 特殊 威力70 命中100 PP15・BURN_HIT（専用技（ran）・#111 legend-moves）
+#define MOVE_AMAGAMI 0x3F7   // アマガミツキ: NORMAL 物理 威力85 命中100 PP10・ABSORB（専用技（ichigo）・#111 legend-moves）
+#define MOVE_YOINOSHIZUKU 0x3F8   // ヨイノシズク: RIL 特殊 威力40 命中100 PP25・HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_TSUKINOARASHI 0x3F9   // ツキノアラシ: RIL 特殊 威力130 命中90 PP5・OVERHEAT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_SAMISHIIKOE 0x3FA   // サミシイコエ: RIL 特殊 威力55 命中95 PP15・SPECIAL_ATTACK_DOWN_HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_TSUKIKAGE 0x3FB   // ツキカゲ: RIL 物理 威力40 命中100 PP30・QUICK_ATTACK（リルタイプの共通技・#111 legend-moves）
+#define MOVE_KETSUIDAIBU 0x3FC   // ケツイダイブ: RIL 物理 威力120 命中100 PP15・RECOIL（リルタイプの共通技・#111 legend-moves）
+#define MOVE_WASUREMONO 0x3FD   // ワスレモノ: RIL 物理 威力65 命中100 PP20・KNOCK_OFF（リルタイプの共通技・#111 legend-moves）
+#define MOVE_TSUKINOIYASHI 0x3FE   // ツキノイヤシ: RIL 変化 ― 命中― PP5・RESTORE_HP（リルタイプの共通技・#111 legend-moves）
+#define MOVE_NAKIOTOSHI 0x3FF   // ナキオトシ: RIL 変化 ― 命中100 PP20・ATTACK_DOWN_2（リルタイプの共通技・#111 legend-moves）
+#define MOVE_TSUKINOUTA 0x400   // ツキノウタ: RIL 特殊 威力75 命中100 PP15・CONFUSE_HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_NAMIDANOHIKARI 0x401   // ナミダノヒカリ: RIL 特殊 威力80 命中100 PP15・SPECIAL_DEFENSE_DOWN_HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_TOWANOHANA 0x402   // トワノハナ: RIL 特殊 威力70 命中100 PP10・ALL_STATS_UP_HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_TSUKINOHOUKOU 0x403   // ツキノオタケビ: RIL 特殊 威力150 命中90 PP5・RECHARGE（リルタイプの共通技・#111 legend-moves）
+#define MOVE_TSUKINOKIBA 0x404   // ツキノキバ: RIL 物理 威力65 命中100 PP15・FLINCH_HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_HARINOAME 0x405   // ハリノアメ: RIL 物理 威力25 命中95 PP20・MULTI_HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_NAGORINOTSUME 0x406   // ナゴリノツメ: RIL 物理 威力40 命中100 PP15・DOUBLE_HIT（リルタイプの共通技・#111 legend-moves）
+#define MOVE_KIOKUNOYAIBA 0x407   // キオクノヤイバ: RIL 物理 威力75 命中100 PP15・HIGH_CRITICAL（リルタイプの共通技・#111 legend-moves）
+#define MOVE_SHIZUKANAOMOI 0x408   // シズカナオモイ: RIL 変化 ― 命中― PP20・CALM_MIND（リルタイプの共通技・#111 legend-moves）
+#define MOVE_NAMIDANOMAKU 0x409   // ナミダノマク: RIL 変化 ― 命中― PP20・COSMIC_POWER（リルタイプの共通技・#111 legend-moves）
+/* LV200_MOVES_0593 BEGIN */
+#define MOVE_LV200_NORMAL_101           0x40A // ノーマル Lv101 ヘビーストンプ
+#define MOVE_LV200_NORMAL_102           0x40B // ノーマル Lv102 ボイスキャノン
+#define MOVE_LV200_NORMAL_103           0x40C // ノーマル Lv103 ダッシュスパーク
+#define MOVE_LV200_NORMAL_104           0x40D // ノーマル Lv104 ひゃくれつビンタ
+#define MOVE_LV200_NORMAL_105           0x40E // ノーマル Lv105 ほっとひといき
+#define MOVE_LV200_NORMAL_106           0x40F // ノーマル Lv106 ネックラリアット
+#define MOVE_LV200_NORMAL_107           0x410 // ノーマル Lv107 ブーストタックル
+#define MOVE_LV200_NORMAL_108           0x411 // ノーマル Lv108 エコーウェーブ
+#define MOVE_LV200_NORMAL_109           0x412 // ノーマル Lv109 ふんばりガード
+#define MOVE_LV200_NORMAL_110           0x413 // ノーマル Lv110 ぜんいんラッシュ
+#define MOVE_LV200_NORMAL_111           0x414 // ノーマル Lv111 ガッツアッパー
+#define MOVE_LV200_NORMAL_112           0x415 // ノーマル Lv112 ふみこみアタック
+#define MOVE_LV200_NORMAL_113           0x416 // ノーマル Lv113 とびだしクロー
+#define MOVE_LV200_NORMAL_114           0x417 // ノーマル Lv114 ぎゅうぎゅうハグ
+#define MOVE_LV200_NORMAL_115           0x418 // ノーマル Lv115 ゴロゴロボンバー
+#define MOVE_LV200_NORMAL_116           0x419 // ノーマル Lv116 ひらめきワンツー
+#define MOVE_LV200_NORMAL_117           0x41A // ノーマル Lv117 きまぐれのうた
+#define MOVE_LV200_NORMAL_118           0x41B // ノーマル Lv118 いやしのまどろみ
+#define MOVE_LV200_NORMAL_119           0x41C // ノーマル Lv119 ドシンバウンド
+#define MOVE_LV200_NORMAL_120           0x41D // ノーマル Lv120 アダプトブラスト
+#define MOVE_LV200_NORMAL_121           0x41E // ノーマル Lv121 しつけのビンタ
+#define MOVE_LV200_NORMAL_122           0x41F // ノーマル Lv122 えがおのひかり
+#define MOVE_LV200_NORMAL_123           0x420 // ノーマル Lv123 ラッキーパンチ
+#define MOVE_LV200_NORMAL_124           0x421 // ノーマル Lv124 どうもうブレイク
+#define MOVE_LV200_NORMAL_125           0x422 // ノーマル Lv125 ぱくぱくチャージ
+#define MOVE_LV200_NORMAL_126           0x423 // ノーマル Lv126 はずみダイブ
+#define MOVE_LV200_NORMAL_127           0x424 // ノーマル Lv127 ミラクルシャウト
+#define MOVE_LV200_NORMAL_128           0x425 // ノーマル Lv128 かけこみアタック
+#define MOVE_LV200_NORMAL_129           0x426 // ノーマル Lv129 コートのまい
+#define MOVE_LV200_NORMAL_130           0x427 // ノーマル Lv130 ラストコール
+#define MOVE_LV200_NORMAL_131           0x428 // ノーマル Lv131 ひっかきひっさつ
+#define MOVE_LV200_NORMAL_132           0x429 // ノーマル Lv132 ごうかいスイング
+#define MOVE_LV200_NORMAL_133           0x42A // ノーマル Lv133 チャームフォース
+#define MOVE_LV200_NORMAL_134           0x42B // ノーマル Lv134 フルスロットル
+#define MOVE_LV200_NORMAL_135           0x42C // ノーマル Lv135 パワフルダンス
+#define MOVE_LV200_NORMAL_136           0x42D // ノーマル Lv136 ふいうちバンプ
+#define MOVE_LV200_NORMAL_137           0x42E // ノーマル Lv137 だいちラッシュ
+#define MOVE_LV200_NORMAL_138           0x42F // ノーマル Lv138 にじいろシャウト
+#define MOVE_LV200_NORMAL_139           0x430 // ノーマル Lv139 ゴッドアップ
+#define MOVE_LV200_NORMAL_140           0x431 // ノーマル Lv140 リセットゴング
+#define MOVE_LV200_NORMAL_141           0x432 // ノーマル Lv141 おおぐいタックル
+#define MOVE_LV200_NORMAL_142           0x433 // ノーマル Lv142 はじけるコンボ
+#define MOVE_LV200_NORMAL_143           0x434 // ノーマル Lv143 さけびのうず
+#define MOVE_LV200_NORMAL_144           0x435 // ノーマル Lv144 タフネスフォース
+#define MOVE_LV200_NORMAL_145           0x436 // ノーマル Lv145 はじけるしぶき
+#define MOVE_LV200_NORMAL_146           0x437 // ノーマル Lv146 ボディランゲージ
+#define MOVE_LV200_NORMAL_147           0x438 // ノーマル Lv147 ふんぎりアタック
+#define MOVE_LV200_NORMAL_148           0x439 // ノーマル Lv148 ネイチャーコール
+#define MOVE_LV200_NORMAL_149           0x43A // ノーマル Lv149 ぐるっとまわる
+#define MOVE_LV200_NORMAL_150           0x43B // ノーマル Lv150 カウントダウン
+#define MOVE_LV200_NORMAL_151           0x43C // ノーマル Lv151 ひっさつのこえ
+#define MOVE_LV200_NORMAL_152           0x43D // ノーマル Lv152 ぶんぶんスイング
+#define MOVE_LV200_NORMAL_153           0x43E // ノーマル Lv153 ゆうゆうバウンス
+#define MOVE_LV200_NORMAL_154           0x43F // ノーマル Lv154 ワイルドアーム
+#define MOVE_LV200_NORMAL_155           0x440 // ノーマル Lv155 とどろきのいぶき
+#define MOVE_LV200_NORMAL_156           0x441 // ノーマル Lv156 つなわたり
+#define MOVE_LV200_NORMAL_157           0x442 // ノーマル Lv157 ごはんのじかん
+#define MOVE_LV200_NORMAL_158           0x443 // ノーマル Lv158 しめつけバグ
+#define MOVE_LV200_NORMAL_159           0x444 // ノーマル Lv159 かんぺきソロ
+#define MOVE_LV200_NORMAL_160           0x445 // ノーマル Lv160 ステップアップ
+#define MOVE_LV200_NORMAL_161           0x446 // ノーマル Lv161 いっちょくパンチ
+#define MOVE_LV200_NORMAL_162           0x447 // ノーマル Lv162 きょうれつダイブ
+#define MOVE_LV200_NORMAL_163           0x448 // ノーマル Lv163 せんぷうダッシュ
+#define MOVE_LV200_NORMAL_164           0x449 // ノーマル Lv164 ごりおしアタック
+#define MOVE_LV200_NORMAL_165           0x44A // ノーマル Lv165 じゃんぷボディ
+#define MOVE_LV200_NORMAL_166           0x44B // ノーマル Lv166 グッドモーニング
+#define MOVE_LV200_NORMAL_167           0x44C // ノーマル Lv167 おもいでのひかり
+#define MOVE_LV200_NORMAL_168           0x44D // ノーマル Lv168 ブルブルシェイク
+#define MOVE_LV200_NORMAL_169           0x44E // ノーマル Lv169 ひとしきりダイブ
+#define MOVE_LV200_NORMAL_170           0x44F // ノーマル Lv170 ふくびきアタック
+#define MOVE_LV200_NORMAL_171           0x450 // ノーマル Lv171 ぐんぐんチャージ
+#define MOVE_LV200_NORMAL_172           0x451 // ノーマル Lv172 どろんこダイブ
+#define MOVE_LV200_NORMAL_173           0x452 // ノーマル Lv173 たちむかうビンタ
+#define MOVE_LV200_NORMAL_174           0x453 // ノーマル Lv174 あおりトーク
+#define MOVE_LV200_NORMAL_175           0x454 // ノーマル Lv175 ひとふりのいやし
+#define MOVE_LV200_NORMAL_176           0x455 // ノーマル Lv176 ハッピーフラッグ
+#define MOVE_LV200_NORMAL_177           0x456 // ノーマル Lv177 プッシュオフ
+#define MOVE_LV200_NORMAL_178           0x457 // ノーマル Lv178 きあいのかけ
+#define MOVE_LV200_NORMAL_179           0x458 // ノーマル Lv179 ミニトルネード
+#define MOVE_LV200_NORMAL_180           0x459 // ノーマル Lv180 ミラーラウンド
+#define MOVE_LV200_NORMAL_181           0x45A // ノーマル Lv181 ビッグバウンス
+#define MOVE_LV200_NORMAL_182           0x45B // ノーマル Lv182 きのみハンター
+#define MOVE_LV200_NORMAL_183           0x45C // ノーマル Lv183 リベンジスマイル
+#define MOVE_LV200_NORMAL_184           0x45D // ノーマル Lv184 たたきおこし
+#define MOVE_LV200_NORMAL_185           0x45E // ノーマル Lv185 スタンプラッシュ
+#define MOVE_LV200_NORMAL_186           0x45F // ノーマル Lv186 あばれハンマー
+#define MOVE_LV200_NORMAL_187           0x460 // ノーマル Lv187 スピンキック
+#define MOVE_LV200_NORMAL_188           0x461 // ノーマル Lv188 ほえるがごとく
+#define MOVE_LV200_NORMAL_189           0x462 // ノーマル Lv189 ゴールドタックル
+#define MOVE_LV200_NORMAL_190           0x463 // ノーマル Lv190 イコールシェア
+#define MOVE_LV200_NORMAL_191           0x464 // ノーマル Lv191 ぐるぐるダンス
+#define MOVE_LV200_NORMAL_192           0x465 // ノーマル Lv192 いのちのうた
+#define MOVE_LV200_NORMAL_193           0x466 // ノーマル Lv193 ファンタジスタ
+#define MOVE_LV200_NORMAL_194           0x467 // ノーマル Lv194 ミリオンスマイル
+#define MOVE_LV200_NORMAL_195           0x468 // ノーマル Lv195 レジェンドクライ
+#define MOVE_LV200_NORMAL_196           0x469 // ノーマル Lv196 ヘビーバースト
+#define MOVE_LV200_NORMAL_197           0x46A // ノーマル Lv197 フィナーレパワー
+#define MOVE_LV200_NORMAL_198           0x46B // ノーマル Lv198 ファイナルコール
+#define MOVE_LV200_NORMAL_199           0x46C // ノーマル Lv199 かがやくこころ
+#define MOVE_LV200_NORMAL_200           0x46D // ノーマル Lv200 ハーフパス
+#define MOVE_LV200_FIGHTING_101         0x46E // かくとう Lv101 せいけんパンチ
+#define MOVE_LV200_FIGHTING_102         0x46F // かくとう Lv102 きあいはどうだん
+#define MOVE_LV200_FIGHTING_103         0x470 // かくとう Lv103 ステップキック
+#define MOVE_LV200_FIGHTING_104         0x471 // かくとう Lv104 ぼうだんパンチ
+#define MOVE_LV200_FIGHTING_105         0x472 // かくとう Lv105 ひゃっかんダイブ
+#define MOVE_LV200_FIGHTING_106         0x473 // かくとう Lv106 スープレックス
+#define MOVE_LV200_FIGHTING_107         0x474 // かくとう Lv107 ちゅうだんキック
+#define MOVE_LV200_FIGHTING_108         0x475 // かくとう Lv108 てっけんせいさい
+#define MOVE_LV200_FIGHTING_109         0x476 // かくとう Lv109 ブレイクスルー
+#define MOVE_LV200_FIGHTING_110         0x477 // かくとう Lv110 れんげきコンボ
+#define MOVE_LV200_FIGHTING_111         0x478 // かくとう Lv111 ちからだめし
+#define MOVE_LV200_FIGHTING_112         0x479 // かくとう Lv112 こころのまえげり
+#define MOVE_LV200_FIGHTING_113         0x47A // かくとう Lv113 ばくれつのきあい
+#define MOVE_LV200_FIGHTING_114         0x47B // かくとう Lv114 フルスイング
+#define MOVE_LV200_FIGHTING_115         0x47C // かくとう Lv115 ふんばりナックル
+#define MOVE_LV200_FIGHTING_116         0x47D // かくとう Lv116 いきなりドロップ
+#define MOVE_LV200_FIGHTING_117         0x47E // かくとう Lv117 たいぼくのかまえ
+#define MOVE_LV200_FIGHTING_118         0x47F // かくとう Lv118 かまえやぶり
+#define MOVE_LV200_FIGHTING_119         0x480 // かくとう Lv119 ラッシュアップ
+#define MOVE_LV200_FIGHTING_120         0x481 // かくとう Lv120 せいしんとういつ
+#define MOVE_LV200_FIGHTING_121         0x482 // かくとう Lv121 ほうがんパンチ
+#define MOVE_LV200_FIGHTING_122         0x483 // かくとう Lv122 どうじょうやぶり
+#define MOVE_LV200_FIGHTING_123         0x484 // かくとう Lv123 スピンスマッシュ
+#define MOVE_LV200_FIGHTING_124         0x485 // かくとう Lv124 きあいふたたび
+#define MOVE_LV200_FIGHTING_125         0x486 // かくとう Lv125 ダブルナックル
+#define MOVE_LV200_FIGHTING_126         0x487 // かくとう Lv126 うちおとしキック
+#define MOVE_LV200_FIGHTING_127         0x488 // かくとう Lv127 クロスカウンター
+#define MOVE_LV200_FIGHTING_128         0x489 // かくとう Lv128 こだまのせいけん
+#define MOVE_LV200_FIGHTING_129         0x48A // かくとう Lv129 とびかかりダイブ
+#define MOVE_LV200_FIGHTING_130         0x48B // かくとう Lv130 スピードナックル
+#define MOVE_LV200_FIGHTING_131         0x48C // かくとう Lv131 せんしのつきさし
+#define MOVE_LV200_FIGHTING_132         0x48D // かくとう Lv132 きあいスパーク
+#define MOVE_LV200_FIGHTING_133         0x48E // かくとう Lv133 いっぱつげきたい
+#define MOVE_LV200_FIGHTING_134         0x48F // かくとう Lv134 ぶつかりげいこ
+#define MOVE_LV200_FIGHTING_135         0x490 // かくとう Lv135 こうげきスイッチ
+#define MOVE_LV200_FIGHTING_136         0x491 // かくとう Lv136 どうじょうならい
+#define MOVE_LV200_FIGHTING_137         0x492 // かくとう Lv137 はっけいフォース
+#define MOVE_LV200_FIGHTING_138         0x493 // かくとう Lv138 せかいくだき
+#define MOVE_LV200_FIGHTING_139         0x494 // かくとう Lv139 ぶんかいハンマー
+#define MOVE_LV200_FIGHTING_140         0x495 // かくとう Lv140 ぎゃくふうがえし
+#define MOVE_LV200_FIGHTING_141         0x496 // かくとう Lv141 きあいのいぶき
+#define MOVE_LV200_FIGHTING_142         0x497 // かくとう Lv142 トライスピン
+#define MOVE_LV200_FIGHTING_143         0x498 // かくとう Lv143 おおぶりうでぐみ
+#define MOVE_LV200_FIGHTING_144         0x499 // かくとう Lv144 つばぜりあい
+#define MOVE_LV200_FIGHTING_145         0x49A // かくとう Lv145 しゅぎょうけっか
+#define MOVE_LV200_FIGHTING_146         0x49B // かくとう Lv146 だいちほうしゅ
+#define MOVE_LV200_FIGHTING_147         0x49C // かくとう Lv147 サンドバスター
+#define MOVE_LV200_FIGHTING_148         0x49D // かくとう Lv148 ぎゃくてんけん
+#define MOVE_LV200_FIGHTING_149         0x49E // かくとう Lv149 ゼロレンジ
+#define MOVE_LV200_FIGHTING_150         0x49F // かくとう Lv150 しんけんしょうぶ
+#define MOVE_LV200_FIGHTING_151         0x4A0 // かくとう Lv151 つっぱりラリー
+#define MOVE_LV200_FIGHTING_152         0x4A1 // かくとう Lv152 チャンプベルト
+#define MOVE_LV200_FIGHTING_153         0x4A2 // かくとう Lv153 てあらいスイング
+#define MOVE_LV200_FIGHTING_154         0x4A3 // かくとう Lv154 ぎりぎりのきわ
+#define MOVE_LV200_FIGHTING_155         0x4A4 // かくとう Lv155 ライジングパンチ
+#define MOVE_LV200_FIGHTING_156         0x4A5 // かくとう Lv156 たたかいのうた
+#define MOVE_LV200_FIGHTING_157         0x4A6 // かくとう Lv157 ぶつかりコンボ
+#define MOVE_LV200_FIGHTING_158         0x4A7 // かくとう Lv158 ひかりのこぶし
+#define MOVE_LV200_FIGHTING_159         0x4A8 // かくとう Lv159 きあいのかたまり
+#define MOVE_LV200_FIGHTING_160         0x4A9 // かくとう Lv160 つぶしのかた
+#define MOVE_LV200_FIGHTING_161         0x4AA // かくとう Lv161 しんくうれっぱ
+#define MOVE_LV200_FIGHTING_162         0x4AB // かくとう Lv162 ぶっとびプレス
+#define MOVE_LV200_FIGHTING_163         0x4AC // かくとう Lv163 いかりのつきあげ
+#define MOVE_LV200_FIGHTING_164         0x4AD // かくとう Lv164 しゅうちゅう
+#define MOVE_LV200_FIGHTING_165         0x4AE // かくとう Lv165 てっついスタンプ
+#define MOVE_LV200_FIGHTING_166         0x4AF // かくとう Lv166 ほうけんこうげき
+#define MOVE_LV200_FIGHTING_167         0x4B0 // かくとう Lv167 せんてひっしょう
+#define MOVE_LV200_FIGHTING_168         0x4B1 // かくとう Lv168 のこりのいっぱつ
+#define MOVE_LV200_FIGHTING_169         0x4B2 // かくとう Lv169 こんじょうフック
+#define MOVE_LV200_FIGHTING_170         0x4B3 // かくとう Lv170 ぶんどうのかまえ
+#define MOVE_LV200_FIGHTING_171         0x4B4 // かくとう Lv171 フルコンボ
+#define MOVE_LV200_FIGHTING_172         0x4B5 // かくとう Lv172 おおなげのかた
+#define MOVE_LV200_FIGHTING_173         0x4B6 // かくとう Lv173 かくごのこぶし
+#define MOVE_LV200_FIGHTING_174         0x4B7 // かくとう Lv174 スパークジャブ
+#define MOVE_LV200_FIGHTING_175         0x4B8 // かくとう Lv175 いなずまキック
+#define MOVE_LV200_FIGHTING_176         0x4B9 // かくとう Lv176 かわらくだき
+#define MOVE_LV200_FIGHTING_177         0x4BA // かくとう Lv177 ばくしんナックル
+#define MOVE_LV200_FIGHTING_178         0x4BB // かくとう Lv178 えんじんフック
+#define MOVE_LV200_FIGHTING_179         0x4BC // かくとう Lv179 れいかんウェーブ
+#define MOVE_LV200_FIGHTING_180         0x4BD // かくとう Lv180 ばくれつけん
+#define MOVE_LV200_FIGHTING_181         0x4BE // かくとう Lv181 ゴッドハンド
+#define MOVE_LV200_FIGHTING_182         0x4BF // かくとう Lv182 スーパーバスター
+#define MOVE_LV200_FIGHTING_183         0x4C0 // かくとう Lv183 つよがりナックル
+#define MOVE_LV200_FIGHTING_184         0x4C1 // かくとう Lv184 てんかドロップ
+#define MOVE_LV200_FIGHTING_185         0x4C2 // かくとう Lv185 かんぼつげき
+#define MOVE_LV200_FIGHTING_186         0x4C3 // かくとう Lv186 あばれラリー
+#define MOVE_LV200_FIGHTING_187         0x4C4 // かくとう Lv187 きあいクロス
+#define MOVE_LV200_FIGHTING_188         0x4C5 // かくとう Lv188 てんかむそう
+#define MOVE_LV200_FIGHTING_189         0x4C6 // かくとう Lv189 ぜんぶいちげき
+#define MOVE_LV200_FIGHTING_190         0x4C7 // かくとう Lv190 さいごのたたかい
+#define MOVE_LV200_FIGHTING_191         0x4C8 // かくとう Lv191 ボルトフィスト
+#define MOVE_LV200_FIGHTING_192         0x4C9 // かくとう Lv192 バトルマスターズ
+#define MOVE_LV200_FIGHTING_193         0x4CA // かくとう Lv193 せいなるこぶし
+#define MOVE_LV200_FIGHTING_194         0x4CB // かくとう Lv194 きわみのかた
+#define MOVE_LV200_FIGHTING_195         0x4CC // かくとう Lv195 むそうけんぽう
+#define MOVE_LV200_FIGHTING_196         0x4CD // かくとう Lv196 ラストバトル
+#define MOVE_LV200_FIGHTING_197         0x4CE // かくとう Lv197 かくとうじだい
+#define MOVE_LV200_FIGHTING_198         0x4CF // かくとう Lv198 はどうのひけん
+#define MOVE_LV200_FIGHTING_199         0x4D0 // かくとう Lv199 さいきょうけん
+#define MOVE_LV200_FIGHTING_200         0x4D1 // かくとう Lv200 おんぎのいちげき
+#define MOVE_LV200_FLYING_101           0x4D2 // ひこう Lv101 スカイクラッシュ
+#define MOVE_LV200_FLYING_102           0x4D3 // ひこう Lv102 ウィンドカッター
+#define MOVE_LV200_FLYING_103           0x4D4 // ひこう Lv103 つばめくだき
+#define MOVE_LV200_FLYING_104           0x4D5 // ひこう Lv104 ハネのおまじない
+#define MOVE_LV200_FLYING_105           0x4D6 // ひこう Lv105 グライドダイブ
+#define MOVE_LV200_FLYING_106           0x4D7 // ひこう Lv106 あらしのくちばし
+#define MOVE_LV200_FLYING_107           0x4D8 // ひこう Lv107 ギガウィング
+#define MOVE_LV200_FLYING_108           0x4D9 // ひこう Lv108 カゼキリバースト
+#define MOVE_LV200_FLYING_109           0x4DA // ひこう Lv109 スカイドライブ
+#define MOVE_LV200_FLYING_110           0x4DB // ひこう Lv110 おいかぜアタック
+#define MOVE_LV200_FLYING_111           0x4DC // ひこう Lv111 ひこうのまい
+#define MOVE_LV200_FLYING_112           0x4DD // ひこう Lv112 つむじスラスト
+#define MOVE_LV200_FLYING_113           0x4DE // ひこう Lv113 ブラストウィング
+#define MOVE_LV200_FLYING_114           0x4DF // ひこう Lv114 うずまきたつまき
+#define MOVE_LV200_FLYING_115           0x4E0 // ひこう Lv115 ミストラルのかぜ
+#define MOVE_LV200_FLYING_116           0x4E1 // ひこう Lv116 はねラッシュ
+#define MOVE_LV200_FLYING_117           0x4E2 // ひこう Lv117 ホバリングキック
+#define MOVE_LV200_FLYING_118           0x4E3 // ひこう Lv118 かぜのしらべ
+#define MOVE_LV200_FLYING_119           0x4E4 // ひこう Lv119 スカイフォール
+#define MOVE_LV200_FLYING_120           0x4E5 // ひこう Lv120 たかとびのかまえ
+#define MOVE_LV200_FLYING_121           0x4E6 // ひこう Lv121 くうちゅうくびわ
+#define MOVE_LV200_FLYING_122           0x4E7 // ひこう Lv122 そらをかける
+#define MOVE_LV200_FLYING_123           0x4E8 // ひこう Lv123 ゲイルブレード
+#define MOVE_LV200_FLYING_124           0x4E9 // ひこう Lv124 はばたきバースト
+#define MOVE_LV200_FLYING_125           0x4EA // ひこう Lv125 トルネードスピン
+#define MOVE_LV200_FLYING_126           0x4EB // ひこう Lv126 とっぷうリベンジ
+#define MOVE_LV200_FLYING_127           0x4EC // ひこう Lv127 はやぶさタックル
+#define MOVE_LV200_FLYING_128           0x4ED // ひこう Lv128 きりもみアロー
+#define MOVE_LV200_FLYING_129           0x4EE // ひこう Lv129 たかのつめ
+#define MOVE_LV200_FLYING_130           0x4EF // ひこう Lv130 きまぐれてんき
+#define MOVE_LV200_FLYING_131           0x4F0 // ひこう Lv131 ソニックグライド
+#define MOVE_LV200_FLYING_132           0x4F1 // ひこう Lv132 ふきあれるかぜ
+#define MOVE_LV200_FLYING_133           0x4F2 // ひこう Lv133 スカイサンダー
+#define MOVE_LV200_FLYING_134           0x4F3 // ひこう Lv134 ぜんぜんふぶき
+#define MOVE_LV200_FLYING_135           0x4F4 // ひこう Lv135 かげろうのつばさ
+#define MOVE_LV200_FLYING_136           0x4F5 // ひこう Lv136 そらのおうさま
+#define MOVE_LV200_FLYING_137           0x4F6 // ひこう Lv137 ふわふわバウンス
+#define MOVE_LV200_FLYING_138           0x4F7 // ひこう Lv138 うみどりのうた
+#define MOVE_LV200_FLYING_139           0x4F8 // ひこう Lv139 ライジングブレス
+#define MOVE_LV200_FLYING_140           0x4F9 // ひこう Lv140 ぜんりょくのはね
+#define MOVE_LV200_FLYING_141           0x4FA // ひこう Lv141 フライトコール
+#define MOVE_LV200_FLYING_142           0x4FB // ひこう Lv142 あらしのいたずら
+#define MOVE_LV200_FLYING_143           0x4FC // ひこう Lv143 グランドスラム
+#define MOVE_LV200_FLYING_144           0x4FD // ひこう Lv144 ファルコンパンチ
+#define MOVE_LV200_FLYING_145           0x4FE // ひこう Lv145 みだれつばさ
+#define MOVE_LV200_FLYING_146           0x4FF // ひこう Lv146 キリングウィンド
+#define MOVE_LV200_FLYING_147           0x500 // ひこう Lv147 トルネードランス
+#define MOVE_LV200_FLYING_148           0x501 // ひこう Lv148 つばさのよびごえ
+#define MOVE_LV200_FLYING_149           0x502 // ひこう Lv149 サイクロンキラー
+#define MOVE_LV200_FLYING_150           0x503 // ひこう Lv150 つばさのまもり
+#define MOVE_LV200_FLYING_151           0x504 // ひこう Lv151 そらのしゅうげき
+#define MOVE_LV200_FLYING_152           0x505 // ひこう Lv152 アクロスクリュー
+#define MOVE_LV200_FLYING_153           0x506 // ひこう Lv153 エアブレイド
+#define MOVE_LV200_FLYING_154           0x507 // ひこう Lv154 とびだしバスター
+#define MOVE_LV200_FLYING_155           0x508 // ひこう Lv155 フライングダイブ
+#define MOVE_LV200_FLYING_156           0x509 // ひこう Lv156 てんくうのいかり
+#define MOVE_LV200_FLYING_157           0x50A // ひこう Lv157 きりさきウィング
+#define MOVE_LV200_FLYING_158           0x50B // ひこう Lv158 せきらんうん
+#define MOVE_LV200_FLYING_159           0x50C // ひこう Lv159 ガルーダのつばさ
+#define MOVE_LV200_FLYING_160           0x50D // ひこう Lv160 ついふうチャージ
+#define MOVE_LV200_FLYING_161           0x50E // ひこう Lv161 すなあらしのかぜ
+#define MOVE_LV200_FLYING_162           0x50F // ひこう Lv162 つらぬきグライド
+#define MOVE_LV200_FLYING_163           0x510 // ひこう Lv163 クラウドブラスト
+#define MOVE_LV200_FLYING_164           0x511 // ひこう Lv164 ふうそくマッハ
+#define MOVE_LV200_FLYING_165           0x512 // ひこう Lv165 そうふうスラスト
+#define MOVE_LV200_FLYING_166           0x513 // ひこう Lv166 フェニックス
+#define MOVE_LV200_FLYING_167           0x514 // ひこう Lv167 きりさくかぜ
+#define MOVE_LV200_FLYING_168           0x515 // ひこう Lv168 ウィングバスター
+#define MOVE_LV200_FLYING_169           0x516 // ひこう Lv169 かぜのたいふう
+#define MOVE_LV200_FLYING_170           0x517 // ひこう Lv170 かぜのたいじ
+#define MOVE_LV200_FLYING_171           0x518 // ひこう Lv171 いっせんのつばさ
+#define MOVE_LV200_FLYING_172           0x519 // ひこう Lv172 ビッグウィング
+#define MOVE_LV200_FLYING_173           0x51A // ひこう Lv173 てんくうきりもみ
+#define MOVE_LV200_FLYING_174           0x51B // ひこう Lv174 ブレイブフラップ
+#define MOVE_LV200_FLYING_175           0x51C // ひこう Lv175 ジェットゲイル
+#define MOVE_LV200_FLYING_176           0x51D // ひこう Lv176 かぜのささやき
+#define MOVE_LV200_FLYING_177           0x51E // ひこう Lv177 てんくうたつまき
+#define MOVE_LV200_FLYING_178           0x51F // ひこう Lv178 ゴッドウィング
+#define MOVE_LV200_FLYING_179           0x520 // ひこう Lv179 しんくうのやいば
+#define MOVE_LV200_FLYING_180           0x521 // ひこう Lv180 ストームフロント
+#define MOVE_LV200_FLYING_181           0x522 // ひこう Lv181 ほしのつばさ
+#define MOVE_LV200_FLYING_182           0x523 // ひこう Lv182 スカイウォーカー
+#define MOVE_LV200_FLYING_183           0x524 // ひこう Lv183 かがやくつばさ
+#define MOVE_LV200_FLYING_184           0x525 // ひこう Lv184 うなるつばさ
+#define MOVE_LV200_FLYING_185           0x526 // ひこう Lv185 スピンドライブ
+#define MOVE_LV200_FLYING_186           0x527 // ひこう Lv186 ちょうくうやいば
+#define MOVE_LV200_FLYING_187           0x528 // ひこう Lv187 ぜんかいブレイブ
+#define MOVE_LV200_FLYING_188           0x529 // ひこう Lv188 そらわりアタック
+#define MOVE_LV200_FLYING_189           0x52A // ひこう Lv189 アイアンフェザー
+#define MOVE_LV200_FLYING_190           0x52B // ひこう Lv190 ぶんしんのまい
+#define MOVE_LV200_FLYING_191           0x52C // ひこう Lv191 らいめいダイブ
+#define MOVE_LV200_FLYING_192           0x52D // ひこう Lv192 フルフライト
+#define MOVE_LV200_FLYING_193           0x52E // ひこう Lv193 ダイナミックカゼ
+#define MOVE_LV200_FLYING_194           0x52F // ひこう Lv194 ミリオンウィング
+#define MOVE_LV200_FLYING_195           0x530 // ひこう Lv195 きわみのあらし
+#define MOVE_LV200_FLYING_196           0x531 // ひこう Lv196 てんくうのおうぎ
+#define MOVE_LV200_FLYING_197           0x532 // ひこう Lv197 ファイナルゲイル
+#define MOVE_LV200_FLYING_198           0x533 // ひこう Lv198 フルウィング
+#define MOVE_LV200_FLYING_199           0x534 // ひこう Lv199 そらのはて
+#define MOVE_LV200_FLYING_200           0x535 // ひこう Lv200 ひこうのけっかい
+#define MOVE_LV200_POISON_101           0x536 // どく Lv101 ヘドロバースト
+#define MOVE_LV200_POISON_102           0x537 // どく Lv102 どくばりシャワー
+#define MOVE_LV200_POISON_103           0x538 // どく Lv103 どくどくフォール
+#define MOVE_LV200_POISON_104           0x539 // どく Lv104 しょうきのいぶき
+#define MOVE_LV200_POISON_105           0x53A // どく Lv105 くされドロップ
+#define MOVE_LV200_POISON_106           0x53B // どく Lv106 ヴェノムタックル
+#define MOVE_LV200_POISON_107           0x53C // どく Lv107 はくしょくのきり
+#define MOVE_LV200_POISON_108           0x53D // どく Lv108 どくのよろい
+#define MOVE_LV200_POISON_109           0x53E // どく Lv109 ポイズンクロス
+#define MOVE_LV200_POISON_110           0x53F // どく Lv110 ベノムシャワー
+#define MOVE_LV200_POISON_111           0x540 // どく Lv111 ふくろのどく
+#define MOVE_LV200_POISON_112           0x541 // どく Lv112 マスクブレイク
+#define MOVE_LV200_POISON_113           0x542 // どく Lv113 くちなわのきば
+#define MOVE_LV200_POISON_114           0x543 // どく Lv114 ぜっさんヘドロ
+#define MOVE_LV200_POISON_115           0x544 // どく Lv115 ぬけがらカット
+#define MOVE_LV200_POISON_116           0x545 // どく Lv116 ドクガドライブ
+#define MOVE_LV200_POISON_117           0x546 // どく Lv117 ベノムテラー
+#define MOVE_LV200_POISON_118           0x547 // どく Lv118 ダストしぶき
+#define MOVE_LV200_POISON_119           0x548 // どく Lv119 ひとさしどく
+#define MOVE_LV200_POISON_120           0x549 // どく Lv120 ストックヴェノム
+#define MOVE_LV200_POISON_121           0x54A // どく Lv121 ちゅうどくパワー
+#define MOVE_LV200_POISON_122           0x54B // どく Lv122 じわじわスプレー
+#define MOVE_LV200_POISON_123           0x54C // どく Lv123 ヘドロびんた
+#define MOVE_LV200_POISON_124           0x54D // どく Lv124 しびれどくばり
+#define MOVE_LV200_POISON_125           0x54E // どく Lv125 ガスバーナー
+#define MOVE_LV200_POISON_126           0x54F // どく Lv126 どくのしぶき
+#define MOVE_LV200_POISON_127           0x550 // どく Lv127 どくばりれんだ
+#define MOVE_LV200_POISON_128           0x551 // どく Lv128 ダブルスティング
+#define MOVE_LV200_POISON_129           0x552 // どく Lv129 ベノムスピア
+#define MOVE_LV200_POISON_130           0x553 // どく Lv130 どくどくダンス
+#define MOVE_LV200_POISON_131           0x554 // どく Lv131 ふんどのヘドロ
+#define MOVE_LV200_POISON_132           0x555 // どく Lv132 もうどくのつき
+#define MOVE_LV200_POISON_133           0x556 // どく Lv133 サルファーボム
+#define MOVE_LV200_POISON_134           0x557 // どく Lv134 バイオハザード
+#define MOVE_LV200_POISON_135           0x558 // どく Lv135 しょうきのうた
+#define MOVE_LV200_POISON_136           0x559 // どく Lv136 ヴェノムダイブ
+#define MOVE_LV200_POISON_137           0x55A // どく Lv137 ゆうどくノヴァ
+#define MOVE_LV200_POISON_138           0x55B // どく Lv138 アシッドクエイク
+#define MOVE_LV200_POISON_139           0x55C // どく Lv139 どくばりのあらし
+#define MOVE_LV200_POISON_140           0x55D // どく Lv140 ふうじるどく
+#define MOVE_LV200_POISON_141           0x55E // どく Lv141 ミストポイズン
+#define MOVE_LV200_POISON_142           0x55F // どく Lv142 ヒルのチュウ
+#define MOVE_LV200_POISON_143           0x560 // どく Lv143 あさのどくけし
+#define MOVE_LV200_POISON_144           0x561 // どく Lv144 くさったおんぎ
+#define MOVE_LV200_POISON_145           0x562 // どく Lv145 ベノムアーチ
+#define MOVE_LV200_POISON_146           0x563 // どく Lv146 コブラストライク
+#define MOVE_LV200_POISON_147           0x564 // どく Lv147 スモッグストーム
+#define MOVE_LV200_POISON_148           0x565 // どく Lv148 ヘビのひとにらみ
+#define MOVE_LV200_POISON_149           0x566 // どく Lv149 どくのまよい
+#define MOVE_LV200_POISON_150           0x567 // どく Lv150 ひふくぶんかい
+#define MOVE_LV200_POISON_151           0x568 // どく Lv151 やみのどくばり
+#define MOVE_LV200_POISON_152           0x569 // どく Lv152 きょうあくパンチ
+#define MOVE_LV200_POISON_153           0x56A // どく Lv153 どくのリング
+#define MOVE_LV200_POISON_154           0x56B // どく Lv154 まよいのどく
+#define MOVE_LV200_POISON_155           0x56C // どく Lv155 どくばりのまほう
+#define MOVE_LV200_POISON_156           0x56D // どく Lv156 じゃあくのしずく
+#define MOVE_LV200_POISON_157           0x56E // どく Lv157 どくばりミサイル
+#define MOVE_LV200_POISON_158           0x56F // どく Lv158 ドラゴンヴェノム
+#define MOVE_LV200_POISON_159           0x570 // どく Lv159 どくのこかげ
+#define MOVE_LV200_POISON_160           0x571 // どく Lv160 しんこうスピード
+#define MOVE_LV200_POISON_161           0x572 // どく Lv161 きばのどくばり
+#define MOVE_LV200_POISON_162           0x573 // どく Lv162 ぼくめつのヘドロ
+#define MOVE_LV200_POISON_163           0x574 // どく Lv163 ヴェノムミラー
+#define MOVE_LV200_POISON_164           0x575 // どく Lv164 ファングリップ
+#define MOVE_LV200_POISON_165           0x576 // どく Lv165 アシッドレイン
+#define MOVE_LV200_POISON_166           0x577 // どく Lv166 どくどくラスト
+#define MOVE_LV200_POISON_167           0x578 // どく Lv167 どくのトリック
+#define MOVE_LV200_POISON_168           0x579 // どく Lv168 くさりのどく
+#define MOVE_LV200_POISON_169           0x57A // どく Lv169 ざんしんなどく
+#define MOVE_LV200_POISON_170           0x57B // どく Lv170 ヴェノムシフト
+#define MOVE_LV200_POISON_171           0x57C // どく Lv171 やけつくどく
+#define MOVE_LV200_POISON_172           0x57D // どく Lv172 ベノムジャイロ
+#define MOVE_LV200_POISON_173           0x57E // どく Lv173 ふかいどくのきり
+#define MOVE_LV200_POISON_174           0x57F // どく Lv174 ふきだすガス
+#define MOVE_LV200_POISON_175           0x580 // どく Lv175 ヴェノムスピン
+#define MOVE_LV200_POISON_176           0x581 // どく Lv176 ほうしのどく
+#define MOVE_LV200_POISON_177           0x582 // どく Lv177 どくのはなびら
+#define MOVE_LV200_POISON_178           0x583 // どく Lv178 スモッグバルーン
+#define MOVE_LV200_POISON_179           0x584 // どく Lv179 ぱくりヴェノム
+#define MOVE_LV200_POISON_180           0x585 // どく Lv180 ガスしょう
+#define MOVE_LV200_POISON_181           0x586 // どく Lv181 どくばりドリル
+#define MOVE_LV200_POISON_182           0x587 // どく Lv182 どくさいほうしゅ
+#define MOVE_LV200_POISON_183           0x588 // どく Lv183 バイオクラッシュ
+#define MOVE_LV200_POISON_184           0x589 // どく Lv184 ポイズンジャグル
+#define MOVE_LV200_POISON_185           0x58A // どく Lv185 トキシックエッジ
+#define MOVE_LV200_POISON_186           0x58B // どく Lv186 ぶっしょくぬまち
+#define MOVE_LV200_POISON_187           0x58C // どく Lv187 ヴェノムドラゴン
+#define MOVE_LV200_POISON_188           0x58D // どく Lv188 げきどくのしぶき
+#define MOVE_LV200_POISON_189           0x58E // どく Lv189 ヴェノムクラック
+#define MOVE_LV200_POISON_190           0x58F // どく Lv190 どくのいけにえ
+#define MOVE_LV200_POISON_191           0x590 // どく Lv191 めいわくなガス
+#define MOVE_LV200_POISON_192           0x591 // どく Lv192 ベノムインパクト
+#define MOVE_LV200_POISON_193           0x592 // どく Lv193 しりょうばくはつ
+#define MOVE_LV200_POISON_194           0x593 // どく Lv194 どくどくのうたげ
+#define MOVE_LV200_POISON_195           0x594 // どく Lv195 ラストヴェノム
+#define MOVE_LV200_POISON_196           0x595 // どく Lv196 バイオノヴァ
+#define MOVE_LV200_POISON_197           0x596 // どく Lv197 アポカリミスト
+#define MOVE_LV200_POISON_198           0x597 // どく Lv198 ヴェノムワールド
+#define MOVE_LV200_POISON_199           0x598 // どく Lv199 パンデミック
+#define MOVE_LV200_POISON_200           0x599 // どく Lv200 どくのおうさま
+#define MOVE_LV200_GROUND_101           0x59A // じめん Lv101 だいちのうねり
+#define MOVE_LV200_GROUND_102           0x59B // じめん Lv102 さじんバースト
+#define MOVE_LV200_GROUND_103           0x59C // じめん Lv103 どろのスコール
+#define MOVE_LV200_GROUND_104           0x59D // じめん Lv104 ちかのこえ
+#define MOVE_LV200_GROUND_105           0x59E // じめん Lv105 さばくのようさい
+#define MOVE_LV200_GROUND_106           0x59F // じめん Lv106 じわれのいきおい
+#define MOVE_LV200_GROUND_107           0x5A0 // じめん Lv107 つちけむり
+#define MOVE_LV200_GROUND_108           0x5A1 // じめん Lv108 ガレキのあらし
+#define MOVE_LV200_GROUND_109           0x5A2 // じめん Lv109 ぼうえいスコップ
+#define MOVE_LV200_GROUND_110           0x5A3 // じめん Lv110 すなぐいパンチ
+#define MOVE_LV200_GROUND_111           0x5A4 // じめん Lv111 じめんのこうしん
+#define MOVE_LV200_GROUND_112           0x5A5 // じめん Lv112 ちくわぶブロー
+#define MOVE_LV200_GROUND_113           0x5A6 // じめん Lv113 ぼんちストンプ
+#define MOVE_LV200_GROUND_114           0x5A7 // じめん Lv114 ねんどのよろい
+#define MOVE_LV200_GROUND_115           0x5A8 // じめん Lv115 どろみずキャノン
+#define MOVE_LV200_GROUND_116           0x5A9 // じめん Lv116 さばくのたいよう
+#define MOVE_LV200_GROUND_117           0x5AA // じめん Lv117 ガイアクラッシュ
+#define MOVE_LV200_GROUND_118           0x5AB // じめん Lv118 ほねダブルスロー
+#define MOVE_LV200_GROUND_119           0x5AC // じめん Lv119 じならしのたび
+#define MOVE_LV200_GROUND_120           0x5AD // じめん Lv120 ほりすすむ
+#define MOVE_LV200_GROUND_121           0x5AE // じめん Lv121 あなほりダンス
+#define MOVE_LV200_GROUND_122           0x5AF // じめん Lv122 どせいのはどう
+#define MOVE_LV200_GROUND_123           0x5B0 // じめん Lv123 すなあらしのまい
+#define MOVE_LV200_GROUND_124           0x5B1 // じめん Lv124 ひびわれアタック
+#define MOVE_LV200_GROUND_125           0x5B2 // じめん Lv125 どろんこリベンジ
+#define MOVE_LV200_GROUND_126           0x5B3 // じめん Lv126 グランドホールド
+#define MOVE_LV200_GROUND_127           0x5B4 // じめん Lv127 ずしんパンチ
+#define MOVE_LV200_GROUND_128           0x5B5 // じめん Lv128 ちかみずのうねり
+#define MOVE_LV200_GROUND_129           0x5B6 // じめん Lv129 おおすなのうた
+#define MOVE_LV200_GROUND_130           0x5B7 // じめん Lv130 さばくのオアシス
+#define MOVE_LV200_GROUND_131           0x5B8 // じめん Lv131 サンドボム
+#define MOVE_LV200_GROUND_132           0x5B9 // じめん Lv132 ほりほりダイブ
+#define MOVE_LV200_GROUND_133           0x5BA // じめん Lv133 ジャンボタックル
+#define MOVE_LV200_GROUND_134           0x5BB // じめん Lv134 どだいくずし
+#define MOVE_LV200_GROUND_135           0x5BC // じめん Lv135 タイラントプレス
+#define MOVE_LV200_GROUND_136           0x5BD // じめん Lv136 せつりのあらし
+#define MOVE_LV200_GROUND_137           0x5BE // じめん Lv137 サソリテイル
+#define MOVE_LV200_GROUND_138           0x5BF // じめん Lv138 てんちがえし
+#define MOVE_LV200_GROUND_139           0x5C0 // じめん Lv139 マグマショベル
+#define MOVE_LV200_GROUND_140           0x5C1 // じめん Lv140 ぬかるみ
+#define MOVE_LV200_GROUND_141           0x5C2 // じめん Lv141 だいちのいぶき
+#define MOVE_LV200_GROUND_142           0x5C3 // じめん Lv142 ばんりのバウンド
+#define MOVE_LV200_GROUND_143           0x5C4 // じめん Lv143 ちかぞこえんかい
+#define MOVE_LV200_GROUND_144           0x5C5 // じめん Lv144 じならしスタンプ
+#define MOVE_LV200_GROUND_145           0x5C6 // じめん Lv145 ギガントクエイク
+#define MOVE_LV200_GROUND_146           0x5C7 // じめん Lv146 あかつちのいかり
+#define MOVE_LV200_GROUND_147           0x5C8 // じめん Lv147 ふんじんバリア
+#define MOVE_LV200_GROUND_148           0x5C9 // じめん Lv148 ドリルダッシュ
+#define MOVE_LV200_GROUND_149           0x5CA // じめん Lv149 ちほうのしらせ
+#define MOVE_LV200_GROUND_150           0x5CB // じめん Lv150 すなのありじごく
+#define MOVE_LV200_GROUND_151           0x5CC // じめん Lv151 サンドインパクト
+#define MOVE_LV200_GROUND_152           0x5CD // じめん Lv152 スナのつるぎ
+#define MOVE_LV200_GROUND_153           0x5CE // じめん Lv153 いしクラッシュ
+#define MOVE_LV200_GROUND_154           0x5CF // じめん Lv154 どろんこファイト
+#define MOVE_LV200_GROUND_155           0x5D0 // じめん Lv155 なかばだいち
+#define MOVE_LV200_GROUND_156           0x5D1 // じめん Lv156 ゴリゴリスピン
+#define MOVE_LV200_GROUND_157           0x5D2 // じめん Lv157 さばくのおきて
+#define MOVE_LV200_GROUND_158           0x5D3 // じめん Lv158 たいちひとりじめ
+#define MOVE_LV200_GROUND_159           0x5D4 // じめん Lv159 てつぼうスイング
+#define MOVE_LV200_GROUND_160           0x5D5 // じめん Lv160 じばんくずし
+#define MOVE_LV200_GROUND_161           0x5D6 // じめん Lv161 ぬりかべガード
+#define MOVE_LV200_GROUND_162           0x5D7 // じめん Lv162 おもしクラッシュ
+#define MOVE_LV200_GROUND_163           0x5D8 // じめん Lv163 あれくるうだいち
+#define MOVE_LV200_GROUND_164           0x5D9 // じめん Lv164 ぼうふうのスナ
+#define MOVE_LV200_GROUND_165           0x5DA // じめん Lv165 だいちとりで
+#define MOVE_LV200_GROUND_166           0x5DB // じめん Lv166 ひらきなおり
+#define MOVE_LV200_GROUND_167           0x5DC // じめん Lv167 ファントムドリル
+#define MOVE_LV200_GROUND_168           0x5DD // じめん Lv168 どろだんごあらし
+#define MOVE_LV200_GROUND_169           0x5DE // じめん Lv169 だいじしん
+#define MOVE_LV200_GROUND_170           0x5DF // じめん Lv170 ちじょうしんどう
+#define MOVE_LV200_GROUND_171           0x5E0 // じめん Lv171 スカラベダッシュ
+#define MOVE_LV200_GROUND_172           0x5E1 // じめん Lv172 サンドウォール
+#define MOVE_LV200_GROUND_173           0x5E2 // じめん Lv173 ガイアバスター
+#define MOVE_LV200_GROUND_174           0x5E3 // じめん Lv174 ふみつぶし
+#define MOVE_LV200_GROUND_175           0x5E4 // じめん Lv175 さばくのまほう
+#define MOVE_LV200_GROUND_176           0x5E5 // じめん Lv176 どぶいたウェーブ
+#define MOVE_LV200_GROUND_177           0x5E6 // じめん Lv177 あなぐらパンチ
+#define MOVE_LV200_GROUND_178           0x5E7 // じめん Lv178 ひでりのだいち
+#define MOVE_LV200_GROUND_179           0x5E8 // じめん Lv179 だいちハンマー
+#define MOVE_LV200_GROUND_180           0x5E9 // じめん Lv180 だいちのめぐみ
+#define MOVE_LV200_GROUND_181           0x5EA // じめん Lv181 ほろびのだいち
+#define MOVE_LV200_GROUND_182           0x5EB // じめん Lv182 じばくじばん
+#define MOVE_LV200_GROUND_183           0x5EC // じめん Lv183 ちかいのだいち
+#define MOVE_LV200_GROUND_184           0x5ED // じめん Lv184 グラウンドゼロ
+#define MOVE_LV200_GROUND_185           0x5EE // じめん Lv185 じなりダイブ
+#define MOVE_LV200_GROUND_186           0x5EF // じめん Lv186 かたまるだいち
+#define MOVE_LV200_GROUND_187           0x5F0 // じめん Lv187 あたらしいだいち
+#define MOVE_LV200_GROUND_188           0x5F1 // じめん Lv188 ガイアストーム
+#define MOVE_LV200_GROUND_189           0x5F2 // じめん Lv189 おおじわれ
+#define MOVE_LV200_GROUND_190           0x5F3 // じめん Lv190 とどめのじしん
+#define MOVE_LV200_GROUND_191           0x5F4 // じめん Lv191 ちそうのさばく
+#define MOVE_LV200_GROUND_192           0x5F5 // じめん Lv192 かいそうのだいち
+#define MOVE_LV200_GROUND_193           0x5F6 // じめん Lv193 ちきゅうのいき
+#define MOVE_LV200_GROUND_194           0x5F7 // じめん Lv194 ゆるぎないだいち
+#define MOVE_LV200_GROUND_195           0x5F8 // じめん Lv195 はてなきさばく
+#define MOVE_LV200_GROUND_196           0x5F9 // じめん Lv196 ぜんりょくじめん
+#define MOVE_LV200_GROUND_197           0x5FA // じめん Lv197 ばんぶつのだいち
+#define MOVE_LV200_GROUND_198           0x5FB // じめん Lv198 アースゼロ
+#define MOVE_LV200_GROUND_199           0x5FC // じめん Lv199 だいちのおう
+#define MOVE_LV200_GROUND_200           0x5FD // じめん Lv200 すなのわな
+#define MOVE_LV200_ROCK_101             0x5FE // いわ Lv101 ストーンバレット
+#define MOVE_LV200_ROCK_102             0x5FF // いわ Lv102 いわのしらべ
+#define MOVE_LV200_ROCK_103             0x600 // いわ Lv103 つぶてガトリング
+#define MOVE_LV200_ROCK_104             0x601 // いわ Lv104 ダイヤカッター
+#define MOVE_LV200_ROCK_105             0x602 // いわ Lv105 がんせきキャノン
+#define MOVE_LV200_ROCK_106             0x603 // いわ Lv106 ごつごつアタック
+#define MOVE_LV200_ROCK_107             0x604 // いわ Lv107 かせきのいかり
+#define MOVE_LV200_ROCK_108             0x605 // いわ Lv108 サファイアビーム
+#define MOVE_LV200_ROCK_109             0x606 // いわ Lv109 ルビーカノン
+#define MOVE_LV200_ROCK_110             0x607 // いわ Lv110 ガーネットガード
+#define MOVE_LV200_ROCK_111             0x608 // いわ Lv111 ストーンフィスト
+#define MOVE_LV200_ROCK_112             0x609 // いわ Lv112 いんせきそうげき
+#define MOVE_LV200_ROCK_113             0x60A // いわ Lv113 エメラルドボム
+#define MOVE_LV200_ROCK_114             0x60B // いわ Lv114 せきえいフォール
+#define MOVE_LV200_ROCK_115             0x60C // いわ Lv115 かたいきずな
+#define MOVE_LV200_ROCK_116             0x60D // いわ Lv116 がんじょうのたて
+#define MOVE_LV200_ROCK_117             0x60E // いわ Lv117 こうぶつのいぶき
+#define MOVE_LV200_ROCK_118             0x60F // いわ Lv118 ゴロゴロストーン
+#define MOVE_LV200_ROCK_119             0x610 // いわ Lv119 ぶっとびいわ
+#define MOVE_LV200_ROCK_120             0x611 // いわ Lv120 いわおのうち
+#define MOVE_LV200_ROCK_121             0x612 // いわ Lv121 アンバーライト
+#define MOVE_LV200_ROCK_122             0x613 // いわ Lv122 がけくずし
+#define MOVE_LV200_ROCK_123             0x614 // いわ Lv123 こうがんバインド
+#define MOVE_LV200_ROCK_124             0x615 // いわ Lv124 えんすいしょう
+#define MOVE_LV200_ROCK_125             0x616 // いわ Lv125 ゲンブのこうら
+#define MOVE_LV200_ROCK_126             0x617 // いわ Lv126 ガレキのなみ
+#define MOVE_LV200_ROCK_127             0x618 // いわ Lv127 ごうがんハンマー
+#define MOVE_LV200_ROCK_128             0x619 // いわ Lv128 けっしょうだん
+#define MOVE_LV200_ROCK_129             0x61A // いわ Lv129 ストーンギア
+#define MOVE_LV200_ROCK_130             0x61B // いわ Lv130 ほりだしもの
+#define MOVE_LV200_ROCK_131             0x61C // いわ Lv131 ウルトラストーン
+#define MOVE_LV200_ROCK_132             0x61D // いわ Lv132 がんせきショット
+#define MOVE_LV200_ROCK_133             0x61E // いわ Lv133 いわきりカット
+#define MOVE_LV200_ROCK_134             0x61F // いわ Lv134 まっかなほうせき
+#define MOVE_LV200_ROCK_135             0x620 // いわ Lv135 いわのきょじん
+#define MOVE_LV200_ROCK_136             0x621 // いわ Lv136 すいしょうのうた
+#define MOVE_LV200_ROCK_137             0x622 // いわ Lv137 ストーンウォール
+#define MOVE_LV200_ROCK_138             0x623 // いわ Lv138 タイタンブレイク
+#define MOVE_LV200_ROCK_139             0x624 // いわ Lv139 がけっぷち
+#define MOVE_LV200_ROCK_140             0x625 // いわ Lv140 ひびわれスタンプ
+#define MOVE_LV200_ROCK_141             0x626 // いわ Lv141 ごろごろいわ
+#define MOVE_LV200_ROCK_142             0x627 // いわ Lv142 だいちのばんにん
+#define MOVE_LV200_ROCK_143             0x628 // いわ Lv143 きんこうせき
+#define MOVE_LV200_ROCK_144             0x629 // いわ Lv144 いわのかたまり
+#define MOVE_LV200_ROCK_145             0x62A // いわ Lv145 ゴーレムパンチ
+#define MOVE_LV200_ROCK_146             0x62B // いわ Lv146 グランドクロス
+#define MOVE_LV200_ROCK_147             0x62C // いわ Lv147 さんがんリング
+#define MOVE_LV200_ROCK_148             0x62D // いわ Lv148 ストーンジェット
+#define MOVE_LV200_ROCK_149             0x62E // いわ Lv149 ヘビーロック
+#define MOVE_LV200_ROCK_150             0x62F // いわ Lv150 いしくれのまく
+#define MOVE_LV200_ROCK_151             0x630 // いわ Lv151 ふっかつのかせき
+#define MOVE_LV200_ROCK_152             0x631 // いわ Lv152 ジェムストーム
+#define MOVE_LV200_ROCK_153             0x632 // いわ Lv153 せきじんのかまえ
+#define MOVE_LV200_ROCK_154             0x633 // いわ Lv154 いわやぶり
+#define MOVE_LV200_ROCK_155             0x634 // いわ Lv155 ストーンアート
+#define MOVE_LV200_ROCK_156             0x635 // いわ Lv156 てんがんブレイク
+#define MOVE_LV200_ROCK_157             0x636 // いわ Lv157 ドリルロック
+#define MOVE_LV200_ROCK_158             0x637 // いわ Lv158 ガーネットランス
+#define MOVE_LV200_ROCK_159             0x638 // いわ Lv159 いしのおうさま
+#define MOVE_LV200_ROCK_160             0x639 // いわ Lv160 ばくはつハザード
+#define MOVE_LV200_ROCK_161             0x63A // いわ Lv161 パワーストーン
+#define MOVE_LV200_ROCK_162             0x63B // いわ Lv162 かたいかたいいわ
+#define MOVE_LV200_ROCK_163             0x63C // いわ Lv163 サンドストーン
+#define MOVE_LV200_ROCK_164             0x63D // いわ Lv164 いわのつらら
+#define MOVE_LV200_ROCK_165             0x63E // いわ Lv165 ストーンパス
+#define MOVE_LV200_ROCK_166             0x63F // いわ Lv166 きばんのいかり
+#define MOVE_LV200_ROCK_167             0x640 // いわ Lv167 しょうげきせき
+#define MOVE_LV200_ROCK_168             0x641 // いわ Lv168 ごうがんダイブ
+#define MOVE_LV200_ROCK_169             0x642 // いわ Lv169 いわのインパクト
+#define MOVE_LV200_ROCK_170             0x643 // いわ Lv170 かせきリバイブ
+#define MOVE_LV200_ROCK_171             0x644 // いわ Lv171 こうてつのいわ
+#define MOVE_LV200_ROCK_172             0x645 // いわ Lv172 がんせきのおきて
+#define MOVE_LV200_ROCK_173             0x646 // いわ Lv173 いわいわラッシュ
+#define MOVE_LV200_ROCK_174             0x647 // いわ Lv174 きょだいガンセキ
+#define MOVE_LV200_ROCK_175             0x648 // いわ Lv175 ストーンコンボ
+#define MOVE_LV200_ROCK_176             0x649 // いわ Lv176 ほうせきのやま
+#define MOVE_LV200_ROCK_177             0x64A // いわ Lv177 ごうがんなだれ
+#define MOVE_LV200_ROCK_178             0x64B // いわ Lv178 ゴツゴツワールド
+#define MOVE_LV200_ROCK_179             0x64C // いわ Lv179 ひとかけらのいし
+#define MOVE_LV200_ROCK_180             0x64D // いわ Lv180 ロックフィールド
+#define MOVE_LV200_ROCK_181             0x64E // いわ Lv181 せいなるいわ
+#define MOVE_LV200_ROCK_182             0x64F // いわ Lv182 ごうせきドリル
+#define MOVE_LV200_ROCK_183             0x650 // いわ Lv183 ぐんじょうのやり
+#define MOVE_LV200_ROCK_184             0x651 // いわ Lv184 ストーンブレイク
+#define MOVE_LV200_ROCK_185             0x652 // いわ Lv185 ダイナロック
+#define MOVE_LV200_ROCK_186             0x653 // いわ Lv186 てんめつのいわ
+#define MOVE_LV200_ROCK_187             0x654 // いわ Lv187 ひだまりのいわ
+#define MOVE_LV200_ROCK_188             0x655 // いわ Lv188 ロックアーマー
+#define MOVE_LV200_ROCK_189             0x656 // いわ Lv189 ゴッドロック
+#define MOVE_LV200_ROCK_190             0x657 // いわ Lv190 かがやくクォーツ
+#define MOVE_LV200_ROCK_191             0x658 // いわ Lv191 たいりくのいかり
+#define MOVE_LV200_ROCK_192             0x659 // いわ Lv192 ストーンボム
+#define MOVE_LV200_ROCK_193             0x65A // いわ Lv193 ふっかつロック
+#define MOVE_LV200_ROCK_194             0x65B // いわ Lv194 きわみのいわ
+#define MOVE_LV200_ROCK_195             0x65C // いわ Lv195 がんせきのはて
+#define MOVE_LV200_ROCK_196             0x65D // いわ Lv196 いにしえのいかり
+#define MOVE_LV200_ROCK_197             0x65E // いわ Lv197 ジュエルノヴァ
+#define MOVE_LV200_ROCK_198             0x65F // いわ Lv198 ビッグバンロック
+#define MOVE_LV200_ROCK_199             0x660 // いわ Lv199 せかいのいわ
+#define MOVE_LV200_ROCK_200             0x661 // いわ Lv200 ラストストーン
+#define MOVE_LV200_BUG_101              0x662 // むし Lv101 スウォームカット
+#define MOVE_LV200_BUG_102              0x663 // むし Lv102 ハニースティング
+#define MOVE_LV200_BUG_103              0x664 // むし Lv103 みつばちラッシュ
+#define MOVE_LV200_BUG_104              0x665 // むし Lv104 かまきりカット
+#define MOVE_LV200_BUG_105              0x666 // むし Lv105 いとスプレー
+#define MOVE_LV200_BUG_106              0x667 // むし Lv106 はねあらしのうた
+#define MOVE_LV200_BUG_107              0x668 // むし Lv107 こがねのやり
+#define MOVE_LV200_BUG_108              0x669 // むし Lv108 かぶとわり
+#define MOVE_LV200_BUG_109              0x66A // むし Lv109 りんぷんのまい
+#define MOVE_LV200_BUG_110              0x66B // むし Lv110 さなぎのまもり
+#define MOVE_LV200_BUG_111              0x66C // むし Lv111 よつばのつばさ
+#define MOVE_LV200_BUG_112              0x66D // むし Lv112 きんいろのはね
+#define MOVE_LV200_BUG_113              0x66E // むし Lv113 ちょうちょダンス
+#define MOVE_LV200_BUG_114              0x66F // むし Lv114 ミツバチのうた
+#define MOVE_LV200_BUG_115              0x670 // むし Lv115 カブトタックル
+#define MOVE_LV200_BUG_116              0x671 // むし Lv116 シルクブレード
+#define MOVE_LV200_BUG_117              0x672 // むし Lv117 ばっさりカッター
+#define MOVE_LV200_BUG_118              0x673 // むし Lv118 どくあみのわな
+#define MOVE_LV200_BUG_119              0x674 // むし Lv119 ふゆうのはね
+#define MOVE_LV200_BUG_120              0x675 // むし Lv120 いとぬいのわざ
+#define MOVE_LV200_BUG_121              0x676 // むし Lv121 ギガバタフライ
+#define MOVE_LV200_BUG_122              0x677 // むし Lv122 くさむらのしかけ
+#define MOVE_LV200_BUG_123              0x678 // むし Lv123 クワガタカッター
+#define MOVE_LV200_BUG_124              0x679 // むし Lv124 でんしんのしらせ
+#define MOVE_LV200_BUG_125              0x67A // むし Lv125 ダンゴとっしん
+#define MOVE_LV200_BUG_126              0x67B // むし Lv126 アントストライク
+#define MOVE_LV200_BUG_127              0x67C // むし Lv127 かたむしのいかり
+#define MOVE_LV200_BUG_128              0x67D // むし Lv128 どくがのりんぷん
+#define MOVE_LV200_BUG_129              0x67E // むし Lv129 ななほしアタック
+#define MOVE_LV200_BUG_130              0x67F // むし Lv130 ぐんたいアタック
+#define MOVE_LV200_BUG_131              0x680 // むし Lv131 きばのスティング
+#define MOVE_LV200_BUG_132              0x681 // むし Lv132 そうがんアイ
+#define MOVE_LV200_BUG_133              0x682 // むし Lv133 ぜつぼうのハチ
+#define MOVE_LV200_BUG_134              0x683 // むし Lv134 かいこのあみ
+#define MOVE_LV200_BUG_135              0x684 // むし Lv135 ホーンショット
+#define MOVE_LV200_BUG_136              0x685 // むし Lv136 ひかりのりんぷん
+#define MOVE_LV200_BUG_137              0x686 // むし Lv137 ムカデのしめつけ
+#define MOVE_LV200_BUG_138              0x687 // むし Lv138 すずむしのはね
+#define MOVE_LV200_BUG_139              0x688 // むし Lv139 こかげのしのび
+#define MOVE_LV200_BUG_140              0x689 // むし Lv140 だっぴのごうし
+#define MOVE_LV200_BUG_141              0x68A // むし Lv141 ゆらゆらドリル
+#define MOVE_LV200_BUG_142              0x68B // むし Lv142 おどろのはね
+#define MOVE_LV200_BUG_143              0x68C // むし Lv143 ちいさなだいぐん
+#define MOVE_LV200_BUG_144              0x68D // むし Lv144 むしくいかじり
+#define MOVE_LV200_BUG_145              0x68E // むし Lv145 はちのひとさし
+#define MOVE_LV200_BUG_146              0x68F // むし Lv146 かまきりのおどし
+#define MOVE_LV200_BUG_147              0x690 // むし Lv147 がっぷりかじり
+#define MOVE_LV200_BUG_148              0x691 // むし Lv148 むしのいどころ
+#define MOVE_LV200_BUG_149              0x692 // むし Lv149 のこぎりスライス
+#define MOVE_LV200_BUG_150              0x693 // むし Lv150 いとあみふんしゃ
+#define MOVE_LV200_BUG_151              0x694 // むし Lv151 はちみつのとげ
+#define MOVE_LV200_BUG_152              0x695 // むし Lv152 せみしぐれ
+#define MOVE_LV200_BUG_153              0x696 // むし Lv153 とうみんあけ
+#define MOVE_LV200_BUG_154              0x697 // むし Lv154 けむしのいかり
+#define MOVE_LV200_BUG_155              0x698 // むし Lv155 かりうどのきば
+#define MOVE_LV200_BUG_156              0x699 // むし Lv156 ゆうわくりんぷん
+#define MOVE_LV200_BUG_157              0x69A // むし Lv157 むしのはどう
+#define MOVE_LV200_BUG_158              0x69B // むし Lv158 でんでんダッシュ
+#define MOVE_LV200_BUG_159              0x69C // むし Lv159 ぐるぐるなげ
+#define MOVE_LV200_BUG_160              0x69D // むし Lv160 むしのちょっかん
+#define MOVE_LV200_BUG_161              0x69E // むし Lv161 かゆみのこな
+#define MOVE_LV200_BUG_162              0x69F // むし Lv162 いっせいほうき
+#define MOVE_LV200_BUG_163              0x6A0 // むし Lv163 ありじごくのわな
+#define MOVE_LV200_BUG_164              0x6A1 // むし Lv164 ちょうせんばり
+#define MOVE_LV200_BUG_165              0x6A2 // むし Lv165 みどりのやり
+#define MOVE_LV200_BUG_166              0x6A3 // むし Lv166 カマキリのまい
+#define MOVE_LV200_BUG_167              0x6A4 // むし Lv167 ひめいのとげ
+#define MOVE_LV200_BUG_168              0x6A5 // むし Lv168 せいぎょのはね
+#define MOVE_LV200_BUG_169              0x6A6 // むし Lv169 ふゆうのひだね
+#define MOVE_LV200_BUG_170              0x6A7 // むし Lv170 りんぷんのかぜ
+#define MOVE_LV200_BUG_171              0x6A8 // むし Lv171 むしのたてがみ
+#define MOVE_LV200_BUG_172              0x6A9 // むし Lv172 ゆうえんのはね
+#define MOVE_LV200_BUG_173              0x6AA // むし Lv173 くわがたアーム
+#define MOVE_LV200_BUG_174              0x6AB // むし Lv174 いのちのみつ
+#define MOVE_LV200_BUG_175              0x6AC // むし Lv175 ぎらぎらのはね
+#define MOVE_LV200_BUG_176              0x6AD // むし Lv176 はいよるおもい
+#define MOVE_LV200_BUG_177              0x6AE // むし Lv177 どくばりスコール
+#define MOVE_LV200_BUG_178              0x6AF // むし Lv178 むしのあらし
+#define MOVE_LV200_BUG_179              0x6B0 // むし Lv179 コンバート
+#define MOVE_LV200_BUG_180              0x6B1 // むし Lv180 まゆのよろい
+#define MOVE_LV200_BUG_181              0x6B2 // むし Lv181 カブトとっしん
+#define MOVE_LV200_BUG_182              0x6B3 // むし Lv182 よるのむれ
+#define MOVE_LV200_BUG_183              0x6B4 // むし Lv183 ほうせきのはね
+#define MOVE_LV200_BUG_184              0x6B5 // むし Lv184 むしのえんそう
+#define MOVE_LV200_BUG_185              0x6B6 // むし Lv185 そらとぶカナブン
+#define MOVE_LV200_BUG_186              0x6B7 // むし Lv186 きょだいなあご
+#define MOVE_LV200_BUG_187              0x6B8 // むし Lv187 だいぐんのいかり
+#define MOVE_LV200_BUG_188              0x6B9 // むし Lv188 ムシムシウィング
+#define MOVE_LV200_BUG_189              0x6BA // むし Lv189 さいごのいっぴき
+#define MOVE_LV200_BUG_190              0x6BB // むし Lv190 たまごしかけ
+#define MOVE_LV200_BUG_191              0x6BC // むし Lv191 みつのあらし
+#define MOVE_LV200_BUG_192              0x6BD // むし Lv192 ごうれつばり
+#define MOVE_LV200_BUG_193              0x6BE // むし Lv193 ちょうのあらし
+#define MOVE_LV200_BUG_194              0x6BF // むし Lv194 カミキリブレード
+#define MOVE_LV200_BUG_195              0x6C0 // むし Lv195 めざめのむし
+#define MOVE_LV200_BUG_196              0x6C1 // むし Lv196 むしのこえ
+#define MOVE_LV200_BUG_197              0x6C2 // むし Lv197 キングビートル
+#define MOVE_LV200_BUG_198              0x6C3 // むし Lv198 むしだいしゅう
+#define MOVE_LV200_BUG_199              0x6C4 // むし Lv199 じょおうアタック
+#define MOVE_LV200_BUG_200              0x6C5 // むし Lv200 しじまのむれ
+#define MOVE_LV200_GHOST_101            0x6C6 // ゴースト Lv101 かげのしぐれ
+#define MOVE_LV200_GHOST_102            0x6C7 // ゴースト Lv102 ゴーストクロー
+#define MOVE_LV200_GHOST_103            0x6C8 // ゴースト Lv103 おどかしのしらせ
+#define MOVE_LV200_GHOST_104            0x6C9 // ゴースト Lv104 たたりのうず
+#define MOVE_LV200_GHOST_105            0x6CA // ゴースト Lv105 おばけのうた
+#define MOVE_LV200_GHOST_106            0x6CB // ゴースト Lv106 ゆうれいのつめ
+#define MOVE_LV200_GHOST_107            0x6CC // ゴースト Lv107 ほねほねラッシュ
+#define MOVE_LV200_GHOST_108            0x6CD // ゴースト Lv108 おんねんパンチ
+#define MOVE_LV200_GHOST_109            0x6CE // ゴースト Lv109 のろいのかがみ
+#define MOVE_LV200_GHOST_110            0x6CF // ゴースト Lv110 かげおさえ
+#define MOVE_LV200_GHOST_111            0x6D0 // ゴースト Lv111 たましいのゆくえ
+#define MOVE_LV200_GHOST_112            0x6D1 // ゴースト Lv112 さまようほのお
+#define MOVE_LV200_GHOST_113            0x6D2 // ゴースト Lv113 やみのそうしき
+#define MOVE_LV200_GHOST_114            0x6D3 // ゴースト Lv114 しのびよるかげ
+#define MOVE_LV200_GHOST_115            0x6D4 // ゴースト Lv115 おくりおおかみ
+#define MOVE_LV200_GHOST_116            0x6D5 // ゴースト Lv116 ゴーストダンス
+#define MOVE_LV200_GHOST_117            0x6D6 // ゴースト Lv117 ほろびのまえぶれ
+#define MOVE_LV200_GHOST_118            0x6D7 // ゴースト Lv118 まぼろしのつるぎ
+#define MOVE_LV200_GHOST_119            0x6D8 // ゴースト Lv119 ひとだまスピン
+#define MOVE_LV200_GHOST_120            0x6D9 // ゴースト Lv120 まよいごのさそい
+#define MOVE_LV200_GHOST_121            0x6DA // ゴースト Lv121 のろいのかたな
+#define MOVE_LV200_GHOST_122            0x6DB // ゴースト Lv122 きもだめしパンチ
+#define MOVE_LV200_GHOST_123            0x6DC // ゴースト Lv123 やみのいたずら
+#define MOVE_LV200_GHOST_124            0x6DD // ゴースト Lv124 ぶきみなこえ
+#define MOVE_LV200_GHOST_125            0x6DE // ゴースト Lv125 ゴーストライト
+#define MOVE_LV200_GHOST_126            0x6DF // ゴースト Lv126 かげわけアタック
+#define MOVE_LV200_GHOST_127            0x6E0 // ゴースト Lv127 むえんのかげ
+#define MOVE_LV200_GHOST_128            0x6E1 // ゴースト Lv128 ゆうれいのて
+#define MOVE_LV200_GHOST_129            0x6E2 // ゴースト Lv129 くらやみのぶつぎ
+#define MOVE_LV200_GHOST_130            0x6E3 // ゴースト Lv130 ぬけがらのかげ
+#define MOVE_LV200_GHOST_131            0x6E4 // ゴースト Lv131 ぶきみなほのお
+#define MOVE_LV200_GHOST_132            0x6E5 // ゴースト Lv132 ついばむぼうれい
+#define MOVE_LV200_GHOST_133            0x6E6 // ゴースト Lv133 ごはんのたたり
+#define MOVE_LV200_GHOST_134            0x6E7 // ゴースト Lv134 かげうちのまい
+#define MOVE_LV200_GHOST_135            0x6E8 // ゴースト Lv135 かげのダイブ
+#define MOVE_LV200_GHOST_136            0x6E9 // ゴースト Lv136 かなしばりのかぜ
+#define MOVE_LV200_GHOST_137            0x6EA // ゴースト Lv137 やみのささやき
+#define MOVE_LV200_GHOST_138            0x6EB // ゴースト Lv138 ねんりきのたたり
+#define MOVE_LV200_GHOST_139            0x6EC // ゴースト Lv139 ゆうれいのむれ
+#define MOVE_LV200_GHOST_140            0x6ED // ゴースト Lv140 うらみのこえ
+#define MOVE_LV200_GHOST_141            0x6EE // ゴースト Lv141 こころのかげ
+#define MOVE_LV200_GHOST_142            0x6EF // ゴースト Lv142 ミラクルシャドー
+#define MOVE_LV200_GHOST_143            0x6F0 // ゴースト Lv143 おばけのあいさつ
+#define MOVE_LV200_GHOST_144            0x6F1 // ゴースト Lv144 やみにひそむ
+#define MOVE_LV200_GHOST_145            0x6F2 // ゴースト Lv145 しんぞうつかみ
+#define MOVE_LV200_GHOST_146            0x6F3 // ゴースト Lv146 ゴーストフォール
+#define MOVE_LV200_GHOST_147            0x6F4 // ゴースト Lv147 やみよのかがみ
+#define MOVE_LV200_GHOST_148            0x6F5 // ゴースト Lv148 ゆめのなかのかげ
+#define MOVE_LV200_GHOST_149            0x6F6 // ゴースト Lv149 おんりょうさけび
+#define MOVE_LV200_GHOST_150            0x6F7 // ゴースト Lv150 しりょうのつどい
+#define MOVE_LV200_GHOST_151            0x6F8 // ゴースト Lv151 やみのしめつけ
+#define MOVE_LV200_GHOST_152            0x6F9 // ゴースト Lv152 ひやりシュート
+#define MOVE_LV200_GHOST_153            0x6FA // ゴースト Lv153 しんくうのかげ
+#define MOVE_LV200_GHOST_154            0x6FB // ゴースト Lv154 はいずりゴースト
+#define MOVE_LV200_GHOST_155            0x6FC // ゴースト Lv155 おばけパレード
+#define MOVE_LV200_GHOST_156            0x6FD // ゴースト Lv156 ゆうれいのきばつ
+#define MOVE_LV200_GHOST_157            0x6FE // ゴースト Lv157 そうれいのうたげ
+#define MOVE_LV200_GHOST_158            0x6FF // ゴースト Lv158 たましいカット
+#define MOVE_LV200_GHOST_159            0x700 // ゴースト Lv159 ゴーストバンプ
+#define MOVE_LV200_GHOST_160            0x701 // ゴースト Lv160 あのよのしらせ
+#define MOVE_LV200_GHOST_161            0x702 // ゴースト Lv161 かくれんぼ
+#define MOVE_LV200_GHOST_162            0x703 // ゴースト Lv162 うらめしラッシュ
+#define MOVE_LV200_GHOST_163            0x704 // ゴースト Lv163 シャドーキャノン
+#define MOVE_LV200_GHOST_164            0x705 // ゴースト Lv164 くらやみをまとう
+#define MOVE_LV200_GHOST_165            0x706 // ゴースト Lv165 ゆうれいのしらべ
+#define MOVE_LV200_GHOST_166            0x707 // ゴースト Lv166 きえるマジック
+#define MOVE_LV200_GHOST_167            0x708 // ゴースト Lv167 ゴーストのかまえ
+#define MOVE_LV200_GHOST_168            0x709 // ゴースト Lv168 こわいもの
+#define MOVE_LV200_GHOST_169            0x70A // ゴースト Lv169 むえんぼとけ
+#define MOVE_LV200_GHOST_170            0x70B // ゴースト Lv170 たましいけいやく
+#define MOVE_LV200_GHOST_171            0x70C // ゴースト Lv171 ばくしんのたたり
+#define MOVE_LV200_GHOST_172            0x70D // ゴースト Lv172 よなきのしらせ
+#define MOVE_LV200_GHOST_173            0x70E // ゴースト Lv173 かげのせかい
+#define MOVE_LV200_GHOST_174            0x70F // ゴースト Lv174 とりつくしま
+#define MOVE_LV200_GHOST_175            0x710 // ゴースト Lv175 たましいのりんぶ
+#define MOVE_LV200_GHOST_176            0x711 // ゴースト Lv176 ホロウナイト
+#define MOVE_LV200_GHOST_177            0x712 // ゴースト Lv177 ゴーストバスター
+#define MOVE_LV200_GHOST_178            0x713 // ゴースト Lv178 やみのてっつい
+#define MOVE_LV200_GHOST_179            0x714 // ゴースト Lv179 ゆうれいうず
+#define MOVE_LV200_GHOST_180            0x715 // ゴースト Lv180 やみのとばり
+#define MOVE_LV200_GHOST_181            0x716 // ゴースト Lv181 ひとだまのあらし
+#define MOVE_LV200_GHOST_182            0x717 // ゴースト Lv182 やみのこもりうた
+#define MOVE_LV200_GHOST_183            0x718 // ゴースト Lv183 かげぼうしいかり
+#define MOVE_LV200_GHOST_184            0x719 // ゴースト Lv184 くびなしライダー
+#define MOVE_LV200_GHOST_185            0x71A // ゴースト Lv185 ゴーストフェスタ
+#define MOVE_LV200_GHOST_186            0x71B // ゴースト Lv186 しにがみのかま
+#define MOVE_LV200_GHOST_187            0x71C // ゴースト Lv187 あくりょうアイ
+#define MOVE_LV200_GHOST_188            0x71D // ゴースト Lv188 ひゃっきのよる
+#define MOVE_LV200_GHOST_189            0x71E // ゴースト Lv189 ゴーストジャッジ
+#define MOVE_LV200_GHOST_190            0x71F // ゴースト Lv190 きょうふ
+#define MOVE_LV200_GHOST_191            0x720 // ゴースト Lv191 ほろびのかげ
+#define MOVE_LV200_GHOST_192            0x721 // ゴースト Lv192 やみのしんぞう
+#define MOVE_LV200_GHOST_193            0x722 // ゴースト Lv193 よのしらせ
+#define MOVE_LV200_GHOST_194            0x723 // ゴースト Lv194 ゴーストミサ
+#define MOVE_LV200_GHOST_195            0x724 // ゴースト Lv195 げんじつのかげ
+#define MOVE_LV200_GHOST_196            0x725 // ゴースト Lv196 ゴーストエンド
+#define MOVE_LV200_GHOST_197            0x726 // ゴースト Lv197 たましいのはて
+#define MOVE_LV200_GHOST_198            0x727 // ゴースト Lv198 ゴーストワールド
+#define MOVE_LV200_GHOST_199            0x728 // ゴースト Lv199 れいかいのうた
+#define MOVE_LV200_GHOST_200            0x729 // ゴースト Lv200 ふみとどまり
+#define MOVE_LV200_STEEL_101            0x72A // はがね Lv101 はがねクラッシュ
+#define MOVE_LV200_STEEL_102            0x72B // はがね Lv102 スチールビーム
+#define MOVE_LV200_STEEL_103            0x72C // はがね Lv103 てつのつめあと
+#define MOVE_LV200_STEEL_104            0x72D // はがね Lv104 ハガネウイング
+#define MOVE_LV200_STEEL_105            0x72E // はがね Lv105 ミラーカノン
+#define MOVE_LV200_STEEL_106            0x72F // はがね Lv106 ギアブレード
+#define MOVE_LV200_STEEL_107            0x730 // はがね Lv107 てっぺきスタンプ
+#define MOVE_LV200_STEEL_108            0x731 // はがね Lv108 アイアンライト
+#define MOVE_LV200_STEEL_109            0x732 // はがね Lv109 ターボギア
+#define MOVE_LV200_STEEL_110            0x733 // はがね Lv110 メタルアーマー
+#define MOVE_LV200_STEEL_111            0x734 // はがね Lv111 ヘビーバンカー
+#define MOVE_LV200_STEEL_112            0x735 // はがね Lv112 てつぼうビンタ
+#define MOVE_LV200_STEEL_113            0x736 // はがね Lv113 きりもみドリル
+#define MOVE_LV200_STEEL_114            0x737 // はがね Lv114 かがやくハガネ
+#define MOVE_LV200_STEEL_115            0x738 // はがね Lv115 はがねバスター
+#define MOVE_LV200_STEEL_116            0x739 // はがね Lv116 てつてつラッシュ
+#define MOVE_LV200_STEEL_117            0x73A // はがね Lv117 ぜんめんボルト
+#define MOVE_LV200_STEEL_118            0x73B // はがね Lv118 ごうきんパンチ
+#define MOVE_LV200_STEEL_119            0x73C // はがね Lv119 てっこうのまもり
+#define MOVE_LV200_STEEL_120            0x73D // はがね Lv120 はがねのトゲ
+#define MOVE_LV200_STEEL_121            0x73E // はがね Lv121 てのうちみせる
+#define MOVE_LV200_STEEL_122            0x73F // はがね Lv122 メタルスピン
+#define MOVE_LV200_STEEL_123            0x740 // はがね Lv123 きんぞくバット
+#define MOVE_LV200_STEEL_124            0x741 // はがね Lv124 スチールヘッド
+#define MOVE_LV200_STEEL_125            0x742 // はがね Lv125 てつのくさり
+#define MOVE_LV200_STEEL_126            0x743 // はがね Lv126 ぼうそうチェーン
+#define MOVE_LV200_STEEL_127            0x744 // はがね Lv127 はがねのきば
+#define MOVE_LV200_STEEL_128            0x745 // はがね Lv128 ミサイルパンチ
+#define MOVE_LV200_STEEL_129            0x746 // はがね Lv129 ダイヤウォール
+#define MOVE_LV200_STEEL_130            0x747 // はがね Lv130 ほうしんチューン
+#define MOVE_LV200_STEEL_131            0x748 // はがね Lv131 バネバッシュ
+#define MOVE_LV200_STEEL_132            0x749 // はがね Lv132 けっせんのおの
+#define MOVE_LV200_STEEL_133            0x74A // はがね Lv133 はがねドライブ
+#define MOVE_LV200_STEEL_134            0x74B // はがね Lv134 しんくうメタル
+#define MOVE_LV200_STEEL_135            0x74C // はがね Lv135 こうてつのうたげ
+#define MOVE_LV200_STEEL_136            0x74D // はがね Lv136 アーマープレス
+#define MOVE_LV200_STEEL_137            0x74E // はがね Lv137 てっかいだん
+#define MOVE_LV200_STEEL_138            0x74F // はがね Lv138 スチールスラム
+#define MOVE_LV200_STEEL_139            0x750 // はがね Lv139 でんじのロード
+#define MOVE_LV200_STEEL_140            0x751 // はがね Lv140 かがみのよろい
+#define MOVE_LV200_STEEL_141            0x752 // はがね Lv141 てつのカーテン
+#define MOVE_LV200_STEEL_142            0x753 // はがね Lv142 ジェットギア
+#define MOVE_LV200_STEEL_143            0x754 // はがね Lv143 ガードシールド
+#define MOVE_LV200_STEEL_144            0x755 // はがね Lv144 ダブルスチール
+#define MOVE_LV200_STEEL_145            0x756 // はがね Lv145 サイコメタル
+#define MOVE_LV200_STEEL_146            0x757 // はがね Lv146 せいてつのいかり
+#define MOVE_LV200_STEEL_147            0x758 // はがね Lv147 くろがねカノン
+#define MOVE_LV200_STEEL_148            0x759 // はがね Lv148 ハガネのやりつき
+#define MOVE_LV200_STEEL_149            0x75A // はがね Lv149 くろがねのやみ
+#define MOVE_LV200_STEEL_150            0x75B // はがね Lv150 やいばラッシュ
+#define MOVE_LV200_STEEL_151            0x75C // はがね Lv151 でんじりゅうけん
+#define MOVE_LV200_STEEL_152            0x75D // はがね Lv152 がっしりアーム
+#define MOVE_LV200_STEEL_153            0x75E // はがね Lv153 うずまきブレード
+#define MOVE_LV200_STEEL_154            0x75F // はがね Lv154 メカバースト
+#define MOVE_LV200_STEEL_155            0x760 // はがね Lv155 てつのかべ
+#define MOVE_LV200_STEEL_156            0x761 // はがね Lv156 いかりショット
+#define MOVE_LV200_STEEL_157            0x762 // はがね Lv157 だんがんパンチ
+#define MOVE_LV200_STEEL_158            0x763 // はがね Lv158 きょうじんパワー
+#define MOVE_LV200_STEEL_159            0x764 // はがね Lv159 アイアンメイデン
+#define MOVE_LV200_STEEL_160            0x765 // はがね Lv160 こうてつウォール
+#define MOVE_LV200_STEEL_161            0x766 // はがね Lv161 たたかうこうてつ
+#define MOVE_LV200_STEEL_162            0x767 // はがね Lv162 レーザーフォース
+#define MOVE_LV200_STEEL_163            0x768 // はがね Lv163 パンチングナイト
+#define MOVE_LV200_STEEL_164            0x769 // はがね Lv164 てっつい
+#define MOVE_LV200_STEEL_165            0x76A // はがね Lv165 スチールコア
+#define MOVE_LV200_STEEL_166            0x76B // はがね Lv166 ガードメタル
+#define MOVE_LV200_STEEL_167            0x76C // はがね Lv167 メルトダウン
+#define MOVE_LV200_STEEL_168            0x76D // はがね Lv168 ブレイクメタル
+#define MOVE_LV200_STEEL_169            0x76E // はがね Lv169 しんきろうギア
+#define MOVE_LV200_STEEL_170            0x76F // はがね Lv170 ターボエンジン
+#define MOVE_LV200_STEEL_171            0x770 // はがね Lv171 ナットブレイク
+#define MOVE_LV200_STEEL_172            0x771 // はがね Lv172 ハンマーヘッド
+#define MOVE_LV200_STEEL_173            0x772 // はがね Lv173 バリスティック
+#define MOVE_LV200_STEEL_174            0x773 // はがね Lv174 サーチライト
+#define MOVE_LV200_STEEL_175            0x774 // はがね Lv175 こうてつしんぞう
+#define MOVE_LV200_STEEL_176            0x775 // はがね Lv176 スチームパンク
+#define MOVE_LV200_STEEL_177            0x776 // はがね Lv177 ラストウェポン
+#define MOVE_LV200_STEEL_178            0x777 // はがね Lv178 メタルパルス
+#define MOVE_LV200_STEEL_179            0x778 // はがね Lv179 はがねのおきて
+#define MOVE_LV200_STEEL_180            0x779 // はがね Lv180 ギアスワップ
+#define MOVE_LV200_STEEL_181            0x77A // はがね Lv181 ギアストーム
+#define MOVE_LV200_STEEL_182            0x77B // はがね Lv182 ヘビーハンマー
+#define MOVE_LV200_STEEL_183            0x77C // はがね Lv183 てつのはて
+#define MOVE_LV200_STEEL_184            0x77D // はがね Lv184 ダイナスチール
+#define MOVE_LV200_STEEL_185            0x77E // はがね Lv185 ちきゅうてつ
+#define MOVE_LV200_STEEL_186            0x77F // はがね Lv186 ギャラクシー
+#define MOVE_LV200_STEEL_187            0x780 // はがね Lv187 ハガネのきわみ
+#define MOVE_LV200_STEEL_188            0x781 // はがね Lv188 ブラスターメタル
+#define MOVE_LV200_STEEL_189            0x782 // はがね Lv189 スーパーノヴァ
+#define MOVE_LV200_STEEL_190            0x783 // はがね Lv190 オーバーホール
+#define MOVE_LV200_STEEL_191            0x784 // はがね Lv191 てんじょうのてつ
+#define MOVE_LV200_STEEL_192            0x785 // はがね Lv192 ゴッドアイアン
+#define MOVE_LV200_STEEL_193            0x786 // はがね Lv193 てつのていおう
+#define MOVE_LV200_STEEL_194            0x787 // はがね Lv194 ぜんしょくメタル
+#define MOVE_LV200_STEEL_195            0x788 // はがね Lv195 こうてつのしん
+#define MOVE_LV200_STEEL_196            0x789 // はがね Lv196 メタルレクイエム
+#define MOVE_LV200_STEEL_197            0x78A // はがね Lv197 ハガネのらせん
+#define MOVE_LV200_STEEL_198            0x78B // はがね Lv198 アイアンジャッジ
+#define MOVE_LV200_STEEL_199            0x78C // はがね Lv199 こうきんのおう
+#define MOVE_LV200_STEEL_200            0x78D // はがね Lv200 さびつかせ
+#define MOVE_LV200_FIRE_101             0x78E // ほのお Lv101 フレアバースト
+#define MOVE_LV200_FIRE_102             0x78F // ほのお Lv102 ひのこのあらし
+#define MOVE_LV200_FIRE_103             0x790 // ほのお Lv103 ほのおのいのり
+#define MOVE_LV200_FIRE_104             0x791 // ほのお Lv104 あついなみだ
+#define MOVE_LV200_FIRE_105             0x792 // ほのお Lv105 ほのおぐるま
+#define MOVE_LV200_FIRE_106             0x793 // ほのお Lv106 サンシャイン
+#define MOVE_LV200_FIRE_107             0x794 // ほのお Lv107 ほむらのつるぎ
+#define MOVE_LV200_FIRE_108             0x795 // ほのお Lv108 ひだまりアタック
+#define MOVE_LV200_FIRE_109             0x796 // ほのお Lv109 ドラゴンブレイズ
+#define MOVE_LV200_FIRE_110             0x797 // ほのお Lv110 ほむらのまとい
+#define MOVE_LV200_FIRE_111             0x798 // ほのお Lv111 ぶきみなほむら
+#define MOVE_LV200_FIRE_112             0x799 // ほのお Lv112 やきつくすひかり
+#define MOVE_LV200_FIRE_113             0x79A // ほのお Lv113 ひのこれんだ
+#define MOVE_LV200_FIRE_114             0x79B // ほのお Lv114 かえんのこぶし
+#define MOVE_LV200_FIRE_115             0x79C // ほのお Lv115 かえんのたつまき
+#define MOVE_LV200_FIRE_116             0x79D // ほのお Lv116 ほのおのやりなげ
+#define MOVE_LV200_FIRE_117             0x79E // ほのお Lv117 ねっぷうストーム
+#define MOVE_LV200_FIRE_118             0x79F // ほのお Lv118 ぼうえんのひかり
+#define MOVE_LV200_FIRE_119             0x7A0 // ほのお Lv119 マグマブレード
+#define MOVE_LV200_FIRE_120             0x7A1 // ほのお Lv120 もえるチャージ
+#define MOVE_LV200_FIRE_121             0x7A2 // ほのお Lv121 ひのたまアタック
+#define MOVE_LV200_FIRE_122             0x7A3 // ほのお Lv122 バーニングダンス
+#define MOVE_LV200_FIRE_123             0x7A4 // ほのお Lv123 ほのおのかたまり
+#define MOVE_LV200_FIRE_124             0x7A5 // ほのお Lv124 ひばなダッシュ
+#define MOVE_LV200_FIRE_125             0x7A6 // ほのお Lv125 ようがんボール
+#define MOVE_LV200_FIRE_126             0x7A7 // ほのお Lv126 かえんだいもんじ
+#define MOVE_LV200_FIRE_127             0x7A8 // ほのお Lv127 ひのとりはばたき
+#define MOVE_LV200_FIRE_128             0x7A9 // ほのお Lv128 ほむらのこえ
+#define MOVE_LV200_FIRE_129             0x7AA // ほのお Lv129 バーストキック
+#define MOVE_LV200_FIRE_130             0x7AB // ほのお Lv130 やけどのしるし
+#define MOVE_LV200_FIRE_131             0x7AC // ほのお Lv131 かえんのクロー
+#define MOVE_LV200_FIRE_132             0x7AD // ほのお Lv132 ふんかのまえぶれ
+#define MOVE_LV200_FIRE_133             0x7AE // ほのお Lv133 ひのいろのしっぽ
+#define MOVE_LV200_FIRE_134             0x7AF // ほのお Lv134 れんごくのつめ
+#define MOVE_LV200_FIRE_135             0x7B0 // ほのお Lv135 ほのおのたいほう
+#define MOVE_LV200_FIRE_136             0x7B1 // ほのお Lv136 こうねつバリア
+#define MOVE_LV200_FIRE_137             0x7B2 // ほのお Lv137 だいもんじあらし
+#define MOVE_LV200_FIRE_138             0x7B3 // ほのお Lv138 ほのおのバウンド
+#define MOVE_LV200_FIRE_139             0x7B4 // ほのお Lv139 フレイムバインド
+#define MOVE_LV200_FIRE_140             0x7B5 // ほのお Lv140 いかりのほのお
+#define MOVE_LV200_FIRE_141             0x7B6 // ほのお Lv141 かえんスピード
+#define MOVE_LV200_FIRE_142             0x7B7 // ほのお Lv142 ほのおのあしあと
+#define MOVE_LV200_FIRE_143             0x7B8 // ほのお Lv143 ようがんのよろい
+#define MOVE_LV200_FIRE_144             0x7B9 // ほのお Lv144 ほむらのかたな
+#define MOVE_LV200_FIRE_145             0x7BA // ほのお Lv145 ひのこのダンス
+#define MOVE_LV200_FIRE_146             0x7BB // ほのお Lv146 ヒートドライブ
+#define MOVE_LV200_FIRE_147             0x7BC // ほのお Lv147 ほのおのプレス
+#define MOVE_LV200_FIRE_148             0x7BD // ほのお Lv148 かざんのいかり
+#define MOVE_LV200_FIRE_149             0x7BE // ほのお Lv149 れつかのこぶし
+#define MOVE_LV200_FIRE_150             0x7BF // ほのお Lv150 ほのおのころも
+#define MOVE_LV200_FIRE_151             0x7C0 // ほのお Lv151 ほむらのダンス
+#define MOVE_LV200_FIRE_152             0x7C1 // ほのお Lv152 フレアストライク
+#define MOVE_LV200_FIRE_153             0x7C2 // ほのお Lv153 きょうれつバーン
+#define MOVE_LV200_FIRE_154             0x7C3 // ほのお Lv154 マグマクラッシュ
+#define MOVE_LV200_FIRE_155             0x7C4 // ほのお Lv155 ネオンフレア
+#define MOVE_LV200_FIRE_156             0x7C5 // ほのお Lv156 ほのおのたて
+#define MOVE_LV200_FIRE_157             0x7C6 // ほのお Lv157 かえんのしたたり
+#define MOVE_LV200_FIRE_158             0x7C7 // ほのお Lv158 てんかのほのお
+#define MOVE_LV200_FIRE_159             0x7C8 // ほのお Lv159 ひっさつのひのこ
+#define MOVE_LV200_FIRE_160             0x7C9 // ほのお Lv160 ひざしのいこい
+#define MOVE_LV200_FIRE_161             0x7CA // ほのお Lv161 ほのおのあらし
+#define MOVE_LV200_FIRE_162             0x7CB // ほのお Lv162 きょうあくフレア
+#define MOVE_LV200_FIRE_163             0x7CC // ほのお Lv163 ぐれんフィスト
+#define MOVE_LV200_FIRE_164             0x7CD // ほのお Lv164 たいようのいぶき
+#define MOVE_LV200_FIRE_165             0x7CE // ほのお Lv165 バーニングクロス
+#define MOVE_LV200_FIRE_166             0x7CF // ほのお Lv166 もえるいかり
+#define MOVE_LV200_FIRE_167             0x7D0 // ほのお Lv167 ほのおのさけび
+#define MOVE_LV200_FIRE_168             0x7D1 // ほのお Lv168 かえんのとびら
+#define MOVE_LV200_FIRE_169             0x7D2 // ほのお Lv169 ほむらのこうしん
+#define MOVE_LV200_FIRE_170             0x7D3 // ほのお Lv170 とけだしほのお
+#define MOVE_LV200_FIRE_171             0x7D4 // ほのお Lv171 しゃくねつはどう
+#define MOVE_LV200_FIRE_172             0x7D5 // ほのお Lv172 じごくのほのお
+#define MOVE_LV200_FIRE_173             0x7D6 // ほのお Lv173 ブレイズバンカー
+#define MOVE_LV200_FIRE_174             0x7D7 // ほのお Lv174 ひのこのしらべ
+#define MOVE_LV200_FIRE_175             0x7D8 // ほのお Lv175 ふんかとっしん
+#define MOVE_LV200_FIRE_176             0x7D9 // ほのお Lv176 フレアフォース
+#define MOVE_LV200_FIRE_177             0x7DA // ほのお Lv177 ようがんタックル
+#define MOVE_LV200_FIRE_178             0x7DB // ほのお Lv178 ブレイズバースト
+#define MOVE_LV200_FIRE_179             0x7DC // ほのお Lv179 かえんのつばさ
+#define MOVE_LV200_FIRE_180             0x7DD // ほのお Lv180 やきはらい
+#define MOVE_LV200_FIRE_181             0x7DE // ほのお Lv181 ほのおレクイエム
+#define MOVE_LV200_FIRE_182             0x7DF // ほのお Lv182 ごうかのうず
+#define MOVE_LV200_FIRE_183             0x7E0 // ほのお Lv183 かがやくほむら
+#define MOVE_LV200_FIRE_184             0x7E1 // ほのお Lv184 バーンワールド
+#define MOVE_LV200_FIRE_185             0x7E2 // ほのお Lv185 ほむらのきわみ
+#define MOVE_LV200_FIRE_186             0x7E3 // ほのお Lv186 ようがんあらし
+#define MOVE_LV200_FIRE_187             0x7E4 // ほのお Lv187 かえんのてんし
+#define MOVE_LV200_FIRE_188             0x7E5 // ほのお Lv188 ほのおのなごり
+#define MOVE_LV200_FIRE_189             0x7E6 // ほのお Lv189 いにしえのひ
+#define MOVE_LV200_FIRE_190             0x7E7 // ほのお Lv190 ブレイズフォーム
+#define MOVE_LV200_FIRE_191             0x7E8 // ほのお Lv191 あかいほむら
+#define MOVE_LV200_FIRE_192             0x7E9 // ほのお Lv192 ひのとりのいかり
+#define MOVE_LV200_FIRE_193             0x7EA // ほのお Lv193 えんげつけん
+#define MOVE_LV200_FIRE_194             0x7EB // ほのお Lv194 サンバースト
+#define MOVE_LV200_FIRE_195             0x7EC // ほのお Lv195 ラストフレア
+#define MOVE_LV200_FIRE_196             0x7ED // ほのお Lv196 かえんのおう
+#define MOVE_LV200_FIRE_197             0x7EE // ほのお Lv197 ほのおのしんぞう
+#define MOVE_LV200_FIRE_198             0x7EF // ほのお Lv198 ビッグバンフレア
+#define MOVE_LV200_FIRE_199             0x7F0 // ほのお Lv199 たいようのかけら
+#define MOVE_LV200_FIRE_200             0x7F1 // ほのお Lv200 サンライズフレア
+#define MOVE_LV200_WATER_101            0x7F2 // みず Lv101 しおなりカノン
+#define MOVE_LV200_WATER_102            0x7F3 // みず Lv102 ナミノリブレード
+#define MOVE_LV200_WATER_103            0x7F4 // みず Lv103 うずしおダンス
+#define MOVE_LV200_WATER_104            0x7F5 // みず Lv104 おおなみのいぶき
+#define MOVE_LV200_WATER_105            0x7F6 // みず Lv105 あまやどり
+#define MOVE_LV200_WATER_106            0x7F7 // みず Lv106 クリアドロップ
+#define MOVE_LV200_WATER_107            0x7F8 // みず Lv107 しぶきラッシュ
+#define MOVE_LV200_WATER_108            0x7F9 // みず Lv108 みなもリング
+#define MOVE_LV200_WATER_109            0x7FA // みず Lv109 みなぞこのうた
+#define MOVE_LV200_WATER_110            0x7FB // みず Lv110 みちしお
+#define MOVE_LV200_WATER_111            0x7FC // みず Lv111 ざぶんタックル
+#define MOVE_LV200_WATER_112            0x7FD // みず Lv112 ブルーカノン
+#define MOVE_LV200_WATER_113            0x7FE // みず Lv113 しぶきカッター
+#define MOVE_LV200_WATER_114            0x7FF // みず Lv114 ミストスクリュー
+#define MOVE_LV200_WATER_115            0x800 // みず Lv115 うらなみターン
+#define MOVE_LV200_WATER_116            0x801 // みず Lv116 スコールダッシュ
+#define MOVE_LV200_WATER_117            0x802 // みず Lv117 あまごいのうた
+#define MOVE_LV200_WATER_118            0x803 // みず Lv118 ふかみのいのり
+#define MOVE_LV200_WATER_119            0x804 // みず Lv119 ゆらぎのかがみ
+#define MOVE_LV200_WATER_120            0x805 // みず Lv120 うしおカウンタ
+#define MOVE_LV200_WATER_121            0x806 // みず Lv121 ソーダシャワー
+#define MOVE_LV200_WATER_122            0x807 // みず Lv122 タイダルクロー
+#define MOVE_LV200_WATER_123            0x808 // みず Lv123 コバルトウェーブ
+#define MOVE_LV200_WATER_124            0x809 // みず Lv124 ラグーンフォール
+#define MOVE_LV200_WATER_125            0x80A // みず Lv125 せせらぎのゆめ
+#define MOVE_LV200_WATER_126            0x80B // みず Lv126 トリトンやり
+#define MOVE_LV200_WATER_127            0x80C // みず Lv127 しおみずのナイフ
+#define MOVE_LV200_WATER_128            0x80D // みず Lv128 みなとのあらし
+#define MOVE_LV200_WATER_129            0x80E // みず Lv129 マリンシャワー
+#define MOVE_LV200_WATER_130            0x80F // みず Lv130 しんかいのきおく
+#define MOVE_LV200_WATER_131            0x810 // みず Lv131 ふかなりのまもり
+#define MOVE_LV200_WATER_132            0x811 // みず Lv132 ミズタマボンバー
+#define MOVE_LV200_WATER_133            0x812 // みず Lv133 シーサイドキック
+#define MOVE_LV200_WATER_134            0x813 // みず Lv134 ハイドロスパイク
+#define MOVE_LV200_WATER_135            0x814 // みず Lv135 うずまきのたて
+#define MOVE_LV200_WATER_136            0x815 // みず Lv136 セイレーンハープ
+#define MOVE_LV200_WATER_137            0x816 // みず Lv137 あおいなみまくら
+#define MOVE_LV200_WATER_138            0x817 // みず Lv138 あおつきジェット
+#define MOVE_LV200_WATER_139            0x818 // みず Lv139 アクアマリナ
+#define MOVE_LV200_WATER_140            0x819 // みず Lv140 ながれびなターン
+#define MOVE_LV200_WATER_141            0x81A // みず Lv141 ゲイルタイド
+#define MOVE_LV200_WATER_142            0x81B // みず Lv142 しらなみカット
+#define MOVE_LV200_WATER_143            0x81C // みず Lv143 ナギサのかんむり
+#define MOVE_LV200_WATER_144            0x81D // みず Lv144 クラーケン
+#define MOVE_LV200_WATER_145            0x81E // みず Lv145 ふなぞこブレイク
+#define MOVE_LV200_WATER_146            0x81F // みず Lv146 リーフウェーブ
+#define MOVE_LV200_WATER_147            0x820 // みず Lv147 カスケード
+#define MOVE_LV200_WATER_148            0x821 // みず Lv148 いそしぎのまい
+#define MOVE_LV200_WATER_149            0x822 // みず Lv149 マーメイドソング
+#define MOVE_LV200_WATER_150            0x823 // みず Lv150 おおうずしお
+#define MOVE_LV200_WATER_151            0x824 // みず Lv151 グレートリップ
+#define MOVE_LV200_WATER_152            0x825 // みず Lv152 あくあぼうそう
+#define MOVE_LV200_WATER_153            0x826 // みず Lv153 みずうみのつるぎ
+#define MOVE_LV200_WATER_154            0x827 // みず Lv154 うしおのこだま
+#define MOVE_LV200_WATER_155            0x828 // みず Lv155 ひょうざんのみず
+#define MOVE_LV200_WATER_156            0x829 // みず Lv156 ダイバーズハイ
+#define MOVE_LV200_WATER_157            0x82A // みず Lv157 あらしのしお
+#define MOVE_LV200_WATER_158            0x82B // みず Lv158 ポセイドンレイ
+#define MOVE_LV200_WATER_159            0x82C // みず Lv159 カイゾクダンス
+#define MOVE_LV200_WATER_160            0x82D // みず Lv160 しずくのさばき
+#define MOVE_LV200_WATER_161            0x82E // みず Lv161 おぼろしおかぜ
+#define MOVE_LV200_WATER_162            0x82F // みず Lv162 かげのさざなみ
+#define MOVE_LV200_WATER_163            0x830 // みず Lv163 ホワイトキャップ
+#define MOVE_LV200_WATER_164            0x831 // みず Lv164 ネプチューン
+#define MOVE_LV200_WATER_165            0x832 // みず Lv165 しおまきのかぜ
+#define MOVE_LV200_WATER_166            0x833 // みず Lv166 たいかいのうなり
+#define MOVE_LV200_WATER_167            0x834 // みず Lv167 パールスコール
+#define MOVE_LV200_WATER_168            0x835 // みず Lv168 アビスブレス
+#define MOVE_LV200_WATER_169            0x836 // みず Lv169 ラピスフローズン
+#define MOVE_LV200_WATER_170            0x837 // みず Lv170 しんかいのうた
+#define MOVE_LV200_WATER_171            0x838 // みず Lv171 うみがめのこうら
+#define MOVE_LV200_WATER_172            0x839 // みず Lv172 ブルーホール
+#define MOVE_LV200_WATER_173            0x83A // みず Lv173 リヴァイアサン
+#define MOVE_LV200_WATER_174            0x83B // みず Lv174 ルリイロのなみ
+#define MOVE_LV200_WATER_175            0x83C // みず Lv175 あおぐろあらし
+#define MOVE_LV200_WATER_176            0x83D // みず Lv176 しょうこうのかい
+#define MOVE_LV200_WATER_177            0x83E // みず Lv177 カイドウのまいご
+#define MOVE_LV200_WATER_178            0x83F // みず Lv178 ゆうなぎ
+#define MOVE_LV200_WATER_179            0x840 // みず Lv179 トライデント
+#define MOVE_LV200_WATER_180            0x841 // みず Lv180 うずしおのかがみ
+#define MOVE_LV200_WATER_181            0x842 // みず Lv181 サンゴのいかり
+#define MOVE_LV200_WATER_182            0x843 // みず Lv182 みずのみやこ
+#define MOVE_LV200_WATER_183            0x844 // みず Lv183 うずしおゲート
+#define MOVE_LV200_WATER_184            0x845 // みず Lv184 セイウンハンマー
+#define MOVE_LV200_WATER_185            0x846 // みず Lv185 ミズチのさけび
+#define MOVE_LV200_WATER_186            0x847 // みず Lv186 リバースタイド
+#define MOVE_LV200_WATER_187            0x848 // みず Lv187 ふくよくのひかり
+#define MOVE_LV200_WATER_188            0x849 // みず Lv188 アクアレクイエム
+#define MOVE_LV200_WATER_189            0x84A // みず Lv189 とわのしおざい
+#define MOVE_LV200_WATER_190            0x84B // みず Lv190 わだつみのうたげ
+#define MOVE_LV200_WATER_191            0x84C // みず Lv191 スターウォッシュ
+#define MOVE_LV200_WATER_192            0x84D // みず Lv192 ブレイクウェーブ
+#define MOVE_LV200_WATER_193            0x84E // みず Lv193 タイダルバースト
+#define MOVE_LV200_WATER_194            0x84F // みず Lv194 ハイドロアーク
+#define MOVE_LV200_WATER_195            0x850 // みず Lv195 ナミダのしらべ
+#define MOVE_LV200_WATER_196            0x851 // みず Lv196 うみなりのゆれ
+#define MOVE_LV200_WATER_197            0x852 // みず Lv197 しおかぜのベール
+#define MOVE_LV200_WATER_198            0x853 // みず Lv198 ボトムフィッシュ
+#define MOVE_LV200_WATER_199            0x854 // みず Lv199 しおだまり
+#define MOVE_LV200_WATER_200            0x855 // みず Lv200 アトランティス
+#define MOVE_LV200_GRASS_101            0x856 // くさ Lv101 ひだまりリーフ
+#define MOVE_LV200_GRASS_102            0x857 // くさ Lv102 みどりのやいば
+#define MOVE_LV200_GRASS_103            0x858 // くさ Lv103 もりのいましめ
+#define MOVE_LV200_GRASS_104            0x859 // くさ Lv104 たねバルカン
+#define MOVE_LV200_GRASS_105            0x85A // くさ Lv105 ねっこのいのり
+#define MOVE_LV200_GRASS_106            0x85B // くさ Lv106 もりのねむり
+#define MOVE_LV200_GRASS_107            0x85C // くさ Lv107 こもれびビーム
+#define MOVE_LV200_GRASS_108            0x85D // くさ Lv108 どくあざみ
+#define MOVE_LV200_GRASS_109            0x85E // くさ Lv109 あさつゆ
+#define MOVE_LV200_GRASS_110            0x85F // くさ Lv110 ねこそぎドレイン
+#define MOVE_LV200_GRASS_111            0x860 // くさ Lv111 ウッドクラッシュ
+#define MOVE_LV200_GRASS_112            0x861 // くさ Lv112 はなのうず
+#define MOVE_LV200_GRASS_113            0x862 // くさ Lv113 ひなたぼっこ
+#define MOVE_LV200_GRASS_114            0x863 // くさ Lv114 リーフワルツ
+#define MOVE_LV200_GRASS_115            0x864 // くさ Lv115 どんぐりボム
+#define MOVE_LV200_GRASS_116            0x865 // くさ Lv116 クロロドレイン
+#define MOVE_LV200_GRASS_117            0x866 // くさ Lv117 もりのたて
+#define MOVE_LV200_GRASS_118            0x867 // くさ Lv118 こはるびより
+#define MOVE_LV200_GRASS_119            0x868 // くさ Lv119 わらびダッシュ
+#define MOVE_LV200_GRASS_120            0x869 // くさ Lv120 まきつきのたね
+#define MOVE_LV200_GRASS_121            0x86A // くさ Lv121 わたげのふぶき
+#define MOVE_LV200_GRASS_122            0x86B // くさ Lv122 しばふのうた
+#define MOVE_LV200_GRASS_123            0x86C // くさ Lv123 タケノコドリル
+#define MOVE_LV200_GRASS_124            0x86D // くさ Lv124 フラワーカノン
+#define MOVE_LV200_GRASS_125            0x86E // くさ Lv125 こがらしリーフ
+#define MOVE_LV200_GRASS_126            0x86F // くさ Lv126 ミツバチワルツ
+#define MOVE_LV200_GRASS_127            0x870 // くさ Lv127 きこりのいかり
+#define MOVE_LV200_GRASS_128            0x871 // くさ Lv128 あおばのかべ
+#define MOVE_LV200_GRASS_129            0x872 // くさ Lv129 ヤドリギのしずく
+#define MOVE_LV200_GRASS_130            0x873 // くさ Lv130 ねだやしこうげき
+#define MOVE_LV200_GRASS_131            0x874 // くさ Lv131 モスバレット
+#define MOVE_LV200_GRASS_132            0x875 // くさ Lv132 くさはらラッシュ
+#define MOVE_LV200_GRASS_133            0x876 // くさ Lv133 ブルームレイ
+#define MOVE_LV200_GRASS_134            0x877 // くさ Lv134 ぬしのいぶき
+#define MOVE_LV200_GRASS_135            0x878 // くさ Lv135 みどりのあらし
+#define MOVE_LV200_GRASS_136            0x879 // くさ Lv136 ツタノクサリ
+#define MOVE_LV200_GRASS_137            0x87A // くさ Lv137 ハーブティー
+#define MOVE_LV200_GRASS_138            0x87B // くさ Lv138 ヒノキソード
+#define MOVE_LV200_GRASS_139            0x87C // くさ Lv139 よつばラッシュ
+#define MOVE_LV200_GRASS_140            0x87D // くさ Lv140 ぶんかつのいぶき
+#define MOVE_LV200_GRASS_141            0x87E // くさ Lv141 ひなたのまじない
+#define MOVE_LV200_GRASS_142            0x87F // くさ Lv142 ほうしのかおり
+#define MOVE_LV200_GRASS_143            0x880 // くさ Lv143 ドリアードソング
+#define MOVE_LV200_GRASS_144            0x881 // くさ Lv144 ジャングルダイブ
+#define MOVE_LV200_GRASS_145            0x882 // くさ Lv145 シダのハンマー
+#define MOVE_LV200_GRASS_146            0x883 // くさ Lv146 どくだみトラップ
+#define MOVE_LV200_GRASS_147            0x884 // くさ Lv147 かやぶきのまもり
+#define MOVE_LV200_GRASS_148            0x885 // くさ Lv148 ほんのりアロマ
+#define MOVE_LV200_GRASS_149            0x886 // くさ Lv149 じゅもくのよろい
+#define MOVE_LV200_GRASS_150            0x887 // くさ Lv150 やどりぎのレイン
+#define MOVE_LV200_GRASS_151            0x888 // くさ Lv151 ヒーリングリーフ
+#define MOVE_LV200_GRASS_152            0x889 // くさ Lv152 ローズウィップ
+#define MOVE_LV200_GRASS_153            0x88A // くさ Lv153 かふんのいぶき
+#define MOVE_LV200_GRASS_154            0x88B // くさ Lv154 そよかぜダッシュ
+#define MOVE_LV200_GRASS_155            0x88C // くさ Lv155 サクラふぶき
+#define MOVE_LV200_GRASS_156            0x88D // くさ Lv156 ミツロウのかべ
+#define MOVE_LV200_GRASS_157            0x88E // くさ Lv157 こだまのもり
+#define MOVE_LV200_GRASS_158            0x88F // くさ Lv158 ソーラーチャージ
+#define MOVE_LV200_GRASS_159            0x890 // くさ Lv159 ひいらぎのとげ
+#define MOVE_LV200_GRASS_160            0x891 // くさ Lv160 たいぼくのよろい
+#define MOVE_LV200_GRASS_161            0x892 // くさ Lv161 ゴムノキスラップ
+#define MOVE_LV200_GRASS_162            0x893 // くさ Lv162 せかいじゅのかげ
+#define MOVE_LV200_GRASS_163            0x894 // くさ Lv163 モリノしんどう
+#define MOVE_LV200_GRASS_164            0x895 // くさ Lv164 バジルシャワー
+#define MOVE_LV200_GRASS_165            0x896 // くさ Lv165 アマゾンスコール
+#define MOVE_LV200_GRASS_166            0x897 // くさ Lv166 ヤドリギのねむり
+#define MOVE_LV200_GRASS_167            0x898 // くさ Lv167 こけむすたて
+#define MOVE_LV200_GRASS_168            0x899 // くさ Lv168 しんりょくパワー
+#define MOVE_LV200_GRASS_169            0x89A // くさ Lv169 ハナビラストーム
+#define MOVE_LV200_GRASS_170            0x89B // くさ Lv170 フォトシンセ
+#define MOVE_LV200_GRASS_171            0x89C // くさ Lv171 くすのきパンチ
+#define MOVE_LV200_GRASS_172            0x89D // くさ Lv172 せかいじゅのうた
+#define MOVE_LV200_GRASS_173            0x89E // くさ Lv173 ガイアのいぶき
+#define MOVE_LV200_GRASS_174            0x89F // くさ Lv174 ハーブガーデン
+#define MOVE_LV200_GRASS_175            0x8A0 // くさ Lv175 ルートバインド
+#define MOVE_LV200_GRASS_176            0x8A1 // くさ Lv176 かるかやのまい
+#define MOVE_LV200_GRASS_177            0x8A2 // くさ Lv177 ひとひらのねがい
+#define MOVE_LV200_GRASS_178            0x8A3 // くさ Lv178 かずらのむち
+#define MOVE_LV200_GRASS_179            0x8A4 // くさ Lv179 エメラルドレイ
+#define MOVE_LV200_GRASS_180            0x8A5 // くさ Lv180 ゆうだちのもり
+#define MOVE_LV200_GRASS_181            0x8A6 // くさ Lv181 もりのレクイエム
+#define MOVE_LV200_GRASS_182            0x8A7 // くさ Lv182 アルラウネダンス
+#define MOVE_LV200_GRASS_183            0x8A8 // くさ Lv183 ブルームカノン
+#define MOVE_LV200_GRASS_184            0x8A9 // くさ Lv184 ウッドインパクト
+#define MOVE_LV200_GRASS_185            0x8AA // くさ Lv185 リーフトルネード
+#define MOVE_LV200_GRASS_186            0x8AB // くさ Lv186 こもれびのしらべ
+#define MOVE_LV200_GRASS_187            0x8AC // くさ Lv187 つぼみのかがやき
+#define MOVE_LV200_GRASS_188            0x8AD // くさ Lv188 ゴールデンリーフ
+#define MOVE_LV200_GRASS_189            0x8AE // くさ Lv189 せんじゅのかぜ
+#define MOVE_LV200_GRASS_190            0x8AF // くさ Lv190 じゅかいのひかり
+#define MOVE_LV200_GRASS_191            0x8B0 // くさ Lv191 テラフォレスト
+#define MOVE_LV200_GRASS_192            0x8B1 // くさ Lv192 みどりのほうこう
+#define MOVE_LV200_GRASS_193            0x8B2 // くさ Lv193 いっすいのねむり
+#define MOVE_LV200_GRASS_194            0x8B3 // くさ Lv194 ウッドハリケーン
+#define MOVE_LV200_GRASS_195            0x8B4 // くさ Lv195 せんぼんやり
+#define MOVE_LV200_GRASS_196            0x8B5 // くさ Lv196 ふかみどりのかげ
+#define MOVE_LV200_GRASS_197            0x8B6 // くさ Lv197 ほうかいのたね
+#define MOVE_LV200_GRASS_198            0x8B7 // くさ Lv198 みどりのおうこく
+#define MOVE_LV200_GRASS_199            0x8B8 // くさ Lv199 ラグナリーフ
+#define MOVE_LV200_GRASS_200            0x8B9 // くさ Lv200 じゅかいのさばき
+#define MOVE_LV200_ELECTRIC_101         0x8BA // でんき Lv101 スパークカノン
+#define MOVE_LV200_ELECTRIC_102         0x8BB // でんき Lv102 いなずまクロー
+#define MOVE_LV200_ELECTRIC_103         0x8BC // でんき Lv103 ビリビリネット
+#define MOVE_LV200_ELECTRIC_104         0x8BD // でんき Lv104 プラズマレイン
+#define MOVE_LV200_ELECTRIC_105         0x8BE // でんき Lv105 じりょくのまく
+#define MOVE_LV200_ELECTRIC_106         0x8BF // でんき Lv106 ほうでんダンス
+#define MOVE_LV200_ELECTRIC_107         0x8C0 // でんき Lv107 ピリピリウェーブ
+#define MOVE_LV200_ELECTRIC_108         0x8C1 // でんき Lv108 チャージアップ
+#define MOVE_LV200_ELECTRIC_109         0x8C2 // でんき Lv109 いなびかり
+#define MOVE_LV200_ELECTRIC_110         0x8C3 // でんき Lv110 ちくでんスパーク
+#define MOVE_LV200_ELECTRIC_111         0x8C4 // でんき Lv111 らいめいタックル
+#define MOVE_LV200_ELECTRIC_112         0x8C5 // でんき Lv112 ボルトナックル
+#define MOVE_LV200_ELECTRIC_113         0x8C6 // でんき Lv113 いかずちおとし
+#define MOVE_LV200_ELECTRIC_114         0x8C7 // でんき Lv114 スタンガン
+#define MOVE_LV200_ELECTRIC_115         0x8C8 // でんき Lv115 ターンアーク
+#define MOVE_LV200_ELECTRIC_116         0x8C9 // でんき Lv116 ネオンフィールド
+#define MOVE_LV200_ELECTRIC_117         0x8CA // でんき Lv117 エレキダンス
+#define MOVE_LV200_ELECTRIC_118         0x8CB // でんき Lv118 スロースパーク
+#define MOVE_LV200_ELECTRIC_119         0x8CC // でんき Lv119 コイルガード
+#define MOVE_LV200_ELECTRIC_120         0x8CD // でんき Lv120 エレキタックル
+#define MOVE_LV200_ELECTRIC_121         0x8CE // でんき Lv121 せいでんきのかべ
+#define MOVE_LV200_ELECTRIC_122         0x8CF // でんき Lv122 ゴムのかべ
+#define MOVE_LV200_ELECTRIC_123         0x8D0 // でんき Lv123 パワーチャージ
+#define MOVE_LV200_ELECTRIC_124         0x8D1 // でんき Lv124 かみなりぐも
+#define MOVE_LV200_ELECTRIC_125         0x8D2 // でんき Lv125 デュアルボルト
+#define MOVE_LV200_ELECTRIC_126         0x8D3 // でんき Lv126 ライジングアーク
+#define MOVE_LV200_ELECTRIC_127         0x8D4 // でんき Lv127 ボルトランス
+#define MOVE_LV200_ELECTRIC_128         0x8D5 // でんき Lv128 ちょくげきらい
+#define MOVE_LV200_ELECTRIC_129         0x8D6 // でんき Lv129 スパークシャワー
+#define MOVE_LV200_ELECTRIC_130         0x8D7 // でんき Lv130 ふうじのでんげき
+#define MOVE_LV200_ELECTRIC_131         0x8D8 // でんき Lv131 ていでんのよる
+#define MOVE_LV200_ELECTRIC_132         0x8D9 // でんき Lv132 ほしくずプラズマ
+#define MOVE_LV200_ELECTRIC_133         0x8DA // でんき Lv133 コイルアップ
+#define MOVE_LV200_ELECTRIC_134         0x8DB // でんき Lv134 ダイナモラッシュ
+#define MOVE_LV200_ELECTRIC_135         0x8DC // でんき Lv135 トランスアーク
+#define MOVE_LV200_ELECTRIC_136         0x8DD // でんき Lv136 イオンシャワー
+#define MOVE_LV200_ELECTRIC_137         0x8DE // でんき Lv137 いなずまのわな
+#define MOVE_LV200_ELECTRIC_138         0x8DF // でんき Lv138 らいじんパンチ
+#define MOVE_LV200_ELECTRIC_139         0x8E0 // でんき Lv139 スタンネット
+#define MOVE_LV200_ELECTRIC_140         0x8E1 // でんき Lv140 じばのむち
+#define MOVE_LV200_ELECTRIC_141         0x8E2 // でんき Lv141 ブレーカー
+#define MOVE_LV200_ELECTRIC_142         0x8E3 // でんき Lv142 ねむけパルス
+#define MOVE_LV200_ELECTRIC_143         0x8E4 // でんき Lv143 でんじパルス
+#define MOVE_LV200_ELECTRIC_144         0x8E5 // でんき Lv144 ジュールヒート
+#define MOVE_LV200_ELECTRIC_145         0x8E6 // でんき Lv145 テスラカノン
+#define MOVE_LV200_ELECTRIC_146         0x8E7 // でんき Lv146 アークライト
+#define MOVE_LV200_ELECTRIC_147         0x8E8 // でんき Lv147 ボルトスマッシュ
+#define MOVE_LV200_ELECTRIC_148         0x8E9 // でんき Lv148 トライスパーク
+#define MOVE_LV200_ELECTRIC_149         0x8EA // でんき Lv149 ゼロボルト
+#define MOVE_LV200_ELECTRIC_150         0x8EB // でんき Lv150 らいめいのひびき
+#define MOVE_LV200_ELECTRIC_151         0x8EC // でんき Lv151 サンダードーム
+#define MOVE_LV200_ELECTRIC_152         0x8ED // でんき Lv152 ガルバニック
+#define MOVE_LV200_ELECTRIC_153         0x8EE // でんき Lv153 ほうでんダッシュ
+#define MOVE_LV200_ELECTRIC_154         0x8EF // でんき Lv154 プラズマボール
+#define MOVE_LV200_ELECTRIC_155         0x8F0 // でんき Lv155 でんじバリア
+#define MOVE_LV200_ELECTRIC_156         0x8F1 // でんき Lv156 スパークフォール
+#define MOVE_LV200_ELECTRIC_157         0x8F2 // でんき Lv157 チェーンボルト
+#define MOVE_LV200_ELECTRIC_158         0x8F3 // でんき Lv158 ヘルツウェーブ
+#define MOVE_LV200_ELECTRIC_159         0x8F4 // でんき Lv159 スタティック
+#define MOVE_LV200_ELECTRIC_160         0x8F5 // でんき Lv160 ふゆうでんげき
+#define MOVE_LV200_ELECTRIC_161         0x8F6 // でんき Lv161 エレキブースト
+#define MOVE_LV200_ELECTRIC_162         0x8F7 // でんき Lv162 サージヒール
+#define MOVE_LV200_ELECTRIC_163         0x8F8 // でんき Lv163 コロナフレア
+#define MOVE_LV200_ELECTRIC_164         0x8F9 // でんき Lv164 サンダーホイール
+#define MOVE_LV200_ELECTRIC_165         0x8FA // でんき Lv165 ボルテックス
+#define MOVE_LV200_ELECTRIC_166         0x8FB // でんき Lv166 ギガボルト
+#define MOVE_LV200_ELECTRIC_167         0x8FC // でんき Lv167 エナジーショット
+#define MOVE_LV200_ELECTRIC_168         0x8FD // でんき Lv168 パルスカッター
+#define MOVE_LV200_ELECTRIC_169         0x8FE // でんき Lv169 ふじいろいなずま
+#define MOVE_LV200_ELECTRIC_170         0x8FF // でんき Lv170 でんじふぶき
+#define MOVE_LV200_ELECTRIC_171         0x900 // でんき Lv171 ボルトインパクト
+#define MOVE_LV200_ELECTRIC_172         0x901 // でんき Lv172 スカイボルト
+#define MOVE_LV200_ELECTRIC_173         0x902 // でんき Lv173 ゼータスパーク
+#define MOVE_LV200_ELECTRIC_174         0x903 // でんき Lv174 マイナスチャージ
+#define MOVE_LV200_ELECTRIC_175         0x904 // でんき Lv175 プラスチャージ
+#define MOVE_LV200_ELECTRIC_176         0x905 // でんき Lv176 ハイボルテージ
+#define MOVE_LV200_ELECTRIC_177         0x906 // でんき Lv177 いかずちのまい
+#define MOVE_LV200_ELECTRIC_178         0x907 // でんき Lv178 アンペアヘッド
+#define MOVE_LV200_ELECTRIC_179         0x908 // でんき Lv179 プロトンカノン
+#define MOVE_LV200_ELECTRIC_180         0x909 // でんき Lv180 マイクロウェーブ
+#define MOVE_LV200_ELECTRIC_181         0x90A // でんき Lv181 ジャミング
+#define MOVE_LV200_ELECTRIC_182         0x90B // でんき Lv182 サイクロトロン
+#define MOVE_LV200_ELECTRIC_183         0x90C // でんき Lv183 オームのほうそく
+#define MOVE_LV200_ELECTRIC_184         0x90D // でんき Lv184 ちょうでんどう
+#define MOVE_LV200_ELECTRIC_185         0x90E // でんき Lv185 クーロンフォース
+#define MOVE_LV200_ELECTRIC_186         0x90F // でんき Lv186 イオンストーム
+#define MOVE_LV200_ELECTRIC_187         0x910 // でんき Lv187 ナノリペア
+#define MOVE_LV200_ELECTRIC_188         0x911 // でんき Lv188 ストームセル
+#define MOVE_LV200_ELECTRIC_189         0x912 // でんき Lv189 らいこうのおり
+#define MOVE_LV200_ELECTRIC_190         0x913 // でんき Lv190 デッドヒート
+#define MOVE_LV200_ELECTRIC_191         0x914 // でんき Lv191 エレキトルク
+#define MOVE_LV200_ELECTRIC_192         0x915 // でんき Lv192 マクスウェル
+#define MOVE_LV200_ELECTRIC_193         0x916 // でんき Lv193 いなずまのくさり
+#define MOVE_LV200_ELECTRIC_194         0x917 // でんき Lv194 ファラデーケージ
+#define MOVE_LV200_ELECTRIC_195         0x918 // でんき Lv195 サンダーボウ
+#define MOVE_LV200_ELECTRIC_196         0x919 // でんき Lv196 ガンマレイ
+#define MOVE_LV200_ELECTRIC_197         0x91A // でんき Lv197 テスラコイル
+#define MOVE_LV200_ELECTRIC_198         0x91B // でんき Lv198 ジェットスパーク
+#define MOVE_LV200_ELECTRIC_199         0x91C // でんき Lv199 テラボルト
+#define MOVE_LV200_ELECTRIC_200         0x91D // でんき Lv200 テンペスト
+#define MOVE_LV200_PSYCHIC_101          0x91E // エスパー Lv101 ねんりきカノン
+#define MOVE_LV200_PSYCHIC_102          0x91F // エスパー Lv102 ねんのやいば
+#define MOVE_LV200_PSYCHIC_103          0x920 // エスパー Lv103 ねんどうりょく
+#define MOVE_LV200_PSYCHIC_104          0x921 // エスパー Lv104 しじまのうた
+#define MOVE_LV200_PSYCHIC_105          0x922 // エスパー Lv105 ひらめきのひかり
+#define MOVE_LV200_PSYCHIC_106          0x923 // エスパー Lv106 こころのまく
+#define MOVE_LV200_PSYCHIC_107          0x924 // エスパー Lv107 ゆめうつつ
+#define MOVE_LV200_PSYCHIC_108          0x925 // エスパー Lv108 てんねんのかがみ
+#define MOVE_LV200_PSYCHIC_109          0x926 // エスパー Lv109 ヨガのせいしん
+#define MOVE_LV200_PSYCHIC_110          0x927 // エスパー Lv110 ミラーミラー
+#define MOVE_LV200_PSYCHIC_111          0x928 // エスパー Lv111 ねんりきダッシュ
+#define MOVE_LV200_PSYCHIC_112          0x929 // エスパー Lv112 ねんじゅのこぶし
+#define MOVE_LV200_PSYCHIC_113          0x92A // エスパー Lv113 サイコニードル
+#define MOVE_LV200_PSYCHIC_114          0x92B // エスパー Lv114 ゼンのこころ
+#define MOVE_LV200_PSYCHIC_115          0x92C // エスパー Lv115 ふしぎのとびら
+#define MOVE_LV200_PSYCHIC_116          0x92D // エスパー Lv116 ほしうらない
+#define MOVE_LV200_PSYCHIC_117          0x92E // エスパー Lv117 ひみつのきおく
+#define MOVE_LV200_PSYCHIC_118          0x92F // エスパー Lv118 ミラクルまなこ
+#define MOVE_LV200_PSYCHIC_119          0x930 // エスパー Lv119 ヒプノスパーク
+#define MOVE_LV200_PSYCHIC_120          0x931 // エスパー Lv120 よちのしんぞう
+#define MOVE_LV200_PSYCHIC_121          0x932 // エスパー Lv121 ねんりきショット
+#define MOVE_LV200_PSYCHIC_122          0x933 // エスパー Lv122 ふしぎなほし
+#define MOVE_LV200_PSYCHIC_123          0x934 // エスパー Lv123 サイコクラッシュ
+#define MOVE_LV200_PSYCHIC_124          0x935 // エスパー Lv124 ざんぞうのまい
+#define MOVE_LV200_PSYCHIC_125          0x936 // エスパー Lv125 ひかりのはり
+#define MOVE_LV200_PSYCHIC_126          0x937 // エスパー Lv126 ねんわのしらべ
+#define MOVE_LV200_PSYCHIC_127          0x938 // エスパー Lv127 おもいこみ
+#define MOVE_LV200_PSYCHIC_128          0x939 // エスパー Lv128 サイキックレイ
+#define MOVE_LV200_PSYCHIC_129          0x93A // エスパー Lv129 ぎんがのうず
+#define MOVE_LV200_PSYCHIC_130          0x93B // エスパー Lv130 ミントのかべ
+#define MOVE_LV200_PSYCHIC_131          0x93C // エスパー Lv131 こうしんのゆめ
+#define MOVE_LV200_PSYCHIC_132          0x93D // エスパー Lv132 サイコフォース
+#define MOVE_LV200_PSYCHIC_133          0x93E // エスパー Lv133 ふしぎのくにへ
+#define MOVE_LV200_PSYCHIC_134          0x93F // エスパー Lv134 テレポリッパー
+#define MOVE_LV200_PSYCHIC_135          0x940 // エスパー Lv135 ミストブレス
+#define MOVE_LV200_PSYCHIC_136          0x941 // エスパー Lv136 ねんりきのとげ
+#define MOVE_LV200_PSYCHIC_137          0x942 // エスパー Lv137 センシティブ
+#define MOVE_LV200_PSYCHIC_138          0x943 // エスパー Lv138 ひとみのひかり
+#define MOVE_LV200_PSYCHIC_139          0x944 // エスパー Lv139 カゲロウのまい
+#define MOVE_LV200_PSYCHIC_140          0x945 // エスパー Lv140 こころのみぎわ
+#define MOVE_LV200_PSYCHIC_141          0x946 // エスパー Lv141 ぎんいろのうねり
+#define MOVE_LV200_PSYCHIC_142          0x947 // エスパー Lv142 ブレインショック
+#define MOVE_LV200_PSYCHIC_143          0x948 // エスパー Lv143 ねんどうスピア
+#define MOVE_LV200_PSYCHIC_144          0x949 // エスパー Lv144 ダークマター
+#define MOVE_LV200_PSYCHIC_145          0x94A // エスパー Lv145 れいかんのかべ
+#define MOVE_LV200_PSYCHIC_146          0x94B // エスパー Lv146 めいそうのまくら
+#define MOVE_LV200_PSYCHIC_147          0x94C // エスパー Lv147 ゆらぎのなみ
+#define MOVE_LV200_PSYCHIC_148          0x94D // エスパー Lv148 オーラのたて
+#define MOVE_LV200_PSYCHIC_149          0x94E // エスパー Lv149 エスパーショック
+#define MOVE_LV200_PSYCHIC_150          0x94F // エスパー Lv150 しんくうこうげき
+#define MOVE_LV200_PSYCHIC_151          0x950 // エスパー Lv151 サイコトルネード
+#define MOVE_LV200_PSYCHIC_152          0x951 // エスパー Lv152 こうげんのしらべ
+#define MOVE_LV200_PSYCHIC_153          0x952 // エスパー Lv153 アストラルゲイズ
+#define MOVE_LV200_PSYCHIC_154          0x953 // エスパー Lv154 サイコインパクト
+#define MOVE_LV200_PSYCHIC_155          0x954 // エスパー Lv155 さとりのいちげき
+#define MOVE_LV200_PSYCHIC_156          0x955 // エスパー Lv156 マインドヒール
+#define MOVE_LV200_PSYCHIC_157          0x956 // エスパー Lv157 ふしぎなこうせん
+#define MOVE_LV200_PSYCHIC_158          0x957 // エスパー Lv158 どくしんじゅつ
+#define MOVE_LV200_PSYCHIC_159          0x958 // エスパー Lv159 サイキックゾーン
+#define MOVE_LV200_PSYCHIC_160          0x959 // エスパー Lv160 ねんのわけあい
+#define MOVE_LV200_PSYCHIC_161          0x95A // エスパー Lv161 かげぬいのひとみ
+#define MOVE_LV200_PSYCHIC_162          0x95B // エスパー Lv162 ちょうのうりょく
+#define MOVE_LV200_PSYCHIC_163          0x95C // エスパー Lv163 こころのゲート
+#define MOVE_LV200_PSYCHIC_164          0x95D // エスパー Lv164 ペルソナシフト
+#define MOVE_LV200_PSYCHIC_165          0x95E // エスパー Lv165 まぼろしのむれ
+#define MOVE_LV200_PSYCHIC_166          0x95F // エスパー Lv166 ねんりきウォール
+#define MOVE_LV200_PSYCHIC_167          0x960 // エスパー Lv167 ミラージュランス
+#define MOVE_LV200_PSYCHIC_168          0x961 // エスパー Lv168 しんくうのこころ
+#define MOVE_LV200_PSYCHIC_169          0x962 // エスパー Lv169 スプーンベンダー
+#define MOVE_LV200_PSYCHIC_170          0x963 // エスパー Lv170 ミナモトのはどう
+#define MOVE_LV200_PSYCHIC_171          0x964 // エスパー Lv171 ゆめのつづき
+#define MOVE_LV200_PSYCHIC_172          0x965 // エスパー Lv172 とくせいのまね
+#define MOVE_LV200_PSYCHIC_173          0x966 // エスパー Lv173 サイコダッシュ
+#define MOVE_LV200_PSYCHIC_174          0x967 // エスパー Lv174 ゆうたいりだつ
+#define MOVE_LV200_PSYCHIC_175          0x968 // エスパー Lv175 ふしぎなかげ
+#define MOVE_LV200_PSYCHIC_176          0x969 // エスパー Lv176 リーディング
+#define MOVE_LV200_PSYCHIC_177          0x96A // エスパー Lv177 ぎんがのひとみ
+#define MOVE_LV200_PSYCHIC_178          0x96B // エスパー Lv178 ちょうのうづち
+#define MOVE_LV200_PSYCHIC_179          0x96C // エスパー Lv179 ひかりのメス
+#define MOVE_LV200_PSYCHIC_180          0x96D // エスパー Lv180 ブラックホール
+#define MOVE_LV200_PSYCHIC_181          0x96E // エスパー Lv181 こころのうみ
+#define MOVE_LV200_PSYCHIC_182          0x96F // エスパー Lv182 テレパスだん
+#define MOVE_LV200_PSYCHIC_183          0x970 // エスパー Lv183 サイキックノヴァ
+#define MOVE_LV200_PSYCHIC_184          0x971 // エスパー Lv184 スターゲイザー
+#define MOVE_LV200_PSYCHIC_185          0x972 // エスパー Lv185 ミスティブルーム
+#define MOVE_LV200_PSYCHIC_186          0x973 // エスパー Lv186 サイコしんどう
+#define MOVE_LV200_PSYCHIC_187          0x974 // エスパー Lv187 トランセンド
+#define MOVE_LV200_PSYCHIC_188          0x975 // エスパー Lv188 むげんのめいそう
+#define MOVE_LV200_PSYCHIC_189          0x976 // エスパー Lv189 アルカナストーム
+#define MOVE_LV200_PSYCHIC_190          0x977 // エスパー Lv190 ふしぎなねむり
+#define MOVE_LV200_PSYCHIC_191          0x978 // エスパー Lv191 たましいのうた
+#define MOVE_LV200_PSYCHIC_192          0x979 // エスパー Lv192 ねんしのひとみ
+#define MOVE_LV200_PSYCHIC_193          0x97A // エスパー Lv193 きおくのうず
+#define MOVE_LV200_PSYCHIC_194          0x97B // エスパー Lv194 ほしのうんめい
+#define MOVE_LV200_PSYCHIC_195          0x97C // エスパー Lv195 とおみのまなこ
+#define MOVE_LV200_PSYCHIC_196          0x97D // エスパー Lv196 ブレインバーン
+#define MOVE_LV200_PSYCHIC_197          0x97E // エスパー Lv197 ミラクルパルス
+#define MOVE_LV200_PSYCHIC_198          0x97F // エスパー Lv198 こころのめつぶし
+#define MOVE_LV200_PSYCHIC_199          0x980 // エスパー Lv199 ゆめのおわり
+#define MOVE_LV200_PSYCHIC_200          0x981 // エスパー Lv200 エスパーユニゾン
+#define MOVE_LV200_ICE_101              0x982 // こおり Lv101 ひょうがカノン
+#define MOVE_LV200_ICE_102              0x983 // こおり Lv102 つららのやいば
+#define MOVE_LV200_ICE_103              0x984 // こおり Lv103 しもばしら
+#define MOVE_LV200_ICE_104              0x985 // こおり Lv104 こごえるいき
+#define MOVE_LV200_ICE_105              0x986 // こおり Lv105 ゆきどけのみず
+#define MOVE_LV200_ICE_106              0x987 // こおり Lv106 ダイヤダスト
+#define MOVE_LV200_ICE_107              0x988 // こおり Lv107 ふぶきのまもり
+#define MOVE_LV200_ICE_108              0x989 // こおり Lv108 アイスピック
+#define MOVE_LV200_ICE_109              0x98A // こおり Lv109 こおりのかべ
+#define MOVE_LV200_ICE_110              0x98B // こおり Lv110 しもやけ
+#define MOVE_LV200_ICE_111              0x98C // こおり Lv111 スノーダッシュ
+#define MOVE_LV200_ICE_112              0x98D // こおり Lv112 こごえのうた
+#define MOVE_LV200_ICE_113              0x98E // こおり Lv113 フロストフォール
+#define MOVE_LV200_ICE_114              0x98F // こおり Lv114 れいきのまく
+#define MOVE_LV200_ICE_115              0x990 // こおり Lv115 ひょうてんか
+#define MOVE_LV200_ICE_116              0x991 // こおり Lv116 いてつくまなざし
+#define MOVE_LV200_ICE_117              0x992 // こおり Lv117 ポーラーブレス
+#define MOVE_LV200_ICE_118              0x993 // こおり Lv118 つららひとつき
+#define MOVE_LV200_ICE_119              0x994 // こおり Lv119 ぎんせかいのまい
+#define MOVE_LV200_ICE_120              0x995 // こおり Lv120 ふぶきのよろい
+#define MOVE_LV200_ICE_121              0x996 // こおり Lv121 アイスバーン
+#define MOVE_LV200_ICE_122              0x997 // こおり Lv122 せつげんのまもり
+#define MOVE_LV200_ICE_123              0x998 // こおり Lv123 ゆきおんなのうた
+#define MOVE_LV200_ICE_124              0x999 // こおり Lv124 ひょうせつのかげ
+#define MOVE_LV200_ICE_125              0x99A // こおり Lv125 クリスタルレイ
+#define MOVE_LV200_ICE_126              0x99B // こおり Lv126 ゆきだるま
+#define MOVE_LV200_ICE_127              0x99C // こおり Lv127 しんしんのゆめ
+#define MOVE_LV200_ICE_128              0x99D // こおり Lv128 ダイヤのハート
+#define MOVE_LV200_ICE_129              0x99E // こおり Lv129 ブリザードエッジ
+#define MOVE_LV200_ICE_130              0x99F // こおり Lv130 ひょうがのめざめ
+#define MOVE_LV200_ICE_131              0x9A0 // こおり Lv131 ホワイトアウト
+#define MOVE_LV200_ICE_132              0x9A1 // こおり Lv132 フロストネット
+#define MOVE_LV200_ICE_133              0x9A2 // こおり Lv133 こごえるつばさ
+#define MOVE_LV200_ICE_134              0x9A3 // こおり Lv134 アイシクルハープ
+#define MOVE_LV200_ICE_135              0x9A4 // こおり Lv135 きたかぜのたて
+#define MOVE_LV200_ICE_136              0x9A5 // こおり Lv136 ひょうりゅう
+#define MOVE_LV200_ICE_137              0x9A6 // こおり Lv137 ホーリーフロスト
+#define MOVE_LV200_ICE_138              0x9A7 // こおり Lv138 ふゆのたいよう
+#define MOVE_LV200_ICE_139              0x9A8 // こおり Lv139 こごえるいやし
+#define MOVE_LV200_ICE_140              0x9A9 // こおり Lv140 こごえるぬし
+#define MOVE_LV200_ICE_141              0x9AA // こおり Lv141 ゼロケルビン
+#define MOVE_LV200_ICE_142              0x9AB // こおり Lv142 ツンドラのしらべ
+#define MOVE_LV200_ICE_143              0x9AC // こおり Lv143 ひょうけつのわな
+#define MOVE_LV200_ICE_144              0x9AD // こおり Lv144 アイスブレード
+#define MOVE_LV200_ICE_145              0x9AE // こおり Lv145 せっけいのあらし
+#define MOVE_LV200_ICE_146              0x9AF // こおり Lv146 ひょうはのあめ
+#define MOVE_LV200_ICE_147              0x9B0 // こおり Lv147 スノーマン
+#define MOVE_LV200_ICE_148              0x9B1 // こおり Lv148 こおりのしらべ
+#define MOVE_LV200_ICE_149              0x9B2 // こおり Lv149 つららのまきびし
+#define MOVE_LV200_ICE_150              0x9B3 // こおり Lv150 こおりのうみ
+#define MOVE_LV200_ICE_151              0x9B4 // こおり Lv151 ひょうざんダイブ
+#define MOVE_LV200_ICE_152              0x9B5 // こおり Lv152 ゆきのけっしょう
+#define MOVE_LV200_ICE_153              0x9B6 // こおり Lv153 みぞれのダンス
+#define MOVE_LV200_ICE_154              0x9B7 // こおり Lv154 れいきのふぶき
+#define MOVE_LV200_ICE_155              0x9B8 // こおり Lv155 きょくちレイ
+#define MOVE_LV200_ICE_156              0x9B9 // こおり Lv156 しんしんとふる
+#define MOVE_LV200_ICE_157              0x9BA // こおり Lv157 ひょうがのつるぎ
+#define MOVE_LV200_ICE_158              0x9BB // こおり Lv158 しろいきりのまく
+#define MOVE_LV200_ICE_159              0x9BC // こおり Lv159 こおるたいよう
+#define MOVE_LV200_ICE_160              0x9BD // こおり Lv160 ひょうざんくだき
+#define MOVE_LV200_ICE_161              0x9BE // こおり Lv161 ひょうがプレス
+#define MOVE_LV200_ICE_162              0x9BF // こおり Lv162 こおりのろう
+#define MOVE_LV200_ICE_163              0x9C0 // こおり Lv163 アイスキャニオン
+#define MOVE_LV200_ICE_164              0x9C1 // こおり Lv164 れいとうこうせん
+#define MOVE_LV200_ICE_165              0x9C2 // こおり Lv165 いてつくたいじゅ
+#define MOVE_LV200_ICE_166              0x9C3 // こおり Lv166 こおりやり
+#define MOVE_LV200_ICE_167              0x9C4 // こおり Lv167 ダイヤリーフ
+#define MOVE_LV200_ICE_168              0x9C5 // こおり Lv168 ひょうがのはどう
+#define MOVE_LV200_ICE_169              0x9C6 // こおり Lv169 ルナフロスト
+#define MOVE_LV200_ICE_170              0x9C7 // こおり Lv170 ぜつえいのつらら
+#define MOVE_LV200_ICE_171              0x9C8 // こおり Lv171 スノーウォーカー
+#define MOVE_LV200_ICE_172              0x9C9 // こおり Lv172 ゆきうさぎのまい
+#define MOVE_LV200_ICE_173              0x9CA // こおり Lv173 フロストバイト
+#define MOVE_LV200_ICE_174              0x9CB // こおり Lv174 オーロラカーテン
+#define MOVE_LV200_ICE_175              0x9CC // こおり Lv175 ふゆのおくりもの
+#define MOVE_LV200_ICE_176              0x9CD // こおり Lv176 ペンギンスライド
+#define MOVE_LV200_ICE_177              0x9CE // こおり Lv177 ふぶきのれんだ
+#define MOVE_LV200_ICE_178              0x9CF // こおり Lv178 ひょうがのいのり
+#define MOVE_LV200_ICE_179              0x9D0 // こおり Lv179 きょくちのやみ
+#define MOVE_LV200_ICE_180              0x9D1 // こおり Lv180 れいたいのまなこ
+#define MOVE_LV200_ICE_181              0x9D2 // こおり Lv181 フリーズノヴァ
+#define MOVE_LV200_ICE_182              0x9D3 // こおり Lv182 アイスエイジ
+#define MOVE_LV200_ICE_183              0x9D4 // こおり Lv183 ブルーアイス
+#define MOVE_LV200_ICE_184              0x9D5 // こおり Lv184 ひとひらのゆき
+#define MOVE_LV200_ICE_185              0x9D6 // こおり Lv185 ゆきのめぐみ
+#define MOVE_LV200_ICE_186              0x9D7 // こおり Lv186 シベリアンダイブ
+#define MOVE_LV200_ICE_187              0x9D8 // こおり Lv187 ふぶきのまい
+#define MOVE_LV200_ICE_188              0x9D9 // こおり Lv188 ダイヤプレス
+#define MOVE_LV200_ICE_189              0x9DA // こおり Lv189 ひょうしょうけん
+#define MOVE_LV200_ICE_190              0x9DB // こおり Lv190 ひょうがじだい
+#define MOVE_LV200_ICE_191              0x9DC // こおり Lv191 いてつくれいき
+#define MOVE_LV200_ICE_192              0x9DD // こおり Lv192 フロストクエイク
+#define MOVE_LV200_ICE_193              0x9DE // こおり Lv193 こごえるじゅもん
+#define MOVE_LV200_ICE_194              0x9DF // こおり Lv194 せかいをこおらす
+#define MOVE_LV200_ICE_195              0x9E0 // こおり Lv195 アイスレクイエム
+#define MOVE_LV200_ICE_196              0x9E1 // こおり Lv196 パーマフロスト
+#define MOVE_LV200_ICE_197              0x9E2 // こおり Lv197 こおりのおもいで
+#define MOVE_LV200_ICE_198              0x9E3 // こおり Lv198 ゆきおろし
+#define MOVE_LV200_ICE_199              0x9E4 // こおり Lv199 ホワイトアウトZ
+#define MOVE_LV200_ICE_200              0x9E5 // こおり Lv200 アブソルートゼロ
+#define MOVE_LV200_DRAGON_101           0x9E6 // ドラゴン Lv101 りゅうのこきゅう
+#define MOVE_LV200_DRAGON_102           0x9E7 // ドラゴン Lv102 たつまきクロー
+#define MOVE_LV200_DRAGON_103           0x9E8 // ドラゴン Lv103 ドラゴンスパイク
+#define MOVE_LV200_DRAGON_104           0x9E9 // ドラゴン Lv104 りゅうおうダンス
+#define MOVE_LV200_DRAGON_105           0x9EA // ドラゴン Lv105 ドラゴンウィング
+#define MOVE_LV200_DRAGON_106           0x9EB // ドラゴン Lv106 ドレイクブレス
+#define MOVE_LV200_DRAGON_107           0x9EC // ドラゴン Lv107 りゅうせきカノン
+#define MOVE_LV200_DRAGON_108           0x9ED // ドラゴン Lv108 りゅうのたて
+#define MOVE_LV200_DRAGON_109           0x9EE // ドラゴン Lv109 りゅうにいのる
+#define MOVE_LV200_DRAGON_110           0x9EF // ドラゴン Lv110 りゅうのこころ
+#define MOVE_LV200_DRAGON_111           0x9F0 // ドラゴン Lv111 りゅうのおたけび
+#define MOVE_LV200_DRAGON_112           0x9F1 // ドラゴン Lv112 ワイバーン
+#define MOVE_LV200_DRAGON_113           0x9F2 // ドラゴン Lv113 ウロコバリア
+#define MOVE_LV200_DRAGON_114           0x9F3 // ドラゴン Lv114 りゅうおうのつめ
+#define MOVE_LV200_DRAGON_115           0x9F4 // ドラゴン Lv115 ドラゴンヘッド
+#define MOVE_LV200_DRAGON_116           0x9F5 // ドラゴン Lv116 ドラゴンファング
+#define MOVE_LV200_DRAGON_117           0x9F6 // ドラゴン Lv117 えんりゅうダンス
+#define MOVE_LV200_DRAGON_118           0x9F7 // ドラゴン Lv118 ブルードラゴン
+#define MOVE_LV200_DRAGON_119           0x9F8 // ドラゴン Lv119 りゅうのうろこ
+#define MOVE_LV200_DRAGON_120           0x9F9 // ドラゴン Lv120 りゅうぎゃくりん
+#define MOVE_LV200_DRAGON_121           0x9FA // ドラゴン Lv121 ひりゅうのかぜ
+#define MOVE_LV200_DRAGON_122           0x9FB // ドラゴン Lv122 りゅうこつパンチ
+#define MOVE_LV200_DRAGON_123           0x9FC // ドラゴン Lv123 たつのおとしご
+#define MOVE_LV200_DRAGON_124           0x9FD // ドラゴン Lv124 りゅうのげきど
+#define MOVE_LV200_DRAGON_125           0x9FE // ドラゴン Lv125 ドラゴンかじり
+#define MOVE_LV200_DRAGON_126           0x9FF // ドラゴン Lv126 りゅうのにらみ
+#define MOVE_LV200_DRAGON_127           0xA00 // ドラゴン Lv127 ドラゴンクエイク
+#define MOVE_LV200_DRAGON_128           0xA01 // ドラゴン Lv128 りゅうのけっかい
+#define MOVE_LV200_DRAGON_129           0xA02 // ドラゴン Lv129 ドラコウェーブ
+#define MOVE_LV200_DRAGON_130           0xA03 // ドラゴン Lv130 ラスト・ドラゴン
+#define MOVE_LV200_DRAGON_131           0xA04 // ドラゴン Lv131 りゅうのさけび
+#define MOVE_LV200_DRAGON_132           0xA05 // ドラゴン Lv132 りゅうのしっぽ
+#define MOVE_LV200_DRAGON_133           0xA06 // ドラゴン Lv133 リンドヴルム
+#define MOVE_LV200_DRAGON_134           0xA07 // ドラゴン Lv134 ブラストブレス
+#define MOVE_LV200_DRAGON_135           0xA08 // ドラゴン Lv135 せいりゅうのけん
+#define MOVE_LV200_DRAGON_136           0xA09 // ドラゴン Lv136 ワームホール
+#define MOVE_LV200_DRAGON_137           0xA0A // ドラゴン Lv137 りゅうじんのゆめ
+#define MOVE_LV200_DRAGON_138           0xA0B // ドラゴン Lv138 カイザーフレア
+#define MOVE_LV200_DRAGON_139           0xA0C // ドラゴン Lv139 ドラゴニックレイ
+#define MOVE_LV200_DRAGON_140           0xA0D // ドラゴン Lv140 りゅうのみや
+#define MOVE_LV200_DRAGON_141           0xA0E // ドラゴン Lv141 りゅうせいワルツ
+#define MOVE_LV200_DRAGON_142           0xA0F // ドラゴン Lv142 りゅうぼうそう
+#define MOVE_LV200_DRAGON_143           0xA10 // ドラゴン Lv143 ようりゅうのめ
+#define MOVE_LV200_DRAGON_144           0xA11 // ドラゴン Lv144 かいりゅうけん
+#define MOVE_LV200_DRAGON_145           0xA12 // ドラゴン Lv145 バハムートハウル
+#define MOVE_LV200_DRAGON_146           0xA13 // ドラゴン Lv146 りゅうのしんぞう
+#define MOVE_LV200_DRAGON_147           0xA14 // ドラゴン Lv147 そうりゅうのたて
+#define MOVE_LV200_DRAGON_148           0xA15 // ドラゴン Lv148 ドラゴンブレード
+#define MOVE_LV200_DRAGON_149           0xA16 // ドラゴン Lv149 ドラゴンジャンプ
+#define MOVE_LV200_DRAGON_150           0xA17 // ドラゴン Lv150 ドラゴンカース
+#define MOVE_LV200_DRAGON_151           0xA18 // ドラゴン Lv151 こくりゅうブレス
+#define MOVE_LV200_DRAGON_152           0xA19 // ドラゴン Lv152 ゴールドスケイル
+#define MOVE_LV200_DRAGON_153           0xA1A // ドラゴン Lv153 りゅうのてっつい
+#define MOVE_LV200_DRAGON_154           0xA1B // ドラゴン Lv154 りゅうのかいろう
+#define MOVE_LV200_DRAGON_155           0xA1C // ドラゴン Lv155 ドレイクバーン
+#define MOVE_LV200_DRAGON_156           0xA1D // ドラゴン Lv156 ふんかりゅう
+#define MOVE_LV200_DRAGON_157           0xA1E // ドラゴン Lv157 りゅうのまどろみ
+#define MOVE_LV200_DRAGON_158           0xA1F // ドラゴン Lv158 ドラゴンバスター
+#define MOVE_LV200_DRAGON_159           0xA20 // ドラゴン Lv159 アースドラゴン
+#define MOVE_LV200_DRAGON_160           0xA21 // ドラゴン Lv160 ときのタイラント
+#define MOVE_LV200_DRAGON_161           0xA22 // ドラゴン Lv161 スカイドラゴン
+#define MOVE_LV200_DRAGON_162           0xA23 // ドラゴン Lv162 ドラゴンプライド
+#define MOVE_LV200_DRAGON_163           0xA24 // ドラゴン Lv163 じゃりゅうのうた
+#define MOVE_LV200_DRAGON_164           0xA25 // ドラゴン Lv164 クロスドラゴン
+#define MOVE_LV200_DRAGON_165           0xA26 // ドラゴン Lv165 ドラゴンおうえん
+#define MOVE_LV200_DRAGON_166           0xA27 // ドラゴン Lv166 ミドガルズオルム
+#define MOVE_LV200_DRAGON_167           0xA28 // ドラゴン Lv167 アジダハーカ
+#define MOVE_LV200_DRAGON_168           0xA29 // ドラゴン Lv168 ヨルムンガンド
+#define MOVE_LV200_DRAGON_169           0xA2A // ドラゴン Lv169 りゅうのこうら
+#define MOVE_LV200_DRAGON_170           0xA2B // ドラゴン Lv170 ツインドラクロー
+#define MOVE_LV200_DRAGON_171           0xA2C // ドラゴン Lv171 フェイロン
+#define MOVE_LV200_DRAGON_172           0xA2D // ドラゴン Lv172 ウロボロス
+#define MOVE_LV200_DRAGON_173           0xA2E // ドラゴン Lv173 りゅうのいっせん
+#define MOVE_LV200_DRAGON_174           0xA2F // ドラゴン Lv174 りゅうじんは
+#define MOVE_LV200_DRAGON_175           0xA30 // ドラゴン Lv175 ファーヴニル
+#define MOVE_LV200_DRAGON_176           0xA31 // ドラゴン Lv176 ほうおうのひかり
+#define MOVE_LV200_DRAGON_177           0xA32 // ドラゴン Lv177 りゅうのさだめ
+#define MOVE_LV200_DRAGON_178           0xA33 // ドラゴン Lv178 たつまきのしらべ
+#define MOVE_LV200_DRAGON_179           0xA34 // ドラゴン Lv179 ドラゴンロア
+#define MOVE_LV200_DRAGON_180           0xA35 // ドラゴン Lv180 りゅうのしらべ
+#define MOVE_LV200_DRAGON_181           0xA36 // ドラゴン Lv181 ドラコビート
+#define MOVE_LV200_DRAGON_182           0xA37 // ドラゴン Lv182 りゅうせいのかげ
+#define MOVE_LV200_DRAGON_183           0xA38 // ドラゴン Lv183 こだいのブレス
+#define MOVE_LV200_DRAGON_184           0xA39 // ドラゴン Lv184 ドラゴンジャッジ
+#define MOVE_LV200_DRAGON_185           0xA3A // ドラゴン Lv185 りゅうのまなざし
+#define MOVE_LV200_DRAGON_186           0xA3B // ドラゴン Lv186 りゅうのたすけ
+#define MOVE_LV200_DRAGON_187           0xA3C // ドラゴン Lv187 ふじのりゅうおう
+#define MOVE_LV200_DRAGON_188           0xA3D // ドラゴン Lv188 かみのうろこ
+#define MOVE_LV200_DRAGON_189           0xA3E // ドラゴン Lv189 バハムートコール
+#define MOVE_LV200_DRAGON_190           0xA3F // ドラゴン Lv190 りゅうのゆうわく
+#define MOVE_LV200_DRAGON_191           0xA40 // ドラゴン Lv191 りゅうレクイエム
+#define MOVE_LV200_DRAGON_192           0xA41 // ドラゴン Lv192 りゅうへのみち
+#define MOVE_LV200_DRAGON_193           0xA42 // ドラゴン Lv193 ドラゴンフォース
+#define MOVE_LV200_DRAGON_194           0xA43 // ドラゴン Lv194 しんりゅうのきば
+#define MOVE_LV200_DRAGON_195           0xA44 // ドラゴン Lv195 ドラゴンハート
+#define MOVE_LV200_DRAGON_196           0xA45 // ドラゴン Lv196 りゅうのおもみ
+#define MOVE_LV200_DRAGON_197           0xA46 // ドラゴン Lv197 りゅうかのあらし
+#define MOVE_LV200_DRAGON_198           0xA47 // ドラゴン Lv198 ドラゴンラスト
+#define MOVE_LV200_DRAGON_199           0xA48 // ドラゴン Lv199 りゅうのおうさま
+#define MOVE_LV200_DRAGON_200           0xA49 // ドラゴン Lv200 りゅうのだんまく
+#define MOVE_LV200_DARK_101             0xA4A // あく Lv101 やみのつめ
+#define MOVE_LV200_DARK_102             0xA4B // あく Lv102 くろいカノン
+#define MOVE_LV200_DARK_103             0xA4C // あく Lv103 かげのやいば
+#define MOVE_LV200_DARK_104             0xA4D // あく Lv104 ふいうちのやみ
+#define MOVE_LV200_DARK_105             0xA4E // あく Lv105 ひきょうなわな
+#define MOVE_LV200_DARK_106             0xA4F // あく Lv106 くらやみのうた
+#define MOVE_LV200_DARK_107             0xA50 // あく Lv107 いじわるカット
+#define MOVE_LV200_DARK_108             0xA51 // あく Lv108 あやしいめ
+#define MOVE_LV200_DARK_109             0xA52 // あく Lv109 うらぎりのこぶし
+#define MOVE_LV200_DARK_110             0xA53 // あく Lv110 ぬすみみる
+#define MOVE_LV200_DARK_111             0xA54 // あく Lv111 ドロボウねこ
+#define MOVE_LV200_DARK_112             0xA55 // あく Lv112 よどみのいき
+#define MOVE_LV200_DARK_113             0xA56 // あく Lv113 ブラックホイップ
+#define MOVE_LV200_DARK_114             0xA57 // あく Lv114 かげのいぶき
+#define MOVE_LV200_DARK_115             0xA58 // あく Lv115 まやかしのまく
+#define MOVE_LV200_DARK_116             0xA59 // あく Lv116 あおりのダンス
+#define MOVE_LV200_DARK_117             0xA5A // あく Lv117 くろいささやき
+#define MOVE_LV200_DARK_118             0xA5B // あく Lv118 やみのはやて
+#define MOVE_LV200_DARK_119             0xA5C // あく Lv119 やみうちダイブ
+#define MOVE_LV200_DARK_120             0xA5D // あく Lv120 こころのひきょう
+#define MOVE_LV200_DARK_121             0xA5E // あく Lv121 ブラックアウトZ
+#define MOVE_LV200_DARK_122             0xA5F // あく Lv122 やみよのカラス
+#define MOVE_LV200_DARK_123             0xA60 // あく Lv123 くろねこのまい
+#define MOVE_LV200_DARK_124             0xA61 // あく Lv124 ナイトメアハウス
+#define MOVE_LV200_DARK_125             0xA62 // あく Lv125 いんぼうのしらべ
+#define MOVE_LV200_DARK_126             0xA63 // あく Lv126 ひとでなしのめ
+#define MOVE_LV200_DARK_127             0xA64 // あく Lv127 バッドマナー
+#define MOVE_LV200_DARK_128             0xA65 // あく Lv128 やばんタックル
+#define MOVE_LV200_DARK_129             0xA66 // あく Lv129 ほんしょうのかげ
+#define MOVE_LV200_DARK_130             0xA67 // あく Lv130 やみうちいちげき
+#define MOVE_LV200_DARK_131             0xA68 // あく Lv131 ふくしゅうやいば
+#define MOVE_LV200_DARK_132             0xA69 // あく Lv132 うらみのこぶし
+#define MOVE_LV200_DARK_133             0xA6A // あく Lv133 ぬすっとのよる
+#define MOVE_LV200_DARK_134             0xA6B // あく Lv134 いたずらのきもち
+#define MOVE_LV200_DARK_135             0xA6C // あく Lv135 やみのたて
+#define MOVE_LV200_DARK_136             0xA6D // あく Lv136 やみのきりあらし
+#define MOVE_LV200_DARK_137             0xA6E // あく Lv137 じゃあくなえがお
+#define MOVE_LV200_DARK_138             0xA6F // あく Lv138 ブラックバイト
+#define MOVE_LV200_DARK_139             0xA70 // あく Lv139 まよなかのカラス
+#define MOVE_LV200_DARK_140             0xA71 // あく Lv140 ひろがるやみ
+#define MOVE_LV200_DARK_141             0xA72 // あく Lv141 やみにまぎれる
+#define MOVE_LV200_DARK_142             0xA73 // あく Lv142 いかりのげんこつ
+#define MOVE_LV200_DARK_143             0xA74 // あく Lv143 かげぬいのめ
+#define MOVE_LV200_DARK_144             0xA75 // あく Lv144 わるぢえ
+#define MOVE_LV200_DARK_145             0xA76 // あく Lv145 ダークシャワー
+#define MOVE_LV200_DARK_146             0xA77 // あく Lv146 しっこくのかべ
+#define MOVE_LV200_DARK_147             0xA78 // あく Lv147 あくまのささやき
+#define MOVE_LV200_DARK_148             0xA79 // あく Lv148 ひとだまのひかり
+#define MOVE_LV200_DARK_149             0xA7A // あく Lv149 こうかつなえみ
+#define MOVE_LV200_DARK_150             0xA7B // あく Lv150 くずれるさかい
+#define MOVE_LV200_DARK_151             0xA7C // あく Lv151 くろいかぜ
+#define MOVE_LV200_DARK_152             0xA7D // あく Lv152 ダストストーム
+#define MOVE_LV200_DARK_153             0xA7E // あく Lv153 ネガウェーブ
+#define MOVE_LV200_DARK_154             0xA7F // あく Lv154 よなきのうた
+#define MOVE_LV200_DARK_155             0xA80 // あく Lv155 ルナティック
+#define MOVE_LV200_DARK_156             0xA81 // あく Lv156 バッドエンド
+#define MOVE_LV200_DARK_157             0xA82 // あく Lv157 アビスクロー
+#define MOVE_LV200_DARK_158             0xA83 // あく Lv158 やみのしじま
+#define MOVE_LV200_DARK_159             0xA84 // あく Lv159 ブラックマター
+#define MOVE_LV200_DARK_160             0xA85 // あく Lv160 ウラギリのウタ
+#define MOVE_LV200_DARK_161             0xA86 // あく Lv161 くろいたつまき
+#define MOVE_LV200_DARK_162             0xA87 // あく Lv162 あくじきのはて
+#define MOVE_LV200_DARK_163             0xA88 // あく Lv163 おだてのわな
+#define MOVE_LV200_DARK_164             0xA89 // あく Lv164 かくれみのじゅつ
+#define MOVE_LV200_DARK_165             0xA8A // あく Lv165 ふいうちのかげ
+#define MOVE_LV200_DARK_166             0xA8B // あく Lv166 ギルティクロス
+#define MOVE_LV200_DARK_167             0xA8C // あく Lv167 あんこくウェザー
+#define MOVE_LV200_DARK_168             0xA8D // あく Lv168 せいぎうらがえし
+#define MOVE_LV200_DARK_169             0xA8E // あく Lv169 うらみのいちげき
+#define MOVE_LV200_DARK_170             0xA8F // あく Lv170 ソウルイーター
+#define MOVE_LV200_DARK_171             0xA90 // あく Lv171 パンデモニウム
+#define MOVE_LV200_DARK_172             0xA91 // あく Lv172 おとしあなのよる
+#define MOVE_LV200_DARK_173             0xA92 // あく Lv173 やみのどうけし
+#define MOVE_LV200_DARK_174             0xA93 // あく Lv174 ふくしゅうのひ
+#define MOVE_LV200_DARK_175             0xA94 // あく Lv175 いまわのきわ
+#define MOVE_LV200_DARK_176             0xA95 // あく Lv176 くろいレクイエム
+#define MOVE_LV200_DARK_177             0xA96 // あく Lv177 うらぎりのきば
+#define MOVE_LV200_DARK_178             0xA97 // あく Lv178 ネゴシエイター
+#define MOVE_LV200_DARK_179             0xA98 // あく Lv179 ニヒルウェーブ
+#define MOVE_LV200_DARK_180             0xA99 // あく Lv180 やみのせかい
+#define MOVE_LV200_DARK_181             0xA9A // あく Lv181 やみのほうよう
+#define MOVE_LV200_DARK_182             0xA9B // あく Lv182 ふげんのやみ
+#define MOVE_LV200_DARK_183             0xA9C // あく Lv183 ぎゃくこうやいば
+#define MOVE_LV200_DARK_184             0xA9D // あく Lv184 くろいきょうえん
+#define MOVE_LV200_DARK_185             0xA9E // あく Lv185 グレイブヤード
+#define MOVE_LV200_DARK_186             0xA9F // あく Lv186 かげのしんぱん
+#define MOVE_LV200_DARK_187             0xAA0 // あく Lv187 ふくしゅうげき
+#define MOVE_LV200_DARK_188             0xAA1 // あく Lv188 あくのだいかんぱ
+#define MOVE_LV200_DARK_189             0xAA2 // あく Lv189 ブラッディナイト
+#define MOVE_LV200_DARK_190             0xAA3 // あく Lv190 よるのおうさま
+#define MOVE_LV200_DARK_191             0xAA4 // あく Lv191 ダークキャニオン
+#define MOVE_LV200_DARK_192             0xAA5 // あく Lv192 パープルヘイズ
+#define MOVE_LV200_DARK_193             0xAA6 // あく Lv193 ぞうおのうた
+#define MOVE_LV200_DARK_194             0xAA7 // あく Lv194 へいおんなるやみ
+#define MOVE_LV200_DARK_195             0xAA8 // あく Lv195 やみのていおう
+#define MOVE_LV200_DARK_196             0xAA9 // あく Lv196 かげのくに
+#define MOVE_LV200_DARK_197             0xAAA // あく Lv197 くろいてぶくろ
+#define MOVE_LV200_DARK_198             0xAAB // あく Lv198 やみのひとみ
+#define MOVE_LV200_DARK_199             0xAAC // あく Lv199 ダークカーテン
+#define MOVE_LV200_DARK_200             0xAAD // あく Lv200 ダークネスホール
+#define MOVE_LV200_FAIRY_101            0xAAE // フェアリー Lv101 ほしくずカノン
+#define MOVE_LV200_FAIRY_102            0xAAF // フェアリー Lv102 ひかりのリボン
+#define MOVE_LV200_FAIRY_103            0xAB0 // フェアリー Lv103 スパンコール
+#define MOVE_LV200_FAIRY_104            0xAB1 // フェアリー Lv104 きらめきダンス
+#define MOVE_LV200_FAIRY_105            0xAB2 // フェアリー Lv105 ミルキーシャワー
+#define MOVE_LV200_FAIRY_106            0xAB3 // フェアリー Lv106 まほうのつえ
+#define MOVE_LV200_FAIRY_107            0xAB4 // フェアリー Lv107 ハートのたて
+#define MOVE_LV200_FAIRY_108            0xAB5 // フェアリー Lv108 ゆめみるひとみ
+#define MOVE_LV200_FAIRY_109            0xAB6 // フェアリー Lv109 ようせいダッシュ
+#define MOVE_LV200_FAIRY_110            0xAB7 // フェアリー Lv110 ときめきスパーク
+#define MOVE_LV200_FAIRY_111            0xAB8 // フェアリー Lv111 ルミナスキック
+#define MOVE_LV200_FAIRY_112            0xAB9 // フェアリー Lv112 ちいさなキス
+#define MOVE_LV200_FAIRY_113            0xABA // フェアリー Lv113 ときめきパンチ
+#define MOVE_LV200_FAIRY_114            0xABB // フェアリー Lv114 スイーツラッシュ
+#define MOVE_LV200_FAIRY_115            0xABC // フェアリー Lv115 おはなのまもり
+#define MOVE_LV200_FAIRY_116            0xABD // フェアリー Lv116 まぶしいほし
+#define MOVE_LV200_FAIRY_117            0xABE // フェアリー Lv117 ささやきのかぜ
+#define MOVE_LV200_FAIRY_118            0xABF // フェアリー Lv118 ココロのいやし
+#define MOVE_LV200_FAIRY_119            0xAC0 // フェアリー Lv119 きまぐれスパーク
+#define MOVE_LV200_FAIRY_120            0xAC1 // フェアリー Lv120 ハートのまもり
+#define MOVE_LV200_FAIRY_121            0xAC2 // フェアリー Lv121 たんぽぽのわた
+#define MOVE_LV200_FAIRY_122            0xAC3 // フェアリー Lv122 ほしのカーテン
+#define MOVE_LV200_FAIRY_123            0xAC4 // フェアリー Lv123 パステルクロー
+#define MOVE_LV200_FAIRY_124            0xAC5 // フェアリー Lv124 ミルクのシャワー
+#define MOVE_LV200_FAIRY_125            0xAC6 // フェアリー Lv125 フェアリーテイル
+#define MOVE_LV200_FAIRY_126            0xAC7 // フェアリー Lv126 ふわふわのゆめ
+#define MOVE_LV200_FAIRY_127            0xAC8 // フェアリー Lv127 こもりうたのかぜ
+#define MOVE_LV200_FAIRY_128            0xAC9 // フェアリー Lv128 ミラクルハート
+#define MOVE_LV200_FAIRY_129            0xACA // フェアリー Lv129 おとぎのまど
+#define MOVE_LV200_FAIRY_130            0xACB // フェアリー Lv130 マジカルシュガー
+#define MOVE_LV200_FAIRY_131            0xACC // フェアリー Lv131 ひみつのリボン
+#define MOVE_LV200_FAIRY_132            0xACD // フェアリー Lv132 あめだまあらし
+#define MOVE_LV200_FAIRY_133            0xACE // フェアリー Lv133 ときのまほう
+#define MOVE_LV200_FAIRY_134            0xACF // フェアリー Lv134 マジカルステップ
+#define MOVE_LV200_FAIRY_135            0xAD0 // フェアリー Lv135 パールダスト
+#define MOVE_LV200_FAIRY_136            0xAD1 // フェアリー Lv136 プリズムミスト
+#define MOVE_LV200_FAIRY_137            0xAD2 // フェアリー Lv137 きらめきのつばさ
+#define MOVE_LV200_FAIRY_138            0xAD3 // フェアリー Lv138 ほしのしらべ
+#define MOVE_LV200_FAIRY_139            0xAD4 // フェアリー Lv139 おはじきボンバー
+#define MOVE_LV200_FAIRY_140            0xAD5 // フェアリー Lv140 ラブライト
+#define MOVE_LV200_FAIRY_141            0xAD6 // フェアリー Lv141 ドリームキャッチ
+#define MOVE_LV200_FAIRY_142            0xAD7 // フェアリー Lv142 ファンタジア
+#define MOVE_LV200_FAIRY_143            0xAD8 // フェアリー Lv143 ふしぎのくに
+#define MOVE_LV200_FAIRY_144            0xAD9 // フェアリー Lv144 ミスティックレイ
+#define MOVE_LV200_FAIRY_145            0xADA // フェアリー Lv145 ぴかぴかひかり
+#define MOVE_LV200_FAIRY_146            0xADB // フェアリー Lv146 ココアのまほう
+#define MOVE_LV200_FAIRY_147            0xADC // フェアリー Lv147 ぬいぐるみドン
+#define MOVE_LV200_FAIRY_148            0xADD // フェアリー Lv148 あまいささやき
+#define MOVE_LV200_FAIRY_149            0xADE // フェアリー Lv149 ハートビート
+#define MOVE_LV200_FAIRY_150            0xADF // フェアリー Lv150 ようせいのわ
+#define MOVE_LV200_FAIRY_151            0xAE0 // フェアリー Lv151 ティアラのひかり
+#define MOVE_LV200_FAIRY_152            0xAE1 // フェアリー Lv152 にじいろのうず
+#define MOVE_LV200_FAIRY_153            0xAE2 // フェアリー Lv153 パッションノヴァ
+#define MOVE_LV200_FAIRY_154            0xAE3 // フェアリー Lv154 ときめきアタック
+#define MOVE_LV200_FAIRY_155            0xAE4 // フェアリー Lv155 ようせいのまほう
+#define MOVE_LV200_FAIRY_156            0xAE5 // フェアリー Lv156 ひめごとのはな
+#define MOVE_LV200_FAIRY_157            0xAE6 // フェアリー Lv157 ほしあかりベール
+#define MOVE_LV200_FAIRY_158            0xAE7 // フェアリー Lv158 ほしくずダンス
+#define MOVE_LV200_FAIRY_159            0xAE8 // フェアリー Lv159 おとめのいかり
+#define MOVE_LV200_FAIRY_160            0xAE9 // フェアリー Lv160 ぬいぐるみのかげ
+#define MOVE_LV200_FAIRY_161            0xAEA // フェアリー Lv161 プリンセスブレス
+#define MOVE_LV200_FAIRY_162            0xAEB // フェアリー Lv162 やさしさのはもん
+#define MOVE_LV200_FAIRY_163            0xAEC // フェアリー Lv163 キュートカット
+#define MOVE_LV200_FAIRY_164            0xAED // フェアリー Lv164 メルヘンキャノン
+#define MOVE_LV200_FAIRY_165            0xAEE // フェアリー Lv165 きみのためのうた
+#define MOVE_LV200_FAIRY_166            0xAEF // フェアリー Lv166 ムーンダスト
+#define MOVE_LV200_FAIRY_167            0xAF0 // フェアリー Lv167 ほしぞらのちかい
+#define MOVE_LV200_FAIRY_168            0xAF1 // フェアリー Lv168 ユメミクリスタル
+#define MOVE_LV200_FAIRY_169            0xAF2 // フェアリー Lv169 ラブリーパンチ
+#define MOVE_LV200_FAIRY_170            0xAF3 // フェアリー Lv170 ゆめのおひめさま
+#define MOVE_LV200_FAIRY_171            0xAF4 // フェアリー Lv171 フェアリーグロウ
+#define MOVE_LV200_FAIRY_172            0xAF5 // フェアリー Lv172 まじょのほうき
+#define MOVE_LV200_FAIRY_173            0xAF6 // フェアリー Lv173 ベリーベリーボム
+#define MOVE_LV200_FAIRY_174            0xAF7 // フェアリー Lv174 ふしぎなふしぎ
+#define MOVE_LV200_FAIRY_175            0xAF8 // フェアリー Lv175 ひなげしのうた
+#define MOVE_LV200_FAIRY_176            0xAF9 // フェアリー Lv176 パジャマパーティ
+#define MOVE_LV200_FAIRY_177            0xAFA // フェアリー Lv177 ミラクルティア
+#define MOVE_LV200_FAIRY_178            0xAFB // フェアリー Lv178 シュガーメテオ
+#define MOVE_LV200_FAIRY_179            0xAFC // フェアリー Lv179 ハニーバニー
+#define MOVE_LV200_FAIRY_180            0xAFD // フェアリー Lv180 ちいさなきせき
+#define MOVE_LV200_FAIRY_181            0xAFE // フェアリー Lv181 ララバイムーン
+#define MOVE_LV200_FAIRY_182            0xAFF // フェアリー Lv182 きらめくドレス
+#define MOVE_LV200_FAIRY_183            0xB00 // フェアリー Lv183 わたあめストーム
+#define MOVE_LV200_FAIRY_184            0xB01 // フェアリー Lv184 ローズガーデン
+#define MOVE_LV200_FAIRY_185            0xB02 // フェアリー Lv185 ハッピーダンス
+#define MOVE_LV200_FAIRY_186            0xB03 // フェアリー Lv186 ドリームスマイル
+#define MOVE_LV200_FAIRY_187            0xB04 // フェアリー Lv187 スウィートハグ
+#define MOVE_LV200_FAIRY_188            0xB05 // フェアリー Lv188 フェアリーエンド
+#define MOVE_LV200_FAIRY_189            0xB06 // フェアリー Lv189 ほしのメロディ
+#define MOVE_LV200_FAIRY_190            0xB07 // フェアリー Lv190 ミルクのとびら
+#define MOVE_LV200_FAIRY_191            0xB08 // フェアリー Lv191 ミルキーウェイ
+#define MOVE_LV200_FAIRY_192            0xB09 // フェアリー Lv192 ユニコーンホーン
+#define MOVE_LV200_FAIRY_193            0xB0A // フェアリー Lv193 こころのかがやき
+#define MOVE_LV200_FAIRY_194            0xB0B // フェアリー Lv194 フェアリーゲート
+#define MOVE_LV200_FAIRY_195            0xB0C // フェアリー Lv195 きせきのかがやき
+#define MOVE_LV200_FAIRY_196            0xB0D // フェアリー Lv196 プリズマティック
+#define MOVE_LV200_FAIRY_197            0xB0E // フェアリー Lv197 ねがいごとのほし
+#define MOVE_LV200_FAIRY_198            0xB0F // フェアリー Lv198 ほしぞらおうじょ
+#define MOVE_LV200_FAIRY_199            0xB10 // フェアリー Lv199 ハッピーエンド
+#define MOVE_LV200_FAIRY_200            0xB11 // フェアリー Lv200 ハッピーブレス
+#define MOVE_LV200_RIL_101              0xB12 // リル Lv101 つきあかり
+#define MOVE_LV200_RIL_102              0xB13 // リル Lv102 ひとりぼっち
+#define MOVE_LV200_RIL_103              0xB14 // リル Lv103 なみだのしずく
+#define MOVE_LV200_RIL_104              0xB15 // リル Lv104 おもいでばなし
+#define MOVE_LV200_RIL_105              0xB16 // リル Lv105 ふるいおもちゃ
+#define MOVE_LV200_RIL_106              0xB17 // リル Lv106 さびしさのこえ
+#define MOVE_LV200_RIL_107              0xB18 // リル Lv107 よいやみのうた
+#define MOVE_LV200_RIL_108              0xB19 // リル Lv108 ゆうづきよ
+#define MOVE_LV200_RIL_109              0xB1A // リル Lv109 ひとりごと
+#define MOVE_LV200_RIL_110              0xB1B // リル Lv110 おもいでしまい
+#define MOVE_LV200_RIL_111              0xB1C // リル Lv111 おぼろづき
+#define MOVE_LV200_RIL_112              0xB1D // リル Lv112 きおくのかけら
+#define MOVE_LV200_RIL_113              0xB1E // リル Lv113 いたみのあと
+#define MOVE_LV200_RIL_114              0xB1F // リル Lv114 おわかれのてがみ
+#define MOVE_LV200_RIL_115              0xB20 // リル Lv115 もどれないみち
+#define MOVE_LV200_RIL_116              0xB21 // リル Lv116 ぼんやりしたかげ
+#define MOVE_LV200_RIL_117              0xB22 // リル Lv117 せつなのきらめき
+#define MOVE_LV200_RIL_118              0xB23 // リル Lv118 かなしみのつめ
+#define MOVE_LV200_RIL_119              0xB24 // リル Lv119 ねむれないよる
+#define MOVE_LV200_RIL_120              0xB25 // リル Lv120 まぼろしのきおく
+#define MOVE_LV200_RIL_121              0xB26 // リル Lv121 ゆめのなごり
+#define MOVE_LV200_RIL_122              0xB27 // リル Lv122 しろいためいき
+#define MOVE_LV200_RIL_123              0xB28 // リル Lv123 すれちがいざま
+#define MOVE_LV200_RIL_124              0xB29 // リル Lv124 おいてけぼり
+#define MOVE_LV200_RIL_125              0xB2A // リル Lv125 くもりぞらのつき
+#define MOVE_LV200_RIL_126              0xB2B // リル Lv126 うつろなひとみ
+#define MOVE_LV200_RIL_127              0xB2C // リル Lv127 いなくなったあと
+#define MOVE_LV200_RIL_128              0xB2D // リル Lv128 わすれなぐさ
+#define MOVE_LV200_RIL_129              0xB2E // リル Lv129 まよいごのうた
+#define MOVE_LV200_RIL_130              0xB2F // リル Lv130 リルのまなざし
+#define MOVE_LV200_RIL_131              0xB30 // リル Lv131 こぼれたナミダ
+#define MOVE_LV200_RIL_132              0xB31 // リル Lv132 ふゆのよぞら
+#define MOVE_LV200_RIL_133              0xB32 // リル Lv133 さよならのまえに
+#define MOVE_LV200_RIL_134              0xB33 // リル Lv134 ひなたのあとに
+#define MOVE_LV200_RIL_135              0xB34 // リル Lv135 なつかしいにおい
+#define MOVE_LV200_RIL_136              0xB35 // リル Lv136 つめたいてのひら
+#define MOVE_LV200_RIL_137              0xB36 // リル Lv137 ふたりのやくそく
+#define MOVE_LV200_RIL_138              0xB37 // リル Lv138 かえりみち
+#define MOVE_LV200_RIL_139              0xB38 // リル Lv139 なつのおもいで
+#define MOVE_LV200_RIL_140              0xB39 // リル Lv140 ひとりのいのり
+#define MOVE_LV200_RIL_141              0xB3A // リル Lv141 きえかけのひ
+#define MOVE_LV200_RIL_142              0xB3B // リル Lv142 さびれたえき
+#define MOVE_LV200_RIL_143              0xB3C // リル Lv143 ガラスのゆめ
+#define MOVE_LV200_RIL_144              0xB3D // リル Lv144 すきまかぜ
+#define MOVE_LV200_RIL_145              0xB3E // リル Lv145 ゆうやけこやけ
+#define MOVE_LV200_RIL_146              0xB3F // リル Lv146 ひとりかくれんぼ
+#define MOVE_LV200_RIL_147              0xB40 // リル Lv147 あしたのわたし
+#define MOVE_LV200_RIL_148              0xB41 // リル Lv148 つきのみちしるべ
+#define MOVE_LV200_RIL_149              0xB42 // リル Lv149 ふりむかないで
+#define MOVE_LV200_RIL_150              0xB43 // リル Lv150 なみだのつき
+#define MOVE_LV200_RIL_151              0xB44 // リル Lv151 ざんぞうのおと
+#define MOVE_LV200_RIL_152              0xB45 // リル Lv152 とりのこされて
+#define MOVE_LV200_RIL_153              0xB46 // リル Lv153 おもいでぼうき
+#define MOVE_LV200_RIL_154              0xB47 // リル Lv154 ぽつんとつき
+#define MOVE_LV200_RIL_155              0xB48 // リル Lv155 とおいひのうた
+#define MOVE_LV200_RIL_156              0xB49 // リル Lv156 はなれたてのひら
+#define MOVE_LV200_RIL_157              0xB4A // リル Lv157 ぬくもりのあと
+#define MOVE_LV200_RIL_158              0xB4B // リル Lv158 てがみのゆくえ
+#define MOVE_LV200_RIL_159              0xB4C // リル Lv159 しおれたはな
+#define MOVE_LV200_RIL_160              0xB4D // リル Lv160 さびしさのかげ
+#define MOVE_LV200_RIL_161              0xB4E // リル Lv161 かげおくり
+#define MOVE_LV200_RIL_162              0xB4F // リル Lv162 こころのすきま
+#define MOVE_LV200_RIL_163              0xB50 // リル Lv163 さいごのひとこと
+#define MOVE_LV200_RIL_164              0xB51 // リル Lv164 さがしもの
+#define MOVE_LV200_RIL_165              0xB52 // リル Lv165 なきむしカラス
+#define MOVE_LV200_RIL_166              0xB53 // リル Lv166 ひとりぶんのせき
+#define MOVE_LV200_RIL_167              0xB54 // リル Lv167 まだおぼえてる
+#define MOVE_LV200_RIL_168              0xB55 // リル Lv168 よるのどうぶつ
+#define MOVE_LV200_RIL_169              0xB56 // リル Lv169 わすれものカット
+#define MOVE_LV200_RIL_170              0xB57 // リル Lv170 ツキノコトワリ
+#define MOVE_LV200_RIL_171              0xB58 // リル Lv171 ひとしずくのつき
+#define MOVE_LV200_RIL_172              0xB59 // リル Lv172 さよならバイバイ
+#define MOVE_LV200_RIL_173              0xB5A // リル Lv173 かたおもい
+#define MOVE_LV200_RIL_174              0xB5B // リル Lv174 ともだちのかげ
+#define MOVE_LV200_RIL_175              0xB5C // リル Lv175 つきのうさぎ
+#define MOVE_LV200_RIL_176              0xB5D // リル Lv176 うらがえしのよる
+#define MOVE_LV200_RIL_177              0xB5E // リル Lv177 まっくらなへや
+#define MOVE_LV200_RIL_178              0xB5F // リル Lv178 しずかなゆうべ
+#define MOVE_LV200_RIL_179              0xB60 // リル Lv179 つきがおちる
+#define MOVE_LV200_RIL_180              0xB61 // リル Lv180 わすれがたみ
+#define MOVE_LV200_RIL_181              0xB62 // リル Lv181 おぼえていてね
+#define MOVE_LV200_RIL_182              0xB63 // リル Lv182 ながれぼしのあと
+#define MOVE_LV200_RIL_183              0xB64 // リル Lv183 ひとりのあさ
+#define MOVE_LV200_RIL_184              0xB65 // リル Lv184 ねがいのゆくえ
+#define MOVE_LV200_RIL_185              0xB66 // リル Lv185 さよならライブ
+#define MOVE_LV200_RIL_186              0xB67 // リル Lv186 ひなたのゆめ
+#define MOVE_LV200_RIL_187              0xB68 // リル Lv187 かがみのぼく
+#define MOVE_LV200_RIL_188              0xB69 // リル Lv188 かえらぬひびの
+#define MOVE_LV200_RIL_189              0xB6A // リル Lv189 あおいよるのおと
+#define MOVE_LV200_RIL_190              0xB6B // リル Lv190 さよならまで
+#define MOVE_LV200_RIL_191              0xB6C // リル Lv191 ためらいのひかり
+#define MOVE_LV200_RIL_192              0xB6D // リル Lv192 ぬけがらのうた
+#define MOVE_LV200_RIL_193              0xB6E // リル Lv193 ゆびきりげんまん
+#define MOVE_LV200_RIL_194              0xB6F // リル Lv194 せかいにひとり
+#define MOVE_LV200_RIL_195              0xB70 // リル Lv195 おもいでのつきよ
+#define MOVE_LV200_RIL_196              0xB71 // リル Lv196 ひとりぶんの
+#define MOVE_LV200_RIL_197              0xB72 // リル Lv197 つきなみだ
+#define MOVE_LV200_RIL_198              0xB73 // リル Lv198 ひかりのつぶ
+#define MOVE_LV200_RIL_199              0xB74 // リル Lv199 さびしいかぜ
+#define MOVE_LV200_RIL_200              0xB75 // リル Lv200 よるにおかえり
+/* LV200_MOVES_0593 END */
+/* LV100_MOVES_0600 BEGIN */
+#define MOVE_LV100_NORMAL_1             0xB76 // ノーマル Lv1 とっしんパンチ
+#define MOVE_LV100_NORMAL_2             0xB77 // ノーマル Lv2 ちいさなほえ
+#define MOVE_LV100_NORMAL_3             0xB78 // ノーマル Lv3 ポコポコたたき
+#define MOVE_LV100_NORMAL_4             0xB79 // ノーマル Lv4 かるいタックル
+#define MOVE_LV100_NORMAL_5             0xB7A // ノーマル Lv5 まるまりガード
+#define MOVE_LV100_NORMAL_6             0xB7B // ノーマル Lv6 ぱたぱたビンタ
+#define MOVE_LV100_NORMAL_7             0xB7C // ノーマル Lv7 ひとりごとだけ
+#define MOVE_LV100_NORMAL_8             0xB7D // ノーマル Lv8 ダッシュアタック
+#define MOVE_LV100_NORMAL_9             0xB7E // ノーマル Lv9 ひとにらみ
+#define MOVE_LV100_NORMAL_10            0xB7F // ノーマル Lv10 おうえんコール
+#define MOVE_LV100_NORMAL_11            0xB80 // ノーマル Lv11 ふんばりブロー
+#define MOVE_LV100_NORMAL_12            0xB81 // ノーマル Lv12 まんまるアタック
+#define MOVE_LV100_NORMAL_13            0xB82 // ノーマル Lv13 ねむけのうた
+#define MOVE_LV100_NORMAL_14            0xB83 // ノーマル Lv14 てかげんパンチ
+#define MOVE_LV100_NORMAL_15            0xB84 // ノーマル Lv15 ひらひらステップ
+#define MOVE_LV100_NORMAL_16            0xB85 // ノーマル Lv16 ぐるぐるウェーブ
+#define MOVE_LV100_NORMAL_17            0xB86 // ノーマル Lv17 ずっしりプレス
+#define MOVE_LV100_NORMAL_18            0xB87 // ノーマル Lv18 ねっこのひといき
+#define MOVE_LV100_NORMAL_19            0xB88 // ノーマル Lv19 ささやきボイス
+#define MOVE_LV100_NORMAL_20            0xB89 // ノーマル Lv20 きりかえしのツメ
+#define MOVE_LV100_NORMAL_21            0xB8A // ノーマル Lv21 あまえんぼタック
+#define MOVE_LV100_NORMAL_22            0xB8B // ノーマル Lv22 まもりのかまえ
+#define MOVE_LV100_NORMAL_23            0xB8C // ノーマル Lv23 こころのどなり
+#define MOVE_LV100_NORMAL_24            0xB8D // ノーマル Lv24 いっぱつビンタ
+#define MOVE_LV100_NORMAL_25            0xB8E // ノーマル Lv25 がむしゃらパンチ
+#define MOVE_LV100_NORMAL_26            0xB8F // ノーマル Lv26 はずむしっぽ
+#define MOVE_LV100_NORMAL_27            0xB90 // ノーマル Lv27 のんびりタイム
+#define MOVE_LV100_NORMAL_28            0xB91 // ノーマル Lv28 ひびけやまびこ
+#define MOVE_LV100_NORMAL_29            0xB92 // ノーマル Lv29 つよがりアタック
+#define MOVE_LV100_NORMAL_30            0xB93 // ノーマル Lv30 ふくれっつら
+#define MOVE_LV100_NORMAL_31            0xB94 // ノーマル Lv31 ぜんそくリード
+#define MOVE_LV100_NORMAL_32            0xB95 // ノーマル Lv32 じゅうたんボム
+#define MOVE_LV100_NORMAL_33            0xB96 // ノーマル Lv33 ふわふわバリア
+#define MOVE_LV100_NORMAL_34            0xB97 // ノーマル Lv34 はりきりダッシュ
+#define MOVE_LV100_NORMAL_35            0xB98 // ノーマル Lv35 やるきのおたけび
+#define MOVE_LV100_NORMAL_36            0xB99 // ノーマル Lv36 きまぐれパンチ
+#define MOVE_LV100_NORMAL_37            0xB9A // ノーマル Lv37 すてみのやりなげ
+#define MOVE_LV100_NORMAL_38            0xB9B // ノーマル Lv38 じたばたラッシュ
+#define MOVE_LV100_NORMAL_39            0xB9C // ノーマル Lv39 ひけつのささやき
+#define MOVE_LV100_NORMAL_40            0xB9D // ノーマル Lv40 どっしりかまえ
+#define MOVE_LV100_NORMAL_41            0xB9E // ノーマル Lv41 せなかあわせ
+#define MOVE_LV100_NORMAL_42            0xB9F // ノーマル Lv42 ブンブンまわし
+#define MOVE_LV100_NORMAL_43            0xBA0 // ノーマル Lv43 ふるいたつさけび
+#define MOVE_LV100_NORMAL_44            0xBA1 // ノーマル Lv44 かぜのまくら
+#define MOVE_LV100_NORMAL_45            0xBA2 // ノーマル Lv45 つかみかかり
+#define MOVE_LV100_NORMAL_46            0xBA3 // ノーマル Lv46 ほえるメロディ
+#define MOVE_LV100_NORMAL_47            0xBA4 // ノーマル Lv47 ぶちかまスタンプ
+#define MOVE_LV100_NORMAL_48            0xBA5 // ノーマル Lv48 やすらぎのしらべ
+#define MOVE_LV100_NORMAL_49            0xBA6 // ノーマル Lv49 あばれゆめ
+#define MOVE_LV100_NORMAL_50            0xBA7 // ノーマル Lv50 かまいたちのひれ
+#define MOVE_LV100_NORMAL_51            0xBA8 // ノーマル Lv51 どんぐりドーン
+#define MOVE_LV100_NORMAL_52            0xBA9 // ノーマル Lv52 やくそくのキス
+#define MOVE_LV100_NORMAL_53            0xBAA // ノーマル Lv53 おおあばれ
+#define MOVE_LV100_NORMAL_54            0xBAB // ノーマル Lv54 いっせいスパーク
+#define MOVE_LV100_NORMAL_55            0xBAC // ノーマル Lv55 うちあげロケット
+#define MOVE_LV100_NORMAL_56            0xBAD // ノーマル Lv56 もてなしのエール
+#define MOVE_LV100_NORMAL_57            0xBAE // ノーマル Lv57 ねんりきぬき
+#define MOVE_LV100_NORMAL_58            0xBAF // ノーマル Lv58 ふんぬのげんこつ
+#define MOVE_LV100_NORMAL_59            0xBB0 // ノーマル Lv59 ふしぎタックル
+#define MOVE_LV100_NORMAL_60            0xBB1 // ノーマル Lv60 こころのバリア
+#define MOVE_LV100_NORMAL_61            0xBB2 // ノーマル Lv61 とんぼチャージ
+#define MOVE_LV100_NORMAL_62            0xBB3 // ノーマル Lv62 さわがしいとびら
+#define MOVE_LV100_NORMAL_63            0xBB4 // ノーマル Lv63 かみつきホーム
+#define MOVE_LV100_NORMAL_64            0xBB5 // ノーマル Lv64 ひびかせるうた
+#define MOVE_LV100_NORMAL_65            0xBB6 // ノーマル Lv65 どよめきのかおり
+#define MOVE_LV100_NORMAL_66            0xBB7 // ノーマル Lv66 ゆうきのほこ
+#define MOVE_LV100_NORMAL_67            0xBB8 // ノーマル Lv67 ぐらぐらハンマー
+#define MOVE_LV100_NORMAL_68            0xBB9 // ノーマル Lv68 じりじりつめより
+#define MOVE_LV100_NORMAL_69            0xBBA // ノーマル Lv69 パーフェクト
+#define MOVE_LV100_NORMAL_70            0xBBB // ノーマル Lv70 ぐっすりねんね
+#define MOVE_LV100_NORMAL_71            0xBBC // ノーマル Lv71 かくしだま
+#define MOVE_LV100_NORMAL_72            0xBBD // ノーマル Lv72 ほしにねがいを
+#define MOVE_LV100_NORMAL_73            0xBBE // ノーマル Lv73 たましいタックル
+#define MOVE_LV100_NORMAL_74            0xBBF // ノーマル Lv74 ぐるりスイング
+#define MOVE_LV100_NORMAL_75            0xBC0 // ノーマル Lv75 たたみかけ
+#define MOVE_LV100_NORMAL_76            0xBC1 // ノーマル Lv76 いつくしみのかぜ
+#define MOVE_LV100_NORMAL_77            0xBC2 // ノーマル Lv77 もうれつフィナ
+#define MOVE_LV100_NORMAL_78            0xBC3 // ノーマル Lv78 おなじみのうた
+#define MOVE_LV100_NORMAL_79            0xBC4 // ノーマル Lv79 ぜんしんぜんれい
+#define MOVE_LV100_NORMAL_80            0xBC5 // ノーマル Lv80 ダイナマイト
+#define MOVE_LV100_NORMAL_81            0xBC6 // ノーマル Lv81 ひそかなじゅもん
+#define MOVE_LV100_NORMAL_82            0xBC7 // ノーマル Lv82 こんじょうパンチ
+#define MOVE_LV100_NORMAL_83            0xBC8 // ノーマル Lv83 どうどうのほえ
+#define MOVE_LV100_NORMAL_84            0xBC9 // ノーマル Lv84 はなやかなオーラ
+#define MOVE_LV100_NORMAL_85            0xBCA // ノーマル Lv85 てんしのいちげき
+#define MOVE_LV100_NORMAL_86            0xBCB // ノーマル Lv86 おどりくるい
+#define MOVE_LV100_NORMAL_87            0xBCC // ノーマル Lv87 ありったけパワー
+#define MOVE_LV100_NORMAL_88            0xBCD // ノーマル Lv88 ちょうぜつテール
+#define MOVE_LV100_NORMAL_89            0xBCE // ノーマル Lv89 せかいをゆるがす
+#define MOVE_LV100_NORMAL_90            0xBCF // ノーマル Lv90 さいごのいっこえ
+#define MOVE_LV100_NORMAL_91            0xBD0 // ノーマル Lv91 がっちりスクラム
+#define MOVE_LV100_NORMAL_92            0xBD1 // ノーマル Lv92 きらめくビーム
+#define MOVE_LV100_NORMAL_93            0xBD2 // ノーマル Lv93 ゆびきりタッチ
+#define MOVE_LV100_NORMAL_94            0xBD3 // ノーマル Lv94 のびのびアーチ
+#define MOVE_LV100_NORMAL_95            0xBD4 // ノーマル Lv95 たいりくをこえて
+#define MOVE_LV100_NORMAL_96            0xBD5 // ノーマル Lv96 ひっさつボイス
+#define MOVE_LV100_NORMAL_97            0xBD6 // ノーマル Lv97 ぜんぶかけだ
+#define MOVE_LV100_NORMAL_98            0xBD7 // ノーマル Lv98 つきぬけるしらべ
+#define MOVE_LV100_NORMAL_99            0xBD8 // ノーマル Lv99 まっすぐのいのり
+#define MOVE_LV100_NORMAL_100           0xBD9 // ノーマル Lv100 さいごのとっしん
+#define MOVE_LV100_FIGHTING_1           0xBDA // かくとう Lv1 ぶんなぐり
+#define MOVE_LV100_FIGHTING_2           0xBDB // かくとう Lv2 うでまくり
+#define MOVE_LV100_FIGHTING_3           0xBDC // かくとう Lv3 ひじうちロー
+#define MOVE_LV100_FIGHTING_4           0xBDD // かくとう Lv4 あしばらい
+#define MOVE_LV100_FIGHTING_5           0xBDE // かくとう Lv5 ふんばりポーズ
+#define MOVE_LV100_FIGHTING_6           0xBDF // かくとう Lv6 ばたばたパンチ
+#define MOVE_LV100_FIGHTING_7           0xBE0 // かくとう Lv7 かたならし
+#define MOVE_LV100_FIGHTING_8           0xBE1 // かくとう Lv8 すばやいジャブ
+#define MOVE_LV100_FIGHTING_9           0xBE2 // かくとう Lv9 ハイキック
+#define MOVE_LV100_FIGHTING_10          0xBE3 // かくとう Lv10 じっくりにらみ
+#define MOVE_LV100_FIGHTING_11          0xBE4 // かくとう Lv11 とびげりアタック
+#define MOVE_LV100_FIGHTING_12          0xBE5 // かくとう Lv12 きあいのスパーク
+#define MOVE_LV100_FIGHTING_13          0xBE6 // かくとう Lv13 おうぎのかまえ
+#define MOVE_LV100_FIGHTING_14          0xBE7 // かくとう Lv14 なげとばし
+#define MOVE_LV100_FIGHTING_15          0xBE8 // かくとう Lv15 こぶしのゆうき
+#define MOVE_LV100_FIGHTING_16          0xBE9 // かくとう Lv16 ほどよいチョップ
+#define MOVE_LV100_FIGHTING_17          0xBEA // かくとう Lv17 せいしんいっとう
+#define MOVE_LV100_FIGHTING_18          0xBEB // かくとう Lv18 きりもみパンチ
+#define MOVE_LV100_FIGHTING_19          0xBEC // かくとう Lv19 はどうのささやき
+#define MOVE_LV100_FIGHTING_20          0xBED // かくとう Lv20 かえしステップ
+#define MOVE_LV100_FIGHTING_21          0xBEE // かくとう Lv21 たたかいのこえ
+#define MOVE_LV100_FIGHTING_22          0xBEF // かくとう Lv22 ソバットロール
+#define MOVE_LV100_FIGHTING_23          0xBF0 // かくとう Lv23 ふんばりかえし
+#define MOVE_LV100_FIGHTING_24          0xBF1 // かくとう Lv24 みやぶりチョップ
+#define MOVE_LV100_FIGHTING_25          0xBF2 // かくとう Lv25 くいしばるいき
+#define MOVE_LV100_FIGHTING_26          0xBF3 // かくとう Lv26 ねっけつパンチ
+#define MOVE_LV100_FIGHTING_27          0xBF4 // かくとう Lv27 たまぬきパンチ
+#define MOVE_LV100_FIGHTING_28          0xBF5 // かくとう Lv28 ゴリラドラミング
+#define MOVE_LV100_FIGHTING_29          0xBF6 // かくとう Lv29 やっつけだん
+#define MOVE_LV100_FIGHTING_30          0xBF7 // かくとう Lv30 けりあげコンボ
+#define MOVE_LV100_FIGHTING_31          0xBF8 // かくとう Lv31 しゅぎょうのひび
+#define MOVE_LV100_FIGHTING_32          0xBF9 // かくとう Lv32 ぶちぬきフック
+#define MOVE_LV100_FIGHTING_33          0xBFA // かくとう Lv33 れんだパンチ
+#define MOVE_LV100_FIGHTING_34          0xBFB // かくとう Lv34 ちからくらべ
+#define MOVE_LV100_FIGHTING_35          0xBFC // かくとう Lv35 きあいのバリア
+#define MOVE_LV100_FIGHTING_36          0xBFD // かくとう Lv36 いきをととのえ
+#define MOVE_LV100_FIGHTING_37          0xBFE // かくとう Lv37 こころのこぶし
+#define MOVE_LV100_FIGHTING_38          0xBFF // かくとう Lv38 ストーンパンチ
+#define MOVE_LV100_FIGHTING_39          0xC00 // かくとう Lv39 ひらてうち
+#define MOVE_LV100_FIGHTING_40          0xC01 // かくとう Lv40 はげしいけんか
+#define MOVE_LV100_FIGHTING_41          0xC02 // かくとう Lv41 うけながし
+#define MOVE_LV100_FIGHTING_42          0xC03 // かくとう Lv42 おんがえしのわざ
+#define MOVE_LV100_FIGHTING_43          0xC04 // かくとう Lv43 かくとうごっこ
+#define MOVE_LV100_FIGHTING_44          0xC05 // かくとう Lv44 なみだのクロス
+#define MOVE_LV100_FIGHTING_45          0xC06 // かくとう Lv45 どとうのラッシュ
+#define MOVE_LV100_FIGHTING_46          0xC07 // かくとう Lv46 おおきなてのひら
+#define MOVE_LV100_FIGHTING_47          0xC08 // かくとう Lv47 ひっさつのはどう
+#define MOVE_LV100_FIGHTING_48          0xC09 // かくとう Lv48 かまえなおし
+#define MOVE_LV100_FIGHTING_49          0xC0A // かくとう Lv49 いのちがけキック
+#define MOVE_LV100_FIGHTING_50          0xC0B // かくとう Lv50 ながれるかた
+#define MOVE_LV100_FIGHTING_51          0xC0C // かくとう Lv51 さんだんづき
+#define MOVE_LV100_FIGHTING_52          0xC0D // かくとう Lv52 しんくうなげ
+#define MOVE_LV100_FIGHTING_53          0xC0E // かくとう Lv53 むねをかりる
+#define MOVE_LV100_FIGHTING_54          0xC0F // かくとう Lv54 みだれうち
+#define MOVE_LV100_FIGHTING_55          0xC10 // かくとう Lv55 ふっきれパンチ
+#define MOVE_LV100_FIGHTING_56          0xC11 // かくとう Lv56 だいちのこぶし
+#define MOVE_LV100_FIGHTING_57          0xC12 // かくとう Lv57 やぶれかぶれ
+#define MOVE_LV100_FIGHTING_58          0xC13 // かくとう Lv58 ゆうだちのひじ
+#define MOVE_LV100_FIGHTING_59          0xC14 // かくとう Lv59 せいけんづき
+#define MOVE_LV100_FIGHTING_60          0xC15 // かくとう Lv60 きあいのうず
+#define MOVE_LV100_FIGHTING_61          0xC16 // かくとう Lv61 ぜんりょくフック
+#define MOVE_LV100_FIGHTING_62          0xC17 // かくとう Lv62 ひらめきのさけび
+#define MOVE_LV100_FIGHTING_63          0xC18 // かくとう Lv63 ふりぬくこぶし
+#define MOVE_LV100_FIGHTING_64          0xC19 // かくとう Lv64 どうぎのえり
+#define MOVE_LV100_FIGHTING_65          0xC1A // かくとう Lv65 じごくまわし
+#define MOVE_LV100_FIGHTING_66          0xC1B // かくとう Lv66 たましいパンチ
+#define MOVE_LV100_FIGHTING_67          0xC1C // かくとう Lv67 ばくれつフック
+#define MOVE_LV100_FIGHTING_68          0xC1D // かくとう Lv68 いちげきひっさつ
+#define MOVE_LV100_FIGHTING_69          0xC1E // かくとう Lv69 ゆうかんなさけび
+#define MOVE_LV100_FIGHTING_70          0xC1F // かくとう Lv70 かちあげアッパー
+#define MOVE_LV100_FIGHTING_71          0xC20 // かくとう Lv71 かんぜんなこぶし
+#define MOVE_LV100_FIGHTING_72          0xC21 // かくとう Lv72 ヘビーボディ
+#define MOVE_LV100_FIGHTING_73          0xC22 // かくとう Lv73 こうそくのこぶし
+#define MOVE_LV100_FIGHTING_74          0xC23 // かくとう Lv74 さいごのきあい
+#define MOVE_LV100_FIGHTING_75          0xC24 // かくとう Lv75 ぼうふうのキック
+#define MOVE_LV100_FIGHTING_76          0xC25 // かくとう Lv76 ぎりぎりかえし
+#define MOVE_LV100_FIGHTING_77          0xC26 // かくとう Lv77 じんつうパンチ
+#define MOVE_LV100_FIGHTING_78          0xC27 // かくとう Lv78 ぼくしんパンチ
+#define MOVE_LV100_FIGHTING_79          0xC28 // かくとう Lv79 ゆるぎないしるし
+#define MOVE_LV100_FIGHTING_80          0xC29 // かくとう Lv80 めいじんのわざ
+#define MOVE_LV100_FIGHTING_81          0xC2A // かくとう Lv81 しなやかなポーズ
+#define MOVE_LV100_FIGHTING_82          0xC2B // かくとう Lv82 きょうじんのまい
+#define MOVE_LV100_FIGHTING_83          0xC2C // かくとう Lv83 ばくはつフィスト
+#define MOVE_LV100_FIGHTING_84          0xC2D // かくとう Lv84 はげしいつき
+#define MOVE_LV100_FIGHTING_85          0xC2E // かくとう Lv85 ゆうしゃのこぶし
+#define MOVE_LV100_FIGHTING_86          0xC2F // かくとう Lv86 ふかのうをこえて
+#define MOVE_LV100_FIGHTING_87          0xC30 // かくとう Lv87 たたかいのきずな
+#define MOVE_LV100_FIGHTING_88          0xC31 // かくとう Lv88 どうじょうのかべ
+#define MOVE_LV100_FIGHTING_89          0xC32 // かくとう Lv89 まけないハート
+#define MOVE_LV100_FIGHTING_90          0xC33 // かくとう Lv90 しんしょうのつき
+#define MOVE_LV100_FIGHTING_91          0xC34 // かくとう Lv91 くだきのドリル
+#define MOVE_LV100_FIGHTING_92          0xC35 // かくとう Lv92 めいじんのほこり
+#define MOVE_LV100_FIGHTING_93          0xC36 // かくとう Lv93 ちからのかぎり
+#define MOVE_LV100_FIGHTING_94          0xC37 // かくとう Lv94 かんぺきなかた
+#define MOVE_LV100_FIGHTING_95          0xC38 // かくとう Lv95 ねっけつだんがん
+#define MOVE_LV100_FIGHTING_96          0xC39 // かくとう Lv96 いきぬくこぶし
+#define MOVE_LV100_FIGHTING_97          0xC3A // かくとう Lv97 ゆうゆうアッパー
+#define MOVE_LV100_FIGHTING_98          0xC3B // かくとう Lv98 どうじょうルール
+#define MOVE_LV100_FIGHTING_99          0xC3C // かくとう Lv99 きわめしこぶし
+#define MOVE_LV100_FIGHTING_100         0xC3D // かくとう Lv100 でんせつのわざ
+#define MOVE_LV100_FLYING_1             0xC3E // ひこう Lv1 はばたきつつき
+#define MOVE_LV100_FLYING_2             0xC3F // ひこう Lv2 そよかぜのうた
+#define MOVE_LV100_FLYING_3             0xC40 // ひこう Lv3 つばさビンタ
+#define MOVE_LV100_FLYING_4             0xC41 // ひこう Lv4 きりもみダイブ
+#define MOVE_LV100_FLYING_5             0xC42 // ひこう Lv5 すなけむりばね
+#define MOVE_LV100_FLYING_6             0xC43 // ひこう Lv6 かぜのひそひそ
+#define MOVE_LV100_FLYING_7             0xC44 // ひこう Lv7 とびたつじゅんび
+#define MOVE_LV100_FLYING_8             0xC45 // ひこう Lv8 ひなどりのいのり
+#define MOVE_LV100_FLYING_9             0xC46 // ひこう Lv9 さえずりアタック
+#define MOVE_LV100_FLYING_10            0xC47 // ひこう Lv10 こかぜランス
+#define MOVE_LV100_FLYING_11            0xC48 // ひこう Lv11 ふわりとかわす
+#define MOVE_LV100_FLYING_12            0xC49 // ひこう Lv12 ちいさなつむじ
+#define MOVE_LV100_FLYING_13            0xC4A // ひこう Lv13 くちばしラッシュ
+#define MOVE_LV100_FLYING_14            0xC4B // ひこう Lv14 つばさのたて
+#define MOVE_LV100_FLYING_15            0xC4C // ひこう Lv15 そらのさんぽ
+#define MOVE_LV100_FLYING_16            0xC4D // ひこう Lv16 つばめのはやて
+#define MOVE_LV100_FLYING_17            0xC4E // ひこう Lv17 ふきぬけるかぜ
+#define MOVE_LV100_FLYING_18            0xC4F // ひこう Lv18 とまりぎのねむり
+#define MOVE_LV100_FLYING_19            0xC50 // ひこう Lv19 いなびかりダイブ
+#define MOVE_LV100_FLYING_20            0xC51 // ひこう Lv20 つばめおとし
+#define MOVE_LV100_FLYING_21            0xC52 // ひこう Lv21 あおぞらのしらべ
+#define MOVE_LV100_FLYING_22            0xC53 // ひこう Lv22 おいかぜのうた
+#define MOVE_LV100_FLYING_23            0xC54 // ひこう Lv23 ばさばさビンタ
+#define MOVE_LV100_FLYING_24            0xC55 // ひこう Lv24 とりもちのしっぽ
+#define MOVE_LV100_FLYING_25            0xC56 // ひこう Lv25 かぜまかせ
+#define MOVE_LV100_FLYING_26            0xC57 // ひこう Lv26 ふうせんアタック
+#define MOVE_LV100_FLYING_27            0xC58 // ひこう Lv27 ブランコダイブ
+#define MOVE_LV100_FLYING_28            0xC59 // ひこう Lv28 ぐんぐんのぼる
+#define MOVE_LV100_FLYING_29            0xC5A // ひこう Lv29 はなびらかぜ
+#define MOVE_LV100_FLYING_30            0xC5B // ひこう Lv30 かぜのたかぶり
+#define MOVE_LV100_FLYING_31            0xC5C // ひこう Lv31 スカイステップ
+#define MOVE_LV100_FLYING_32            0xC5D // ひこう Lv32 かぜきりのふえ
+#define MOVE_LV100_FLYING_33            0xC5E // ひこう Lv33 あさやけのひかり
+#define MOVE_LV100_FLYING_34            0xC5F // ひこう Lv34 そらとぶいちげき
+#define MOVE_LV100_FLYING_35            0xC60 // ひこう Lv35 ささらのつばさ
+#define MOVE_LV100_FLYING_36            0xC61 // ひこう Lv36 うずまくそよかぜ
+#define MOVE_LV100_FLYING_37            0xC62 // ひこう Lv37 ひこうとびつき
+#define MOVE_LV100_FLYING_38            0xC63 // ひこう Lv38 めまいのうず
+#define MOVE_LV100_FLYING_39            0xC64 // ひこう Lv39 くものうえのうた
+#define MOVE_LV100_FLYING_40            0xC65 // ひこう Lv40 きりさきフェザー
+#define MOVE_LV100_FLYING_41            0xC66 // ひこう Lv41 じゅんぷうバレー
+#define MOVE_LV100_FLYING_42            0xC67 // ひこう Lv42 こうくうせんこう
+#define MOVE_LV100_FLYING_43            0xC68 // ひこう Lv43 はねのダンス
+#define MOVE_LV100_FLYING_44            0xC69 // ひこう Lv44 たかのかぎづめ
+#define MOVE_LV100_FLYING_45            0xC6A // ひこう Lv45 よかぜのさそい
+#define MOVE_LV100_FLYING_46            0xC6B // ひこう Lv46 とんぼのかえし
+#define MOVE_LV100_FLYING_47            0xC6C // ひこう Lv47 あまかぜパンチ
+#define MOVE_LV100_FLYING_48            0xC6D // ひこう Lv48 きょうふうカット
+#define MOVE_LV100_FLYING_49            0xC6E // ひこう Lv49 つばさのかべ
+#define MOVE_LV100_FLYING_50            0xC6F // ひこう Lv50 ひこうしのいのり
+#define MOVE_LV100_FLYING_51            0xC70 // ひこう Lv51 いそぎのダイブ
+#define MOVE_LV100_FLYING_52            0xC71 // ひこう Lv52 かぜよみ
+#define MOVE_LV100_FLYING_53            0xC72 // ひこう Lv53 しんぷうのうず
+#define MOVE_LV100_FLYING_54            0xC73 // ひこう Lv54 ふうじんのホーン
+#define MOVE_LV100_FLYING_55            0xC74 // ひこう Lv55 そらをきるツメ
+#define MOVE_LV100_FLYING_56            0xC75 // ひこう Lv56 はるかぜのいき
+#define MOVE_LV100_FLYING_57            0xC76 // ひこう Lv57 ぎんいろのつばさ
+#define MOVE_LV100_FLYING_58            0xC77 // ひこう Lv58 たかくとぶ
+#define MOVE_LV100_FLYING_59            0xC78 // ひこう Lv59 れんぞくダイブ
+#define MOVE_LV100_FLYING_60            0xC79 // ひこう Lv60 つむじブレード
+#define MOVE_LV100_FLYING_61            0xC7A // ひこう Lv61 おおぞらのこえ
+#define MOVE_LV100_FLYING_62            0xC7B // ひこう Lv62 たいくうせん
+#define MOVE_LV100_FLYING_63            0xC7C // ひこう Lv63 ハヤブサダイブ
+#define MOVE_LV100_FLYING_64            0xC7D // ひこう Lv64 ぎりぎりのつばさ
+#define MOVE_LV100_FLYING_65            0xC7E // ひこう Lv65 きりひらくつばさ
+#define MOVE_LV100_FLYING_66            0xC7F // ひこう Lv66 てんくうのうた
+#define MOVE_LV100_FLYING_67            0xC80 // ひこう Lv67 さいせんたん
+#define MOVE_LV100_FLYING_68            0xC81 // ひこう Lv68 つばさのかいほう
+#define MOVE_LV100_FLYING_69            0xC82 // ひこう Lv69 こうろんのつばさ
+#define MOVE_LV100_FLYING_70            0xC83 // ひこう Lv70 うらないのかぜ
+#define MOVE_LV100_FLYING_71            0xC84 // ひこう Lv71 てんくうはばたき
+#define MOVE_LV100_FLYING_72            0xC85 // ひこう Lv72 つばさのねっこ
+#define MOVE_LV100_FLYING_73            0xC86 // ひこう Lv73 ぼうふうライズ
+#define MOVE_LV100_FLYING_74            0xC87 // ひこう Lv74 バックドロップ
+#define MOVE_LV100_FLYING_75            0xC88 // ひこう Lv75 きょくげんダイブ
+#define MOVE_LV100_FLYING_76            0xC89 // ひこう Lv76 かぜのこころ
+#define MOVE_LV100_FLYING_77            0xC8A // ひこう Lv77 そらのことば
+#define MOVE_LV100_FLYING_78            0xC8B // ひこう Lv78 くものよろい
+#define MOVE_LV100_FLYING_79            0xC8C // ひこう Lv79 いちじんのかぜ
+#define MOVE_LV100_FLYING_80            0xC8D // ひこう Lv80 カタパルト
+#define MOVE_LV100_FLYING_81            0xC8E // ひこう Lv81 ロングフライト
+#define MOVE_LV100_FLYING_82            0xC8F // ひこう Lv82 おおぞらカッター
+#define MOVE_LV100_FLYING_83            0xC90 // ひこう Lv83 うるおうつばさ
+#define MOVE_LV100_FLYING_84            0xC91 // ひこう Lv84 ほしぞらのかぜ
+#define MOVE_LV100_FLYING_85            0xC92 // ひこう Lv85 そらのまもり
+#define MOVE_LV100_FLYING_86            0xC93 // ひこう Lv86 てんくうこうせん
+#define MOVE_LV100_FLYING_87            0xC94 // ひこう Lv87 ひとすじのつばさ
+#define MOVE_LV100_FLYING_88            0xC95 // ひこう Lv88 せかいをこえる
+#define MOVE_LV100_FLYING_89            0xC96 // ひこう Lv89 ぜんそくスカイ
+#define MOVE_LV100_FLYING_90            0xC97 // ひこう Lv90 とりのうたげ
+#define MOVE_LV100_FLYING_91            0xC98 // ひこう Lv91 てんへのぼる
+#define MOVE_LV100_FLYING_92            0xC99 // ひこう Lv92 いきおいのままに
+#define MOVE_LV100_FLYING_93            0xC9A // ひこう Lv93 しゅんこうつばさ
+#define MOVE_LV100_FLYING_94            0xC9B // ひこう Lv94 かがやくそらへ
+#define MOVE_LV100_FLYING_95            0xC9C // ひこう Lv95 げんかいとっぱ
+#define MOVE_LV100_FLYING_96            0xC9D // ひこう Lv96 そらのたび
+#define MOVE_LV100_FLYING_97            0xC9E // ひこう Lv97 ぬけるようなそら
+#define MOVE_LV100_FLYING_98            0xC9F // ひこう Lv98 つばさよひらけ
+#define MOVE_LV100_FLYING_99            0xCA0 // ひこう Lv99 あらしまえのこえ
+#define MOVE_LV100_FLYING_100           0xCA1 // ひこう Lv100 そらをわるつばさ
+#define MOVE_LV100_POISON_1             0xCA2 // どく Lv1 どくばりつつき
+#define MOVE_LV100_POISON_2             0xCA3 // どく Lv2 ねばねばしぶき
+#define MOVE_LV100_POISON_3             0xCA4 // どく Lv3 どくけむり
+#define MOVE_LV100_POISON_4             0xCA5 // どく Lv4 ちいさなどくだん
+#define MOVE_LV100_POISON_5             0xCA6 // どく Lv5 しびれのこな
+#define MOVE_LV100_POISON_6             0xCA7 // どく Lv6 ヘドロのひとなめ
+#define MOVE_LV100_POISON_7             0xCA8 // どく Lv7 ようかいのよだれ
+#define MOVE_LV100_POISON_8             0xCA9 // どく Lv8 ふゆかいなおと
+#define MOVE_LV100_POISON_9             0xCAA // どく Lv9 どくのしずく
+#define MOVE_LV100_POISON_10            0xCAB // どく Lv10 どくどくステップ
+#define MOVE_LV100_POISON_11            0xCAC // どく Lv11 ヘドロしぶき
+#define MOVE_LV100_POISON_12            0xCAD // どく Lv12 きばのどくえき
+#define MOVE_LV100_POISON_13            0xCAE // どく Lv13 あやしいにおい
+#define MOVE_LV100_POISON_14            0xCAF // どく Lv14 もうどくのしずく
+#define MOVE_LV100_POISON_15            0xCB0 // どく Lv15 どくづきアタック
+#define MOVE_LV100_POISON_16            0xCB1 // どく Lv16 ガスタンクどん
+#define MOVE_LV100_POISON_17            0xCB2 // どく Lv17 どくのはり
+#define MOVE_LV100_POISON_18            0xCB3 // どく Lv18 しびれるきり
+#define MOVE_LV100_POISON_19            0xCB4 // どく Lv19 よどんだなみだ
+#define MOVE_LV100_POISON_20            0xCB5 // どく Lv20 ヘドロアッパー
+#define MOVE_LV100_POISON_21            0xCB6 // どく Lv21 ヘドロのうねり
+#define MOVE_LV100_POISON_22            0xCB7 // どく Lv22 くすりのじっけん
+#define MOVE_LV100_POISON_23            0xCB8 // どく Lv23 ちくりのはり
+#define MOVE_LV100_POISON_24            0xCB9 // どく Lv24 たまのどくえき
+#define MOVE_LV100_POISON_25            0xCBA // どく Lv25 どくやくをなげる
+#define MOVE_LV100_POISON_26            0xCBB // どく Lv26 どくぶくろ
+#define MOVE_LV100_POISON_27            0xCBC // どく Lv27 ひそかなどくばり
+#define MOVE_LV100_POISON_28            0xCBD // どく Lv28 ヘドロボール
+#define MOVE_LV100_POISON_29            0xCBE // どく Lv29 どくぼうきゃく
+#define MOVE_LV100_POISON_30            0xCBF // どく Lv30 くすりさまし
+#define MOVE_LV100_POISON_31            0xCC0 // どく Lv31 びりびりスモッグ
+#define MOVE_LV100_POISON_32            0xCC1 // どく Lv32 あしからみ
+#define MOVE_LV100_POISON_33            0xCC2 // どく Lv33 さびついたキバ
+#define MOVE_LV100_POISON_34            0xCC3 // どく Lv34 ひかげのどく
+#define MOVE_LV100_POISON_35            0xCC4 // どく Lv35 どくまみれ
+#define MOVE_LV100_POISON_36            0xCC5 // どく Lv36 どくのゆきげしき
+#define MOVE_LV100_POISON_37            0xCC6 // どく Lv37 フルーツポイズン
+#define MOVE_LV100_POISON_38            0xCC7 // どく Lv38 ヘドロソード
+#define MOVE_LV100_POISON_39            0xCC8 // どく Lv39 じわじわのうた
+#define MOVE_LV100_POISON_40            0xCC9 // どく Lv40 ガスばくはつ
+#define MOVE_LV100_POISON_41            0xCCA // どく Lv41 かいどくのいき
+#define MOVE_LV100_POISON_42            0xCCB // どく Lv42 ダストシャワー
+#define MOVE_LV100_POISON_43            0xCCC // どく Lv43 ヘドロカッター
+#define MOVE_LV100_POISON_44            0xCCD // どく Lv44 どくどくカーテン
+#define MOVE_LV100_POISON_45            0xCCE // どく Lv45 ふきだすどく
+#define MOVE_LV100_POISON_46            0xCCF // どく Lv46 ちからのどくばり
+#define MOVE_LV100_POISON_47            0xCD0 // どく Lv47 むらさきのまくら
+#define MOVE_LV100_POISON_48            0xCD1 // どく Lv48 ダークポイズン
+#define MOVE_LV100_POISON_49            0xCD2 // どく Lv49 ヘドロクラッシュ
+#define MOVE_LV100_POISON_50            0xCD3 // どく Lv50 ひびわれのどく
+#define MOVE_LV100_POISON_51            0xCD4 // どく Lv51 どくのむち
+#define MOVE_LV100_POISON_52            0xCD5 // どく Lv52 あまいわな
+#define MOVE_LV100_POISON_53            0xCD6 // どく Lv53 まっさかさま
+#define MOVE_LV100_POISON_54            0xCD7 // どく Lv54 どくのいかり
+#define MOVE_LV100_POISON_55            0xCD8 // どく Lv55 ポイズンバックル
+#define MOVE_LV100_POISON_56            0xCD9 // どく Lv56 ふぶきのどく
+#define MOVE_LV100_POISON_57            0xCDA // どく Lv57 ヘドロのまもり
+#define MOVE_LV100_POISON_58            0xCDB // どく Lv58 どくがまわる
+#define MOVE_LV100_POISON_59            0xCDC // どく Lv59 はなやかなどく
+#define MOVE_LV100_POISON_60            0xCDD // どく Lv60 どくけしのしらべ
+#define MOVE_LV100_POISON_61            0xCDE // どく Lv61 ヘドロストーム
+#define MOVE_LV100_POISON_62            0xCDF // どく Lv62 おくびょうのどく
+#define MOVE_LV100_POISON_63            0xCE0 // どく Lv63 どくアッパー
+#define MOVE_LV100_POISON_64            0xCE1 // どく Lv64 ぞくぞくダイブ
+#define MOVE_LV100_POISON_65            0xCE2 // どく Lv65 くちはてるまで
+#define MOVE_LV100_POISON_66            0xCE3 // どく Lv66 ヘドロばいがえし
+#define MOVE_LV100_POISON_67            0xCE4 // どく Lv67 ひかりをうばう
+#define MOVE_LV100_POISON_68            0xCE5 // どく Lv68 どくのほのお
+#define MOVE_LV100_POISON_69            0xCE6 // どく Lv69 ガスあらし
+#define MOVE_LV100_POISON_70            0xCE7 // どく Lv70 アシッドシャワー
+#define MOVE_LV100_POISON_71            0xCE8 // どく Lv71 ながれるどく
+#define MOVE_LV100_POISON_72            0xCE9 // どく Lv72 じごくのどくばり
+#define MOVE_LV100_POISON_73            0xCEA // どく Lv73 どくどくのめぐみ
+#define MOVE_LV100_POISON_74            0xCEB // どく Lv74 ふかいどくだま
+#define MOVE_LV100_POISON_75            0xCEC // どく Lv75 しびれのうたごえ
+#define MOVE_LV100_POISON_76            0xCED // どく Lv76 どろどろしぶき
+#define MOVE_LV100_POISON_77            0xCEE // どく Lv77 どくのこうずい
+#define MOVE_LV100_POISON_78            0xCEF // どく Lv78 わざわいのヘドロ
+#define MOVE_LV100_POISON_79            0xCF0 // どく Lv79 さそりのひとさし
+#define MOVE_LV100_POISON_80            0xCF1 // どく Lv80 デッドリーキス
+#define MOVE_LV100_POISON_81            0xCF2 // どく Lv81 ざんこくのどく
+#define MOVE_LV100_POISON_82            0xCF3 // どく Lv82 どくのかべ
+#define MOVE_LV100_POISON_83            0xCF4 // どく Lv83 どくやくしっぱい
+#define MOVE_LV100_POISON_84            0xCF5 // どく Lv84 ゆるせないにおい
+#define MOVE_LV100_POISON_85            0xCF6 // どく Lv85 どくのおうのあご
+#define MOVE_LV100_POISON_86            0xCF7 // どく Lv86 ヘドロテンペスト
+#define MOVE_LV100_POISON_87            0xCF8 // どく Lv87 めいどのあまみず
+#define MOVE_LV100_POISON_88            0xCF9 // どく Lv88 どくばくはつ
+#define MOVE_LV100_POISON_89            0xCFA // どく Lv89 カラカラどく
+#define MOVE_LV100_POISON_90            0xCFB // どく Lv90 あくじょのうた
+#define MOVE_LV100_POISON_91            0xCFC // どく Lv91 さそりテール
+#define MOVE_LV100_POISON_92            0xCFD // どく Lv92 いまわのどく
+#define MOVE_LV100_POISON_93            0xCFE // どく Lv93 ぜんぶどくにする
+#define MOVE_LV100_POISON_94            0xCFF // どく Lv94 じゅうどくあらし
+#define MOVE_LV100_POISON_95            0xD00 // どく Lv95 どくのきわみ
+#define MOVE_LV100_POISON_96            0xD01 // どく Lv96 ひだまりのどく
+#define MOVE_LV100_POISON_97            0xD02 // どく Lv97 やまいのしずく
+#define MOVE_LV100_POISON_98            0xD03 // どく Lv98 ゆっくりのどく
+#define MOVE_LV100_POISON_99            0xD04 // どく Lv99 むげんのヘドロ
+#define MOVE_LV100_POISON_100           0xD05 // どく Lv100 さいごのどくばり
+#define MOVE_LV100_GROUND_1             0xD06 // じめん Lv1 つちかけ
+#define MOVE_LV100_GROUND_2             0xD07 // じめん Lv2 どろんこパーティ
+#define MOVE_LV100_GROUND_3             0xD08 // じめん Lv3 ほりほりアタック
+#define MOVE_LV100_GROUND_4             0xD09 // じめん Lv4 すなぼこり
+#define MOVE_LV100_GROUND_5             0xD0A // じめん Lv5 どろだんご
+#define MOVE_LV100_GROUND_6             0xD0B // じめん Lv6 ましろのすな
+#define MOVE_LV100_GROUND_7             0xD0C // じめん Lv7 あしもとゆれ
+#define MOVE_LV100_GROUND_8             0xD0D // じめん Lv8 つちのうたごえ
+#define MOVE_LV100_GROUND_9             0xD0E // じめん Lv9 ぬかるみのわな
+#define MOVE_LV100_GROUND_10            0xD0F // じめん Lv10 じめんにもぐる
+#define MOVE_LV100_GROUND_11            0xD10 // じめん Lv11 すなけむり
+#define MOVE_LV100_GROUND_12            0xD11 // じめん Lv12 ぺたぺたどろ
+#define MOVE_LV100_GROUND_13            0xD12 // じめん Lv13 どすどすあるき
+#define MOVE_LV100_GROUND_14            0xD13 // じめん Lv14 どろんこアピール
+#define MOVE_LV100_GROUND_15            0xD14 // じめん Lv15 あなほりダッシュ
+#define MOVE_LV100_GROUND_16            0xD15 // じめん Lv16 じならしパンチ
+#define MOVE_LV100_GROUND_17            0xD16 // じめん Lv17 ほこりのかぜ
+#define MOVE_LV100_GROUND_18            0xD17 // じめん Lv18 がれきなげ
+#define MOVE_LV100_GROUND_19            0xD18 // じめん Lv19 つちぼこりのかべ
+#define MOVE_LV100_GROUND_20            0xD19 // じめん Lv20 ひっこぬき
+#define MOVE_LV100_GROUND_21            0xD1A // じめん Lv21 ぐらぐらスタンプ
+#define MOVE_LV100_GROUND_22            0xD1B // じめん Lv22 ほねのつえ
+#define MOVE_LV100_GROUND_23            0xD1C // じめん Lv23 すなのうずまき
+#define MOVE_LV100_GROUND_24            0xD1D // じめん Lv24 つちのバリア
+#define MOVE_LV100_GROUND_25            0xD1E // じめん Lv25 じめんがえし
+#define MOVE_LV100_GROUND_26            0xD1F // じめん Lv26 つちのひめい
+#define MOVE_LV100_GROUND_27            0xD20 // じめん Lv27 だいちのおたけび
+#define MOVE_LV100_GROUND_28            0xD21 // じめん Lv28 おもたいこぶし
+#define MOVE_LV100_GROUND_29            0xD22 // じめん Lv29 ふみしめアタック
+#define MOVE_LV100_GROUND_30            0xD23 // じめん Lv30 どろのまもり
+#define MOVE_LV100_GROUND_31            0xD24 // じめん Lv31 じゃりドリル
+#define MOVE_LV100_GROUND_32            0xD25 // じめん Lv32 さばくのかぜ
+#define MOVE_LV100_GROUND_33            0xD26 // じめん Lv33 ぬかるみジャンプ
+#define MOVE_LV100_GROUND_34            0xD27 // じめん Lv34 だいちにいのる
+#define MOVE_LV100_GROUND_35            0xD28 // じめん Lv35 ひびわれアース
+#define MOVE_LV100_GROUND_36            0xD29 // じめん Lv36 どろしぶき
+#define MOVE_LV100_GROUND_37            0xD2A // じめん Lv37 ぐらつくだいち
+#define MOVE_LV100_GROUND_38            0xD2B // じめん Lv38 じならしのうた
+#define MOVE_LV100_GROUND_39            0xD2C // じめん Lv39 あなぐらのいびき
+#define MOVE_LV100_GROUND_40            0xD2D // じめん Lv40 ほりまくり
+#define MOVE_LV100_GROUND_41            0xD2E // じめん Lv41 じしんのまえぶれ
+#define MOVE_LV100_GROUND_42            0xD2F // じめん Lv42 つちほこりのまい
+#define MOVE_LV100_GROUND_43            0xD30 // じめん Lv43 がんばりスコップ
+#define MOVE_LV100_GROUND_44            0xD31 // じめん Lv44 どろのどく
+#define MOVE_LV100_GROUND_45            0xD32 // じめん Lv45 ぬまのいざない
+#define MOVE_LV100_GROUND_46            0xD33 // じめん Lv46 どすこいストンプ
+#define MOVE_LV100_GROUND_47            0xD34 // じめん Lv47 だいちのささやき
+#define MOVE_LV100_GROUND_48            0xD35 // じめん Lv48 ずぶずぶそこなし
+#define MOVE_LV100_GROUND_49            0xD36 // じめん Lv49 ぐんぐんもぐる
+#define MOVE_LV100_GROUND_50            0xD37 // じめん Lv50 まんげつのだいち
+#define MOVE_LV100_GROUND_51            0xD38 // じめん Lv51 じならしロール
+#define MOVE_LV100_GROUND_52            0xD39 // じめん Lv52 あなぐらにこもる
+#define MOVE_LV100_GROUND_53            0xD3A // じめん Lv53 じめんくだき
+#define MOVE_LV100_GROUND_54            0xD3B // じめん Lv54 つちのよろい
+#define MOVE_LV100_GROUND_55            0xD3C // じめん Lv55 どんぞこホール
+#define MOVE_LV100_GROUND_56            0xD3D // じめん Lv56 かわいたかぜ
+#define MOVE_LV100_GROUND_57            0xD3E // じめん Lv57 じめんのいかり
+#define MOVE_LV100_GROUND_58            0xD3F // じめん Lv58 ざらつくあらし
+#define MOVE_LV100_GROUND_59            0xD40 // じめん Lv59 ねっさのかぜ
+#define MOVE_LV100_GROUND_60            0xD41 // じめん Lv60 つちのいのり
+#define MOVE_LV100_GROUND_61            0xD42 // じめん Lv61 どろどろパンチ
+#define MOVE_LV100_GROUND_62            0xD43 // じめん Lv62 じひびきアタック
+#define MOVE_LV100_GROUND_63            0xD44 // じめん Lv63 おおあなほり
+#define MOVE_LV100_GROUND_64            0xD45 // じめん Lv64 だいちのほこ
+#define MOVE_LV100_GROUND_65            0xD46 // じめん Lv65 つちくれのやり
+#define MOVE_LV100_GROUND_66            0xD47 // じめん Lv66 ざらつくじめん
+#define MOVE_LV100_GROUND_67            0xD48 // じめん Lv67 ぬまのほこり
+#define MOVE_LV100_GROUND_68            0xD49 // じめん Lv68 じんめんじしん
+#define MOVE_LV100_GROUND_69            0xD4A // じめん Lv69 あしとりワナ
+#define MOVE_LV100_GROUND_70            0xD4B // じめん Lv70 ぬまのさそい
+#define MOVE_LV100_GROUND_71            0xD4C // じめん Lv71 だいちのみのり
+#define MOVE_LV100_GROUND_72            0xD4D // じめん Lv72 ずしんといちげき
+#define MOVE_LV100_GROUND_73            0xD4E // じめん Lv73 さばくのおうじ
+#define MOVE_LV100_GROUND_74            0xD4F // じめん Lv74 つちのぬし
+#define MOVE_LV100_GROUND_75            0xD50 // じめん Lv75 かためたつち
+#define MOVE_LV100_GROUND_76            0xD51 // じめん Lv76 ぬまちのさけび
+#define MOVE_LV100_GROUND_77            0xD52 // じめん Lv77 じごくのあなほり
+#define MOVE_LV100_GROUND_78            0xD53 // じめん Lv78 つちのいぶき
+#define MOVE_LV100_GROUND_79            0xD54 // じめん Lv79 どろのまんまく
+#define MOVE_LV100_GROUND_80            0xD55 // じめん Lv80 そこなしぬま
+#define MOVE_LV100_GROUND_81            0xD56 // じめん Lv81 ずんぐりチャージ
+#define MOVE_LV100_GROUND_82            0xD57 // じめん Lv82 だいちのためいき
+#define MOVE_LV100_GROUND_83            0xD58 // じめん Lv83 ごうごうくずれ
+#define MOVE_LV100_GROUND_84            0xD59 // じめん Lv84 どろんこパニック
+#define MOVE_LV100_GROUND_85            0xD5A // じめん Lv85 うまのたいあたり
+#define MOVE_LV100_GROUND_86            0xD5B // じめん Lv86 じめんのほこり
+#define MOVE_LV100_GROUND_87            0xD5C // じめん Lv87 かんそうしたいち
+#define MOVE_LV100_GROUND_88            0xD5D // じめん Lv88 じしんのよかん
+#define MOVE_LV100_GROUND_89            0xD5E // じめん Lv89 ほりつくす
+#define MOVE_LV100_GROUND_90            0xD5F // じめん Lv90 きたいのドリル
+#define MOVE_LV100_GROUND_91            0xD60 // じめん Lv91 だいちがわれる
+#define MOVE_LV100_GROUND_92            0xD61 // じめん Lv92 すなのむれ
+#define MOVE_LV100_GROUND_93            0xD62 // じめん Lv93 だいちのかたまり
+#define MOVE_LV100_GROUND_94            0xD63 // じめん Lv94 どろのつなみ
+#define MOVE_LV100_GROUND_95            0xD64 // じめん Lv95 あなのそこから
+#define MOVE_LV100_GROUND_96            0xD65 // じめん Lv96 すなぼこりのおう
+#define MOVE_LV100_GROUND_97            0xD66 // じめん Lv97 ぐらぐらエンド
+#define MOVE_LV100_GROUND_98            0xD67 // じめん Lv98 まだらのだいち
+#define MOVE_LV100_GROUND_99            0xD68 // じめん Lv99 げんしのだいち
+#define MOVE_LV100_GROUND_100           0xD69 // じめん Lv100 さいごのじしん
+#define MOVE_LV100_ROCK_1               0xD6A // いわ Lv1 こいしなげ
+#define MOVE_LV100_ROCK_2               0xD6B // いわ Lv2 ごろごろいしころ
+#define MOVE_LV100_ROCK_3               0xD6C // いわ Lv3 かたいからだ
+#define MOVE_LV100_ROCK_4               0xD6D // いわ Lv4 ごつごつつぶて
+#define MOVE_LV100_ROCK_5               0xD6E // いわ Lv5 いわのつぶやき
+#define MOVE_LV100_ROCK_6               0xD6F // いわ Lv6 ごつごつタックル
+#define MOVE_LV100_ROCK_7               0xD70 // いわ Lv7 すなぼこりのいわ
+#define MOVE_LV100_ROCK_8               0xD71 // いわ Lv8 ひびわれのいし
+#define MOVE_LV100_ROCK_9               0xD72 // いわ Lv9 いわばだのよろい
+#define MOVE_LV100_ROCK_10              0xD73 // いわ Lv10 いわのよろい
+#define MOVE_LV100_ROCK_11              0xD74 // いわ Lv11 なだれがけ
+#define MOVE_LV100_ROCK_12              0xD75 // いわ Lv12 ころころいわ
+#define MOVE_LV100_ROCK_13              0xD76 // いわ Lv13 いわのかべ
+#define MOVE_LV100_ROCK_14              0xD77 // いわ Lv14 きらめくいしころ
+#define MOVE_LV100_ROCK_15              0xD78 // いわ Lv15 いしだたみのわな
+#define MOVE_LV100_ROCK_16              0xD79 // いわ Lv16 いわやすみ
+#define MOVE_LV100_ROCK_17              0xD7A // いわ Lv17 がんせきなだれ
+#define MOVE_LV100_ROCK_18              0xD7B // いわ Lv18 ごうがんのかまえ
+#define MOVE_LV100_ROCK_19              0xD7C // いわ Lv19 いわのこぶし
+#define MOVE_LV100_ROCK_20              0xD7D // いわ Lv20 かけらほうせき
+#define MOVE_LV100_ROCK_21              0xD7E // いわ Lv21 かんこつだっぱ
+#define MOVE_LV100_ROCK_22              0xD7F // いわ Lv22 いわのなみだ
+#define MOVE_LV100_ROCK_23              0xD80 // いわ Lv23 ながれいしのはげ
+#define MOVE_LV100_ROCK_24              0xD81 // いわ Lv24 じゃりダッシュ
+#define MOVE_LV100_ROCK_25              0xD82 // いわ Lv25 ごりごりかじり
+#define MOVE_LV100_ROCK_26              0xD83 // いわ Lv26 てつのいしぶみ
+#define MOVE_LV100_ROCK_27              0xD84 // いわ Lv27 たまのいし
+#define MOVE_LV100_ROCK_28              0xD85 // いわ Lv28 いわのきずな
+#define MOVE_LV100_ROCK_29              0xD86 // いわ Lv29 いわあなのねむり
+#define MOVE_LV100_ROCK_30              0xD87 // いわ Lv30 ざんがんソード
+#define MOVE_LV100_ROCK_31              0xD88 // いわ Lv31 いしのささやき
+#define MOVE_LV100_ROCK_32              0xD89 // いわ Lv32 いわのドリル
+#define MOVE_LV100_ROCK_33              0xD8A // いわ Lv33 かこうがんのかた
+#define MOVE_LV100_ROCK_34              0xD8B // いわ Lv34 どしゃくずれ
+#define MOVE_LV100_ROCK_35              0xD8C // いわ Lv35 せきえいのひかり
+#define MOVE_LV100_ROCK_36              0xD8D // いわ Lv36 つぶてのわな
+#define MOVE_LV100_ROCK_37              0xD8E // いわ Lv37 いしのたいふう
+#define MOVE_LV100_ROCK_38              0xD8F // いわ Lv38 いわおのさけび
+#define MOVE_LV100_ROCK_39              0xD90 // いわ Lv39 ばくだんいわ
+#define MOVE_LV100_ROCK_40              0xD91 // いわ Lv40 いんせきのかけら
+#define MOVE_LV100_ROCK_41              0xD92 // いわ Lv41 ごつごつバンカー
+#define MOVE_LV100_ROCK_42              0xD93 // いわ Lv42 じゃりテンポ
+#define MOVE_LV100_ROCK_43              0xD94 // いわ Lv43 せきばんのやり
+#define MOVE_LV100_ROCK_44              0xD95 // いわ Lv44 いわのきおく
+#define MOVE_LV100_ROCK_45              0xD96 // いわ Lv45 うごかざること
+#define MOVE_LV100_ROCK_46              0xD97 // いわ Lv46 いしのたまご
+#define MOVE_LV100_ROCK_47              0xD98 // いわ Lv47 げんせきのいかり
+#define MOVE_LV100_ROCK_48              0xD99 // いわ Lv48 ごうがんヘッド
+#define MOVE_LV100_ROCK_49              0xD9A // いわ Lv49 いしのまきひげ
+#define MOVE_LV100_ROCK_50              0xD9B // いわ Lv50 ざらざらのいわ
+#define MOVE_LV100_ROCK_51              0xD9C // いわ Lv51 ほうせきえいこう
+#define MOVE_LV100_ROCK_52              0xD9D // いわ Lv52 だんがいぜっぺき
+#define MOVE_LV100_ROCK_53              0xD9E // いわ Lv53 ごろごろプレス
+#define MOVE_LV100_ROCK_54              0xD9F // いわ Lv54 ごりごりまもり
+#define MOVE_LV100_ROCK_55              0xDA0 // いわ Lv55 ばんにんのかべ
+#define MOVE_LV100_ROCK_56              0xDA1 // いわ Lv56 がんせきわり
+#define MOVE_LV100_ROCK_57              0xDA2 // いわ Lv57 どうくつのこえ
+#define MOVE_LV100_ROCK_58              0xDA3 // いわ Lv58 いしだらけのやま
+#define MOVE_LV100_ROCK_59              0xDA4 // いわ Lv59 きょがんアタック
+#define MOVE_LV100_ROCK_60              0xDA5 // いわ Lv60 りゅうかくのいし
+#define MOVE_LV100_ROCK_61              0xDA6 // いわ Lv61 ほうせきのまもり
+#define MOVE_LV100_ROCK_62              0xDA7 // いわ Lv62 はんがんのやいば
+#define MOVE_LV100_ROCK_63              0xDA8 // いわ Lv63 しゃりしゃりだん
+#define MOVE_LV100_ROCK_64              0xDA9 // いわ Lv64 がんせきのかべ
+#define MOVE_LV100_ROCK_65              0xDAA // いわ Lv65 ガレキラッシュ
+#define MOVE_LV100_ROCK_66              0xDAB // いわ Lv66 かせきのしらべ
+#define MOVE_LV100_ROCK_67              0xDAC // いわ Lv67 いわのおおごえ
+#define MOVE_LV100_ROCK_68              0xDAD // いわ Lv68 ぐらぐらかいがん
+#define MOVE_LV100_ROCK_69              0xDAE // いわ Lv69 すいしょうのとげ
+#define MOVE_LV100_ROCK_70              0xDAF // いわ Lv70 いわのぼうし
+#define MOVE_LV100_ROCK_71              0xDB0 // いわ Lv71 ジャンボいわ
+#define MOVE_LV100_ROCK_72              0xDB1 // いわ Lv72 げんせいかたまり
+#define MOVE_LV100_ROCK_73              0xDB2 // いわ Lv73 ごうがんフォール
+#define MOVE_LV100_ROCK_74              0xDB3 // いわ Lv74 だいがんタックル
+#define MOVE_LV100_ROCK_75              0xDB4 // いわ Lv75 いわのていおう
+#define MOVE_LV100_ROCK_76              0xDB5 // いわ Lv76 いわのこだま
+#define MOVE_LV100_ROCK_77              0xDB6 // いわ Lv77 ふるいうたごえ
+#define MOVE_LV100_ROCK_78              0xDB7 // いわ Lv78 いわのてっぺん
+#define MOVE_LV100_ROCK_79              0xDB8 // いわ Lv79 がんじょうさいご
+#define MOVE_LV100_ROCK_80              0xDB9 // いわ Lv80 ごうせきのあらし
+#define MOVE_LV100_ROCK_81              0xDBA // いわ Lv81 せいせきのひかり
+#define MOVE_LV100_ROCK_82              0xDBB // いわ Lv82 ごつごつばくは
+#define MOVE_LV100_ROCK_83              0xDBC // いわ Lv83 いわのきばげり
+#define MOVE_LV100_ROCK_84              0xDBD // いわ Lv84 いわのじんえい
+#define MOVE_LV100_ROCK_85              0xDBE // いわ Lv85 ちかのうみ
+#define MOVE_LV100_ROCK_86              0xDBF // いわ Lv86 いわぎしのかた
+#define MOVE_LV100_ROCK_87              0xDC0 // いわ Lv87 ごうおんのいわ
+#define MOVE_LV100_ROCK_88              0xDC1 // いわ Lv88 いわのかけぬけ
+#define MOVE_LV100_ROCK_89              0xDC2 // いわ Lv89 すいしょうレイ
+#define MOVE_LV100_ROCK_90              0xDC3 // いわ Lv90 せんねんのいし
+#define MOVE_LV100_ROCK_91              0xDC4 // いわ Lv91 いわのこころ
+#define MOVE_LV100_ROCK_92              0xDC5 // いわ Lv92 ごうがんてっぺき
+#define MOVE_LV100_ROCK_93              0xDC6 // いわ Lv93 ばんじゃくのつえ
+#define MOVE_LV100_ROCK_94              0xDC7 // いわ Lv94 いしのきんぐ
+#define MOVE_LV100_ROCK_95              0xDC8 // いわ Lv95 いわのさいご
+#define MOVE_LV100_ROCK_96              0xDC9 // いわ Lv96 せんしのいし
+#define MOVE_LV100_ROCK_97              0xDCA // いわ Lv97 くだけちるいわ
+#define MOVE_LV100_ROCK_98              0xDCB // いわ Lv98 じめんのそこから
+#define MOVE_LV100_ROCK_99              0xDCC // いわ Lv99 ふりそそぐいわ
+#define MOVE_LV100_ROCK_100             0xDCD // いわ Lv100 いわのフィナーレ
+#define MOVE_LV100_BUG_1                0xDCE // むし Lv1 むしのかじり
+#define MOVE_LV100_BUG_2                0xDCF // むし Lv2 いとのひとすじ
+#define MOVE_LV100_BUG_3                0xDD0 // むし Lv3 ちくりばり
+#define MOVE_LV100_BUG_4                0xDD1 // むし Lv4 はねのりんぷん
+#define MOVE_LV100_BUG_5                0xDD2 // むし Lv5 かぶとあたり
+#define MOVE_LV100_BUG_6                0xDD3 // むし Lv6 くさむらのみの
+#define MOVE_LV100_BUG_7                0xDD4 // むし Lv7 きらきらりんぷん
+#define MOVE_LV100_BUG_8                0xDD5 // むし Lv8 ちいさなはさみ
+#define MOVE_LV100_BUG_9                0xDD6 // むし Lv9 はちのはり
+#define MOVE_LV100_BUG_10               0xDD7 // むし Lv10 はねおとアタック
+#define MOVE_LV100_BUG_11               0xDD8 // むし Lv11 いもむしロール
+#define MOVE_LV100_BUG_12               0xDD9 // むし Lv12 ふんわりまゆ
+#define MOVE_LV100_BUG_13               0xDDA // むし Lv13 ぎざぎざカッター
+#define MOVE_LV100_BUG_14               0xDDB // むし Lv14 うすばのたて
+#define MOVE_LV100_BUG_15               0xDDC // むし Lv15 ふしぎなふんまつ
+#define MOVE_LV100_BUG_16               0xDDD // むし Lv16 ひらひらアタック
+#define MOVE_LV100_BUG_17               0xDDE // むし Lv17 たまごのいのり
+#define MOVE_LV100_BUG_18               0xDDF // むし Lv18 ぷちぷちスプレー
+#define MOVE_LV100_BUG_19               0xDE0 // むし Lv19 ちいさなはね
+#define MOVE_LV100_BUG_20               0xDE1 // むし Lv20 はねまわりロール
+#define MOVE_LV100_BUG_21               0xDE2 // むし Lv21 つのでひとつき
+#define MOVE_LV100_BUG_22               0xDE3 // むし Lv22 どくがのはね
+#define MOVE_LV100_BUG_23               0xDE4 // むし Lv23 いとまきつけ
+#define MOVE_LV100_BUG_24               0xDE5 // むし Lv24 むしのいのり
+#define MOVE_LV100_BUG_25               0xDE6 // むし Lv25 むしのよかん
+#define MOVE_LV100_BUG_26               0xDE7 // むし Lv26 はねのひかり
+#define MOVE_LV100_BUG_27               0xDE8 // むし Lv27 かまきりシザー
+#define MOVE_LV100_BUG_28               0xDE9 // むし Lv28 ひとあおぎ
+#define MOVE_LV100_BUG_29               0xDEA // むし Lv29 かたいからのたて
+#define MOVE_LV100_BUG_30               0xDEB // むし Lv30 くるくるつむぎ
+#define MOVE_LV100_BUG_31               0xDEC // むし Lv31 せみのこえ
+#define MOVE_LV100_BUG_32               0xDED // むし Lv32 むらがるむし
+#define MOVE_LV100_BUG_33               0xDEE // むし Lv33 ひかりのいと
+#define MOVE_LV100_BUG_34               0xDEF // むし Lv34 はねのあそび
+#define MOVE_LV100_BUG_35               0xDF0 // むし Lv35 ぎゅっとハサミ
+#define MOVE_LV100_BUG_36               0xDF1 // むし Lv36 みつのにおい
+#define MOVE_LV100_BUG_37               0xDF2 // むし Lv37 かぶとむしのつの
+#define MOVE_LV100_BUG_38               0xDF3 // むし Lv38 ふんわりのまゆ
+#define MOVE_LV100_BUG_39               0xDF4 // むし Lv39 ぶんぶんブレード
+#define MOVE_LV100_BUG_40               0xDF5 // むし Lv40 はねのたいふう
+#define MOVE_LV100_BUG_41               0xDF6 // むし Lv41 むしのおんがえし
+#define MOVE_LV100_BUG_42               0xDF7 // むし Lv42 ばらばらのはね
+#define MOVE_LV100_BUG_43               0xDF8 // むし Lv43 きのこのたね
+#define MOVE_LV100_BUG_44               0xDF9 // むし Lv44 ちいさなさけび
+#define MOVE_LV100_BUG_45               0xDFA // むし Lv45 スズメバチのはり
+#define MOVE_LV100_BUG_46               0xDFB // むし Lv46 すいとりストロー
+#define MOVE_LV100_BUG_47               0xDFC // むし Lv47 とんぼステップ
+#define MOVE_LV100_BUG_48               0xDFD // むし Lv48 かぶとくだき
+#define MOVE_LV100_BUG_49               0xDFE // むし Lv49 どんどんふえる
+#define MOVE_LV100_BUG_50               0xDFF // むし Lv50 かるいはね
+#define MOVE_LV100_BUG_51               0xE00 // むし Lv51 ほたるのあかり
+#define MOVE_LV100_BUG_52               0xE01 // むし Lv52 ひらひらワルツ
+#define MOVE_LV100_BUG_53               0xE02 // むし Lv53 くものすばり
+#define MOVE_LV100_BUG_54               0xE03 // むし Lv54 ぐるぐるいと
+#define MOVE_LV100_BUG_55               0xE04 // むし Lv55 むしのたいぐん
+#define MOVE_LV100_BUG_56               0xE05 // むし Lv56 はさみうち
+#define MOVE_LV100_BUG_57               0xE06 // むし Lv57 やみよのはね
+#define MOVE_LV100_BUG_58               0xE07 // むし Lv58 くものぼうへき
+#define MOVE_LV100_BUG_59               0xE08 // むし Lv59 かたくなのからだ
+#define MOVE_LV100_BUG_60               0xE09 // むし Lv60 おおあごアタック
+#define MOVE_LV100_BUG_61               0xE0A // むし Lv61 きばのぼうけん
+#define MOVE_LV100_BUG_62               0xE0B // むし Lv62 ヒメヒカリ
+#define MOVE_LV100_BUG_63               0xE0C // むし Lv63 ぎりぎりのはり
+#define MOVE_LV100_BUG_64               0xE0D // むし Lv64 むしのためいき
+#define MOVE_LV100_BUG_65               0xE0E // むし Lv65 ぶんどりナイフ
+#define MOVE_LV100_BUG_66               0xE0F // むし Lv66 つのどりょう
+#define MOVE_LV100_BUG_67               0xE10 // むし Lv67 むしのこうしん
+#define MOVE_LV100_BUG_68               0xE11 // むし Lv68 むしのやすらぎ
+#define MOVE_LV100_BUG_69               0xE12 // むし Lv69 きゅうけつバイト
+#define MOVE_LV100_BUG_70               0xE13 // むし Lv70 かぶとのこうら
+#define MOVE_LV100_BUG_71               0xE14 // むし Lv71 むしのがっしょう
+#define MOVE_LV100_BUG_72               0xE15 // むし Lv72 ひとのみこむ
+#define MOVE_LV100_BUG_73               0xE16 // むし Lv73 さなぎのいかり
+#define MOVE_LV100_BUG_74               0xE17 // むし Lv74 きばのかいてん
+#define MOVE_LV100_BUG_75               0xE18 // むし Lv75 いなごのむれ
+#define MOVE_LV100_BUG_76               0xE19 // むし Lv76 はたはたのうた
+#define MOVE_LV100_BUG_77               0xE1A // むし Lv77 そよぐはね
+#define MOVE_LV100_BUG_78               0xE1B // むし Lv78 ろうそくのしびれ
+#define MOVE_LV100_BUG_79               0xE1C // むし Lv79 かたつむりロール
+#define MOVE_LV100_BUG_80               0xE1D // むし Lv80 はなしべのみつ
+#define MOVE_LV100_BUG_81               0xE1E // むし Lv81 つのぼうずロール
+#define MOVE_LV100_BUG_82               0xE1F // むし Lv82 はねのバリア
+#define MOVE_LV100_BUG_83               0xE20 // むし Lv83 つのだしバンプ
+#define MOVE_LV100_BUG_84               0xE21 // むし Lv84 かぜになるはね
+#define MOVE_LV100_BUG_85               0xE22 // むし Lv85 ごうぜんたるはね
+#define MOVE_LV100_BUG_86               0xE23 // むし Lv86 かぶとのいかり
+#define MOVE_LV100_BUG_87               0xE24 // むし Lv87 ちいさなぐんだん
+#define MOVE_LV100_BUG_88               0xE25 // むし Lv88 ぼうぎゃくはさみ
+#define MOVE_LV100_BUG_89               0xE26 // むし Lv89 てんてんとまう
+#define MOVE_LV100_BUG_90               0xE27 // むし Lv90 むしのゆうしゃ
+#define MOVE_LV100_BUG_91               0xE28 // むし Lv91 やまびこのはね
+#define MOVE_LV100_BUG_92               0xE29 // むし Lv92 きらめくりんぷん
+#define MOVE_LV100_BUG_93               0xE2A // むし Lv93 むしのさけび
+#define MOVE_LV100_BUG_94               0xE2B // むし Lv94 ずっしりカブト
+#define MOVE_LV100_BUG_95               0xE2C // むし Lv95 ぜんりょくはさみ
+#define MOVE_LV100_BUG_96               0xE2D // むし Lv96 うたかたのはね
+#define MOVE_LV100_BUG_97               0xE2E // むし Lv97 しんかのはて
+#define MOVE_LV100_BUG_98               0xE2F // むし Lv98 むれのおおあらし
+#define MOVE_LV100_BUG_99               0xE30 // むし Lv99 かがやくカブト
+#define MOVE_LV100_BUG_100              0xE31 // むし Lv100 むしフィナーレ
+#define MOVE_LV100_GHOST_1              0xE32 // ゴースト Lv1 おどかしのかげ
+#define MOVE_LV100_GHOST_2              0xE33 // ゴースト Lv2 ぺろりとなめる
+#define MOVE_LV100_GHOST_3              0xE34 // ゴースト Lv3 ゆらゆらかげ
+#define MOVE_LV100_GHOST_4              0xE35 // ゴースト Lv4 ひそひそばなし
+#define MOVE_LV100_GHOST_5              0xE36 // ゴースト Lv5 いたずらパンチ
+#define MOVE_LV100_GHOST_6              0xE37 // ゴースト Lv6 ぞくぞくしたいき
+#define MOVE_LV100_GHOST_7              0xE38 // ゴースト Lv7 おばけのしっぽ
+#define MOVE_LV100_GHOST_8              0xE39 // ゴースト Lv8 うらめしやのうた
+#define MOVE_LV100_GHOST_9              0xE3A // ゴースト Lv9 かげかくれ
+#define MOVE_LV100_GHOST_10             0xE3B // ゴースト Lv10 やみのぬけがら
+#define MOVE_LV100_GHOST_11             0xE3C // ゴースト Lv11 おばけのかお
+#define MOVE_LV100_GHOST_12             0xE3D // ゴースト Lv12 ゆうれいのてまね
+#define MOVE_LV100_GHOST_13             0xE3E // ゴースト Lv13 ささやきのおばけ
+#define MOVE_LV100_GHOST_14             0xE3F // ゴースト Lv14 かげにまぎれる
+#define MOVE_LV100_GHOST_15             0xE40 // ゴースト Lv15 とりつきパンチ
+#define MOVE_LV100_GHOST_16             0xE41 // ゴースト Lv16 うすぐらいうた
+#define MOVE_LV100_GHOST_17             0xE42 // ゴースト Lv17 かげのあしあと
+#define MOVE_LV100_GHOST_18             0xE43 // ゴースト Lv18 じゃれつくおばけ
+#define MOVE_LV100_GHOST_19             0xE44 // ゴースト Lv19 ゴーストジャンプ
+#define MOVE_LV100_GHOST_20             0xE45 // ゴースト Lv20 おびえるひとみ
+#define MOVE_LV100_GHOST_21             0xE46 // ゴースト Lv21 ふゆうれい
+#define MOVE_LV100_GHOST_22             0xE47 // ゴースト Lv22 くらがりのつめ
+#define MOVE_LV100_GHOST_23             0xE48 // ゴースト Lv23 ほのぐらいひかり
+#define MOVE_LV100_GHOST_24             0xE49 // ゴースト Lv24 よなよなさんぽ
+#define MOVE_LV100_GHOST_25             0xE4A // ゴースト Lv25 ゴーストボイス
+#define MOVE_LV100_GHOST_26             0xE4B // ゴースト Lv26 ぬるりとすりぬけ
+#define MOVE_LV100_GHOST_27             0xE4C // ゴースト Lv27 むねさわぎ
+#define MOVE_LV100_GHOST_28             0xE4D // ゴースト Lv28 しのびよるやみ
+#define MOVE_LV100_GHOST_29             0xE4E // ゴースト Lv29 はらはらのかさね
+#define MOVE_LV100_GHOST_30             0xE4F // ゴースト Lv30 ちぎれたカーテン
+#define MOVE_LV100_GHOST_31             0xE50 // ゴースト Lv31 ゆめのおばけ
+#define MOVE_LV100_GHOST_32             0xE51 // ゴースト Lv32 おいかけるかげ
+#define MOVE_LV100_GHOST_33             0xE52 // ゴースト Lv33 うつろなまなこ
+#define MOVE_LV100_GHOST_34             0xE53 // ゴースト Lv34 ガタガタラップ
+#define MOVE_LV100_GHOST_35             0xE54 // ゴースト Lv35 みちづれまじない
+#define MOVE_LV100_GHOST_36             0xE55 // ゴースト Lv36 こんぱくダイブ
+#define MOVE_LV100_GHOST_37             0xE56 // ゴースト Lv37 うらみのしらべ
+#define MOVE_LV100_GHOST_38             0xE57 // ゴースト Lv38 ほうむりのうた
+#define MOVE_LV100_GHOST_39             0xE58 // ゴースト Lv39 かげのひとなめ
+#define MOVE_LV100_GHOST_40             0xE59 // ゴースト Lv40 おばけのて
+#define MOVE_LV100_GHOST_41             0xE5A // ゴースト Lv41 おばけのおどり
+#define MOVE_LV100_GHOST_42             0xE5B // ゴースト Lv42 かげのつぶやき
+#define MOVE_LV100_GHOST_43             0xE5C // ゴースト Lv43 くびなしのはな
+#define MOVE_LV100_GHOST_44             0xE5D // ゴースト Lv44 ゆうれいこうかん
+#define MOVE_LV100_GHOST_45             0xE5E // ゴースト Lv45 かげわかれ
+#define MOVE_LV100_GHOST_46             0xE5F // ゴースト Lv46 ぜつぼうのかげ
+#define MOVE_LV100_GHOST_47             0xE60 // ゴースト Lv47 たましいのさけび
+#define MOVE_LV100_GHOST_48             0xE61 // ゴースト Lv48 ひとだまのうた
+#define MOVE_LV100_GHOST_49             0xE62 // ゴースト Lv49 よるのしずけさ
+#define MOVE_LV100_GHOST_50             0xE63 // ゴースト Lv50 ゾンビスラッシュ
+#define MOVE_LV100_GHOST_51             0xE64 // ゴースト Lv51 おくりおばけ
+#define MOVE_LV100_GHOST_52             0xE65 // ゴースト Lv52 ゴーストフォルテ
+#define MOVE_LV100_GHOST_53             0xE66 // ゴースト Lv53 やみのだんまり
+#define MOVE_LV100_GHOST_54             0xE67 // ゴースト Lv54 のろいのくぎ
+#define MOVE_LV100_GHOST_55             0xE68 // ゴースト Lv55 たたりのかげ
+#define MOVE_LV100_GHOST_56             0xE69 // ゴースト Lv56 おくりかげ
+#define MOVE_LV100_GHOST_57             0xE6A // ゴースト Lv57 ぬけがらかなしみ
+#define MOVE_LV100_GHOST_58             0xE6B // ゴースト Lv58 さみしがりや
+#define MOVE_LV100_GHOST_59             0xE6C // ゴースト Lv59 かたりかける
+#define MOVE_LV100_GHOST_60             0xE6D // ゴースト Lv60 かげぬいのはり
+#define MOVE_LV100_GHOST_61             0xE6E // ゴースト Lv61 おかえしのおばけ
+#define MOVE_LV100_GHOST_62             0xE6F // ゴースト Lv62 かたみのうた
+#define MOVE_LV100_GHOST_63             0xE70 // ゴースト Lv63 おもいかげ
+#define MOVE_LV100_GHOST_64             0xE71 // ゴースト Lv64 しれんのかげ
+#define MOVE_LV100_GHOST_65             0xE72 // ゴースト Lv65 ゆうめいなおばけ
+#define MOVE_LV100_GHOST_66             0xE73 // ゴースト Lv66 ゴーストのひ
+#define MOVE_LV100_GHOST_67             0xE74 // ゴースト Lv67 やみのおつかい
+#define MOVE_LV100_GHOST_68             0xE75 // ゴースト Lv68 かすみのなかのて
+#define MOVE_LV100_GHOST_69             0xE76 // ゴースト Lv69 みがわりのかわ
+#define MOVE_LV100_GHOST_70             0xE77 // ゴースト Lv70 いちやのしじま
+#define MOVE_LV100_GHOST_71             0xE78 // ゴースト Lv71 れいかんソング
+#define MOVE_LV100_GHOST_72             0xE79 // ゴースト Lv72 おちゃめゆうれい
+#define MOVE_LV100_GHOST_73             0xE7A // ゴースト Lv73 ふくろうのうた
+#define MOVE_LV100_GHOST_74             0xE7B // ゴースト Lv74 かげのまもり
+#define MOVE_LV100_GHOST_75             0xE7C // ゴースト Lv75 ぱっときえるかげ
+#define MOVE_LV100_GHOST_76             0xE7D // ゴースト Lv76 おばけやしき
+#define MOVE_LV100_GHOST_77             0xE7E // ゴースト Lv77 ふぶきのおばけ
+#define MOVE_LV100_GHOST_78             0xE7F // ゴースト Lv78 やみにとけて
+#define MOVE_LV100_GHOST_79             0xE80 // ゴースト Lv79 ゆうれいのなみだ
+#define MOVE_LV100_GHOST_80             0xE81 // ゴースト Lv80 ひるよるかげ
+#define MOVE_LV100_GHOST_81             0xE82 // ゴースト Lv81 ひとこえでうなる
+#define MOVE_LV100_GHOST_82             0xE83 // ゴースト Lv82 みえないうで
+#define MOVE_LV100_GHOST_83             0xE84 // ゴースト Lv83 おろかなゆうれい
+#define MOVE_LV100_GHOST_84             0xE85 // ゴースト Lv84 こわいうわさ
+#define MOVE_LV100_GHOST_85             0xE86 // ゴースト Lv85 にじむかげ
+#define MOVE_LV100_GHOST_86             0xE87 // ゴースト Lv86 ゆうれいぶね
+#define MOVE_LV100_GHOST_87             0xE88 // ゴースト Lv87 ゴーストタイマー
+#define MOVE_LV100_GHOST_88             0xE89 // ゴースト Lv88 よふけのうたげ
+#define MOVE_LV100_GHOST_89             0xE8A // ゴースト Lv89 だんまりのやみ
+#define MOVE_LV100_GHOST_90             0xE8B // ゴースト Lv90 ゴーストフェイス
+#define MOVE_LV100_GHOST_91             0xE8C // ゴースト Lv91 しれいのひとみ
+#define MOVE_LV100_GHOST_92             0xE8D // ゴースト Lv92 かんぜんなかげ
+#define MOVE_LV100_GHOST_93             0xE8E // ゴースト Lv93 ゴーストのよる
+#define MOVE_LV100_GHOST_94             0xE8F // ゴースト Lv94 まよなかのしらべ
+#define MOVE_LV100_GHOST_95             0xE90 // ゴースト Lv95 ゆうやみのかげ
+#define MOVE_LV100_GHOST_96             0xE91 // ゴースト Lv96 おぼろのはな
+#define MOVE_LV100_GHOST_97             0xE92 // ゴースト Lv97 かなしきおばけ
+#define MOVE_LV100_GHOST_98             0xE93 // ゴースト Lv98 かげのおうこく
+#define MOVE_LV100_GHOST_99             0xE94 // ゴースト Lv99 ひとだまのうらみ
+#define MOVE_LV100_GHOST_100            0xE95 // ゴースト Lv100 さいごのやみ
+#define MOVE_LV100_STEEL_1              0xE96 // はがね Lv1 てっこつパンチ
+#define MOVE_LV100_STEEL_2              0xE97 // はがね Lv2 ねじまわし
+#define MOVE_LV100_STEEL_3              0xE98 // はがね Lv3 てつのつめ
+#define MOVE_LV100_STEEL_4              0xE99 // はがね Lv4 きんぞくのひびき
+#define MOVE_LV100_STEEL_5              0xE9A // はがね Lv5 はがねのからだ
+#define MOVE_LV100_STEEL_6              0xE9B // はがね Lv6 くぎうち
+#define MOVE_LV100_STEEL_7              0xE9C // はがね Lv7 ぴかぴかボディ
+#define MOVE_LV100_STEEL_8              0xE9D // はがね Lv8 きんぞくをみがく
+#define MOVE_LV100_STEEL_9              0xE9E // はがね Lv9 ばねジャンプ
+#define MOVE_LV100_STEEL_10             0xE9F // はがね Lv10 くろがねヘッド
+#define MOVE_LV100_STEEL_11             0xEA0 // はがね Lv11 ひかるボルト
+#define MOVE_LV100_STEEL_12             0xEA1 // はがね Lv12 こうてつのうで
+#define MOVE_LV100_STEEL_13             0xEA2 // はがね Lv13 てっぺきのたて
+#define MOVE_LV100_STEEL_14             0xEA3 // はがね Lv14 さびどめスプレー
+#define MOVE_LV100_STEEL_15             0xEA4 // はがね Lv15 てつハンマー
+#define MOVE_LV100_STEEL_16             0xEA5 // はがね Lv16 てつのとばり
+#define MOVE_LV100_STEEL_17             0xEA6 // はがね Lv17 ぎんのきらめき
+#define MOVE_LV100_STEEL_18             0xEA7 // はがね Lv18 てつぼうなぐり
+#define MOVE_LV100_STEEL_19             0xEA8 // はがね Lv19 ちからのボルト
+#define MOVE_LV100_STEEL_20             0xEA9 // はがね Lv20 ネジのうた
+#define MOVE_LV100_STEEL_21             0xEAA // はがね Lv21 はがねのはね
+#define MOVE_LV100_STEEL_22             0xEAB // はがね Lv22 しろがねのやいば
+#define MOVE_LV100_STEEL_23             0xEAC // はがね Lv23 つなぎめのひかり
+#define MOVE_LV100_STEEL_24             0xEAD // はがね Lv24 くろがねのかべ
+#define MOVE_LV100_STEEL_25             0xEAE // はがね Lv25 メタルチャージ
+#define MOVE_LV100_STEEL_26             0xEAF // はがね Lv26 はがねのかまえ
+#define MOVE_LV100_STEEL_27             0xEB0 // はがね Lv27 かたまりのうなり
+#define MOVE_LV100_STEEL_28             0xEB1 // はがね Lv28 カッターブレード
+#define MOVE_LV100_STEEL_29             0xEB2 // はがね Lv29 ハリガネあみ
+#define MOVE_LV100_STEEL_30             0xEB3 // はがね Lv30 どうのつるぎ
+#define MOVE_LV100_STEEL_31             0xEB4 // はがね Lv31 つよいおもみ
+#define MOVE_LV100_STEEL_32             0xEB5 // はがね Lv32 かたいきんぞく
+#define MOVE_LV100_STEEL_33             0xEB6 // はがね Lv33 ばねパンチ
+#define MOVE_LV100_STEEL_34             0xEB7 // はがね Lv34 ぎんぱくのひかり
+#define MOVE_LV100_STEEL_35             0xEB8 // はがね Lv35 てつのしっぽ
+#define MOVE_LV100_STEEL_36             0xEB9 // はがね Lv36 こおりつくはがね
+#define MOVE_LV100_STEEL_37             0xEBA // はがね Lv37 ギアアップ
+#define MOVE_LV100_STEEL_38             0xEBB // はがね Lv38 じわじわおもみ
+#define MOVE_LV100_STEEL_39             0xEBC // はがね Lv39 どうりょくパンチ
+#define MOVE_LV100_STEEL_40             0xEBD // はがね Lv40 くろがねほう
+#define MOVE_LV100_STEEL_41             0xEBE // はがね Lv41 ナイフジャグル
+#define MOVE_LV100_STEEL_42             0xEBF // はがね Lv42 はがねのこころ
+#define MOVE_LV100_STEEL_43             0xEC0 // はがね Lv43 バンカーバスター
+#define MOVE_LV100_STEEL_44             0xEC1 // はがね Lv44 きんぞくのさけび
+#define MOVE_LV100_STEEL_45             0xEC2 // はがね Lv45 ブーストギア
+#define MOVE_LV100_STEEL_46             0xEC3 // はがね Lv46 てつのいのり
+#define MOVE_LV100_STEEL_47             0xEC4 // はがね Lv47 てつのクロス
+#define MOVE_LV100_STEEL_48             0xEC5 // はがね Lv48 はがねのいかり
+#define MOVE_LV100_STEEL_49             0xEC6 // はがね Lv49 ゴツゴツなげ
+#define MOVE_LV100_STEEL_50             0xEC7 // はがね Lv50 はがねのファング
+#define MOVE_LV100_STEEL_51             0xEC8 // はがね Lv51 さいぼうのよろい
+#define MOVE_LV100_STEEL_52             0xEC9 // はがね Lv52 ガンメタルビーム
+#define MOVE_LV100_STEEL_53             0xECA // はがね Lv53 こうてつのはね
+#define MOVE_LV100_STEEL_54             0xECB // はがね Lv54 てつくずなげ
+#define MOVE_LV100_STEEL_55             0xECC // はがね Lv55 ぎしぎしバネ
+#define MOVE_LV100_STEEL_56             0xECD // はがね Lv56 ブリキのたて
+#define MOVE_LV100_STEEL_57             0xECE // はがね Lv57 どうたいびょうぶ
+#define MOVE_LV100_STEEL_58             0xECF // はがね Lv58 ひかりのレーザー
+#define MOVE_LV100_STEEL_59             0xED0 // はがね Lv59 じめんをつらぬく
+#define MOVE_LV100_STEEL_60             0xED1 // はがね Lv60 かたいせいしん
+#define MOVE_LV100_STEEL_61             0xED2 // はがね Lv61 はがねのドリル
+#define MOVE_LV100_STEEL_62             0xED3 // はがね Lv62 てつのおおあらし
+#define MOVE_LV100_STEEL_63             0xED4 // はがね Lv63 ホイールターン
+#define MOVE_LV100_STEEL_64             0xED5 // はがね Lv64 こうそくラム
+#define MOVE_LV100_STEEL_65             0xED6 // はがね Lv65 バランスメタル
+#define MOVE_LV100_STEEL_66             0xED7 // はがね Lv66 ぎんいろほうだん
+#define MOVE_LV100_STEEL_67             0xED8 // はがね Lv67 こうてつのフック
+#define MOVE_LV100_STEEL_68             0xED9 // はがね Lv68 ミサイルダンス
+#define MOVE_LV100_STEEL_69             0xEDA // はがね Lv69 てつのいちげき
+#define MOVE_LV100_STEEL_70             0xEDB // はがね Lv70 きんぞくまじない
+#define MOVE_LV100_STEEL_71             0xEDC // はがね Lv71 はがねのやいば
+#define MOVE_LV100_STEEL_72             0xEDD // はがね Lv72 くろがねゾーン
+#define MOVE_LV100_STEEL_73             0xEDE // はがね Lv73 こうてつのたまご
+#define MOVE_LV100_STEEL_74             0xEDF // はがね Lv74 きんぞくのはだ
+#define MOVE_LV100_STEEL_75             0xEE0 // はがね Lv75 どっしりこうてつ
+#define MOVE_LV100_STEEL_76             0xEE1 // はがね Lv76 うごくはがね
+#define MOVE_LV100_STEEL_77             0xEE2 // はがね Lv77 てつくだき
+#define MOVE_LV100_STEEL_78             0xEE3 // はがね Lv78 はがねのバリア
+#define MOVE_LV100_STEEL_79             0xEE4 // はがね Lv79 はがねのミサイル
+#define MOVE_LV100_STEEL_80             0xEE5 // はがね Lv80 もとめるはがね
+#define MOVE_LV100_STEEL_81             0xEE6 // はがね Lv81 はがねのおうこく
+#define MOVE_LV100_STEEL_82             0xEE7 // はがね Lv82 さびないこころ
+#define MOVE_LV100_STEEL_83             0xEE8 // はがね Lv83 こうてつソウル
+#define MOVE_LV100_STEEL_84             0xEE9 // はがね Lv84 つるぎのやま
+#define MOVE_LV100_STEEL_85             0xEEA // はがね Lv85 メタルリターン
+#define MOVE_LV100_STEEL_86             0xEEB // はがね Lv86 てつのまいご
+#define MOVE_LV100_STEEL_87             0xEEC // はがね Lv87 きんぞくばくはつ
+#define MOVE_LV100_STEEL_88             0xEED // はがね Lv88 かたいちかい
+#define MOVE_LV100_STEEL_89             0xEEE // はがね Lv89 はがねフィナーレ
+#define MOVE_LV100_STEEL_90             0xEEF // はがね Lv90 とりかえせない
+#define MOVE_LV100_STEEL_91             0xEF0 // はがね Lv91 くろがねらいめい
+#define MOVE_LV100_STEEL_92             0xEF1 // はがね Lv92 こうてつのとびら
+#define MOVE_LV100_STEEL_93             0xEF2 // はがね Lv93 てつのしっこく
+#define MOVE_LV100_STEEL_94             0xEF3 // はがね Lv94 はがねのしめつけ
+#define MOVE_LV100_STEEL_95             0xEF4 // はがね Lv95 てつのかたまり
+#define MOVE_LV100_STEEL_96             0xEF5 // はがね Lv96 ぎんのひかり
+#define MOVE_LV100_STEEL_97             0xEF6 // はがね Lv97 こうてつれっしゃ
+#define MOVE_LV100_STEEL_98             0xEF7 // はがね Lv98 はがねのしんてん
+#define MOVE_LV100_STEEL_99             0xEF8 // はがね Lv99 せんこくのはがね
+#define MOVE_LV100_STEEL_100            0xEF9 // はがね Lv100 かくごのはがね
+#define MOVE_LV100_FIRE_1               0xEFA // ほのお Lv1 ちいさなひだね
+#define MOVE_LV100_FIRE_2               0xEFB // ほのお Lv2 ほのおのひとなめ
+#define MOVE_LV100_FIRE_3               0xEFC // ほのお Lv3 ぽっとひのこ
+#define MOVE_LV100_FIRE_4               0xEFD // ほのお Lv4 ひのこパンチ
+#define MOVE_LV100_FIRE_5               0xEFE // ほのお Lv5 あつあつのいき
+#define MOVE_LV100_FIRE_6               0xEFF // ほのお Lv6 かえんのしっぽ
+#define MOVE_LV100_FIRE_7               0xF00 // ほのお Lv7 もえるまなざし
+#define MOVE_LV100_FIRE_8               0xF01 // ほのお Lv8 ほのおのつめ
+#define MOVE_LV100_FIRE_9               0xF02 // ほのお Lv9 ひのこダッシュ
+#define MOVE_LV100_FIRE_10              0xF03 // ほのお Lv10 もやしのけむり
+#define MOVE_LV100_FIRE_11              0xF04 // ほのお Lv11 ひだるまアタック
+#define MOVE_LV100_FIRE_12              0xF05 // ほのお Lv12 かがりびのうた
+#define MOVE_LV100_FIRE_13              0xF06 // ほのお Lv13 もうもうけむり
+#define MOVE_LV100_FIRE_14              0xF07 // ほのお Lv14 ねつをためる
+#define MOVE_LV100_FIRE_15              0xF08 // ほのお Lv15 もえあがるひ
+#define MOVE_LV100_FIRE_16              0xF09 // ほのお Lv16 ひばしらのかべ
+#define MOVE_LV100_FIRE_17              0xF0A // ほのお Lv17 やけつくねっぷう
+#define MOVE_LV100_FIRE_18              0xF0B // ほのお Lv18 まっかなこぶし
+#define MOVE_LV100_FIRE_19              0xF0C // ほのお Lv19 ひなたぼこ
+#define MOVE_LV100_FIRE_20              0xF0D // ほのお Lv20 ほのおのやくそく
+#define MOVE_LV100_FIRE_21              0xF0E // ほのお Lv21 ほむらのキバ
+#define MOVE_LV100_FIRE_22              0xF0F // ほのお Lv22 ほのおのずつき
+#define MOVE_LV100_FIRE_23              0xF10 // ほのお Lv23 かえんダッシュ
+#define MOVE_LV100_FIRE_24              0xF11 // ほのお Lv24 たいまつなげ
+#define MOVE_LV100_FIRE_25              0xF12 // ほのお Lv25 あかいひのこ
+#define MOVE_LV100_FIRE_26              0xF13 // ほのお Lv26 ぼうえんのやり
+#define MOVE_LV100_FIRE_27              0xF14 // ほのお Lv27 ひのほうだん
+#define MOVE_LV100_FIRE_28              0xF15 // ほのお Lv28 ちいさなかえん
+#define MOVE_LV100_FIRE_29              0xF16 // ほのお Lv29 ひのまわりこみ
+#define MOVE_LV100_FIRE_30              0xF17 // ほのお Lv30 ほむらのステップ
+#define MOVE_LV100_FIRE_31              0xF18 // ほのお Lv31 ねっぷうのうず
+#define MOVE_LV100_FIRE_32              0xF19 // ほのお Lv32 ほのおのバリア
+#define MOVE_LV100_FIRE_33              0xF1A // ほのお Lv33 こげつくカーテン
+#define MOVE_LV100_FIRE_34              0xF1B // ほのお Lv34 ほのおのめざめ
+#define MOVE_LV100_FIRE_35              0xF1C // ほのお Lv35 ほむらのやり
+#define MOVE_LV100_FIRE_36              0xF1D // ほのお Lv36 ほむらのいっぱつ
+#define MOVE_LV100_FIRE_37              0xF1E // ほのお Lv37 ひのたまなげ
+#define MOVE_LV100_FIRE_38              0xF1F // ほのお Lv38 ゆらめくともしび
+#define MOVE_LV100_FIRE_39              0xF20 // ほのお Lv39 あかいかげろう
+#define MOVE_LV100_FIRE_40              0xF21 // ほのお Lv40 ぬくもりのひ
+#define MOVE_LV100_FIRE_41              0xF22 // ほのお Lv41 ほむらのつばさ
+#define MOVE_LV100_FIRE_42              0xF23 // ほのお Lv42 もえさかるこぶし
+#define MOVE_LV100_FIRE_43              0xF24 // ほのお Lv43 ひのこのあめ
+#define MOVE_LV100_FIRE_44              0xF25 // ほのお Lv44 かんかんひざし
+#define MOVE_LV100_FIRE_45              0xF26 // ほのお Lv45 ふんかのしるし
+#define MOVE_LV100_FIRE_46              0xF27 // ほのお Lv46 やけどあと
+#define MOVE_LV100_FIRE_47              0xF28 // ほのお Lv47 ほむらのよろい
+#define MOVE_LV100_FIRE_48              0xF29 // ほのお Lv48 カーニバルフレア
+#define MOVE_LV100_FIRE_49              0xF2A // ほのお Lv49 ほのおのいなずま
+#define MOVE_LV100_FIRE_50              0xF2B // ほのお Lv50 ごうかタックル
+#define MOVE_LV100_FIRE_51              0xF2C // ほのお Lv51 ひのこカッター
+#define MOVE_LV100_FIRE_52              0xF2D // ほのお Lv52 ひだねのいのり
+#define MOVE_LV100_FIRE_53              0xF2E // ほのお Lv53 ほのおのけだもの
+#define MOVE_LV100_FIRE_54              0xF2F // ほのお Lv54 ひのいきおい
+#define MOVE_LV100_FIRE_55              0xF30 // ほのお Lv55 かえんのうた
+#define MOVE_LV100_FIRE_56              0xF31 // ほのお Lv56 ひのよろい
+#define MOVE_LV100_FIRE_57              0xF32 // ほのお Lv57 ほむらのまじない
+#define MOVE_LV100_FIRE_58              0xF33 // ほのお Lv58 のろしのひ
+#define MOVE_LV100_FIRE_59              0xF34 // ほのお Lv59 めらめらパンチ
+#define MOVE_LV100_FIRE_60              0xF35 // ほのお Lv60 もえるけっしん
+#define MOVE_LV100_FIRE_61              0xF36 // ほのお Lv61 ごうえんのつるぎ
+#define MOVE_LV100_FIRE_62              0xF37 // ほのお Lv62 かんろのひ
+#define MOVE_LV100_FIRE_63              0xF38 // ほのお Lv63 ようがんのとびら
+#define MOVE_LV100_FIRE_64              0xF39 // ほのお Lv64 さかるほのお
+#define MOVE_LV100_FIRE_65              0xF3A // ほのお Lv65 ひかりのほむら
+#define MOVE_LV100_FIRE_66              0xF3B // ほのお Lv66 あかあかとキック
+#define MOVE_LV100_FIRE_67              0xF3C // ほのお Lv67 ほのおのかぎ
+#define MOVE_LV100_FIRE_68              0xF3D // ほのお Lv68 ひのとりのまい
+#define MOVE_LV100_FIRE_69              0xF3E // ほのお Lv69 やきつくすひびき
+#define MOVE_LV100_FIRE_70              0xF3F // ほのお Lv70 ふんかダイブ
+#define MOVE_LV100_FIRE_71              0xF40 // ほのお Lv71 ほむらのうなり
+#define MOVE_LV100_FIRE_72              0xF41 // ほのお Lv72 ひとりかえんびん
+#define MOVE_LV100_FIRE_73              0xF42 // ほのお Lv73 ほむらのやいば
+#define MOVE_LV100_FIRE_74              0xF43 // ほのお Lv74 たいようのこえ
+#define MOVE_LV100_FIRE_75              0xF44 // ほのお Lv75 やけどのあと
+#define MOVE_LV100_FIRE_76              0xF45 // ほのお Lv76 ひのこのうずまき
+#define MOVE_LV100_FIRE_77              0xF46 // ほのお Lv77 まっかなたいよう
+#define MOVE_LV100_FIRE_78              0xF47 // ほのお Lv78 ひのこハリケーン
+#define MOVE_LV100_FIRE_79              0xF48 // ほのお Lv79 ほのおうずしお
+#define MOVE_LV100_FIRE_80              0xF49 // ほのお Lv80 ひのこのたて
+#define MOVE_LV100_FIRE_81              0xF4A // ほのお Lv81 ほのおのだいだま
+#define MOVE_LV100_FIRE_82              0xF4B // ほのお Lv82 ほむらのカーテン
+#define MOVE_LV100_FIRE_83              0xF4C // ほのお Lv83 やけつくさけび
+#define MOVE_LV100_FIRE_84              0xF4D // ほのお Lv84 ごうかのひ
+#define MOVE_LV100_FIRE_85              0xF4E // ほのお Lv85 ほむらしぶき
+#define MOVE_LV100_FIRE_86              0xF4F // ほのお Lv86 ほのおのわっか
+#define MOVE_LV100_FIRE_87              0xF50 // ほのお Lv87 ひのたまヒット
+#define MOVE_LV100_FIRE_88              0xF51 // ほのお Lv88 ほのおのほえごえ
+#define MOVE_LV100_FIRE_89              0xF52 // ほのお Lv89 まっかなやいば
+#define MOVE_LV100_FIRE_90              0xF53 // ほのお Lv90 ごうえんのたま
+#define MOVE_LV100_FIRE_91              0xF54 // ほのお Lv91 ひのくにのおう
+#define MOVE_LV100_FIRE_92              0xF55 // ほのお Lv92 ほむらのねがい
+#define MOVE_LV100_FIRE_93              0xF56 // ほのお Lv93 さいごまでもえる
+#define MOVE_LV100_FIRE_94              0xF57 // ほのお Lv94 ひのなみ
+#define MOVE_LV100_FIRE_95              0xF58 // ほのお Lv95 せんこうのほむら
+#define MOVE_LV100_FIRE_96              0xF59 // ほのお Lv96 ほのおのれっしゃ
+#define MOVE_LV100_FIRE_97              0xF5A // ほのお Lv97 だいもんじかけら
+#define MOVE_LV100_FIRE_98              0xF5B // ほのお Lv98 もえたつだいち
+#define MOVE_LV100_FIRE_99              0xF5C // ほのお Lv99 ひのたまのおわり
+#define MOVE_LV100_FIRE_100             0xF5D // ほのお Lv100 ほむらのさいご
+#define MOVE_LV100_WATER_1              0xF5E // みず Lv1 しずくのつぶて
+#define MOVE_LV100_WATER_2              0xF5F // みず Lv2 あぶくまくら
+#define MOVE_LV100_WATER_3              0xF60 // みず Lv3 みなもたたき
+#define MOVE_LV100_WATER_4              0xF61 // みず Lv4 しろいしぶき
+#define MOVE_LV100_WATER_5              0xF62 // みず Lv5 ぬれつばめ
+#define MOVE_LV100_WATER_6              0xF63 // みず Lv6 さざなみ
+#define MOVE_LV100_WATER_7              0xF64 // みず Lv7 ひしゃくがえし
+#define MOVE_LV100_WATER_8              0xF65 // みず Lv8 なみまくら
+#define MOVE_LV100_WATER_9              0xF66 // みず Lv9 てんすいのこえ
+#define MOVE_LV100_WATER_10             0xF67 // みず Lv10 みずたまジャンプ
+#define MOVE_LV100_WATER_11             0xF68 // みず Lv11 かわせみダイブ
+#define MOVE_LV100_WATER_12             0xF69 // みず Lv12 こもりうたのなみ
+#define MOVE_LV100_WATER_13             0xF6A // みず Lv13 ぬかるみしぶき
+#define MOVE_LV100_WATER_14             0xF6B // みず Lv14 いずみのめぐみ
+#define MOVE_LV100_WATER_15             0xF6C // みず Lv15 うしおのつめ
+#define MOVE_LV100_WATER_16             0xF6D // みず Lv16 ほしがたしぶき
+#define MOVE_LV100_WATER_17             0xF6E // みず Lv17 ながれぼし
+#define MOVE_LV100_WATER_18             0xF6F // みず Lv18 せせらぎのうた
+#define MOVE_LV100_WATER_19             0xF70 // みず Lv19 すいちゅうのかげ
+#define MOVE_LV100_WATER_20             0xF71 // みず Lv20 あわだてスプレー
+#define MOVE_LV100_WATER_21             0xF72 // みず Lv21 しおかぜのゆび
+#define MOVE_LV100_WATER_22             0xF73 // みず Lv22 あめあがりのにじ
+#define MOVE_LV100_WATER_23             0xF74 // みず Lv23 ふかみのさそい
+#define MOVE_LV100_WATER_24             0xF75 // みず Lv24 みずくさたたき
+#define MOVE_LV100_WATER_25             0xF76 // みず Lv25 かわのぬし
+#define MOVE_LV100_WATER_26             0xF77 // みず Lv26 ずぶぬれ
+#define MOVE_LV100_WATER_27             0xF78 // みず Lv27 あまがさのまもり
+#define MOVE_LV100_WATER_28             0xF79 // みず Lv28 まきなみ
+#define MOVE_LV100_WATER_29             0xF7A // みず Lv29 しずくのくすり
+#define MOVE_LV100_WATER_30             0xF7B // みず Lv30 つりぼりのわな
+#define MOVE_LV100_WATER_31             0xF7C // みず Lv31 きりさめのまい
+#define MOVE_LV100_WATER_32             0xF7D // みず Lv32 さんごのいぶき
+#define MOVE_LV100_WATER_33             0xF7E // みず Lv33 かいがらくずし
+#define MOVE_LV100_WATER_34             0xF7F // みず Lv34 うみねこのこえ
+#define MOVE_LV100_WATER_35             0xF80 // みず Lv35 ひたひたのあし
+#define MOVE_LV100_WATER_36             0xF81 // みず Lv36 とびうおのつばさ
+#define MOVE_LV100_WATER_37             0xF82 // みず Lv37 しおまねきばさみ
+#define MOVE_LV100_WATER_38             0xF83 // みず Lv38 せびれカッター
+#define MOVE_LV100_WATER_39             0xF84 // みず Lv39 うずまきのとびら
+#define MOVE_LV100_WATER_40             0xF85 // みず Lv40 くじらのうた
+#define MOVE_LV100_WATER_41             0xF86 // みず Lv41 しおひがり
+#define MOVE_LV100_WATER_42             0xF87 // みず Lv42 みちしおのうた
+#define MOVE_LV100_WATER_43             0xF88 // みず Lv43 せんすいかん
+#define MOVE_LV100_WATER_44             0xF89 // みず Lv44 かっぱのいたずら
+#define MOVE_LV100_WATER_45             0xF8A // みず Lv45 つきのみなも
+#define MOVE_LV100_WATER_46             0xF8B // みず Lv46 はまべのしらべ
+#define MOVE_LV100_WATER_47             0xF8C // みず Lv47 たまりみず
+#define MOVE_LV100_WATER_48             0xF8D // みず Lv48 あらいぐまのて
+#define MOVE_LV100_WATER_49             0xF8E // みず Lv49 おおしおのいかり
+#define MOVE_LV100_WATER_50             0xF8F // みず Lv50 ふぶきなみ
+#define MOVE_LV100_WATER_51             0xF90 // みず Lv51 こころのみず
+#define MOVE_LV100_WATER_52             0xF91 // みず Lv52 たきつぼ
+#define MOVE_LV100_WATER_53             0xF92 // みず Lv53 おおあめのひ
+#define MOVE_LV100_WATER_54             0xF93 // みず Lv54 ひきしおのあと
+#define MOVE_LV100_WATER_55             0xF94 // みず Lv55 くらげのやかた
+#define MOVE_LV100_WATER_56             0xF95 // みず Lv56 ふかいうみ
+#define MOVE_LV100_WATER_57             0xF96 // みず Lv57 みずうみのやいば
+#define MOVE_LV100_WATER_58             0xF97 // みず Lv58 かがみのみなも
+#define MOVE_LV100_WATER_59             0xF98 // みず Lv59 こうずいのきざし
+#define MOVE_LV100_WATER_60             0xF99 // みず Lv60 とうとうのながれ
+#define MOVE_LV100_WATER_61             0xF9A // みず Lv61 ながしそうめん
+#define MOVE_LV100_WATER_62             0xF9B // みず Lv62 うずしおのわな
+#define MOVE_LV100_WATER_63             0xF9C // みず Lv63 ぬまちのしぶき
+#define MOVE_LV100_WATER_64             0xF9D // みず Lv64 とびこみアタック
+#define MOVE_LV100_WATER_65             0xF9E // みず Lv65 みずをさすもの
+#define MOVE_LV100_WATER_66             0xF9F // みず Lv66 あおのかげろう
+#define MOVE_LV100_WATER_67             0xFA0 // みず Lv67 しおけむり
+#define MOVE_LV100_WATER_68             0xFA1 // みず Lv68 さざれいし
+#define MOVE_LV100_WATER_69             0xFA2 // みず Lv69 やまびこのたき
+#define MOVE_LV100_WATER_70             0xFA3 // みず Lv70 すいぞくのさけび
+#define MOVE_LV100_WATER_71             0xFA4 // みず Lv71 いきのこりのあわ
+#define MOVE_LV100_WATER_72             0xFA5 // みず Lv72 かいりゅうダンス
+#define MOVE_LV100_WATER_73             0xFA6 // みず Lv73 うなばらのいかり
+#define MOVE_LV100_WATER_74             0xFA7 // みず Lv74 くらげのかざり
+#define MOVE_LV100_WATER_75             0xFA8 // みず Lv75 みなわ
+#define MOVE_LV100_WATER_76             0xFA9 // みず Lv76 せんとうのかぜ
+#define MOVE_LV100_WATER_77             0xFAA // みず Lv77 たいかいのたより
+#define MOVE_LV100_WATER_78             0xFAB // みず Lv78 ぎょぐんのしらせ
+#define MOVE_LV100_WATER_79             0xFAC // みず Lv79 ふなうたのなみ
+#define MOVE_LV100_WATER_80             0xFAD // みず Lv80 うみのいかり
+#define MOVE_LV100_WATER_81             0xFAE // みず Lv81 おおしお
+#define MOVE_LV100_WATER_82             0xFAF // みず Lv82 どろんこみず
+#define MOVE_LV100_WATER_83             0xFB0 // みず Lv83 まんちょうのつき
+#define MOVE_LV100_WATER_84             0xFB1 // みず Lv84 ふなぞこのさけび
+#define MOVE_LV100_WATER_85             0xFB2 // みず Lv85 うおざのひかり
+#define MOVE_LV100_WATER_86             0xFB3 // みず Lv86 せんすいのやいば
+#define MOVE_LV100_WATER_87             0xFB4 // みず Lv87 みなもわたり
+#define MOVE_LV100_WATER_88             0xFB5 // みず Lv88 かいじゅうのいき
+#define MOVE_LV100_WATER_89             0xFB6 // みず Lv89 りゅうぐうのうた
+#define MOVE_LV100_WATER_90             0xFB7 // みず Lv90 てっぽうだま
+#define MOVE_LV100_WATER_91             0xFB8 // みず Lv91 あおのなみだ
+#define MOVE_LV100_WATER_92             0xFB9 // みず Lv92 ほしくずのうしお
+#define MOVE_LV100_WATER_93             0xFBA // みず Lv93 すいしんのほこ
+#define MOVE_LV100_WATER_94             0xFBB // みず Lv94 つなみのはじまり
+#define MOVE_LV100_WATER_95             0xFBC // みず Lv95 わだつみのいかり
+#define MOVE_LV100_WATER_96             0xFBD // みず Lv96 かめのこうら
+#define MOVE_LV100_WATER_97             0xFBE // みず Lv97 まなつのしおさい
+#define MOVE_LV100_WATER_98             0xFBF // みず Lv98 おおうなばら
+#define MOVE_LV100_WATER_99             0xFC0 // みず Lv99 うおのぼりのたき
+#define MOVE_LV100_WATER_100            0xFC1 // みず Lv100 なみのせいれい
+#define MOVE_LV100_GRASS_1              0xFC2 // くさ Lv1 こはっぱのつぶて
+#define MOVE_LV100_GRASS_2              0xFC3 // くさ Lv2 たねをまく
+#define MOVE_LV100_GRASS_3              0xFC4 // くさ Lv3 つるのささやき
+#define MOVE_LV100_GRASS_4              0xFC5 // くさ Lv4 くさぶえのしらべ
+#define MOVE_LV100_GRASS_5              0xFC6 // くさ Lv5 つゆのしずく
+#define MOVE_LV100_GRASS_6              0xFC7 // くさ Lv6 はなびらのかおり
+#define MOVE_LV100_GRASS_7              0xFC8 // くさ Lv7 ひなたのまどろみ
+#define MOVE_LV100_GRASS_8              0xFC9 // くさ Lv8 わたげとばし
+#define MOVE_LV100_GRASS_9              0xFCA // くさ Lv9 ねっこしばり
+#define MOVE_LV100_GRASS_10             0xFCB // くさ Lv10 みどりのためいき
+#define MOVE_LV100_GRASS_11             0xFCC // くさ Lv11 とげのまい
+#define MOVE_LV100_GRASS_12             0xFCD // くさ Lv12 しびれほうし
+#define MOVE_LV100_GRASS_13             0xFCE // くさ Lv13 たけのこアタック
+#define MOVE_LV100_GRASS_14             0xFCF // くさ Lv14 ようぶんほきゅう
+#define MOVE_LV100_GRASS_15             0xFD0 // くさ Lv15 かさのたいあたり
+#define MOVE_LV100_GRASS_16             0xFD1 // くさ Lv16 まつぼっくり
+#define MOVE_LV100_GRASS_17             0xFD2 // くさ Lv17 どくのつぼみ
+#define MOVE_LV100_GRASS_18             0xFD3 // くさ Lv18 いばらのわな
+#define MOVE_LV100_GRASS_19             0xFD4 // くさ Lv19 しげみがくれ
+#define MOVE_LV100_GRASS_20             0xFD5 // くさ Lv20 はなびらのふぶき
+#define MOVE_LV100_GRASS_21             0xFD6 // くさ Lv21 くさわけダッシュ
+#define MOVE_LV100_GRASS_22             0xFD7 // くさ Lv22 こもれびのひかり
+#define MOVE_LV100_GRASS_23             0xFD8 // くさ Lv23 もりのささやき
+#define MOVE_LV100_GRASS_24             0xFD9 // くさ Lv24 おおばこのたたき
+#define MOVE_LV100_GRASS_25             0xFDA // くさ Lv25 ねむりのこけ
+#define MOVE_LV100_GRASS_26             0xFDB // くさ Lv26 どんぐりころころ
+#define MOVE_LV100_GRASS_27             0xFDC // くさ Lv27 やどりぎアタック
+#define MOVE_LV100_GRASS_28             0xFDD // くさ Lv28 はっぱのうたげ
+#define MOVE_LV100_GRASS_29             0xFDE // くさ Lv29 きりかぶのまもり
+#define MOVE_LV100_GRASS_30             0xFDF // くさ Lv30 みずやりのあと
+#define MOVE_LV100_GRASS_31             0xFE0 // くさ Lv31 ひだまりのまい
+#define MOVE_LV100_GRASS_32             0xFE1 // くさ Lv32 つるのからみつき
+#define MOVE_LV100_GRASS_33             0xFE2 // くさ Lv33 はなのきおく
+#define MOVE_LV100_GRASS_34             0xFE3 // くさ Lv34 ふきのとう
+#define MOVE_LV100_GRASS_35             0xFE4 // くさ Lv35 きのこのかさぶた
+#define MOVE_LV100_GRASS_36             0xFE5 // くさ Lv36 めぶきのちから
+#define MOVE_LV100_GRASS_37             0xFE6 // くさ Lv37 しげるもり
+#define MOVE_LV100_GRASS_38             0xFE7 // くさ Lv38 たけやりのさき
+#define MOVE_LV100_GRASS_39             0xFE8 // くさ Lv39 くさのいぶき
+#define MOVE_LV100_GRASS_40             0xFE9 // くさ Lv40 もりのかみさま
+#define MOVE_LV100_GRASS_41             0xFEA // くさ Lv41 はなかざりのまい
+#define MOVE_LV100_GRASS_42             0xFEB // くさ Lv42 ホルモンざい
+#define MOVE_LV100_GRASS_43             0xFEC // くさ Lv43 ふゆごもり
+#define MOVE_LV100_GRASS_44             0xFED // くさ Lv44 かやのはなびら
+#define MOVE_LV100_GRASS_45             0xFEE // くさ Lv45 くさはらのかげ
+#define MOVE_LV100_GRASS_46             0xFEF // くさ Lv46 きばりのつる
+#define MOVE_LV100_GRASS_47             0xFF0 // くさ Lv47 ひかりのうた
+#define MOVE_LV100_GRASS_48             0xFF1 // くさ Lv48 ちいさなもり
+#define MOVE_LV100_GRASS_49             0xFF2 // くさ Lv49 あさつゆのけむり
+#define MOVE_LV100_GRASS_50             0xFF3 // くさ Lv50 ひまわりばくだん
+#define MOVE_LV100_GRASS_51             0xFF4 // くさ Lv51 ほうしのきり
+#define MOVE_LV100_GRASS_52             0xFF5 // くさ Lv52 はなびらだいかい
+#define MOVE_LV100_GRASS_53             0xFF6 // くさ Lv53 やどりぎドリーム
+#define MOVE_LV100_GRASS_54             0xFF7 // くさ Lv54 こけむすいわ
+#define MOVE_LV100_GRASS_55             0xFF8 // くさ Lv55 ばっさりのこ
+#define MOVE_LV100_GRASS_56             0xFF9 // くさ Lv56 せいなるはっぱ
+#define MOVE_LV100_GRASS_57             0xFFA // くさ Lv57 くさのおきて
+#define MOVE_LV100_GRASS_58             0xFFB // くさ Lv58 いろどりのはな
+#define MOVE_LV100_GRASS_59             0xFFC // くさ Lv59 ぎんいろビーム
+#define MOVE_LV100_GRASS_60             0xFFD // くさ Lv60 たいぼくのうらみ
+#define MOVE_LV100_GRASS_61             0xFFE // くさ Lv61 こもりうたのはな
+#define MOVE_LV100_GRASS_62             0xFFF // くさ Lv62 ゆりかごのつる
+#define MOVE_LV100_GRASS_63             0x1000 // くさ Lv63 とうめいなはっぱ
+#define MOVE_LV100_GRASS_64             0x1001 // くさ Lv64 やぶのなか
+#define MOVE_LV100_GRASS_65             0x1002 // くさ Lv65 かれえだのやいば
+#define MOVE_LV100_GRASS_66             0x1003 // くさ Lv66 みどりのかぜ
+#define MOVE_LV100_GRASS_67             0x1004 // くさ Lv67 つるくさのあらし
+#define MOVE_LV100_GRASS_68             0x1005 // くさ Lv68 ふきだすほうし
+#define MOVE_LV100_GRASS_69             0x1006 // くさ Lv69 めいぼくのつえ
+#define MOVE_LV100_GRASS_70             0x1007 // くさ Lv70 はるのしらせ
+#define MOVE_LV100_GRASS_71             0x1008 // くさ Lv71 からのもり
+#define MOVE_LV100_GRASS_72             0x1009 // くさ Lv72 はなちるさと
+#define MOVE_LV100_GRASS_73             0x100A // くさ Lv73 そうげんのまもり
+#define MOVE_LV100_GRASS_74             0x100B // くさ Lv74 とげとげのたね
+#define MOVE_LV100_GRASS_75             0x100C // くさ Lv75 くさかげのわな
+#define MOVE_LV100_GRASS_76             0x100D // くさ Lv76 ねこじゃらし
+#define MOVE_LV100_GRASS_77             0x100E // くさ Lv77 わたぼうしぐも
+#define MOVE_LV100_GRASS_78             0x100F // くさ Lv78 しんりょくやいば
+#define MOVE_LV100_GRASS_79             0x1010 // くさ Lv79 かんなぎのつる
+#define MOVE_LV100_GRASS_80             0x1011 // くさ Lv80 みちくさ
+#define MOVE_LV100_GRASS_81             0x1012 // くさ Lv81 はなびらのきおく
+#define MOVE_LV100_GRASS_82             0x1013 // くさ Lv82 そうじゅタックル
+#define MOVE_LV100_GRASS_83             0x1014 // くさ Lv83 みのりのふぶき
+#define MOVE_LV100_GRASS_84             0x1015 // くさ Lv84 やまのかみさま
+#define MOVE_LV100_GRASS_85             0x1016 // くさ Lv85 せかいじゅいぶき
+#define MOVE_LV100_GRASS_86             0x1017 // くさ Lv86 こもりうたのもり
+#define MOVE_LV100_GRASS_87             0x1018 // くさ Lv87 くすりのはな
+#define MOVE_LV100_GRASS_88             0x1019 // くさ Lv88 はびこるつる
+#define MOVE_LV100_GRASS_89             0x101A // くさ Lv89 みどりのさけび
+#define MOVE_LV100_GRASS_90             0x101B // くさ Lv90 きんもくせい
+#define MOVE_LV100_GRASS_91             0x101C // くさ Lv91 ひだまりのいのり
+#define MOVE_LV100_GRASS_92             0x101D // くさ Lv92 じゅかいのうねり
+#define MOVE_LV100_GRASS_93             0x101E // くさ Lv93 こもれびのつるぎ
+#define MOVE_LV100_GRASS_94             0x101F // くさ Lv94 はなのいかり
+#define MOVE_LV100_GRASS_95             0x1020 // くさ Lv95 しんりょくあらし
+#define MOVE_LV100_GRASS_96             0x1021 // くさ Lv96 たいぼくのやどり
+#define MOVE_LV100_GRASS_97             0x1022 // くさ Lv97 なつくさのうた
+#define MOVE_LV100_GRASS_98             0x1023 // くさ Lv98 せかいをおおう
+#define MOVE_LV100_GRASS_99             0x1024 // くさ Lv99 ひらけごま
+#define MOVE_LV100_GRASS_100            0x1025 // くさ Lv100 むげんのしげみ
+#define MOVE_LV100_ELECTRIC_1           0x1026 // でんき Lv1 ぱちぱちショック
+#define MOVE_LV100_ELECTRIC_2           0x1027 // でんき Lv2 せいでんきのたば
+#define MOVE_LV100_ELECTRIC_3           0x1028 // でんき Lv3 ピリピリタッチ
+#define MOVE_LV100_ELECTRIC_4           0x1029 // でんき Lv4 でんきのまくら
+#define MOVE_LV100_ELECTRIC_5           0x102A // でんき Lv5 ほたるびスパーク
+#define MOVE_LV100_ELECTRIC_6           0x102B // でんき Lv6 こうでんしのうた
+#define MOVE_LV100_ELECTRIC_7           0x102C // でんき Lv7 ビリビリはじき
+#define MOVE_LV100_ELECTRIC_8           0x102D // でんき Lv8 プラスのしずく
+#define MOVE_LV100_ELECTRIC_9           0x102E // でんき Lv9 たまりでんき
+#define MOVE_LV100_ELECTRIC_10          0x102F // でんき Lv10 いなずまのたね
+#define MOVE_LV100_ELECTRIC_11          0x1030 // でんき Lv11 ライトニング
+#define MOVE_LV100_ELECTRIC_12          0x1031 // でんき Lv12 ぴかりのひとみ
+#define MOVE_LV100_ELECTRIC_13          0x1032 // でんき Lv13 でんじのさざなみ
+#define MOVE_LV100_ELECTRIC_14          0x1033 // でんき Lv14 かみなりこぞう
+#define MOVE_LV100_ELECTRIC_15          0x1034 // でんき Lv15 スパークのうた
+#define MOVE_LV100_ELECTRIC_16          0x1035 // でんき Lv16 ほうでんまえぶれ
+#define MOVE_LV100_ELECTRIC_17          0x1036 // でんき Lv17 じばのこえ
+#define MOVE_LV100_ELECTRIC_18          0x1037 // でんき Lv18 でんせんのわな
+#define MOVE_LV100_ELECTRIC_19          0x1038 // でんき Lv19 サンダーキック
+#define MOVE_LV100_ELECTRIC_20          0x1039 // でんき Lv20 ちいさなかみなり
+#define MOVE_LV100_ELECTRIC_21          0x103A // でんき Lv21 ツインパルス
+#define MOVE_LV100_ELECTRIC_22          0x103B // でんき Lv22 でんぱのいたずら
+#define MOVE_LV100_ELECTRIC_23          0x103C // でんき Lv23 かみなりぐもの
+#define MOVE_LV100_ELECTRIC_24          0x103D // でんき Lv24 うなぎのでんげき
+#define MOVE_LV100_ELECTRIC_25          0x103E // でんき Lv25 すずめばち
+#define MOVE_LV100_ELECTRIC_26          0x103F // でんき Lv26 まひのしらべ
+#define MOVE_LV100_ELECTRIC_27          0x1040 // でんき Lv27 しびれひげ
+#define MOVE_LV100_ELECTRIC_28          0x1041 // でんき Lv28 プラズマのつぶ
+#define MOVE_LV100_ELECTRIC_29          0x1042 // でんき Lv29 いかずちのよろい
+#define MOVE_LV100_ELECTRIC_30          0x1043 // でんき Lv30 とうめいなでんき
+#define MOVE_LV100_ELECTRIC_31          0x1044 // でんき Lv31 ひかりのアロー
+#define MOVE_LV100_ELECTRIC_32          0x1045 // でんき Lv32 らいめいロア
+#define MOVE_LV100_ELECTRIC_33          0x1046 // でんき Lv33 でんじのつばさ
+#define MOVE_LV100_ELECTRIC_34          0x1047 // でんき Lv34 バチバチあらし
+#define MOVE_LV100_ELECTRIC_35          0x1048 // でんき Lv35 クリップスパーク
+#define MOVE_LV100_ELECTRIC_36          0x1049 // でんき Lv36 じばりょくのかべ
+#define MOVE_LV100_ELECTRIC_37          0x104A // でんき Lv37 かみなりクロー
+#define MOVE_LV100_ELECTRIC_38          0x104B // でんき Lv38 ライトニングボ
+#define MOVE_LV100_ELECTRIC_39          0x104C // でんき Lv39 おおきなイナズマ
+#define MOVE_LV100_ELECTRIC_40          0x104D // でんき Lv40 ほうでんだいち
+#define MOVE_LV100_ELECTRIC_41          0x104E // でんき Lv41 ボルトターン
+#define MOVE_LV100_ELECTRIC_42          0x104F // でんき Lv42 ぎんいろでんじは
+#define MOVE_LV100_ELECTRIC_43          0x1050 // でんき Lv43 かみなりのひとみ
+#define MOVE_LV100_ELECTRIC_44          0x1051 // でんき Lv44 やみよのいなずま
+#define MOVE_LV100_ELECTRIC_45          0x1052 // でんき Lv45 でんじのだいほう
+#define MOVE_LV100_ELECTRIC_46          0x1053 // でんき Lv46 でんじのつめ
+#define MOVE_LV100_ELECTRIC_47          0x1054 // でんき Lv47 トランスミッター
+#define MOVE_LV100_ELECTRIC_48          0x1055 // でんき Lv48 でんきのくもあみ
+#define MOVE_LV100_ELECTRIC_49          0x1056 // でんき Lv49 ナノサンダー
+#define MOVE_LV100_ELECTRIC_50          0x1057 // でんき Lv50 じゅうでんかいし
+#define MOVE_LV100_ELECTRIC_51          0x1058 // でんき Lv51 せんこうのうた
+#define MOVE_LV100_ELECTRIC_52          0x1059 // でんき Lv52 いかずちくだき
+#define MOVE_LV100_ELECTRIC_53          0x105A // でんき Lv53 でんきあしのまい
+#define MOVE_LV100_ELECTRIC_54          0x105B // でんき Lv54 サンダーテール
+#define MOVE_LV100_ELECTRIC_55          0x105C // でんき Lv55 スパークラッシュ
+#define MOVE_LV100_ELECTRIC_56          0x105D // でんき Lv56 ランプのまじない
+#define MOVE_LV100_ELECTRIC_57          0x105E // でんき Lv57 ちょうでんあつ
+#define MOVE_LV100_ELECTRIC_58          0x105F // でんき Lv58 いかずちのたづな
+#define MOVE_LV100_ELECTRIC_59          0x1060 // でんき Lv59 つかのまのひかり
+#define MOVE_LV100_ELECTRIC_60          0x1061 // でんき Lv60 かみなりまゆげ
+#define MOVE_LV100_ELECTRIC_61          0x1062 // でんき Lv61 せいでんファング
+#define MOVE_LV100_ELECTRIC_62          0x1063 // でんき Lv62 ほしのいかずち
+#define MOVE_LV100_ELECTRIC_63          0x1064 // でんき Lv63 ボルテージ
+#define MOVE_LV100_ELECTRIC_64          0x1065 // でんき Lv64 でんきのうみ
+#define MOVE_LV100_ELECTRIC_65          0x1066 // でんき Lv65 じゅうでんのこえ
+#define MOVE_LV100_ELECTRIC_66          0x1067 // でんき Lv66 チャージアタック
+#define MOVE_LV100_ELECTRIC_67          0x1068 // でんき Lv67 ひかりのわ
+#define MOVE_LV100_ELECTRIC_68          0x1069 // でんき Lv68 みなぎるでんりゅ
+#define MOVE_LV100_ELECTRIC_69          0x106A // でんき Lv69 ぴりりのまもり
+#define MOVE_LV100_ELECTRIC_70          0x106B // でんき Lv70 スパイクボルト
+#define MOVE_LV100_ELECTRIC_71          0x106C // でんき Lv71 いかずちのこだま
+#define MOVE_LV100_ELECTRIC_72          0x106D // でんき Lv72 サージのいかり
+#define MOVE_LV100_ELECTRIC_73          0x106E // でんき Lv73 かみなりおたけび
+#define MOVE_LV100_ELECTRIC_74          0x106F // でんき Lv74 プラズマのやいば
+#define MOVE_LV100_ELECTRIC_75          0x1070 // でんき Lv75 フルチャージ
+#define MOVE_LV100_ELECTRIC_76          0x1071 // でんき Lv76 でんじのあみ
+#define MOVE_LV100_ELECTRIC_77          0x1072 // でんき Lv77 いなずまダッシュ
+#define MOVE_LV100_ELECTRIC_78          0x1073 // でんき Lv78 じりょくのうず
+#define MOVE_LV100_ELECTRIC_79          0x1074 // でんき Lv79 ぴかぴかフラッ
+#define MOVE_LV100_ELECTRIC_80          0x1075 // でんき Lv80 ほうでんのまい
+#define MOVE_LV100_ELECTRIC_81          0x1076 // でんき Lv81 ちょうでんじほう
+#define MOVE_LV100_ELECTRIC_82          0x1077 // でんき Lv82 らいてんのいかり
+#define MOVE_LV100_ELECTRIC_83          0x1078 // でんき Lv83 バチバチクラッシ
+#define MOVE_LV100_ELECTRIC_84          0x1079 // でんき Lv84 スパーキング
+#define MOVE_LV100_ELECTRIC_85          0x107A // でんき Lv85 ゴロゴロぐもり
+#define MOVE_LV100_ELECTRIC_86          0x107B // でんき Lv86 でんげきのうた
+#define MOVE_LV100_ELECTRIC_87          0x107C // でんき Lv87 いなずまのうず
+#define MOVE_LV100_ELECTRIC_88          0x107D // でんき Lv88 ぱちぱちのよろい
+#define MOVE_LV100_ELECTRIC_89          0x107E // でんき Lv89 いかずちのみやこ
+#define MOVE_LV100_ELECTRIC_90          0x107F // でんき Lv90 らいめいバースト
+#define MOVE_LV100_ELECTRIC_91          0x1080 // でんき Lv91 スパークのあらし
+#define MOVE_LV100_ELECTRIC_92          0x1081 // でんき Lv92 いなずまのきば
+#define MOVE_LV100_ELECTRIC_93          0x1082 // でんき Lv93 いなずまのつるぎ
+#define MOVE_LV100_ELECTRIC_94          0x1083 // でんき Lv94 ライジング
+#define MOVE_LV100_ELECTRIC_95          0x1084 // でんき Lv95 ほしくだき
+#define MOVE_LV100_ELECTRIC_96          0x1085 // でんき Lv96 でんきのきおく
+#define MOVE_LV100_ELECTRIC_97          0x1086 // でんき Lv97 ライトニングスコ
+#define MOVE_LV100_ELECTRIC_98          0x1087 // でんき Lv98 てんちのいかり
+#define MOVE_LV100_ELECTRIC_99          0x1088 // でんき Lv99 ほうらいのでんこ
+#define MOVE_LV100_ELECTRIC_100         0x1089 // でんき Lv100 かみなりさま
+#define MOVE_LV100_PSYCHIC_1            0x108A // エスパー Lv1 ねんりきのつぶて
+#define MOVE_LV100_PSYCHIC_2            0x108B // エスパー Lv2 ちいさなひらめき
+#define MOVE_LV100_PSYCHIC_3            0x108C // エスパー Lv3 こころのまなざし
+#define MOVE_LV100_PSYCHIC_4            0x108D // エスパー Lv4 ふしぎなまじない
+#define MOVE_LV100_PSYCHIC_5            0x108E // エスパー Lv5 ゆめのかけら
+#define MOVE_LV100_PSYCHIC_6            0x108F // エスパー Lv6 うつろなまなざし
+#define MOVE_LV100_PSYCHIC_7            0x1090 // エスパー Lv7 しろいまぼろし
+#define MOVE_LV100_PSYCHIC_8            0x1091 // エスパー Lv8 おもいでぶくろ
+#define MOVE_LV100_PSYCHIC_9            0x1092 // エスパー Lv9 きまぐれテレポ
+#define MOVE_LV100_PSYCHIC_10           0x1093 // エスパー Lv10 サイコタッチ
+#define MOVE_LV100_PSYCHIC_11           0x1094 // エスパー Lv11 まよいごのこえ
+#define MOVE_LV100_PSYCHIC_12           0x1095 // エスパー Lv12 よみとりのひとみ
+#define MOVE_LV100_PSYCHIC_13           0x1096 // エスパー Lv13 ねんのちから
+#define MOVE_LV100_PSYCHIC_14           0x1097 // エスパー Lv14 ひらめきのかげ
+#define MOVE_LV100_PSYCHIC_15           0x1098 // エスパー Lv15 こもりうたのゆめ
+#define MOVE_LV100_PSYCHIC_16           0x1099 // エスパー Lv16 ふしぎなひかり
+#define MOVE_LV100_PSYCHIC_17           0x109A // エスパー Lv17 ゆうれいのうた
+#define MOVE_LV100_PSYCHIC_18           0x109B // エスパー Lv18 おくびょうのつえ
+#define MOVE_LV100_PSYCHIC_19           0x109C // エスパー Lv19 ひとだまテレパス
+#define MOVE_LV100_PSYCHIC_20           0x109D // エスパー Lv20 かなしばりのすず
+#define MOVE_LV100_PSYCHIC_21           0x109E // エスパー Lv21 ゆめうつつのなみ
+#define MOVE_LV100_PSYCHIC_22           0x109F // エスパー Lv22 きおくのかなた
+#define MOVE_LV100_PSYCHIC_23           0x10A0 // エスパー Lv23 ねんりきアロー
+#define MOVE_LV100_PSYCHIC_24           0x10A1 // エスパー Lv24 うつしかがみ
+#define MOVE_LV100_PSYCHIC_25           0x10A2 // エスパー Lv25 まどろみのしずく
+#define MOVE_LV100_PSYCHIC_26           0x10A3 // エスパー Lv26 ふしぎなちから
+#define MOVE_LV100_PSYCHIC_27           0x10A4 // エスパー Lv27 こころのつえ
+#define MOVE_LV100_PSYCHIC_28           0x10A5 // エスパー Lv28 やさしいひだまり
+#define MOVE_LV100_PSYCHIC_29           0x10A6 // エスパー Lv29 いたずらテレキネ
+#define MOVE_LV100_PSYCHIC_30           0x10A7 // エスパー Lv30 しんぴのきらめき
+#define MOVE_LV100_PSYCHIC_31           0x10A8 // エスパー Lv31 ふしぎなヴェール
+#define MOVE_LV100_PSYCHIC_32           0x10A9 // エスパー Lv32 ひたいのチャクラ
+#define MOVE_LV100_PSYCHIC_33           0x10AA // エスパー Lv33 せいしんいたずら
+#define MOVE_LV100_PSYCHIC_34           0x10AB // エスパー Lv34 あしたのゆめ
+#define MOVE_LV100_PSYCHIC_35           0x10AC // エスパー Lv35 ゆらめくひとみ
+#define MOVE_LV100_PSYCHIC_36           0x10AD // エスパー Lv36 サイコステップ
+#define MOVE_LV100_PSYCHIC_37           0x10AE // エスパー Lv37 ねんりきのうず
+#define MOVE_LV100_PSYCHIC_38           0x10AF // エスパー Lv38 こころのとびら
+#define MOVE_LV100_PSYCHIC_39           0x10B0 // エスパー Lv39 ふしぎなふんいき
+#define MOVE_LV100_PSYCHIC_40           0x10B1 // エスパー Lv40 ゆめみのかけら
+#define MOVE_LV100_PSYCHIC_41           0x10B2 // エスパー Lv41 くうそうのつるぎ
+#define MOVE_LV100_PSYCHIC_42           0x10B3 // エスパー Lv42 しんくうテレポ
+#define MOVE_LV100_PSYCHIC_43           0x10B4 // エスパー Lv43 ねんりきのはどう
+#define MOVE_LV100_PSYCHIC_44           0x10B5 // エスパー Lv44 あやつりいと
+#define MOVE_LV100_PSYCHIC_45           0x10B6 // エスパー Lv45 こころのばくだん
+#define MOVE_LV100_PSYCHIC_46           0x10B7 // エスパー Lv46 ちょうのうりき
+#define MOVE_LV100_PSYCHIC_47           0x10B8 // エスパー Lv47 サイコスマッシュ
+#define MOVE_LV100_PSYCHIC_48           0x10B9 // エスパー Lv48 ふしぎなゆめ
+#define MOVE_LV100_PSYCHIC_49           0x10BA // エスパー Lv49 きえるまぼろし
+#define MOVE_LV100_PSYCHIC_50           0x10BB // エスパー Lv50 ねがいのほし
+#define MOVE_LV100_PSYCHIC_51           0x10BC // エスパー Lv51 ゆめくいのしらべ
+#define MOVE_LV100_PSYCHIC_52           0x10BD // エスパー Lv52 こうそくのひとみ
+#define MOVE_LV100_PSYCHIC_53           0x10BE // エスパー Lv53 ひとやすみのゆめ
+#define MOVE_LV100_PSYCHIC_54           0x10BF // エスパー Lv54 きおくのしずく
+#define MOVE_LV100_PSYCHIC_55           0x10C0 // エスパー Lv55 サイコのにわ
+#define MOVE_LV100_PSYCHIC_56           0x10C1 // エスパー Lv56 ふしぎなせかいへ
+#define MOVE_LV100_PSYCHIC_57           0x10C2 // エスパー Lv57 おもいだしのうた
+#define MOVE_LV100_PSYCHIC_58           0x10C3 // エスパー Lv58 ねんりきのさけび
+#define MOVE_LV100_PSYCHIC_59           0x10C4 // エスパー Lv59 こころのやいば
+#define MOVE_LV100_PSYCHIC_60           0x10C5 // エスパー Lv60 さいみんのうた
+#define MOVE_LV100_PSYCHIC_61           0x10C6 // エスパー Lv61 まなざしのちから
+#define MOVE_LV100_PSYCHIC_62           0x10C7 // エスパー Lv62 ゆめうらない
+#define MOVE_LV100_PSYCHIC_63           0x10C8 // エスパー Lv63 サイコエッジ
+#define MOVE_LV100_PSYCHIC_64           0x10C9 // エスパー Lv64 ふしぎなだいち
+#define MOVE_LV100_PSYCHIC_65           0x10CA // エスパー Lv65 こころのおもし
+#define MOVE_LV100_PSYCHIC_66           0x10CB // エスパー Lv66 サイコダイブ
+#define MOVE_LV100_PSYCHIC_67           0x10CC // エスパー Lv67 ねんりきのかべ
+#define MOVE_LV100_PSYCHIC_68           0x10CD // エスパー Lv68 きえるきおく
+#define MOVE_LV100_PSYCHIC_69           0x10CE // エスパー Lv69 ひとみのきらめき
+#define MOVE_LV100_PSYCHIC_70           0x10CF // エスパー Lv70 サイコスプレッド
+#define MOVE_LV100_PSYCHIC_71           0x10D0 // エスパー Lv71 うつろいのかがみ
+#define MOVE_LV100_PSYCHIC_72           0x10D1 // エスパー Lv72 ねんりきのあらし
+#define MOVE_LV100_PSYCHIC_73           0x10D2 // エスパー Lv73 ゆめのくに
+#define MOVE_LV100_PSYCHIC_74           0x10D3 // エスパー Lv74 サイキックやいば
+#define MOVE_LV100_PSYCHIC_75           0x10D4 // エスパー Lv75 ふしぎのパワー
+#define MOVE_LV100_PSYCHIC_76           0x10D5 // エスパー Lv76 ほしのきおく
+#define MOVE_LV100_PSYCHIC_77           0x10D6 // エスパー Lv77 サイコストーム
+#define MOVE_LV100_PSYCHIC_78           0x10D7 // エスパー Lv78 ゆめのさざなみ
+#define MOVE_LV100_PSYCHIC_79           0x10D8 // エスパー Lv79 ひとみのそら
+#define MOVE_LV100_PSYCHIC_80           0x10D9 // エスパー Lv80 ねんりきウェーブ
+#define MOVE_LV100_PSYCHIC_81           0x10DA // エスパー Lv81 サイコのひらめき
+#define MOVE_LV100_PSYCHIC_82           0x10DB // エスパー Lv82 こころのみずうみ
+#define MOVE_LV100_PSYCHIC_83           0x10DC // エスパー Lv83 ねんりきのつばさ
+#define MOVE_LV100_PSYCHIC_84           0x10DD // エスパー Lv84 ゆめのたそがれ
+#define MOVE_LV100_PSYCHIC_85           0x10DE // エスパー Lv85 むげんのひらめき
+#define MOVE_LV100_PSYCHIC_86           0x10DF // エスパー Lv86 ねんじゅのひとみ
+#define MOVE_LV100_PSYCHIC_87           0x10E0 // エスパー Lv87 サイコバンプ
+#define MOVE_LV100_PSYCHIC_88           0x10E1 // エスパー Lv88 ひとりごとのうた
+#define MOVE_LV100_PSYCHIC_89           0x10E2 // エスパー Lv89 ふしぎなほうせき
+#define MOVE_LV100_PSYCHIC_90           0x10E3 // エスパー Lv90 ゆめのかなたへ
+#define MOVE_LV100_PSYCHIC_91           0x10E4 // エスパー Lv91 ふしぎなほしぞら
+#define MOVE_LV100_PSYCHIC_92           0x10E5 // エスパー Lv92 ねんりきほう
+#define MOVE_LV100_PSYCHIC_93           0x10E6 // エスパー Lv93 こころのつるぎ
+#define MOVE_LV100_PSYCHIC_94           0x10E7 // エスパー Lv94 サイコスター
+#define MOVE_LV100_PSYCHIC_95           0x10E8 // エスパー Lv95 ゆめのはて
+#define MOVE_LV100_PSYCHIC_96           0x10E9 // エスパー Lv96 ひらめきひとすじ
+#define MOVE_LV100_PSYCHIC_97           0x10EA // エスパー Lv97 ねんりきのうねり
+#define MOVE_LV100_PSYCHIC_98           0x10EB // エスパー Lv98 むげんのまぼろし
+#define MOVE_LV100_PSYCHIC_99           0x10EC // エスパー Lv99 サイコリープ
+#define MOVE_LV100_PSYCHIC_100          0x10ED // エスパー Lv100 ふしぎなせかい
+#define MOVE_LV100_ICE_1                0x10EE // こおり Lv1 こごえるつぶて
+#define MOVE_LV100_ICE_2                0x10EF // こおり Lv2 つららのさきっぽ
+#define MOVE_LV100_ICE_3                0x10F0 // こおり Lv3 しものはしら
+#define MOVE_LV100_ICE_4                0x10F1 // こおり Lv4 ふゆのかぜ
+#define MOVE_LV100_ICE_5                0x10F2 // こおり Lv5 ゆきだまなげ
+#define MOVE_LV100_ICE_6                0x10F3 // こおり Lv6 ひょうてんのいき
+#define MOVE_LV100_ICE_7                0x10F4 // こおり Lv7 こおりのまくら
+#define MOVE_LV100_ICE_8                0x10F5 // こおり Lv8 こゆきまじり
+#define MOVE_LV100_ICE_9                0x10F6 // こおり Lv9 ふぶきのたね
+#define MOVE_LV100_ICE_10               0x10F7 // こおり Lv10 ひやっこいて
+#define MOVE_LV100_ICE_11               0x10F8 // こおり Lv11 しもやけのいき
+#define MOVE_LV100_ICE_12               0x10F9 // こおり Lv12 こおりのかけら
+#define MOVE_LV100_ICE_13               0x10FA // こおり Lv13 あられのまえぶれ
+#define MOVE_LV100_ICE_14               0x10FB // こおり Lv14 つららころがし
+#define MOVE_LV100_ICE_15               0x10FC // こおり Lv15 ゆきんこのわな
+#define MOVE_LV100_ICE_16               0x10FD // こおり Lv16 ひえびえのこえ
+#define MOVE_LV100_ICE_17               0x10FE // こおり Lv17 こおりのつめ
+#define MOVE_LV100_ICE_18               0x10FF // こおり Lv18 しろいきりごおり
+#define MOVE_LV100_ICE_19               0x1100 // こおり Lv19 ゆきうさぎキック
+#define MOVE_LV100_ICE_20               0x1101 // こおり Lv20 きりごおり
+#define MOVE_LV100_ICE_21               0x1102 // こおり Lv21 こごえるひとみ
+#define MOVE_LV100_ICE_22               0x1103 // こおり Lv22 とうけつのうた
+#define MOVE_LV100_ICE_23               0x1104 // こおり Lv23 ふぶきのダンス
+#define MOVE_LV100_ICE_24               0x1105 // こおり Lv24 ゆきおんなのいき
+#define MOVE_LV100_ICE_25               0x1106 // こおり Lv25 ひょうがのきば
+#define MOVE_LV100_ICE_26               0x1107 // こおり Lv26 しもふりのつえ
+#define MOVE_LV100_ICE_27               0x1108 // こおり Lv27 あられのまじない
+#define MOVE_LV100_ICE_28               0x1109 // こおり Lv28 こおりのたてがみ
+#define MOVE_LV100_ICE_29               0x110A // こおり Lv29 ゆきどけのしずく
+#define MOVE_LV100_ICE_30               0x110B // こおり Lv30 ダイヤのしも
+#define MOVE_LV100_ICE_31               0x110C // こおり Lv31 ふぶきのかべ
+#define MOVE_LV100_ICE_32               0x110D // こおり Lv32 オーロラのひかり
+#define MOVE_LV100_ICE_33               0x110E // こおり Lv33 つららのやり
+#define MOVE_LV100_ICE_34               0x110F // こおり Lv34 かちこちのわな
+#define MOVE_LV100_ICE_35               0x1110 // こおり Lv35 ひょうせつのいき
+#define MOVE_LV100_ICE_36               0x1111 // こおり Lv36 とうしのつばさ
+#define MOVE_LV100_ICE_37               0x1112 // こおり Lv37 さむけのまなざし
+#define MOVE_LV100_ICE_38               0x1113 // こおり Lv38 じょおうのダンス
+#define MOVE_LV100_ICE_39               0x1114 // こおり Lv39 こごえぬほし
+#define MOVE_LV100_ICE_40               0x1115 // こおり Lv40 つららのニードル
+#define MOVE_LV100_ICE_41               0x1116 // こおり Lv41 こおりのエッジ
+#define MOVE_LV100_ICE_42               0x1117 // こおり Lv42 せつげんのかぜ
+#define MOVE_LV100_ICE_43               0x1118 // こおり Lv43 アイスクラッシュ
+#define MOVE_LV100_ICE_44               0x1119 // こおり Lv44 かんぱのおたけび
+#define MOVE_LV100_ICE_45               0x111A // こおり Lv45 ひょうざんわり
+#define MOVE_LV100_ICE_46               0x111B // こおり Lv46 こごえるうらみ
+#define MOVE_LV100_ICE_47               0x111C // こおり Lv47 しんしんふぶき
+#define MOVE_LV100_ICE_48               0x111D // こおり Lv48 れいきのたば
+#define MOVE_LV100_ICE_49               0x111E // こおり Lv49 ゆきやまのしじま
+#define MOVE_LV100_ICE_50               0x111F // こおり Lv50 さむざむのかぜ
+#define MOVE_LV100_ICE_51               0x1120 // こおり Lv51 つららのあめ
+#define MOVE_LV100_ICE_52               0x1121 // こおり Lv52 ふぶきのさけび
+#define MOVE_LV100_ICE_53               0x1122 // こおり Lv53 こおりのけっかい
+#define MOVE_LV100_ICE_54               0x1123 // こおり Lv54 ゆきくずし
+#define MOVE_LV100_ICE_55               0x1124 // こおり Lv55 きびしいさむさ
+#define MOVE_LV100_ICE_56               0x1125 // こおり Lv56 はくぎんのつき
+#define MOVE_LV100_ICE_57               0x1126 // こおり Lv57 しもがれのうた
+#define MOVE_LV100_ICE_58               0x1127 // こおり Lv58 ひょうかのいき
+#define MOVE_LV100_ICE_59               0x1128 // こおり Lv59 つめたいパンチ
+#define MOVE_LV100_ICE_60               0x1129 // こおり Lv60 こおりのまもり
+#define MOVE_LV100_ICE_61               0x112A // こおり Lv61 たいせつなゆき
+#define MOVE_LV100_ICE_62               0x112B // こおり Lv62 ふかゆきのわな
+#define MOVE_LV100_ICE_63               0x112C // こおり Lv63 ゆきのせいれい
+#define MOVE_LV100_ICE_64               0x112D // こおり Lv64 つららのいかり
+#define MOVE_LV100_ICE_65               0x112E // こおり Lv65 ぎんせかいやいば
+#define MOVE_LV100_ICE_66               0x112F // こおり Lv66 ふぶきこごえ
+#define MOVE_LV100_ICE_67               0x1130 // こおり Lv67 こおりのとびら
+#define MOVE_LV100_ICE_68               0x1131 // こおり Lv68 はくぎんのかげ
+#define MOVE_LV100_ICE_69               0x1132 // こおり Lv69 きびしいふぶき
+#define MOVE_LV100_ICE_70               0x1133 // こおり Lv70 れいきのかたまり
+#define MOVE_LV100_ICE_71               0x1134 // こおり Lv71 ひょうがのねがい
+#define MOVE_LV100_ICE_72               0x1135 // こおり Lv72 とうけつのひかり
+#define MOVE_LV100_ICE_73               0x1136 // こおり Lv73 ぜっかのまもり
+#define MOVE_LV100_ICE_74               0x1137 // こおり Lv74 こごえるゆめ
+#define MOVE_LV100_ICE_75               0x1138 // こおり Lv75 こおりのブレード
+#define MOVE_LV100_ICE_76               0x1139 // こおり Lv76 せつえいのまい
+#define MOVE_LV100_ICE_77               0x113A // こおり Lv77 ゆきだるまだま
+#define MOVE_LV100_ICE_78               0x113B // こおり Lv78 しもばしらのたて
+#define MOVE_LV100_ICE_79               0x113C // こおり Lv79 ホワイトワールド
+#define MOVE_LV100_ICE_80               0x113D // こおり Lv80 こおりのくに
+#define MOVE_LV100_ICE_81               0x113E // こおり Lv81 ぜったいのこおり
+#define MOVE_LV100_ICE_82               0x113F // こおり Lv82 ひょうざんのつき
+#define MOVE_LV100_ICE_83               0x1140 // こおり Lv83 ふぶきのナックル
+#define MOVE_LV100_ICE_84               0x1141 // こおり Lv84 こおりのはて
+#define MOVE_LV100_ICE_85               0x1142 // こおり Lv85 つららのだいほう
+#define MOVE_LV100_ICE_86               0x1143 // こおり Lv86 れいきのうた
+#define MOVE_LV100_ICE_87               0x1144 // こおり Lv87 ひょうがのじだい
+#define MOVE_LV100_ICE_88               0x1145 // こおり Lv88 しろくまのいぶき
+#define MOVE_LV100_ICE_89               0x1146 // こおり Lv89 こごえるかみなり
+#define MOVE_LV100_ICE_90               0x1147 // こおり Lv90 ふぶきのあと
+#define MOVE_LV100_ICE_91               0x1148 // こおり Lv91 ぎんかのきおく
+#define MOVE_LV100_ICE_92               0x1149 // こおり Lv92 ひょうがのさけび
+#define MOVE_LV100_ICE_93               0x114A // こおり Lv93 ひょうけつソード
+#define MOVE_LV100_ICE_94               0x114B // こおり Lv94 つららのてんし
+#define MOVE_LV100_ICE_95               0x114C // こおり Lv95 はくぎんのあらし
+#define MOVE_LV100_ICE_96               0x114D // こおり Lv96 れいとうのひとみ
+#define MOVE_LV100_ICE_97               0x114E // こおり Lv97 ゆきおくりのうた
+#define MOVE_LV100_ICE_98               0x114F // こおり Lv98 ぜんぶこおらせる
+#define MOVE_LV100_ICE_99               0x1150 // こおり Lv99 ダイヤスノー
+#define MOVE_LV100_ICE_100              0x1151 // こおり Lv100 こおりのかみさま
+#define MOVE_LV100_DRAGON_1             0x1152 // ドラゴン Lv1 こりゅうのつめ
+#define MOVE_LV100_DRAGON_2             0x1153 // ドラゴン Lv2 ドラゴンスケイル
+#define MOVE_LV100_DRAGON_3             0x1154 // ドラゴン Lv3 ちびりゅうブレス
+#define MOVE_LV100_DRAGON_4             0x1155 // ドラゴン Lv4 ドラゴンステップ
+#define MOVE_LV100_DRAGON_5             0x1156 // ドラゴン Lv5 こりゅうのなき
+#define MOVE_LV100_DRAGON_6             0x1157 // ドラゴン Lv6 たつのこ
+#define MOVE_LV100_DRAGON_7             0x1158 // ドラゴン Lv7 りゅうのひとみ
+#define MOVE_LV100_DRAGON_8             0x1159 // ドラゴン Lv8 つばさのはばたき
+#define MOVE_LV100_DRAGON_9             0x115A // ドラゴン Lv9 りゅうまじない
+#define MOVE_LV100_DRAGON_10            0x115B // ドラゴン Lv10 こりゅうのしっぽ
+#define MOVE_LV100_DRAGON_11            0x115C // ドラゴン Lv11 たつまきのたね
+#define MOVE_LV100_DRAGON_12            0x115D // ドラゴン Lv12 りゅうがにらむ
+#define MOVE_LV100_DRAGON_13            0x115E // ドラゴン Lv13 ドラゴンスパーク
+#define MOVE_LV100_DRAGON_14            0x115F // ドラゴン Lv14 ドラゴンいびき
+#define MOVE_LV100_DRAGON_15            0x1160 // ドラゴン Lv15 やまのぬし
+#define MOVE_LV100_DRAGON_16            0x1161 // ドラゴン Lv16 りゅうのつめとぎ
+#define MOVE_LV100_DRAGON_17            0x1162 // ドラゴン Lv17 ほむらのうろこ
+#define MOVE_LV100_DRAGON_18            0x1163 // ドラゴン Lv18 りゅうのおはやし
+#define MOVE_LV100_DRAGON_19            0x1164 // ドラゴン Lv19 せきりゅうだん
+#define MOVE_LV100_DRAGON_20            0x1165 // ドラゴン Lv20 りゅうせいかけら
+#define MOVE_LV100_DRAGON_21            0x1166 // ドラゴン Lv21 りゅうじんダンス
+#define MOVE_LV100_DRAGON_22            0x1167 // ドラゴン Lv22 りゅうのおおあご
+#define MOVE_LV100_DRAGON_23            0x1168 // ドラゴン Lv23 りゅうのなみ
+#define MOVE_LV100_DRAGON_24            0x1169 // ドラゴン Lv24 うろこのよろい
+#define MOVE_LV100_DRAGON_25            0x116A // ドラゴン Lv25 りゅうのとびこみ
+#define MOVE_LV100_DRAGON_26            0x116B // ドラゴン Lv26 りゅうのふえ
+#define MOVE_LV100_DRAGON_27            0x116C // ドラゴン Lv27 さんぷくのまもり
+#define MOVE_LV100_DRAGON_28            0x116D // ドラゴン Lv28 しろりゅうブレス
+#define MOVE_LV100_DRAGON_29            0x116E // ドラゴン Lv29 つるぎのさかな
+#define MOVE_LV100_DRAGON_30            0x116F // ドラゴン Lv30 りゅうのあくび
+#define MOVE_LV100_DRAGON_31            0x1170 // ドラゴン Lv31 りゅうのちしお
+#define MOVE_LV100_DRAGON_32            0x1171 // ドラゴン Lv32 テイルスマッシュ
+#define MOVE_LV100_DRAGON_33            0x1172 // ドラゴン Lv33 ひりゅうのつばさ
+#define MOVE_LV100_DRAGON_34            0x1173 // ドラゴン Lv34 りゅうのこみち
+#define MOVE_LV100_DRAGON_35            0x1174 // ドラゴン Lv35 こうりゅうのつめ
+#define MOVE_LV100_DRAGON_36            0x1175 // ドラゴン Lv36 ぎんりゅうワルツ
+#define MOVE_LV100_DRAGON_37            0x1176 // ドラゴン Lv37 りゅうごろし
+#define MOVE_LV100_DRAGON_38            0x1177 // ドラゴン Lv38 たつのかくれが
+#define MOVE_LV100_DRAGON_39            0x1178 // ドラゴン Lv39 りゅうめいのうた
+#define MOVE_LV100_DRAGON_40            0x1179 // ドラゴン Lv40 いかりタックル
+#define MOVE_LV100_DRAGON_41            0x117A // ドラゴン Lv41 ドラゴンストーム
+#define MOVE_LV100_DRAGON_42            0x117B // ドラゴン Lv42 ひりゅうのひとみ
+#define MOVE_LV100_DRAGON_43            0x117C // ドラゴン Lv43 りゅうのうたげ
+#define MOVE_LV100_DRAGON_44            0x117D // ドラゴン Lv44 りゅうこつくだき
+#define MOVE_LV100_DRAGON_45            0x117E // ドラゴン Lv45 かみなりりゅう
+#define MOVE_LV100_DRAGON_46            0x117F // ドラゴン Lv46 りゅうのバリア
+#define MOVE_LV100_DRAGON_47            0x1180 // ドラゴン Lv47 ドラゴンナックル
+#define MOVE_LV100_DRAGON_48            0x1181 // ドラゴン Lv48 せいりゅうのたて
+#define MOVE_LV100_DRAGON_49            0x1182 // ドラゴン Lv49 りゅうのかくれが
+#define MOVE_LV100_DRAGON_50            0x1183 // ドラゴン Lv50 りゅうじんのげき
+#define MOVE_LV100_DRAGON_51            0x1184 // ドラゴン Lv51 ドラゴンバッシュ
+#define MOVE_LV100_DRAGON_52            0x1185 // ドラゴン Lv52 りゅうのほこら
+#define MOVE_LV100_DRAGON_53            0x1186 // ドラゴン Lv53 ひりゅうらいめい
+#define MOVE_LV100_DRAGON_54            0x1187 // ドラゴン Lv54 かいりゅうのかげ
+#define MOVE_LV100_DRAGON_55            0x1188 // ドラゴン Lv55 りゅうのめ
+#define MOVE_LV100_DRAGON_56            0x1189 // ドラゴン Lv56 ドラゴンシュート
+#define MOVE_LV100_DRAGON_57            0x118A // ドラゴン Lv57 りゅうのおまつり
+#define MOVE_LV100_DRAGON_58            0x118B // ドラゴン Lv58 ドラゴンのすみか
+#define MOVE_LV100_DRAGON_59            0x118C // ドラゴン Lv59 りゅうきゅうけん
+#define MOVE_LV100_DRAGON_60            0x118D // ドラゴン Lv60 じゅりゅうぶち
+#define MOVE_LV100_DRAGON_61            0x118E // ドラゴン Lv61 ドラゴンフレア
+#define MOVE_LV100_DRAGON_62            0x118F // ドラゴン Lv62 りゅうのほうこう
+#define MOVE_LV100_DRAGON_63            0x1190 // ドラゴン Lv63 りゅうのダッシュ
+#define MOVE_LV100_DRAGON_64            0x1191 // ドラゴン Lv64 せんりゅうのうた
+#define MOVE_LV100_DRAGON_65            0x1192 // ドラゴン Lv65 りゅうのうずまき
+#define MOVE_LV100_DRAGON_66            0x1193 // ドラゴン Lv66 りゅうのかぜのり
+#define MOVE_LV100_DRAGON_67            0x1194 // ドラゴン Lv67 りゅうこうのきば
+#define MOVE_LV100_DRAGON_68            0x1195 // ドラゴン Lv68 ひりゅうのあらし
+#define MOVE_LV100_DRAGON_69            0x1196 // ドラゴン Lv69 うろこおとし
+#define MOVE_LV100_DRAGON_70            0x1197 // ドラゴン Lv70 らいりゅうのつめ
+#define MOVE_LV100_DRAGON_71            0x1198 // ドラゴン Lv71 りゅうおうのこえ
+#define MOVE_LV100_DRAGON_72            0x1199 // ドラゴン Lv72 りゅうせいのむれ
+#define MOVE_LV100_DRAGON_73            0x119A // ドラゴン Lv73 ドラゴンパニック
+#define MOVE_LV100_DRAGON_74            0x119B // ドラゴン Lv74 りゅうのこごえ
+#define MOVE_LV100_DRAGON_75            0x119C // ドラゴン Lv75 りゅうのひづめ
+#define MOVE_LV100_DRAGON_76            0x119D // ドラゴン Lv76 りゅうじんまもり
+#define MOVE_LV100_DRAGON_77            0x119E // ドラゴン Lv77 りゅうせいさいご
+#define MOVE_LV100_DRAGON_78            0x119F // ドラゴン Lv78 りゅうへのねがい
+#define MOVE_LV100_DRAGON_79            0x11A0 // ドラゴン Lv79 りゅうのつばさ
+#define MOVE_LV100_DRAGON_80            0x11A1 // ドラゴン Lv80 りゅうけつだん
+#define MOVE_LV100_DRAGON_81            0x11A2 // ドラゴン Lv81 おうのいかり
+#define MOVE_LV100_DRAGON_82            0x11A3 // ドラゴン Lv82 ひりゅうほう
+#define MOVE_LV100_DRAGON_83            0x11A4 // ドラゴン Lv83 りゅうのきおく
+#define MOVE_LV100_DRAGON_84            0x11A5 // ドラゴン Lv84 ギガドラゴン
+#define MOVE_LV100_DRAGON_85            0x11A6 // ドラゴン Lv85 ひりゅうのやいば
+#define MOVE_LV100_DRAGON_86            0x11A7 // ドラゴン Lv86 りゅうのつるぎ
+#define MOVE_LV100_DRAGON_87            0x11A8 // ドラゴン Lv87 りゅうしんのうた
+#define MOVE_LV100_DRAGON_88            0x11A9 // ドラゴン Lv88 りゅうさばき
+#define MOVE_LV100_DRAGON_89            0x11AA // ドラゴン Lv89 りゅうのはてまで
+#define MOVE_LV100_DRAGON_90            0x11AB // ドラゴン Lv90 りゅうおうのかげ
+#define MOVE_LV100_DRAGON_91            0x11AC // ドラゴン Lv91 りゅうのきりこ
+#define MOVE_LV100_DRAGON_92            0x11AD // ドラゴン Lv92 りゅうのほえごえ
+#define MOVE_LV100_DRAGON_93            0x11AE // ドラゴン Lv93 りゅうじんクロー
+#define MOVE_LV100_DRAGON_94            0x11AF // ドラゴン Lv94 ひりゅうのはね
+#define MOVE_LV100_DRAGON_95            0x11B0 // ドラゴン Lv95 りゅうせいのげき
+#define MOVE_LV100_DRAGON_96            0x11B1 // ドラゴン Lv96 りゅうおうけん
+#define MOVE_LV100_DRAGON_97            0x11B2 // ドラゴン Lv97 りゅうのおおうみ
+#define MOVE_LV100_DRAGON_98            0x11B3 // ドラゴン Lv98 りゅうのさいなん
+#define MOVE_LV100_DRAGON_99            0x11B4 // ドラゴン Lv99 りゅうじんのかげ
+#define MOVE_LV100_DRAGON_100           0x11B5 // ドラゴン Lv100 りゅうのおうこく
+#define MOVE_LV100_DARK_1               0x11B6 // あく Lv1 こそどろのゆび
+#define MOVE_LV100_DARK_2               0x11B7 // あく Lv2 いじわるささやき
+#define MOVE_LV100_DARK_3               0x11B8 // あく Lv3 くらやみのつぶて
+#define MOVE_LV100_DARK_4               0x11B9 // あく Lv4 やみうち
+#define MOVE_LV100_DARK_5               0x11BA // あく Lv5 うらぎりのひとみ
+#define MOVE_LV100_DARK_6               0x11BB // あく Lv6 かげのいたずら
+#define MOVE_LV100_DARK_7               0x11BC // あく Lv7 ふいうちのキック
+#define MOVE_LV100_DARK_8               0x11BD // あく Lv8 かたすかし
+#define MOVE_LV100_DARK_9               0x11BE // あく Lv9 おそろしいかお
+#define MOVE_LV100_DARK_10              0x11BF // あく Lv10 くろいゆび
+#define MOVE_LV100_DARK_11              0x11C0 // あく Lv11 ぬすみぐい
+#define MOVE_LV100_DARK_12              0x11C1 // あく Lv12 わるだくみのたね
+#define MOVE_LV100_DARK_13              0x11C2 // あく Lv13 よるのひそひそ
+#define MOVE_LV100_DARK_14              0x11C3 // あく Lv14 きたないて
+#define MOVE_LV100_DARK_15              0x11C4 // あく Lv15 うらみのいっぱつ
+#define MOVE_LV100_DARK_16              0x11C5 // あく Lv16 ひきょうなやり
+#define MOVE_LV100_DARK_17              0x11C6 // あく Lv17 いたずらこぞう
+#define MOVE_LV100_DARK_18              0x11C7 // あく Lv18 おどしのこえ
+#define MOVE_LV100_DARK_19              0x11C8 // あく Lv19 だましわざ
+#define MOVE_LV100_DARK_20              0x11C9 // あく Lv20 かげわけ
+#define MOVE_LV100_DARK_21              0x11CA // あく Lv21 ふいうちパンチ
+#define MOVE_LV100_DARK_22              0x11CB // あく Lv22 よみちのこえ
+#define MOVE_LV100_DARK_23              0x11CC // あく Lv23 ブラックスパイク
+#define MOVE_LV100_DARK_24              0x11CD // あく Lv24 やみのそよかぜ
+#define MOVE_LV100_DARK_25              0x11CE // あく Lv25 こうかつなわな
+#define MOVE_LV100_DARK_26              0x11CF // あく Lv26 みちづれのうた
+#define MOVE_LV100_DARK_27              0x11D0 // あく Lv27 やみのはどう
+#define MOVE_LV100_DARK_28              0x11D1 // あく Lv28 かみつきまくり
+#define MOVE_LV100_DARK_29              0x11D2 // あく Lv29 かたなしのかげ
+#define MOVE_LV100_DARK_30              0x11D3 // あく Lv30 おもいあがり
+#define MOVE_LV100_DARK_31              0x11D4 // あく Lv31 ちょうはつダンス
+#define MOVE_LV100_DARK_32              0x11D5 // あく Lv32 しっぽをつかむ
+#define MOVE_LV100_DARK_33              0x11D6 // あく Lv33 くらやみのきば
+#define MOVE_LV100_DARK_34              0x11D7 // あく Lv34 こすいかげ
+#define MOVE_LV100_DARK_35              0x11D8 // あく Lv35 ひとりごとのやみ
+#define MOVE_LV100_DARK_36              0x11D9 // あく Lv36 よみちのわな
+#define MOVE_LV100_DARK_37              0x11DA // あく Lv37 うらみのうた
+#define MOVE_LV100_DARK_38              0x11DB // あく Lv38 ぬすっとのかたな
+#define MOVE_LV100_DARK_39              0x11DC // あく Lv39 かげうちラッシュ
+#define MOVE_LV100_DARK_40              0x11DD // あく Lv40 くろいひばな
+#define MOVE_LV100_DARK_41              0x11DE // あく Lv41 かたすかしのまい
+#define MOVE_LV100_DARK_42              0x11DF // あく Lv42 きたないやりかた
+#define MOVE_LV100_DARK_43              0x11E0 // あく Lv43 ゆうやみのとばり
+#define MOVE_LV100_DARK_44              0x11E1 // あく Lv44 やみよのいかり
+#define MOVE_LV100_DARK_45              0x11E2 // あく Lv45 うらぎりのつるぎ
+#define MOVE_LV100_DARK_46              0x11E3 // あく Lv46 くらやみのこえ
+#define MOVE_LV100_DARK_47              0x11E4 // あく Lv47 ブラックアウト
+#define MOVE_LV100_DARK_48              0x11E5 // あく Lv48 かげぬいのほこ
+#define MOVE_LV100_DARK_49              0x11E6 // あく Lv49 ひきょうなてぐち
+#define MOVE_LV100_DARK_50              0x11E7 // あく Lv50 ふくしゅうのうた
+#define MOVE_LV100_DARK_51              0x11E8 // あく Lv51 ダークネスアロー
+#define MOVE_LV100_DARK_52              0x11E9 // あく Lv52 わるいゆめ
+#define MOVE_LV100_DARK_53              0x11EA // あく Lv53 やみにとけこむ
+#define MOVE_LV100_DARK_54              0x11EB // あく Lv54 どくぎりのよる
+#define MOVE_LV100_DARK_55              0x11EC // あく Lv55 かげのからだ
+#define MOVE_LV100_DARK_56              0x11ED // あく Lv56 ブラックパンチ
+#define MOVE_LV100_DARK_57              0x11EE // あく Lv57 うらぎりのこえ
+#define MOVE_LV100_DARK_58              0x11EF // あく Lv58 やみのぬかるみ
+#define MOVE_LV100_DARK_59              0x11F0 // あく Lv59 こしぬけのうた
+#define MOVE_LV100_DARK_60              0x11F1 // あく Lv60 ぎゃくしゅうづめ
+#define MOVE_LV100_DARK_61              0x11F2 // あく Lv61 よるのとばり
+#define MOVE_LV100_DARK_62              0x11F3 // あく Lv62 ひとりきりのかげ
+#define MOVE_LV100_DARK_63              0x11F4 // あく Lv63 わるだくみのかげ
+#define MOVE_LV100_DARK_64              0x11F5 // あく Lv64 ぬすびとのまい
+#define MOVE_LV100_DARK_65              0x11F6 // あく Lv65 くろいかみなり
+#define MOVE_LV100_DARK_66              0x11F7 // あく Lv66 あくじのむくい
+#define MOVE_LV100_DARK_67              0x11F8 // あく Lv67 よるのいかり
+#define MOVE_LV100_DARK_68              0x11F9 // あく Lv68 やみのつばさ
+#define MOVE_LV100_DARK_69              0x11FA // あく Lv69 ダークスパイク
+#define MOVE_LV100_DARK_70              0x11FB // あく Lv70 くらやみごうもん
+#define MOVE_LV100_DARK_71              0x11FC // あく Lv71 かげのだましうち
+#define MOVE_LV100_DARK_72              0x11FD // あく Lv72 ぎゃくてんのうた
+#define MOVE_LV100_DARK_73              0x11FE // あく Lv73 ブラックフェイス
+#define MOVE_LV100_DARK_74              0x11FF // あく Lv74 うらみのつるぎ
+#define MOVE_LV100_DARK_75              0x1200 // あく Lv75 よるのしじま
+#define MOVE_LV100_DARK_76              0x1201 // あく Lv76 しっこくのやみ
+#define MOVE_LV100_DARK_77              0x1202 // あく Lv77 わるいいたずら
+#define MOVE_LV100_DARK_78              0x1203 // あく Lv78 とりつくやみ
+#define MOVE_LV100_DARK_79              0x1204 // あく Lv79 どくあくファング
+#define MOVE_LV100_DARK_80              0x1205 // あく Lv80 くろいほのお
+#define MOVE_LV100_DARK_81              0x1206 // あく Lv81 やみのだいほう
+#define MOVE_LV100_DARK_82              0x1207 // あく Lv82 ブラックラッシュ
+#define MOVE_LV100_DARK_83              0x1208 // あく Lv83 しっこくのやいば
+#define MOVE_LV100_DARK_84              0x1209 // あく Lv84 くらやみのかなた
+#define MOVE_LV100_DARK_85              0x120A // あく Lv85 よごれたたましい
+#define MOVE_LV100_DARK_86              0x120B // あく Lv86 あくむのうた
+#define MOVE_LV100_DARK_87              0x120C // あく Lv87 かげのいかり
+#define MOVE_LV100_DARK_88              0x120D // あく Lv88 ダークフォース
+#define MOVE_LV100_DARK_89              0x120E // あく Lv89 ぬすっとのいのり
+#define MOVE_LV100_DARK_90              0x120F // あく Lv90 わるだくみのはて
+#define MOVE_LV100_DARK_91              0x1210 // あく Lv91 やみのきおく
+#define MOVE_LV100_DARK_92              0x1211 // あく Lv92 やみのとうぞく
+#define MOVE_LV100_DARK_93              0x1212 // あく Lv93 くろいながれぼし
+#define MOVE_LV100_DARK_94              0x1213 // あく Lv94 よるのつるぎ
+#define MOVE_LV100_DARK_95              0x1214 // あく Lv95 やみのみやこ
+#define MOVE_LV100_DARK_96              0x1215 // あく Lv96 かげのかみさま
+#define MOVE_LV100_DARK_97              0x1216 // あく Lv97 くろいつばさ
+#define MOVE_LV100_DARK_98              0x1217 // あく Lv98 やみのしゅうえん
+#define MOVE_LV100_DARK_99              0x1218 // あく Lv99 ダークスマッシュ
+#define MOVE_LV100_DARK_100             0x1219 // あく Lv100 よるのおうこく
+#define MOVE_LV100_FAIRY_1              0x121A // フェアリー Lv1 ほしのかけら
+#define MOVE_LV100_FAIRY_2              0x121B // フェアリー Lv2 ふわふわいたずら
+#define MOVE_LV100_FAIRY_3              0x121C // フェアリー Lv3 きらきらのつぶ
+#define MOVE_LV100_FAIRY_4              0x121D // フェアリー Lv4 ゆびきりまじない
+#define MOVE_LV100_FAIRY_5              0x121E // フェアリー Lv5 はなかんむり
+#define MOVE_LV100_FAIRY_6              0x121F // フェアリー Lv6 よいこのキス
+#define MOVE_LV100_FAIRY_7              0x1220 // フェアリー Lv7 ほわほわタッチ
+#define MOVE_LV100_FAIRY_8              0x1221 // フェアリー Lv8 こもりうたのほし
+#define MOVE_LV100_FAIRY_9              0x1222 // フェアリー Lv9 ようせいのわらい
+#define MOVE_LV100_FAIRY_10             0x1223 // フェアリー Lv10 ちいさなまほう
+#define MOVE_LV100_FAIRY_11             0x1224 // フェアリー Lv11 ゆめのつぶ
+#define MOVE_LV100_FAIRY_12             0x1225 // フェアリー Lv12 ひかりのこびと
+#define MOVE_LV100_FAIRY_13             0x1226 // フェアリー Lv13 ミルクのベール
+#define MOVE_LV100_FAIRY_14             0x1227 // フェアリー Lv14 まぼろしのはね
+#define MOVE_LV100_FAIRY_15             0x1228 // フェアリー Lv15 ほしくずのまほう
+#define MOVE_LV100_FAIRY_16             0x1229 // フェアリー Lv16 あまいひそひそ
+#define MOVE_LV100_FAIRY_17             0x122A // フェアリー Lv17 わたあめアタック
+#define MOVE_LV100_FAIRY_18             0x122B // フェアリー Lv18 きらめきのつえ
+#define MOVE_LV100_FAIRY_19             0x122C // フェアリー Lv19 どろんこようせい
+#define MOVE_LV100_FAIRY_20             0x122D // フェアリー Lv20 チャームウィンク
+#define MOVE_LV100_FAIRY_21             0x122E // フェアリー Lv21 ようせいのダンス
+#define MOVE_LV100_FAIRY_22             0x122F // フェアリー Lv22 ふしぎのいたずら
+#define MOVE_LV100_FAIRY_23             0x1230 // フェアリー Lv23 ハートのしるし
+#define MOVE_LV100_FAIRY_24             0x1231 // フェアリー Lv24 ひとみのまたたき
+#define MOVE_LV100_FAIRY_25             0x1232 // フェアリー Lv25 ミストのにわ
+#define MOVE_LV100_FAIRY_26             0x1233 // フェアリー Lv26 ゆめみのパレード
+#define MOVE_LV100_FAIRY_27             0x1234 // フェアリー Lv27 ほしぞらのしらべ
+#define MOVE_LV100_FAIRY_28             0x1235 // フェアリー Lv28 やさしいてのひら
+#define MOVE_LV100_FAIRY_29             0x1236 // フェアリー Lv29 ぬいぐるみガード
+#define MOVE_LV100_FAIRY_30             0x1237 // フェアリー Lv30 ふんわりベール
+#define MOVE_LV100_FAIRY_31             0x1238 // フェアリー Lv31 ようせいキス
+#define MOVE_LV100_FAIRY_32             0x1239 // フェアリー Lv32 きらめきのまもり
+#define MOVE_LV100_FAIRY_33             0x123A // フェアリー Lv33 スイートパンチ
+#define MOVE_LV100_FAIRY_34             0x123B // フェアリー Lv34 つきあかりのまい
+#define MOVE_LV100_FAIRY_35             0x123C // フェアリー Lv35 ようせいはばたき
+#define MOVE_LV100_FAIRY_36             0x123D // フェアリー Lv36 めざめのキス
+#define MOVE_LV100_FAIRY_37             0x123E // フェアリー Lv37 こびとのいたずら
+#define MOVE_LV100_FAIRY_38             0x123F // フェアリー Lv38 ひかりのこなごな
+#define MOVE_LV100_FAIRY_39             0x1240 // フェアリー Lv39 ほしのパレット
+#define MOVE_LV100_FAIRY_40             0x1241 // フェアリー Lv40 きらきらスパイク
+#define MOVE_LV100_FAIRY_41             0x1242 // フェアリー Lv41 ようせいささやき
+#define MOVE_LV100_FAIRY_42             0x1243 // フェアリー Lv42 ほしくずのゆめ
+#define MOVE_LV100_FAIRY_43             0x1244 // フェアリー Lv43 フェアリーテール
+#define MOVE_LV100_FAIRY_44             0x1245 // フェアリー Lv44 ミラクルドレイン
+#define MOVE_LV100_FAIRY_45             0x1246 // フェアリー Lv45 かなたのうた
+#define MOVE_LV100_FAIRY_46             0x1247 // フェアリー Lv46 まほうのリボン
+#define MOVE_LV100_FAIRY_47             0x1248 // フェアリー Lv47 しあわせのかけら
+#define MOVE_LV100_FAIRY_48             0x1249 // フェアリー Lv48 ハートブレイカー
+#define MOVE_LV100_FAIRY_49             0x124A // フェアリー Lv49 ひかりのさざなみ
+#define MOVE_LV100_FAIRY_50             0x124B // フェアリー Lv50 ミルキーロード
+#define MOVE_LV100_FAIRY_51             0x124C // フェアリー Lv51 ふしぎのうた
+#define MOVE_LV100_FAIRY_52             0x124D // フェアリー Lv52 ほしのしずく
+#define MOVE_LV100_FAIRY_53             0x124E // フェアリー Lv53 ようせいのつるぎ
+#define MOVE_LV100_FAIRY_54             0x124F // フェアリー Lv54 ときめきのひかり
+#define MOVE_LV100_FAIRY_55             0x1250 // フェアリー Lv55 フェアリーガード
+#define MOVE_LV100_FAIRY_56             0x1251 // フェアリー Lv56 ゆめうらないキス
+#define MOVE_LV100_FAIRY_57             0x1252 // フェアリー Lv57 ほしのいたずら
+#define MOVE_LV100_FAIRY_58             0x1253 // フェアリー Lv58 ふんわりパンチ
+#define MOVE_LV100_FAIRY_59             0x1254 // フェアリー Lv59 きらきらのにわ
+#define MOVE_LV100_FAIRY_60             0x1255 // フェアリー Lv60 ねがいのたま
+#define MOVE_LV100_FAIRY_61             0x1256 // フェアリー Lv61 ようせいのひとみ
+#define MOVE_LV100_FAIRY_62             0x1257 // フェアリー Lv62 ミラクルステップ
+#define MOVE_LV100_FAIRY_63             0x1258 // フェアリー Lv63 ラブリーハンマー
+#define MOVE_LV100_FAIRY_64             0x1259 // フェアリー Lv64 ほしぞらのドレス
+#define MOVE_LV100_FAIRY_65             0x125A // フェアリー Lv65 きらめきげきりん
+#define MOVE_LV100_FAIRY_66             0x125B // フェアリー Lv66 ゆめのなかのキス
+#define MOVE_LV100_FAIRY_67             0x125C // フェアリー Lv67 フェアリーダイブ
+#define MOVE_LV100_FAIRY_68             0x125D // フェアリー Lv68 ひかりのつばさ
+#define MOVE_LV100_FAIRY_69             0x125E // フェアリー Lv69 こころのまじゅつ
+#define MOVE_LV100_FAIRY_70             0x125F // フェアリー Lv70 ミルクのしずく
+#define MOVE_LV100_FAIRY_71             0x1260 // フェアリー Lv71 きせきのうたごえ
+#define MOVE_LV100_FAIRY_72             0x1261 // フェアリー Lv72 ほしのまもり
+#define MOVE_LV100_FAIRY_73             0x1262 // フェアリー Lv73 ようせいいたずら
+#define MOVE_LV100_FAIRY_74             0x1263 // フェアリー Lv74 ハートのつるぎ
+#define MOVE_LV100_FAIRY_75             0x1264 // フェアリー Lv75 ときめきのダンス
+#define MOVE_LV100_FAIRY_76             0x1265 // フェアリー Lv76 ようせいのまなこ
+#define MOVE_LV100_FAIRY_77             0x1266 // フェアリー Lv77 ミラクルひかり
+#define MOVE_LV100_FAIRY_78             0x1267 // フェアリー Lv78 ようせいのめまい
+#define MOVE_LV100_FAIRY_79             0x1268 // フェアリー Lv79 やさしいまほう
+#define MOVE_LV100_FAIRY_80             0x1269 // フェアリー Lv80 きらめきのいき
+#define MOVE_LV100_FAIRY_81             0x126A // フェアリー Lv81 フェアリーほう
+#define MOVE_LV100_FAIRY_82             0x126B // フェアリー Lv82 ほしのうたげ
+#define MOVE_LV100_FAIRY_83             0x126C // フェアリー Lv83 ようせいていおう
+#define MOVE_LV100_FAIRY_84             0x126D // フェアリー Lv84 ときめきラッシュ
+#define MOVE_LV100_FAIRY_85             0x126E // フェアリー Lv85 しあわせのつばさ
+#define MOVE_LV100_FAIRY_86             0x126F // フェアリー Lv86 ほしぞらのダイブ
+#define MOVE_LV100_FAIRY_87             0x1270 // フェアリー Lv87 ミラクルチャーム
+#define MOVE_LV100_FAIRY_88             0x1271 // フェアリー Lv88 ひかりのおくり
+#define MOVE_LV100_FAIRY_89             0x1272 // フェアリー Lv89 ようせいプリズム
+#define MOVE_LV100_FAIRY_90             0x1273 // フェアリー Lv90 あまいゆめ
+#define MOVE_LV100_FAIRY_91             0x1274 // フェアリー Lv91 きらめきのきおく
+#define MOVE_LV100_FAIRY_92             0x1275 // フェアリー Lv92 ようせいほしぞら
+#define MOVE_LV100_FAIRY_93             0x1276 // フェアリー Lv93 ひかりのつるぎ
+#define MOVE_LV100_FAIRY_94             0x1277 // フェアリー Lv94 ほしくずのつばさ
+#define MOVE_LV100_FAIRY_95             0x1278 // フェアリー Lv95 ミラクルバースト
+#define MOVE_LV100_FAIRY_96             0x1279 // フェアリー Lv96 ようせいステッキ
+#define MOVE_LV100_FAIRY_97             0x127A // フェアリー Lv97 きらめきほう
+#define MOVE_LV100_FAIRY_98             0x127B // フェアリー Lv98 ほしのかなた
+#define MOVE_LV100_FAIRY_99             0x127C // フェアリー Lv99 ハートのげきど
+#define MOVE_LV100_FAIRY_100            0x127D // フェアリー Lv100 ようせいおうこく
+#define MOVE_LV100_RIL_1                0x127E // リル Lv1 こぼれるつき
+#define MOVE_LV100_RIL_2                0x127F // リル Lv2 ひとりごちる
+#define MOVE_LV100_RIL_3                0x1280 // リル Lv3 よいのくちぶえ
+#define MOVE_LV100_RIL_4                0x1281 // リル Lv4 つきのかげぼうし
+#define MOVE_LV100_RIL_5                0x1282 // リル Lv5 ほほのなみだ
+#define MOVE_LV100_RIL_6                0x1283 // リル Lv6 わすれもののうた
+#define MOVE_LV100_RIL_7                0x1284 // リル Lv7 かすかなおもいで
+#define MOVE_LV100_RIL_8                0x1285 // リル Lv8 こえをころして
+#define MOVE_LV100_RIL_9                0x1286 // リル Lv9 さびしいあしおと
+#define MOVE_LV100_RIL_10               0x1287 // リル Lv10 よるのひとみ
+#define MOVE_LV100_RIL_11               0x1288 // リル Lv11 きえそうなひかり
+#define MOVE_LV100_RIL_12               0x1289 // リル Lv12 おいてかれた
+#define MOVE_LV100_RIL_13               0x128A // リル Lv13 つきあかりのみち
+#define MOVE_LV100_RIL_14               0x128B // リル Lv14 みおくりのかげ
+#define MOVE_LV100_RIL_15               0x128C // リル Lv15 せつないうた
+#define MOVE_LV100_RIL_16               0x128D // リル Lv16 ねむれぬよる
+#define MOVE_LV100_RIL_17               0x128E // リル Lv17 しずかなうたごえ
+#define MOVE_LV100_RIL_18               0x128F // リル Lv18 ふりむけない
+#define MOVE_LV100_RIL_19               0x1290 // リル Lv19 かたすみのなみだ
+#define MOVE_LV100_RIL_20               0x1291 // リル Lv20 うすれゆくきおく
+#define MOVE_LV100_RIL_21               0x1292 // リル Lv21 つきあかりのいえ
+#define MOVE_LV100_RIL_22               0x1293 // リル Lv22 ひとりきりのよる
+#define MOVE_LV100_RIL_23               0x1294 // リル Lv23 おぼろづきよ
+#define MOVE_LV100_RIL_24               0x1295 // リル Lv24 たそがれのかげ
+#define MOVE_LV100_RIL_25               0x1296 // リル Lv25 ぬくもりのきおく
+#define MOVE_LV100_RIL_26               0x1297 // リル Lv26 だれもいないへや
+#define MOVE_LV100_RIL_27               0x1298 // リル Lv27 わかれのことば
+#define MOVE_LV100_RIL_28               0x1299 // リル Lv28 つきのしたたり
+#define MOVE_LV100_RIL_29               0x129A // リル Lv29 むねのすきま
+#define MOVE_LV100_RIL_30               0x129B // リル Lv30 やくそくゆびきり
+#define MOVE_LV100_RIL_31               0x129C // リル Lv31 ほのかなつき
+#define MOVE_LV100_RIL_32               0x129D // リル Lv32 うつろなこころ
+#define MOVE_LV100_RIL_33               0x129E // リル Lv33 わすれられたまち
+#define MOVE_LV100_RIL_34               0x129F // リル Lv34 なきむしのかげ
+#define MOVE_LV100_RIL_35               0x12A0 // リル Lv35 しんやのつき
+#define MOVE_LV100_RIL_36               0x12A1 // リル Lv36 さがしものさがし
+#define MOVE_LV100_RIL_37               0x12A2 // リル Lv37 かげのまぼろし
+#define MOVE_LV100_RIL_38               0x12A3 // リル Lv38 ゆうやみなきごえ
+#define MOVE_LV100_RIL_39               0x12A4 // リル Lv39 つきのはなびら
+#define MOVE_LV100_RIL_40               0x12A5 // リル Lv40 こころのひび
+#define MOVE_LV100_RIL_41               0x12A6 // リル Lv41 おもいでのかけら
+#define MOVE_LV100_RIL_42               0x12A7 // リル Lv42 くもまのつき
+#define MOVE_LV100_RIL_43               0x12A8 // リル Lv43 ねがいごとのつき
+#define MOVE_LV100_RIL_44               0x12A9 // リル Lv44 ひとりのダンス
+#define MOVE_LV100_RIL_45               0x12AA // リル Lv45 なみだけっしょう
+#define MOVE_LV100_RIL_46               0x12AB // リル Lv46 つきのかたすみ
+#define MOVE_LV100_RIL_47               0x12AC // リル Lv47 かえらぬひび
+#define MOVE_LV100_RIL_48               0x12AD // リル Lv48 さよならのきおく
+#define MOVE_LV100_RIL_49               0x12AE // リル Lv49 あしあとなきみち
+#define MOVE_LV100_RIL_50               0x12AF // リル Lv50 やさしいうそ
+#define MOVE_LV100_RIL_51               0x12B0 // リル Lv51 つきのしらべ
+#define MOVE_LV100_RIL_52               0x12B1 // リル Lv52 うたかたのゆめ
+#define MOVE_LV100_RIL_53               0x12B2 // リル Lv53 こころのとりで
+#define MOVE_LV100_RIL_54               0x12B3 // リル Lv54 せつなのまたたき
+#define MOVE_LV100_RIL_55               0x12B4 // リル Lv55 きおくのかげ
+#define MOVE_LV100_RIL_56               0x12B5 // リル Lv56 ふたりのひみつ
+#define MOVE_LV100_RIL_57               0x12B6 // リル Lv57 まよいごのつき
+#define MOVE_LV100_RIL_58               0x12B7 // リル Lv58 さびしさのうず
+#define MOVE_LV100_RIL_59               0x12B8 // リル Lv59 おもいでがたり
+#define MOVE_LV100_RIL_60               0x12B9 // リル Lv60 かなしみのつるぎ
+#define MOVE_LV100_RIL_61               0x12BA // リル Lv61 つきのかべ
+#define MOVE_LV100_RIL_62               0x12BB // リル Lv62 うらはらなきもち
+#define MOVE_LV100_RIL_63               0x12BC // リル Lv63 わすれえぬひ
+#define MOVE_LV100_RIL_64               0x12BD // リル Lv64 なみだのあめ
+#define MOVE_LV100_RIL_65               0x12BE // リル Lv65 おぼろげなきおく
+#define MOVE_LV100_RIL_66               0x12BF // リル Lv66 つきのつばさ
+#define MOVE_LV100_RIL_67               0x12C0 // リル Lv67 こころのさけび
+#define MOVE_LV100_RIL_68               0x12C1 // リル Lv68 ほしのないよる
+#define MOVE_LV100_RIL_69               0x12C2 // リル Lv69 いつかのやくそく
+#define MOVE_LV100_RIL_70               0x12C3 // リル Lv70 きえないこだま
+#define MOVE_LV100_RIL_71               0x12C4 // リル Lv71 わすれなのつき
+#define MOVE_LV100_RIL_72               0x12C5 // リル Lv72 つきのまなざし
+#define MOVE_LV100_RIL_73               0x12C6 // リル Lv73 さびしがりのげき
+#define MOVE_LV100_RIL_74               0x12C7 // リル Lv74 ゆうつきのよる
+#define MOVE_LV100_RIL_75               0x12C8 // リル Lv75 なみだのかがみ
+#define MOVE_LV100_RIL_76               0x12C9 // リル Lv76 ひとりのまもり
+#define MOVE_LV100_RIL_77               0x12CA // リル Lv77 いとしさのきおく
+#define MOVE_LV100_RIL_78               0x12CB // リル Lv78 つきのかなしみ
+#define MOVE_LV100_RIL_79               0x12CC // リル Lv79 こころのしじま
+#define MOVE_LV100_RIL_80               0x12CD // リル Lv80 かえれないばしょ
+#define MOVE_LV100_RIL_81               0x12CE // リル Lv81 つきあかりほう
+#define MOVE_LV100_RIL_82               0x12CF // リル Lv82 さびしさのはて
+#define MOVE_LV100_RIL_83               0x12D0 // リル Lv83 ちいさななみだ
+#define MOVE_LV100_RIL_84               0x12D1 // リル Lv84 わすれもののいけ
+#define MOVE_LV100_RIL_85               0x12D2 // リル Lv85 つきへのいのり
+#define MOVE_LV100_RIL_86               0x12D3 // リル Lv86 こえなきさけび
+#define MOVE_LV100_RIL_87               0x12D4 // リル Lv87 けつい
+#define MOVE_LV100_RIL_88               0x12D5 // リル Lv88 とわのつき
+#define MOVE_LV100_RIL_89               0x12D6 // リル Lv89 きおくのなみ
+#define MOVE_LV100_RIL_90               0x12D7 // リル Lv90 こころのくらやみ
+#define MOVE_LV100_RIL_91               0x12D8 // リル Lv91 まんげつのよる
+#define MOVE_LV100_RIL_92               0x12D9 // リル Lv92 つきのかなたへ
+#define MOVE_LV100_RIL_93               0x12DA // リル Lv93 わすれえぬなみだ
+#define MOVE_LV100_RIL_94               0x12DB // リル Lv94 ひとりのやいば
+#define MOVE_LV100_RIL_95               0x12DC // リル Lv95 さびしさのさけび
+#define MOVE_LV100_RIL_96               0x12DD // リル Lv96 つきあかりのうた
+#define MOVE_LV100_RIL_97               0x12DE // リル Lv97 きおくのはて
+#define MOVE_LV100_RIL_98               0x12DF // リル Lv98 とわのさびしさ
+#define MOVE_LV100_RIL_99               0x12E0 // リル Lv99 つきのおもいで
+#define MOVE_LV100_RIL_100              0x12E1 // リル Lv100 いつかまた
+/* LV100_MOVES_0600 END */
+/* DUAL_MOVES_0630 BEGIN */
+#define MOVE_DUAL_BUG_FLYING_1          0x12E2 // むし/ひこう つむじサイズ
+#define MOVE_DUAL_BUG_FLYING_2          0x12E3 // むし/ひこう そよかぜはねうち
+#define MOVE_DUAL_BUG_FLYING_3          0x12E4 // むし/ひこう ビートルはばたき
+#define MOVE_DUAL_BUG_FLYING_4          0x12E5 // むし/ひこう ソニックニードル
+#define MOVE_DUAL_BUG_FLYING_5          0x12E6 // むし/ひこう かまきりつばさ
+#define MOVE_DUAL_NORMAL_FLYING_1       0x12E7 // ノーマル/ひこう ごういんドライブ
+#define MOVE_DUAL_NORMAL_FLYING_2       0x12E8 // ノーマル/ひこう まっすぐウイング
+#define MOVE_DUAL_NORMAL_FLYING_3       0x12E9 // ノーマル/ひこう かぜきりスタンプ
+#define MOVE_DUAL_NORMAL_FLYING_4       0x12EA // ノーマル/ひこう ひらてかまいたち
+#define MOVE_DUAL_NORMAL_FLYING_5       0x12EB // ノーマル/ひこう ぜんりょくダイブ
+#define MOVE_DUAL_GHOST_GRASS_1         0x12EC // ゴースト/くさ よみじふぶき
+#define MOVE_DUAL_GHOST_GRASS_2         0x12ED // ゴースト/くさ はなびらハンド
+#define MOVE_DUAL_GHOST_GRASS_3         0x12EE // ゴースト/くさ まぼろしウィップ
+#define MOVE_DUAL_GHOST_GRASS_4         0x12EF // ゴースト/くさ しんりょくクロー
+#define MOVE_DUAL_GHOST_GRASS_5         0x12F0 // ゴースト/くさ つるミスト
+#define MOVE_DUAL_GRASS_POISON_1        0x12F1 // くさ/どく どくぎりシード
+#define MOVE_DUAL_GRASS_POISON_2        0x12F2 // くさ/どく ベノムストーム
+#define MOVE_DUAL_GRASS_POISON_3        0x12F3 // くさ/どく リーフスティング
+#define MOVE_DUAL_GRASS_POISON_4        0x12F4 // くさ/どく わかばポイズン
+#define MOVE_DUAL_GRASS_POISON_5        0x12F5 // くさ/どく しゅうきブレード
+#define MOVE_DUAL_BUG_POISON_1          0x12F6 // むし/どく しびれどくシザー
+#define MOVE_DUAL_BUG_POISON_2          0x12F7 // むし/どく かぶとファング
+#define MOVE_DUAL_BUG_POISON_3          0x12F8 // むし/どく もうどくビート
+#define MOVE_DUAL_BUG_POISON_4          0x12F9 // むし/どく はちのすどくばり
+#define MOVE_DUAL_BUG_POISON_5          0x12FA // むし/どく ヘドロサイズ
+#define MOVE_DUAL_BUG_STEEL_1           0x12FB // むし/はがね クモのいとランス
+#define MOVE_DUAL_BUG_STEEL_2           0x12FC // むし/はがね はねハンマー
+#define MOVE_DUAL_BUG_STEEL_3           0x12FD // むし/はがね はがねスティング
+#define MOVE_DUAL_BUG_STEEL_4           0x12FE // むし/はがね てっぺきニードル
+#define MOVE_DUAL_BUG_STEEL_5           0x12FF // むし/はがね メタルリズム
+#define MOVE_DUAL_DRAGON_GROUND_1       0x1300 // ドラゴン/じめん すなあらしブレス
+#define MOVE_DUAL_DRAGON_GROUND_2       0x1301 // ドラゴン/じめん さばくテイル
+#define MOVE_DUAL_DRAGON_GROUND_3       0x1302 // ドラゴン/じめん ドラゴドリル
+#define MOVE_DUAL_DRAGON_GROUND_4       0x1303 // ドラゴン/じめん りゅうクエイク
+#define MOVE_DUAL_DRAGON_GROUND_5       0x1304 // ドラゴン/じめん じなりパルス
+#define MOVE_DUAL_DRAGON_WATER_1        0x1305 // ドラゴン/みず きょうりゅうたき
+#define MOVE_DUAL_DRAGON_WATER_2        0x1306 // ドラゴン/みず たつウェーブ
+#define MOVE_DUAL_DRAGON_WATER_3        0x1307 // ドラゴン/みず りゅうみずポンプ
+#define MOVE_DUAL_DRAGON_WATER_4        0x1308 // ドラゴン/みず しおかぜクロー
+#define MOVE_DUAL_DRAGON_WATER_5        0x1309 // ドラゴン/みず しぶきパルス
+#define MOVE_DUAL_PSYCHIC_FAIRY_1       0x130A // エスパー/フェアリー ひらめきリボン
+#define MOVE_DUAL_PSYCHIC_FAIRY_2       0x130B // エスパー/フェアリー ねんりきウィンド
+#define MOVE_DUAL_PSYCHIC_FAIRY_3       0x130C // エスパー/フェアリー ほしビジョン
+#define MOVE_DUAL_PSYCHIC_FAIRY_4       0x130D // エスパー/フェアリー テレパスシャワー
+#define MOVE_DUAL_PSYCHIC_FAIRY_5       0x130E // エスパー/フェアリー きらめきサークル
+#define MOVE_DUAL_ROCK_FLYING_1         0x130F // いわ/ひこう あおぞらショット
+#define MOVE_DUAL_ROCK_FLYING_2         0x1310 // いわ/ひこう せんぷうロック
+#define MOVE_DUAL_ROCK_FLYING_3         0x1311 // いわ/ひこう ストーンつばさ
+#define MOVE_DUAL_ROCK_FLYING_4         0x1312 // いわ/ひこう ガレキスタンプ
+#define MOVE_DUAL_ROCK_FLYING_5         0x1313 // いわ/ひこう せきばんダイブ
+#define MOVE_DUAL_ROCK_WATER_1          0x1314 // いわ/みず れいすいアーマー
+#define MOVE_DUAL_ROCK_WATER_2          0x1315 // いわ/みず うずブレイク
+#define MOVE_DUAL_ROCK_WATER_3          0x1316 // いわ/みず アクアいしつぶて
+#define MOVE_DUAL_ROCK_WATER_4          0x1317 // いわ/みず ごつごつジェット
+#define MOVE_DUAL_ROCK_WATER_5          0x1318 // いわ/みず なみショット
+#define MOVE_DUAL_STEEL_FAIRY_1         0x1319 // はがね/フェアリー ぎんいろスター
+#define MOVE_DUAL_STEEL_FAIRY_2         0x131A // はがね/フェアリー くろがねダスト
+#define MOVE_DUAL_STEEL_FAIRY_3         0x131B // はがね/フェアリー ムーンフィスト
+#define MOVE_DUAL_STEEL_FAIRY_4         0x131C // はがね/フェアリー こうてつリボン
+#define MOVE_DUAL_STEEL_FAIRY_5         0x131D // はがね/フェアリー ルナランス
+#define MOVE_DUAL_NORMAL_GRASS_1        0x131E // ノーマル/くさ いっせいバインド
+#define MOVE_DUAL_NORMAL_GRASS_2        0x131F // ノーマル/くさ おおぶりウィップ
+#define MOVE_DUAL_NORMAL_GRASS_3        0x1320 // ノーマル/くさ わかばストライク
+#define MOVE_DUAL_NORMAL_GRASS_4        0x1321 // ノーマル/くさ リーフアタック
+#define MOVE_DUAL_NORMAL_GRASS_5        0x1322 // ノーマル/くさ はなびらブロー
+#define MOVE_DUAL_WATER_GROUND_1        0x1323 // みず/じめん だいちのながれ
+#define MOVE_DUAL_WATER_GROUND_2        0x1324 // みず/じめん ぐらぐらポンプ
+#define MOVE_DUAL_WATER_GROUND_3        0x1325 // みず/じめん どろぬまウェーブ
+#define MOVE_DUAL_WATER_GROUND_4        0x1326 // みず/じめん しぶきじわれ
+#define MOVE_DUAL_WATER_GROUND_5        0x1327 // みず/じめん アクアクラッシュ
+#define MOVE_DUAL_STEEL_PSYCHIC_1       0x1328 // はがね/エスパー めいそうハンマー
+#define MOVE_DUAL_STEEL_PSYCHIC_2       0x1329 // はがね/エスパー サイコセイバー
+#define MOVE_DUAL_STEEL_PSYCHIC_3       0x132A // はがね/エスパー はがねショック
+#define MOVE_DUAL_STEEL_PSYCHIC_4       0x132B // はがね/エスパー てっぺきブラスト
+#define MOVE_DUAL_WATER_FLYING_1        0x132C // みず/ひこう れいすいウイング
+#define MOVE_DUAL_WATER_FLYING_2        0x132D // みず/ひこう つむじジェット
+#define MOVE_DUAL_WATER_FLYING_3        0x132E // みず/ひこう なみはばたき
+#define MOVE_DUAL_WATER_FLYING_4        0x132F // みず/ひこう せんぷうたき
+#define MOVE_DUAL_WATER_DARK_1          0x1330 // みず/あく やみスプラッシュ
+#define MOVE_DUAL_WATER_DARK_2          0x1331 // みず/あく ダークストリーム
+#define MOVE_DUAL_WATER_DARK_3          0x1332 // みず/あく しおかぜフォール
+#define MOVE_DUAL_DRAGON_FLYING_1       0x1333 // ドラゴン/ひこう りゅうじんつばさ
+#define MOVE_DUAL_DRAGON_FLYING_2       0x1334 // ドラゴン/ひこう そよかぜブレス
+#define MOVE_DUAL_DRAGON_FLYING_3       0x1335 // ドラゴン/ひこう かぜきりテイル
+#define MOVE_DUAL_GRASS_DRAGON_1        0x1336 // くさ/ドラゴン たつバインド
+#define MOVE_DUAL_GRASS_DRAGON_2        0x1337 // くさ/ドラゴン つるファング
+#define MOVE_DUAL_GRASS_DRAGON_3        0x1338 // くさ/ドラゴン ドラゴストーム
+#define MOVE_DUAL_FIRE_FIGHTING_1       0x1339 // ほのお/かくとう ねっけつフレイム
+#define MOVE_DUAL_FIRE_FIGHTING_2       0x133A // ほのお/かくとう ほむらストレート
+#define MOVE_DUAL_FIRE_FIGHTING_3       0x133B // ほのお/かくとう れんげきスパーク
+#define MOVE_DUAL_FIRE_GHOST_1          0x133C // ほのお/ゴースト かげファイア
+#define MOVE_DUAL_FIRE_GHOST_2          0x133D // ほのお/ゴースト ねっぷうゴースト
+#define MOVE_DUAL_FIRE_GHOST_3          0x133E // ほのお/ゴースト シャドーファイア
+#define MOVE_DUAL_PSYCHIC_FLYING_1      0x133F // エスパー/ひこう ミラージュダイブ
+#define MOVE_DUAL_PSYCHIC_FLYING_2      0x1340 // エスパー/ひこう ソニックビジョン
+#define MOVE_DUAL_PSYCHIC_FLYING_3      0x1341 // エスパー/ひこう あおぞらサークル
+#define MOVE_DUAL_ROCK_GROUND_1         0x1342 // いわ/じめん がんせきスタンプ
+#define MOVE_DUAL_ROCK_GROUND_2         0x1343 // いわ/じめん いわやまドリル
+#define MOVE_DUAL_ROCK_GROUND_3         0x1344 // いわ/じめん ガレキすなけむり
+#define MOVE_DUAL_WATER_ICE_1           0x1345 // みず/こおり うずスノー
+#define MOVE_DUAL_WATER_ICE_2           0x1346 // みず/こおり フロストたき
+#define MOVE_DUAL_WATER_ICE_3           0x1347 // みず/こおり つららポンプ
+#define MOVE_DUAL_DARK_FLYING_1         0x1348 // あく/ひこう くろいかまいたち
+#define MOVE_DUAL_DARK_FLYING_2         0x1349 // あく/ひこう あんこくドライブ
+#define MOVE_DUAL_DARK_FLYING_3         0x134A // あく/ひこう つきやみはばたき
+#define MOVE_DUAL_GRASS_DARK_1          0x134B // くさ/あく よやみシード
+#define MOVE_DUAL_GRASS_DARK_2          0x134C // くさ/あく しんりょくベール
+#define MOVE_DUAL_GRASS_DARK_3          0x134D // くさ/あく やみざくらふぶき
+#define MOVE_DUAL_ELECTRIC_FLYING_1     0x134E // でんき/ひこう いかずちウイング
+#define MOVE_DUAL_ELECTRIC_FLYING_2     0x134F // でんき/ひこう しびれかまいたち
+#define MOVE_DUAL_ELECTRIC_FLYING_3     0x1350 // でんき/ひこう かぜきりビーム
+#define MOVE_DUAL_FIRE_FLYING_1         0x1351 // ほのお/ひこう せんぷうほのお
+#define MOVE_DUAL_FIRE_FLYING_2         0x1352 // ほのお/ひこう ひばなつばさ
+#define MOVE_DUAL_FIRE_FLYING_3         0x1353 // ほのお/ひこう しゃくねつダイブ
+#define MOVE_DUAL_GROUND_STEEL_1        0x1354 // じめん/はがね くろがねじわれ
+#define MOVE_DUAL_GROUND_STEEL_2        0x1355 // じめん/はがね メタルクエイク
+#define MOVE_DUAL_GROUND_STEEL_3        0x1356 // じめん/はがね だいちフィスト
+#define MOVE_DUAL_WATER_PSYCHIC_1       0x1357 // みず/エスパー サイコジェット
+#define MOVE_DUAL_WATER_PSYCHIC_2       0x1358 // みず/エスパー テレパスウェーブ
+#define MOVE_DUAL_WATER_PSYCHIC_3       0x1359 // みず/エスパー しおかぜブラスト
+#define MOVE_DUAL_POISON_DARK_1         0x135A // どく/あく ベノムホール
+#define MOVE_DUAL_POISON_DARK_2         0x135B // どく/あく あんこくポイズン
+#define MOVE_DUAL_POISON_DARK_3         0x135C // どく/あく しゅうきフォール
+#define MOVE_DUAL_DRAGON_ICE_1          0x135D // ドラゴン/こおり りゅうブリザード
+#define MOVE_DUAL_DRAGON_ICE_2          0x135E // ドラゴン/こおり れいきテイル
+#define MOVE_DUAL_DRAGON_ICE_3          0x135F // ドラゴン/こおり ふぶきブレス
+#define MOVE_DUAL_STEEL_DRAGON_1        0x1360 // はがね/ドラゴン ぎんいろファング
+#define MOVE_DUAL_STEEL_DRAGON_2        0x1361 // はがね/ドラゴン こうてつクロー
+#define MOVE_DUAL_STEEL_DRAGON_3        0x1362 // はがね/ドラゴン りゅうせいのやり
+#define MOVE_DUAL_WATER_FIGHTING_1      0x1363 // みず/かくとう きあいストリーム
+#define MOVE_DUAL_WATER_FIGHTING_2      0x1364 // みず/かくとう アクアこぶし
+#define MOVE_DUAL_WATER_FIGHTING_3      0x1365 // みず/かくとう ごうけんポンプ
+#define MOVE_DUAL_GRASS_FLYING_1        0x1366 // くさ/ひこう ソニックバインド
+#define MOVE_DUAL_GRASS_FLYING_2        0x1367 // くさ/ひこう かまいたちカット
+#define MOVE_DUAL_GRASS_FLYING_3        0x1368 // くさ/ひこう つむじシード
+#define MOVE_DUAL_GROUND_GHOST_1        0x1369 // じめん/ゴースト うらみクラッシュ
+#define MOVE_DUAL_GROUND_GHOST_2        0x136A // じめん/ゴースト どろぬまラッシュ
+#define MOVE_DUAL_GROUND_GHOST_3        0x136B // じめん/ゴースト ゆうれいじわれ
+#define MOVE_DUAL_NORMAL_PSYCHIC_1      0x136C // ノーマル/エスパー めいそうチャージ
+#define MOVE_DUAL_NORMAL_PSYCHIC_2      0x136D // ノーマル/エスパー ねんりきアタック
+#define MOVE_DUAL_NORMAL_PSYCHIC_3      0x136E // ノーマル/エスパー ミラージュブロー
+#define MOVE_DUAL_ROCK_STEEL_1          0x136F // いわ/はがね ごつごつフィスト
+#define MOVE_DUAL_ROCK_STEEL_2          0x1370 // いわ/はがね がんせきハンマー
+#define MOVE_DUAL_ROCK_STEEL_3          0x1371 // いわ/はがね ぎんいろロック
+#define MOVE_DUAL_BUG_GRASS_1           0x1372 // むし/くさ かぶとウィップ
+#define MOVE_DUAL_BUG_GRASS_2           0x1373 // むし/くさ はねざくらふぶき
+#define MOVE_DUAL_BUG_GRASS_3           0x1374 // むし/くさ はちのすストーム
+#define MOVE_DUAL_BUG_ROCK_1            0x1375 // むし/いわ かまきりアーマー
+#define MOVE_DUAL_BUG_ROCK_2            0x1376 // むし/いわ ストーンはねうち
+#define MOVE_DUAL_BUG_ROCK_3            0x1377 // むし/いわ いわやまシザー
+#define MOVE_DUAL_DARK_FIGHTING_1       0x1378 // あく/かくとう しょうていベール
+#define MOVE_DUAL_DARK_FIGHTING_2       0x1379 // あく/かくとう ばくれつブレイク
+#define MOVE_DUAL_DARK_FIGHTING_3       0x137A // あく/かくとう よやみラリアット
+#define MOVE_DUAL_GRASS_FAIRY_1         0x137B // くさ/フェアリー ようせいシード
+#define MOVE_DUAL_GRASS_FAIRY_2         0x137C // くさ/フェアリー つるスパークル
+#define MOVE_DUAL_GRASS_FAIRY_3         0x137D // くさ/フェアリー リーフウィンド
+#define MOVE_DUAL_GRASS_FIGHTING_1      0x137E // くさ/かくとう わかばナックル
+#define MOVE_DUAL_GRASS_FIGHTING_2      0x137F // くさ/かくとう はなびらチョップ
+#define MOVE_DUAL_GRASS_FIGHTING_3      0x1380 // くさ/かくとう しんりょくこぶし
+#define MOVE_DUAL_FIGHTING_PSYCHIC_1    0x1381 // かくとう/エスパー きあいショック
+#define MOVE_DUAL_FIGHTING_PSYCHIC_2    0x1382 // かくとう/エスパー ひらめきチョップ
+#define MOVE_DUAL_FIGHTING_PSYCHIC_3    0x1383 // かくとう/エスパー ごうけんブレイク
+#define MOVE_DUAL_FIRE_ROCK_1           0x1384 // ほのお/いわ かえんいしつぶて
+#define MOVE_DUAL_FIRE_ROCK_2           0x1385 // ほのお/いわ せきばんバースト
+#define MOVE_DUAL_FIRE_ROCK_3           0x1386 // ほのお/いわ フレアアーマー
+#define MOVE_DUAL_GHOST_POISON_1        0x1387 // ゴースト/どく シャドーどくばり
+#define MOVE_DUAL_GHOST_POISON_2        0x1388 // ゴースト/どく ヘドロのきり
+#define MOVE_DUAL_GHOST_POISON_3        0x1389 // ゴースト/どく どくぎりゴースト
+#define MOVE_DUAL_WATER_GHOST_1         0x138A // みず/ゴースト よみのしぶき
+#define MOVE_DUAL_WATER_GHOST_2         0x138B // みず/ゴースト れいすいラッシュ
+#define MOVE_DUAL_WATER_GHOST_3         0x138C // みず/ゴースト しぶきフレイム
+#define MOVE_DUAL_GRASS_PSYCHIC_1       0x138D // くさ/エスパー ひらめきブレード
+#define MOVE_DUAL_GRASS_PSYCHIC_2       0x138E // くさ/エスパー テレパスウィップ
+#define MOVE_DUAL_GRASS_PSYCHIC_3       0x138F // くさ/エスパー サイコはなふぶき
+#define MOVE_DUAL_POISON_WATER_1        0x1390 // どく/みず もうどくウェーブ
+#define MOVE_DUAL_POISON_WATER_2        0x1391 // どく/みず しびれどくたき
+#define MOVE_DUAL_POISON_WATER_3        0x1392 // どく/みず なみどくばり
+#define MOVE_DUAL_BUG_FIGHTING_1        0x1393 // むし/かくとう ビートルナックル
+#define MOVE_DUAL_BUG_FIGHTING_2        0x1394 // むし/かくとう れんげきはねうち
+#define MOVE_DUAL_FIRE_BUG_1            0x1395 // ほのお/むし クモのいとほのお
+#define MOVE_DUAL_FIRE_BUG_2            0x1396 // ほのお/むし ひばなニードル
+#define MOVE_DUAL_BUG_WATER_1           0x1397 // むし/みず うずまきシザー
+#define MOVE_DUAL_BUG_WATER_2           0x1398 // むし/みず はねスプラッシュ
+#define MOVE_DUAL_DARK_DRAGON_1         0x1399 // あく/ドラゴン りゅうじんホール
+#define MOVE_DUAL_DARK_DRAGON_2         0x139A // あく/ドラゴン くろいパルス
+#define MOVE_DUAL_DARK_FIRE_1           0x139B // あく/ほのお つきやみブレイズ
+#define MOVE_DUAL_DARK_FIRE_2           0x139C // あく/ほのお やみのほむら
+#define MOVE_DUAL_DARK_GHOST_1          0x139D // あく/ゴースト うらみホール
+#define MOVE_DUAL_DARK_GHOST_2          0x139E // あく/ゴースト まぼろしベール
+#define MOVE_DUAL_DARK_NORMAL_1         0x139F // あく/ノーマル おおぶりフォール
+#define MOVE_DUAL_DARK_NORMAL_2         0x13A0 // あく/ノーマル つきやみチャージ
+#define MOVE_DUAL_ELECTRIC_DRAGON_1     0x13A1 // でんき/ドラゴン ボルトブレス
+#define MOVE_DUAL_ELECTRIC_DRAGON_2     0x13A2 // でんき/ドラゴン らいめいクロー
+#define MOVE_DUAL_DRAGON_GHOST_1        0x13A3 // ドラゴン/ゴースト ほしぞらナックル
+#define MOVE_DUAL_DRAGON_GHOST_2        0x13A4 // ドラゴン/ゴースト かげテイル
+#define MOVE_DUAL_POISON_DRAGON_1       0x13A5 // どく/ドラゴン りゅうスティング
+#define MOVE_DUAL_POISON_DRAGON_2       0x13A6 // どく/ドラゴン ドラゴポイズン
+#define MOVE_DUAL_DRAGON_PSYCHIC_1      0x13A7 // ドラゴン/エスパー たつショック
+#define MOVE_DUAL_DRAGON_PSYCHIC_2      0x13A8 // ドラゴン/エスパー ねんりきパルス
+#define MOVE_DUAL_ELECTRIC_POISON_1     0x13A9 // でんき/どく でんこうミスト
+#define MOVE_DUAL_ELECTRIC_POISON_2     0x13AA // でんき/どく しびれどくボルト
+#define MOVE_DUAL_FAIRY_FLYING_1        0x13AB // フェアリー/ひこう あおぞらダスト
+#define MOVE_DUAL_FAIRY_FLYING_2        0x13AC // フェアリー/ひこう フェアリーつばさ
+#define MOVE_DUAL_NORMAL_FAIRY_1        0x13AD // ノーマル/フェアリー いっせいスター
+#define MOVE_DUAL_NORMAL_FAIRY_2        0x13AE // ノーマル/フェアリー ムーンストライク
+#define MOVE_DUAL_WATER_FAIRY_1         0x13AF // みず/フェアリー ルナスプラッシュ
+#define MOVE_DUAL_WATER_FAIRY_2         0x13B0 // みず/フェアリー ほしストリーム
+#define MOVE_DUAL_FIGHTING_FLYING_1     0x13B1 // かくとう/ひこう ばくれつドライブ
+#define MOVE_DUAL_FIGHTING_FLYING_2     0x13B2 // かくとう/ひこう ねっけつウイング
+#define MOVE_DUAL_POISON_FIGHTING_1     0x13B3 // どく/かくとう ベノムラリアット
+#define MOVE_DUAL_POISON_FIGHTING_2     0x13B4 // どく/かくとう ヘドロストレート
+#define MOVE_DUAL_FIGHTING_STEEL_1      0x13B5 // かくとう/はがね しょうていランス
+#define MOVE_DUAL_FIGHTING_STEEL_2      0x13B6 // かくとう/はがね こうてつパンチ
+#define MOVE_DUAL_FIRE_PSYCHIC_1        0x13B7 // ほのお/エスパー ねっぷうサークル
+#define MOVE_DUAL_FIRE_PSYCHIC_2        0x13B8 // ほのお/エスパー フレアブラスト
+#define MOVE_DUAL_STEEL_FLYING_1        0x13B9 // はがね/ひこう てっぺきはばたき
+#define MOVE_DUAL_STEEL_FLYING_2        0x13BA // はがね/ひこう はがねかまいたち
+#define MOVE_DUAL_STEEL_GHOST_1         0x13BB // はがね/ゴースト ゆうれいハンマー
+#define MOVE_DUAL_STEEL_GHOST_2         0x13BC // はがね/ゴースト くろがねラッシュ
+#define MOVE_DUAL_WATER_GRASS_1         0x13BD // みず/くさ ようりょくそたき
+#define MOVE_DUAL_WATER_GRASS_2         0x13BE // みず/くさ しおかぜストーム
+#define MOVE_DUAL_ICE_PSYCHIC_1         0x13BF // こおり/エスパー はくぎんビジョン
+#define MOVE_DUAL_ICE_PSYCHIC_2         0x13C0 // こおり/エスパー こおりサークル
+#define MOVE_DUAL_BUG_ELECTRIC_1        0x13C1 // むし/でんき スパークサイズ
+#define MOVE_DUAL_BUG_ELECTRIC_2        0x13C2 // むし/でんき はちのすサンダー
+#define MOVE_DUAL_BUG_PSYCHIC_1         0x13C3 // むし/エスパー めいそうビート
+#define MOVE_DUAL_BUG_PSYCHIC_2         0x13C4 // むし/エスパー かまきりビジョン
+#define MOVE_DUAL_DARK_FAIRY_1          0x13C5 // あく/フェアリー くろいシャワー
+#define MOVE_DUAL_DARK_FAIRY_2          0x13C6 // あく/フェアリー よやみスパークル
+#define MOVE_DUAL_GROUND_DARK_1         0x13C7 // じめん/あく やみすなけむり
+#define MOVE_DUAL_GROUND_DARK_2         0x13C8 // じめん/あく さばくのキバ
+#define MOVE_DUAL_DARK_PSYCHIC_1        0x13C9 // あく/エスパー やみのしねん
+#define MOVE_DUAL_DARK_PSYCHIC_2        0x13CA // あく/エスパー あんこくブレイク
+#define MOVE_DUAL_FIRE_DRAGON_1         0x13CB // ほのお/ドラゴン りゅうじんほのお
+#define MOVE_DUAL_FIRE_DRAGON_2         0x13CC // ほのお/ドラゴン かえんダイブ
+#define MOVE_DUAL_ROCK_ELECTRIC_1       0x13CD // いわ/でんき ガレキフラッシュ
+#define MOVE_DUAL_ROCK_ELECTRIC_2       0x13CE // いわ/でんき らいめいショット
+#define MOVE_DUAL_ELECTRIC_STEEL_1      0x13CF // でんき/はがね メタルビーム
+#define MOVE_DUAL_ELECTRIC_STEEL_2      0x13D0 // でんき/はがね いかずちフィスト
+#define MOVE_DUAL_NORMAL_FIGHTING_1     0x13D1 // ノーマル/かくとう ひらてラリアット
+#define MOVE_DUAL_NORMAL_FIGHTING_2     0x13D2 // ノーマル/かくとう まっすぐナックル
+#define MOVE_DUAL_GRASS_FIRE_1          0x13D3 // くさ/ほのお ほむらバインド
+#define MOVE_DUAL_GRASS_FIRE_2          0x13D4 // くさ/ほのお リーフファイア
+#define MOVE_DUAL_FIRE_GROUND_1         0x13D5 // ほのお/じめん じなりスパーク
+#define MOVE_DUAL_FIRE_GROUND_2         0x13D6 // ほのお/じめん しゃくねつドリル
+#define MOVE_DUAL_FIRE_NORMAL_1         0x13D7 // ほのお/ノーマル ごういんバースト
+#define MOVE_DUAL_FIRE_NORMAL_2         0x13D8 // ほのお/ノーマル ぜんりょくほのお
+#define MOVE_DUAL_GROUND_FLYING_1       0x13D9 // じめん/ひこう ぐらぐらウイング
+#define MOVE_DUAL_GROUND_FLYING_2       0x13DA // じめん/ひこう つむじスタンプ
+#define MOVE_DUAL_PSYCHIC_GHOST_1       0x13DB // エスパー/ゴースト ミラージュハンド
+#define MOVE_DUAL_PSYCHIC_GHOST_2       0x13DC // エスパー/ゴースト シャドーショック
+#define MOVE_DUAL_GRASS_ROCK_1          0x13DD // くさ/いわ はなびらロック
+#define MOVE_DUAL_GRASS_ROCK_2          0x13DE // くさ/いわ わかばいしつぶて
+#define MOVE_DUAL_POISON_GROUND_1       0x13DF // どく/じめん すなあらしミスト
+#define MOVE_DUAL_POISON_GROUND_2       0x13E0 // どく/じめん どくぎりクエイク
+#define MOVE_DUAL_ROCK_POISON_1         0x13E1 // いわ/どく もうどくショット
+#define MOVE_DUAL_ROCK_POISON_2         0x13E2 // いわ/どく いわやまニードル
+#define MOVE_DUAL_DARK_ICE_1            0x13E3 // あく/こおり こおりベール
+#define MOVE_DUAL_DARK_STEEL_1          0x13E4 // あく/はがね メタルホール
+#define MOVE_DUAL_DRAGON_FIGHTING_1     0x13E5 // ドラゴン/かくとう りゅうのチョップ
+#define MOVE_DUAL_NORMAL_DRAGON_1       0x13E6 // ノーマル/ドラゴン りゅうストライク
+#define MOVE_DUAL_ELECTRIC_FIGHTING_1   0x13E7 // でんき/かくとう でんこうこぶし
+#define MOVE_DUAL_ELECTRIC_GRASS_1      0x13E8 // でんき/くさ しびれシード
+#define MOVE_DUAL_WATER_ELECTRIC_1      0x13E9 // みず/でんき スパークジェット
+#define MOVE_DUAL_GHOST_FAIRY_1         0x13EA // ゴースト/フェアリー ようせいフレイム
+#define MOVE_DUAL_ROCK_FAIRY_1          0x13EB // いわ/フェアリー きらめきアーマー
+#define MOVE_DUAL_POISON_FIRE_1         0x13EC // どく/ほのお しゅうきブレイズ
+#define MOVE_DUAL_GHOST_FLYING_1        0x13ED // ゴースト/ひこう あおぞらのおばけ
+#define MOVE_DUAL_POISON_FLYING_1       0x13EE // どく/ひこう ソニックポイズン
+#define MOVE_DUAL_GROUND_GRASS_1        0x13EF // じめん/くさ つるのしめつけ
+#define MOVE_DUAL_GRASS_ICE_1           0x13F0 // くさ/こおり はくぎんウィップ
+#define MOVE_DUAL_GRASS_STEEL_1         0x13F1 // くさ/はがね しんりょくランス
+#define MOVE_DUAL_ICE_GROUND_1          0x13F2 // こおり/じめん つららすなけむり
+#define MOVE_DUAL_GROUND_NORMAL_1       0x13F3 // じめん/ノーマル ぐらぐらアタック
+#define MOVE_DUAL_ROCK_ICE_1            0x13F4 // いわ/こおり ごつごつスノー
+#define MOVE_DUAL_POISON_PSYCHIC_1      0x13F5 // どく/エスパー テレパスどくばり
+#define MOVE_DUAL_ROCK_PSYCHIC_1        0x13F6 // いわ/エスパー ストーンショック
+#define MOVE_DUAL_BUG_FAIRY_1           0x13F7 // むし/フェアリー フェアリーシザー
+#define MOVE_DUAL_BUG_GROUND_1          0x13F8 // むし/じめん ビートルドリル
+#define MOVE_DUAL_ICE_BUG_1             0x13F9 // こおり/むし かぶとブリザード
+#define MOVE_DUAL_ELECTRIC_DARK_1       0x13FA // でんき/あく ボルトフォール
+#define MOVE_DUAL_ROCK_DARK_1           0x13FB // いわ/あく せきばんファング
+#define MOVE_DUAL_ROCK_DRAGON_1         0x13FC // いわ/ドラゴン がんせきクロー
+#define MOVE_DUAL_ELECTRIC_FAIRY_1      0x13FD // でんき/フェアリー ムーンサンダー
+#define MOVE_DUAL_ELECTRIC_GROUND_1     0x13FE // でんき/じめん さばくボルト
+#define MOVE_DUAL_ELECTRIC_ICE_1        0x13FF // でんき/こおり ふぶきフラッシュ
+#define MOVE_DUAL_ELECTRIC_NORMAL_1     0x1400 // でんき/ノーマル ひらてサンダー
+#define MOVE_DUAL_ELECTRIC_PSYCHIC_1    0x1401 // でんき/エスパー ひらめきチャージ
+#define MOVE_DUAL_POISON_FAIRY_1        0x1402 // どく/フェアリー ほしスティング
+#define MOVE_DUAL_FIGHTING_GHOST_1      0x1403 // かくとう/ゴースト かげストレート
+#define MOVE_DUAL_FIGHTING_ICE_1        0x1404 // かくとう/こおり れいきナックル
+#define MOVE_DUAL_ROCK_FIGHTING_1       0x1405 // いわ/かくとう きあいいしつぶて
+#define MOVE_DUAL_FIRE_STEEL_1          0x1406 // ほのお/はがね はがねスパーク
+#define MOVE_DUAL_ICE_FLYING_1          0x1407 // こおり/ひこう フロストはばたき
+#define MOVE_DUAL_ICE_GHOST_1           0x1408 // こおり/ゴースト ゆうれいシャワー
+#define MOVE_DUAL_NORMAL_GHOST_1        0x1409 // ノーマル/ゴースト うらみブロー
+#define MOVE_DUAL_GROUND_PSYCHIC_1      0x140A // じめん/エスパー どろぬまビジョン
+#define MOVE_DUAL_ICE_STEEL_1           0x140B // こおり/はがね てっぺきスノー
+#define MOVE_DUAL_POISON_NORMAL_1       0x140C // どく/ノーマル ごういんニードル
+#define MOVE_DUAL_STEEL_POISON_1        0x140D // はがね/どく しゅうきフィスト
+#define MOVE_DUAL_MAKKANA_CHIKAI        0x140E // ノーマル まっかなちかい
+/* DUAL_MOVES_0630 END */
+/* MASAKURU BEGIN */
+#define MOVE_MASAKURUBAITSU 0x140F // ほのお 物理 120 90 PP5・かみつき・相手のぼうぎょを必ず 1 さげる（ゲンシガチゴラス・2026-10-25）
+/* MASAKURU END */
+/* MOVE_EVO_NEW BEGIN */
+#define MOVE_BENOMUBAITO 0x1410 // どく 物理 65 100 PP20・技進化で覚える（ベノムバイト・2026-10-26）
+#define MOVE_IWANAGURI 0x1411 // いわ 物理 70 100 PP15・技進化で覚える（いわなぐり・2026-10-26）
+#define MOVE_GAREKIKUZUSHI 0x1412 // いわ 物理 90 90 PP10・技進化で覚える（がれきくずし・2026-10-26）
+#define MOVE_JUERUREI 0x1413 // いわ 特殊 90 100 PP10・技進化で覚える（ジュエルレイ・2026-10-26）
+#define MOVE_KURAYAMIZUKI 0x1414 // ゴースト 物理 60 100 PP20・技進化で覚える（くらやみづき・2026-10-26）
+#define MOVE_MIRAABAASUTO 0x1415 // はがね 特殊 90 100 PP10・技進化で覚える（ミラーバースト・2026-10-26）
+#define MOVE_EREKIHOON 0x1416 // でんき 物理 90 100 PP10・技進化で覚える（エレキホーン・2026-10-26）
+#define MOVE_KIRAKIRABOISU 0x1417 // フェアリー 特殊 75 100 PP15・技進化で覚える（きらきらボイス・2026-10-26）
+#define MOVE_HAYATEZUKI 0x1418 // ひこう 物理 72 100 PP20・技進化で覚える（はやてづき・2026-10-26）
+#define MOVE_KAGIZUMEOTOSHI 0x1419 // ひこう 物理 90 95 PP10・技進化で覚える（かぎづめおとし・2026-10-26）
+#define MOVE_KAZENOYAIBA 0x141A // ひこう 特殊 90 95 PP10・技進化で覚える（かぜのやいば・2026-10-26）
+#define MOVE_NENRIKIZUKI 0x141B // エスパー 物理 45 100 PP25・技進化で覚える（ねんりきづき・2026-10-26）
+#define MOVE_SAIKONAKKURU 0x141C // エスパー 物理 65 100 PP15・技進化で覚える（サイコナックル・2026-10-26）
+#define MOVE_YUKIDAMABUTSUKE 0x141D // こおり 物理 30 100 PP20・技進化で覚える（ゆきだまぶつけ・2026-10-26）
+#define MOVE_AISUHOON 0x141E // こおり 物理 35 95 PP10・技進化で覚える（アイスホーン・2026-10-26）
+#define MOVE_DORAGONJABU 0x141F // ドラゴン 物理 75 100 PP20・技進化で覚える（ドラゴンジャブ・2026-10-26）
+#define MOVE_RYUUNOKIBA 0x1420 // ドラゴン 物理 90 100 PP10・技進化で覚える（りゅうのキバ・2026-10-26）
+#define MOVE_HAATOTACCHI 0x1421 // フェアリー 物理 40 100 PP25・技進化で覚える（ハートタッチ・2026-10-26）
+#define MOVE_SUTAAPANCHI 0x1422 // フェアリー 物理 65 100 PP15・技進化で覚える（スターパンチ・2026-10-26）
+#define MOVE_KUSAKARI 0x1423 // くさ 物理 70 100 PP20・技進化で覚える（くさかり・2026-10-26）
+#define MOVE_UDDOBASSHU 0x1424 // くさ 物理 105 100 PP10・技進化で覚える（ウッドバッシュ・2026-10-26）
+#define MOVE_BENOMUKURANCHI 0x1425 // どく 物理 85 100 PP15・技進化で覚える（ベノムクランチ・2026-10-26）
+#define MOVE_HAYATEHADOU 0x1426 // かくとう 特殊 55 100 PP20・技進化で覚える（はやてはどう・2026-10-26）
+#define MOVE_SHINSOKUHADOU 0x1427 // かくとう 特殊 70 100 PP15・技進化で覚える（しんそくはどう・2026-10-26）
+#define MOVE_METARUJABU 0x1428 // はがね 物理 55 100 PP20・技進化で覚える（メタルジャブ・2026-10-26）
+#define MOVE_METARUSUTOREETO 0x1429 // はがね 物理 70 100 PP15・技進化で覚える（メタルストレート・2026-10-26）
+#define MOVE_SHIBUKIDASSHU 0x142A // みず 物理 55 100 PP20・技進化で覚える（しぶきダッシュ・2026-10-26）
+#define MOVE_TAKITSUBORASSHU 0x142B // みず 物理 70 100 PP15・技進化で覚える（たきつぼラッシュ・2026-10-26）
+#define MOVE_FUTAGOGERI 0x142C // かくとう 物理 35 100 PP20・技進化で覚える（ふたごげり・2026-10-26）
+#define MOVE_NIRENKYAKU 0x142D // かくとう 物理 45 100 PP15・技進化で覚える（にれんきゃく・2026-10-26）
+#define MOVE_HONENORENDA 0x142E // じめん 物理 55 90 PP15・技進化で覚える（ほねのれんだ・2026-10-26）
+#define MOVE_HONENORANBU 0x142F // じめん 物理 60 90 PP10・技進化で覚える（ほねのらんぶ・2026-10-26）
+#define MOVE_RYUUNOFUTATSUME 0x1430 // ドラゴン 物理 45 100 PP15・技進化で覚える（りゅうのふたつめ・2026-10-26）
+#define MOVE_RYUUNOYOTSUME 0x1431 // ドラゴン 物理 50 100 PP10・技進化で覚える（りゅうのよつめ・2026-10-26）
+#define MOVE_WEZAASHOTTO 0x1432 // ノーマル 特殊 65 100 PP15・技進化で覚える（ウェザーショット・2026-10-26）
+#define MOVE_WEZAABURASUTO 0x1433 // ノーマル 特殊 85 100 PP10・技進化で覚える（ウェザーブラスト・2026-10-26）
+#define MOVE_HIBIKINOUTA 0x1434 // ノーマル 特殊 50 100 PP15・技進化で覚える（ひびきのうた・2026-10-26）
+#define MOVE_TODOROKIBOISU 0x1435 // ノーマル 特殊 60 100 PP10・技進化で覚える（とどろきボイス・2026-10-26）
+#define MOVE_FUKIAGEKAZE 0x1436 // ひこう 特殊 55 100 PP20・技進化で覚える（ふきあげかぜ・2026-10-26）
+#define MOVE_FUKISUSABUKAZE 0x1437 // ひこう 特殊 80 95 PP10・技進化で覚える（ふきすさぶかぜ・2026-10-26）
+#define MOVE_UZUMAKINOIKI 0x1438 // ドラゴン 特殊 65 100 PP20・技進化で覚える（うずまきのいき・2026-10-26）
+#define MOVE_RYUUNOTSUMUJI 0x1439 // ドラゴン 特殊 85 100 PP10・技進化で覚える（りゅうのつむじ・2026-10-26）
+#define MOVE_HEDOROUNERI 0x143A // どく 特殊 85 100 PP10・技進化で覚える（ヘドロうねり・2026-10-26）
+#define MOVE_NOROINOKAGE 0x143B // ゴースト 特殊 85 100 PP10・技進化で覚える（のろいのかげ・2026-10-26）
+#define MOVE_CHIKUSEKIPAWAA 0x143C // エスパー 特殊 30 100 PP15・技進化で覚える（ちくせきパワー・2026-10-26）
+#define MOVE_CHIKUSEKIWEEBU 0x143D // エスパー 特殊 40 100 PP10・技進化で覚える（ちくせきウェーブ・2026-10-26）
+#define MOVE_TAKERINOKIBA 0x143E // あく 物理 30 100 PP15・技進化で覚える（たけりのキバ・2026-10-26）
+#define MOVE_TAKERINOAGITO 0x143F // あく 物理 40 100 PP10・技進化で覚える（たけりのあぎと・2026-10-26）
+#define MOVE_KIRIKIZAMI 0x1440 // むし 物理 50 95 PP20・技進化で覚える（きりきざみ・2026-10-26）
+#define MOVE_MIDAREBASAMI 0x1441 // むし 物理 60 95 PP15・技進化で覚える（みだればさみ・2026-10-26）
+#define MOVE_OIUCHIGIRI 0x1442 // あく 物理 70 100 PP15・技進化で覚える（おいうちぎり・2026-10-26）
+#define MOVE_OIUCHIBUROO 0x1443 // あく 物理 85 100 PP10・技進化で覚える（おいうちブロー・2026-10-26）
+#define MOVE_SHIKAESHIDUKI 0x1444 // あく 物理 55 100 PP15・技進化で覚える（しかえしづき・2026-10-26）
+#define MOVE_YARIKAESHI 0x1445 // あく 物理 70 100 PP10・技進化で覚える（やりかえし・2026-10-26）
+/* MOVE_EVO_NEW END */
+/* KOKAI BEGIN */
+#define MOVE_KOKAINOKIBA 0x1446 // みず 物理 85 100 PP10・かむ・30%で ぼうぎょ -1（オルカイザーの専用技・2026-11-02・ゲンシカイキの合図）
+/* KOKAI END */
+/* SHADOW_MOVES BEGIN */
+#define MOVE_YAMITACKLE 0x1447 // ダーク 物理 40 100・ダーク技（ダークアタック・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMITOSSHIN 0x1448 // ダーク 物理 55 100・ダーク技（ダークラッシュ・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMIKUDAKI 0x1449 // ダーク 物理 75 100・ダーク技（ダークブレイク・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMITOTSUGEKI 0x144A // ダーク 物理 120 60・ダーク技（ダークエンド・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOHADOU 0x144B // ダーク 特殊 50 100・ダーク技（ダークウェーブ・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOTSUKIAGE 0x144C // ダーク 特殊 70 100・ダーク技（ダークレイブ・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOTATSUMAKI 0x144D // ダーク 特殊 95 100・ダーク技（ダークストーム・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOHONOO 0x144E // ダーク 特殊 75 100・ダーク技（ダークファイア・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOINAZUMA 0x144F // ダーク 特殊 75 100・ダーク技（ダークサンダー・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOREIKI 0x1450 // ダーク 特殊 75 100・ダーク技（ダークフリーズ・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOSORA 0x1451 // ダーク 変化 0 0・ダーク技（ダークウェザー・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOTOJIKOME 0x1452 // ダーク 変化 0 80・ダーク技（ダークホールド・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOKIRI 0x1453 // ダーク 変化 0 100・ダーク技（ダークミスト・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOMADOWASHI 0x1454 // ダーク 変化 0 60・ダーク技（ダークパニック・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOOMOSHI 0x1455 // ダーク 変化 0 100・ダーク技（ダークダウン・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOUZU 0x1456 // ダーク 変化 0 0・ダーク技（ダークリムーブ・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOHANBUN 0x1457 // ダーク 変化 0 0・ダーク技（ダークハーフ・XD の名前・2026-11-08・段 D）
+#define MOVE_YAMINOSHINKUU 0x1458 // ダーク 物理 80 100・ダーク技（ダークブラスト・XD の名前・2026-11-08・段 D）
+#define FIRST_SHADOW_MOVE MOVE_YAMITACKLE
+#define LAST_SHADOW_MOVE MOVE_YAMINOSHINKUU
+/* SHADOW_MOVES END */
 
 #define FIRST_MAX_MOVE      MOVE_MAX_GUARD
 #define LAST_MAX_MOVE       MOVE_MAX_STARFALL_S
 #define FIRST_G_MAX_MOVE    MOVE_G_MAX_VINE_LASH_P
 #define LAST_G_MAX_MOVE     MOVE_G_MAX_RAPID_FLOW_S
 
-#define LAST_MOVE_INDEX     MOVE_FRUITCANNON
-#define MOVES_COUNT        (MOVE_FRUITCANNON + 1)
+#define LAST_MOVE_INDEX     MOVE_YAMINOSHINKUU
+#define MOVES_COUNT        (MOVE_YAMINOSHINKUU + 1)
 #define NON_Z_MOVE_COUNT   (MOVE_GLACIALLANCE + 1)
 

@@ -23,6 +23,8 @@
 BwFollowerTemplateHook:
     cmp     r0, #0xFE
     beq     BwFollowerOwnTemplate
+    cmp     r0, #0xFD                   @ ★ 2026-10-26 #76 段 2: 0xFD = ハルカの連れ歩き（人・src/hack_heroine.c の gHeroineFollowerTemplate）
+    beq     BwHeroineOwnTemplate
     push    {r4, lr}
     lsl     r0, r0, #0x18
     lsr     r4, r0, #0x18
@@ -32,6 +34,10 @@ BwFollowerTemplateHook:
 
 BwFollowerOwnTemplate:
     ldr     r0, =gBwFollowerTemplate
+    bx      lr
+
+BwHeroineOwnTemplate:
+    ldr     r0, =gHeroineFollowerTemplate
     bx      lr
     .align 2
 

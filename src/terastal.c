@@ -64,6 +64,8 @@ static const u16 sTeraTypeColor[NUMBER_OF_MON_TYPES] =
     RGB(31, 31, 31),
     RGB(29, 17, 25),
 	RGB(31, 31, 31),
+	RGB(24, 16, 31), //[hack] patches/0408 #110: リル（藤色）
+	RGB(14, 8, 22), //[hack] patches/0955 段 D: ダーク（暗い紫）
 };
 
 

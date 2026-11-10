@@ -34,10 +34,31 @@ static bool8 IsOutdoorType(u8 mapType)
 	return mapType == MAP_TYPE_TOWN || mapType == MAP_TYPE_CITY || mapType == MAP_TYPE_ROUTE || mapType == MAP_TYPE_6;
 }
 
+#define WEATHER_FOG 6   //水平の霧（OBJ の優先度 2＝BG1 の上の層（木のてっぺんなど）には掛からない）
+
+//霧を出さない地図か（地図に入るときだけ・二分探索。表は tools/weather/measure_fog_maps.py が地図のデータから数える）
+static bool8 IsNoFogMap(void)
+{
+	u16 key = (u16) ((gSaveBlock1->location.mapGroup << 8) | (u8) gSaveBlock1->location.mapNum);
+	u32 lo = 0, hi = WEATHER_NO_FOG_COUNT, mid;
+
+	while (lo < hi)
+	{
+		mid = (lo + hi) >> 1;
+		if (sWeatherNoFogMaps[mid] == key)
+			return TRUE;
+		if (sWeatherNoFogMaps[mid] < key)
+			lo = mid + 1;
+		else
+			hi = mid;
+	}
+	return FALSE;
+}
+
 u8 HackRandomWeather_Pick(u8 weather)
 {
 	u8 region, sec, table, i;
-	u32 x;
+	u32 x, raw, rest, prev;
 
 	if (FlagGet(HACK_FLAG_WEATHER_FIXED) || weather > 2 || !IsOutdoorType(gMapHeader.mapType))
 		return weather;
@@ -56,10 +77,35 @@ u8 HackRandomWeather_Pick(u8 weather)
 	x ^= x >> 15;
 	x *= 0x2C1B3C6Du;
 	x ^= x >> 13;
+	raw = x;
 	x %= 100;   //6.83: 同じ数の / と % を並べない（% だけ）
 	for (i = 0; i < WEATHER_TABLE_WIDTH && sWeatherTables[table][i][1] != 0; ++i)
 		if (x < sWeatherTables[table][i][1])
-			return sWeatherTables[table][i][0];
+		{
+			if (sWeatherTables[table][i][0] != WEATHER_FOG || !IsNoFogMap())
+				return sWeatherTables[table][i][0];
+			//霧が出ない地図: 霧の分を除いた残りの確率の按分で引き直す（同じ raw から・% だけ）
+			for (rest = 0, prev = 0, i = 0; i < WEATHER_TABLE_WIDTH && sWeatherTables[table][i][1] != 0; ++i)
+			{
+				if (sWeatherTables[table][i][0] != WEATHER_FOG)
+					rest += sWeatherTables[table][i][1] - prev;
+				prev = sWeatherTables[table][i][1];
+			}
+			if (rest == 0)
+				return weather;
+			raw %= rest;
+			for (prev = 0, i = 0; i < WEATHER_TABLE_WIDTH && sWeatherTables[table][i][1] != 0; ++i)
+			{
+				if (sWeatherTables[table][i][0] != WEATHER_FOG)
+				{
+					if (raw < sWeatherTables[table][i][1] - prev)
+						return sWeatherTables[table][i][0];
+					raw -= sWeatherTables[table][i][1] - prev;
+				}
+				prev = sWeatherTables[table][i][1];
+			}
+			return weather;
+		}
 	return weather;
 }
 

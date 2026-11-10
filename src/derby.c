@@ -2521,7 +2521,8 @@ static void AddBet(void)
     
     PayoutId = sDerby->racerSpeedPay[sDerby->MenuPosition];
     
-    if ((sDerby->Bet + 10) <= GetCoins())
+    //[hack] patches/0410 コインは 99,999 枚まで持てるが、かけきんの数字のスプライトは 4 けた（最大 9,999）。上限を 9,990 に（10 きざみ）
+    if ((sDerby->Bet + 10) <= GetCoins() && (sDerby->Bet + 10) <= 9999)
     {
         PlaySE(SE_BALL_TRAY_BALL);
         sDerby->Bet = (sDerby->Bet + 10);

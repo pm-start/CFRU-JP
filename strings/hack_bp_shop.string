@@ -1,0 +1,8 @@
+// バトルフロンティアの交換所（群 69 の 42）の係の文（2026-10-25・Redmine #115・patches/0815）。
+// 文はエメラルド日本語版 ROM の BattleFrontier_ExchangeServiceCorner_Text_*（tools/rom/em_script_link.py で取り出した・work/tmp/bp_shop/scott_ja.md）
+
+#org @gText_BpShop_Welcome
+ひきかえサービス コーナーへ ようこそ！\pこちらでは おきゃくさまの ためた\nバトルポイントと すてきな けいひんを\lこうかん いたします！\pでは けいひんを おえらび ください！
+
+#org @gText_BpShop_Goodbye
+ありがとう ございました\pバトルポイントが たまりましたら また\nおこしください

@@ -15,3 +15,4 @@ void HackWatashi_FieldTick(void);
 void HackWatashi_ShowFace(void);
 void HackWatashi_HideFace(void);
 u8 HackWatashi_BaseBonus(const struct Pokemon* mon);
+void HackWatashi_FixMon(struct Pokemon* mon, u16 trainerId);   /* 2026-10-15 patches/0393: 940〜949 の手持ちを その人のボール・色違い・Moémon の当たりに */

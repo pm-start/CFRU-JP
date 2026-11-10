@@ -14,6 +14,8 @@
 #include "../include/new/frontier.h"
 #include "../include/new/util.h"
 #include "Tables/hoenn_script_flags.h"
+#include "hoenn_frontier_level.h"
+#include "hoenn_frontier_rec.h"
 
 /*
  * ホウエンのバトルチューブ（#5・2026-09-29 ユーザー「つづけて」）
@@ -419,15 +421,26 @@ void HoennPike_SetHintRoom(void)
 		return;
 	}
 	SetField(ST_HINT_IDX_SHIFT, 0x7, Random() % 3);
-	for (i = 0; i < NUM_PIKE_ROOM_TYPES - 1; ++i)
+	//★ 2026-10-21 ユーザー「A全部修正」: エメラルドの SetHintedRoom（battle_pike.c:1344-1362）のとおり。回復の部屋が出ない状態では count = NUM - 3 = 6 で、
+	//  候補は i < 6 のうち回復 2 つを除いた 4 種（0,2,3,5）だけが入り、残り 2 枠は 0（ふつうの戦い）のまま＝ふつうの戦い 3/6・他 1/6 ずつ（強い相手・ダブルは出ない）。
+	//  回復ありのときは 0〜7 の一様（count = NUM - 1 = 8）
 	{
-		if (!(HOENN_PIKE_ROOMS_READY & (1 << i)))
-			continue;
-		if (HealingDisabled() && (i == PIKE_ROOM_HEAL_FULL || i == PIKE_ROOM_HEAL_PART))
-			continue;
-		candidates[num++] = i;
+		u8 count = HealingDisabled() ? NUM_PIKE_ROOM_TYPES - 3 : NUM_PIKE_ROOM_TYPES - 1;
+
+		for (i = 0; i < NUM_PIKE_ROOM_TYPES - 1; ++i)
+			candidates[i] = 0;
+		for (i = 0; i < count; ++i)
+		{
+			if (HealingDisabled())
+			{
+				if (i != PIKE_ROOM_HEAL_FULL && i != PIKE_ROOM_HEAL_PART)
+					candidates[num++] = i;
+			}
+			else
+				candidates[i] = i;
+		}
+		type = candidates[Random() % count];
 	}
-	type = candidates[Random() % num];
 	if (type == PIKE_ROOM_STATUS && !AtLeastOneHealthyMon())
 		type = PIKE_ROOM_NPC;
 	if (type == PIKE_ROOM_DOUBLE_BATTLE && !AtLeastTwoAliveMons())
@@ -464,12 +477,22 @@ void HoennPike_IsFinalRoom(void)
 	gSpecialVar_LastResult = BattleNum() > NUM_PIKE_ROOMS;
 }
 
+//連勝（部屋の数）。レベル49・100 は別の記録（追加のセーブ領域・src/hoenn_frontier_rec.c）
+static u16 PikeStreak(void)
+{
+	u16 mode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
+
+	if (HOENN_LVL_SEPARATE(mode))
+		return HoennFrontierRec_Get(HFR_FAC_PIKE, 0, mode, FALSE);
+	return VarGet(HOENN_VAR_PIKE_STREAK + HOENN_LVL_OPENCLASS(mode));
+}
+
 //部屋の人の絵（エメラルドの SetupRoomObjectEvents）。絵 0xFF00 / 0xFF01（CFRU の VAR_RUNTIME_CHANGEABLE + 0 / + 1）。
 //戦いの部屋は相手を決める（タワーと同じ表・並びの番号 1 ＝ ふつう／6 ＝ 強い）
 void HoennPike_SetRoomObjects(void)
 {
 	u16 gfx0 = HOENN_PIKE_GFX_RECEPTIONIST, gfx1 = HOENN_PIKE_GFX_DUSCLOPS;
-	u16 streak = VarGet(HOENN_VAR_PIKE_STREAK + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0));
+	u16 streak = PikeStreak();
 	u16 id;
 
 	switch (RoomType()) {
@@ -752,6 +775,14 @@ void HoennPike_LoadPartyState(void)
 	}
 }
 
+//歩き回れる部屋（三つ又・普通・野生）にいるか（レポートを書ける・src/hoenn_tower.c の HoennFacility_SaveMode・patches/0683）
+bool8 HoennPike_OnRoamingMap(void)
+{
+	u8 map = gSaveBlock1->location.mapNum;
+
+	return map == HOENN_PIKE_THREE_PATH_NUM || map == HOENN_PIKE_ROOM_NUM || map == HOENN_PIKE_WILD_NUM;
+}
+
 /* ---- ダブルの部屋（相手 2 人・エメラルドの SPECIAL_BATTLE_PIKE_DOUBLE） ---------------------------------- */
 //エメラルドは 1 人 1 匹（FillFrontierTrainersParties(1)）。施設の戦いの型は CFRU に「相手 2 人・味方なし」が無いので、
 //FLAG_TWO_OPPONENTS を立てて src/overworld.c の BattleSetup_StartTrainerBattle（patches/0126）で ダブル＋相手 2 人 にする。
@@ -789,7 +820,7 @@ bool8 HoennPike_InWildRoom(void)
 //連勝で表を選ぶ（エメラルドの GetBattlePikeWildMonHeaderId: 20・40・60 周まで）
 static u8 WildHeaderId(void)
 {
-	u16 streak = VarGet(HOENN_VAR_PIKE_STREAK + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0));
+	u16 streak = PikeStreak();
 
 	if (streak <= 20 * NUM_PIKE_ROOMS)
 		return 0;
@@ -827,7 +858,7 @@ void HoennPike_AdjustWildMon(void)
 {
 	struct Pokemon* mon = &gEnemyParty[0];
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-	bool8 open = VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0;
+	bool8 open = HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 	const struct HoennPikeWildMon* set = NULL;
 	s32 level;
 	u8 altAbility = 0;
@@ -845,9 +876,9 @@ void HoennPike_AdjustWildMon(void)
 		return;
 
 	if (open)
-		level = MathMax(HighestPartyLevel() - set->levelDelta, 60);
+		level = (VarGet(HOENN_VAR_TOWER_LVL_MODE) == HOENN_LVL_MODE_100) ? 100 - set->levelDelta : MathMax(HighestPartyLevel() - set->levelDelta, 60); //★ レベル100 は 100 - 差
 	else
-		level = 50 - set->levelDelta;
+		level = HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE)) - set->levelDelta;
 	SetMonData(mon, MON_DATA_EXP, &gExperienceTables[gBaseStats[species].growthRate][level]);
 	if (gBaseStats[species].ability2 != ABILITY_NONE)
 		altAbility = Random() % 2;

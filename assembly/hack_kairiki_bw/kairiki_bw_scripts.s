@@ -41,3 +41,72 @@ HackScr_KairikiBw_Magma3R_OnLoad:
 	checkflag FLAG_KAIRIKI_FIERY
 	if 0x1 _call HackScr_KairikiBw_Magma3RFill
 	end
+
+@ ---- ほのおのぬけみち（FieryPath・人を置く地図）の穴 4 つ（2026-10-12・ユーザー承認の見本）----
+@ 穴のマスは build_hoenn.HOENN_CELL_EDITS・床のイベントは PEOPLE_COORDS・岩の旗は PEOPLE_OBJECT_FLAGS（0xF1A〜0xF1D）
+.global HackScr_KairikiBw_FieryHole1
+HackScr_KairikiBw_FieryHole1:
+	lockall
+	setmetatile 16 15 MT_FIERY_FLOOR 0
+	special SP_DRAW_WHOLE_MAP_VIEW
+	releaseall
+	end
+
+.global HackScr_KairikiBw_FieryHole2
+HackScr_KairikiBw_FieryHole2:
+	lockall
+	setmetatile 7 11 MT_FIERY_FLOOR 0
+	special SP_DRAW_WHOLE_MAP_VIEW
+	releaseall
+	end
+
+.global HackScr_KairikiBw_FieryHole3
+HackScr_KairikiBw_FieryHole3:
+	lockall
+	setmetatile 3 13 MT_FIERY_FLOOR 0
+	special SP_DRAW_WHOLE_MAP_VIEW
+	releaseall
+	end
+
+.global HackScr_KairikiBw_FieryHole4
+HackScr_KairikiBw_FieryHole4:
+	lockall
+	setmetatile 5 25 MT_FIERY_FLOOR 0
+	special SP_DRAW_WHOLE_MAP_VIEW
+	releaseall
+	end
+
+.align 2
+.global HackScr_KairikiBw_Fiery_MapScripts
+HackScr_KairikiBw_Fiery_MapScripts:
+	.byte 1
+	.word HackScr_KairikiBw_Fiery_OnLoad
+	.byte 0
+
+.align 2
+HackScr_KairikiBw_Fiery_OnLoad:
+	checkflag 0xF1A
+	if 0x1 _call HackScr_KairikiBw_FieryFill1
+	checkflag 0xF1B
+	if 0x1 _call HackScr_KairikiBw_FieryFill2
+	checkflag 0xF1C
+	if 0x1 _call HackScr_KairikiBw_FieryFill3
+	checkflag 0xF1D
+	if 0x1 _call HackScr_KairikiBw_FieryFill4
+	end
+
+HackScr_KairikiBw_FieryFill1:
+	setmetatile 16 15 MT_FIERY_FLOOR 0
+	return
+
+HackScr_KairikiBw_FieryFill2:
+	setmetatile 7 11 MT_FIERY_FLOOR 0
+	return
+
+HackScr_KairikiBw_FieryFill3:
+	setmetatile 3 13 MT_FIERY_FLOOR 0
+	return
+
+HackScr_KairikiBw_FieryFill4:
+	setmetatile 5 25 MT_FIERY_FLOOR 0
+	return

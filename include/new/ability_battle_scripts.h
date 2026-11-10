@@ -140,6 +140,9 @@ extern const u8 gText_SnowWarningActivate[];
 extern const u8 gText_OrichalcumPulseSunActivate[];
 extern const u8 gText_OrichalcumPulseActivate[];
 extern const u8 gText_PrimordialSeaActivate[];
+extern const u8 gText_StormySeaActivate[];   //[hack] patches/0952 あらしのうみ
+extern const u8 gText_StormySeaContinues[];
+extern const u8 gText_StormySeaEnd[];
 extern const u8 gText_DesolateLandActivate[];
 extern const u8 gText_DeltaStream[];
 extern const u8 gText_AirLockActivate[];

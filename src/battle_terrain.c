@@ -130,7 +130,11 @@ u8 BattleSetup_GetTerrainId(void)
 u8 GetBattleTerrainOverride(void)
 {
 	u8 terrain = gBattleTerrain;
-	
+
+	//[hack] patches/0860 戦闘中の進化の場面は、戦闘の種類の旗を消さず（トレーナー戦・ダブルが戻ったあと野生・シングルに化ける）地形は無地（expansion 69437cc1 と同じ）
+	if (gNewBS != NULL && gMain.inBattle && gNewBS->midBattleEvolution.active)
+		return BATTLE_TERRAIN_PLAIN;
+
 	if (gMain.callback2 == CB2_EvolutionSceneLoadGraphics
 	|| gMain.callback2 == CB2_BeginEvolutionScene
 	|| gMain.callback2 == CB2_EvolutionSceneUpdate

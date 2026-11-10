@@ -100,6 +100,9 @@ Moemon
 #org @gText_BwOpt_RiruIce
 りるアイス
 
+#org @gText_BwOpt_Shakariki
+しゃかりき
+
 #org @gText_BwOpt_DescTextSpeed
 メッセージの はやさを\n3だんかいから えらびます
 
@@ -117,6 +120,9 @@ Moemon
 
 #org @gText_BwOpt_DescDifficulty
 ポケモンの つよさを えらびます\nりるアイスが いちばん やさしい
+
+#org @gText_BwOpt_DescMomoIceWarn
+ちゅうい！ このなんいどは\nクリアさせる つもりが ありません
 
 #org @gText_BwOpt_DescBattleSpeed
 せんとうの はやさを\n1ばいから 4ばいまで えらびます
@@ -168,3 +174,288 @@ Aを おしながら SELECTで ネットの\nミラクルこうかんを ひら�
 
 #org @gText_BwOpt_DescWeather
 そとの てんきが じかんで かわるか\nきまった てんきに するか きめます
+
+#org @gText_BwOpt_Nickname
+ニックネーム
+
+#org @gText_BwOpt_NicknameAsk
+きかれる
+
+#org @gText_BwOpt_NicknameNoAsk
+きかれない
+
+#org @gText_BwOpt_DescNickname
+てにいれた ポケモンに ニックネームを\nつけるか きかれるか きめます
+
+#org @gText_BwOpt_Affection
+なかよし
+
+#org @gText_BwOpt_AffectionOn
+こうか あり
+
+#org @gText_BwOpt_AffectionOff
+こうか なし
+
+#org @gText_BwOpt_DescAffection
+なかよしどで おこる せんとうの\nとくべつな こうかを つかうか きめます
+
+#org @gText_BwOpt_FolderBasic
+きほん
+
+#org @gText_BwOpt_FolderOriginal
+どくじきのう
+
+#org @gText_BwOpt_FolderChallenge
+しばり
+
+#org @gText_BwOpt_DescFolderBasic
+はなしの はやさや おとなど\nもともとある せっていです
+
+#org @gText_BwOpt_DescFolderOriginal
+このゲームで ふえた せっていを\nまとめています
+
+#org @gText_BwOpt_DescFolderChallenge
+あそびかたに せいげんを つけます\nさいしょは ぜんぶ OFFです
+
+#org @gText_BwOpt_Open
+ひらく
+
+#org @gText_BwOpt_Quit
+やめる
+
+#org @gText_BwOpt_ChNoItems
+アイテムきんし
+
+#org @gText_BwOpt_ChNoHeld
+もちものきんし
+
+#org @gText_BwOpt_ChCenterFee
+ポケセンりょうきん
+
+#org @gText_BwOpt_ChPcFee
+PCりょうきん
+
+#org @gText_BwOpt_ChLentrant
+ポケセンの ？？？
+
+#org @gText_BwOpt_ChOn
+ON
+
+#org @gText_BwOpt_ChOff
+OFF
+
+#org @gText_BwOpt_DescChNoItems
+ボールいがいの どうぐは せんとうで\nそとでは かいふくやくも つかえません
+
+#org @gText_BwOpt_DescChNoHeld
+じぶんの ポケモンの もちものは\nせんとうで こうかが ありません
+
+#org @gText_BwOpt_DescChCenterFee
+ポケモンセンターに はいるたび\n100えんを はらいます
+
+#org @gText_BwOpt_DescChPcFee
+パソコンを つかうたび\n500えんを はらいます
+
+#org @gText_BwOpt_DescChLentrant
+ポケモンセンターに はいるたび\nなぞの ？？？が あらわれます
+
+#org @gText_BwOpt_ChDeath
+ひんしでおわかれ
+
+#org @gText_BwOpt_ChFirstOnly
+はじめの1ぴきだけ
+
+#org @gText_BwOpt_ChNickname
+ニックネームひっす
+
+#org @gText_BwOpt_DescChDeath
+ひんしに なった ポケモンは\nてもちから おわかれします
+
+#org @gText_BwOpt_DescChFirstOnly
+ちずごとに さいしょに であった\nやせい 1ぴきだけ つかまります
+
+#org @gText_BwOpt_DescChNickname
+ニックネームが ない ポケモンに\nつけるまで すすめません
+
+#org @gText_BwOpt_ChCenterBan
+ポケセンきんし
+
+#org @gText_BwOpt_ChShopBan
+おみせきんし
+
+#org @gText_BwOpt_ChNoRevive
+ひんしどうぐきんし
+
+#org @gText_BwOpt_ChMonoType
+モノタイプ
+
+#org @gText_BwOpt_ChRandom
+ランダム
+
+#org @gText_BwOpt_DescChCenterBan
+ポケモンセンターで かいふくが\nできません いえの ベッドは つかえます
+
+#org @gText_BwOpt_DescChShopBan
+おみせで かいものも\nうりものも できません
+
+#org @gText_BwOpt_DescChNoRevive
+げんきのかけら・かたまり・ふっかつそう\nせいなるはいが つかえません
+
+#org @gText_BwOpt_DescChMonoType
+さいしょの ポケモンと おなじ タイプの\nポケモンしか たたかえません
+
+#org @gText_BwOpt_DescChRandom
+やせい・もらう ポケモン・あいてが\nランダムな ポケモンに なります
+
+#org @gText_BwOpt_ChRandomBtn
+ランダムしばり
+
+#org @gText_BwOpt_ChRandomHint
+Aボタンで きめる
+
+#org @gText_BwOpt_DescChRandomBtn
+いまの しばりを ぜんぶ OFFにして\n1こから5こ しばりを ONにします
+
+#org @gText_BwOpt_RandomAsk
+もとに もどせない しばりも あるよ\nほんとうに いい？ Aはい Bいいえ
+
+#org @gText_BwOpt_RandomDone
+こ えらんだよ！\nかくにんして Aで ほぞん
+
+#org @gText_BwOpt_ChFuuin
+ふういんルーレット
+
+#org @gText_BwOpt_DescChFuuin
+レベル10ごとに ポケモン・どうぐ・\nわざの どれか 1つを ふういんします
+
+#org @gText_BwOpt_ChLuxray
+ぜんぶレントラー
+
+#org @gText_BwOpt_DescChLuxray
+てにいれた ポケモンは ぜんぶ\nレントラー♀・いろちがい・Moemonに
+
+#org @gText_BwOpt_ChInverse
+さかさバトル
+
+#org @gText_BwOpt_DescChInverse
+すべての たたかいで\nタイプの あいしょうが ぎゃくに なります
+
+#org @gText_BwOpt_ChBonus
+しばりボーナス
+
+#org @gText_BwOpt_DescChBonus
+しばり 1つで しょうきん 1わり ふえる\nバッジで どうぐも もらえる
+
+#org @gText_BwOpt_DescChBonusBroken
+しばりを はずしたことが あるので\nごほうびは もらえません
+
+#org @gText_BwOpt_ChBlind
+めかくしバトル
+
+#org @gText_BwOpt_DescChBlind
+あいての なまえ・レベル・HPが\n？？？に なります
+
+#org @gText_BwOpt_ChOneshot
+いっぱつしょうぶ
+
+#org @gText_BwOpt_DescChOneshot
+ボールが はずれたら やせいの\nポケモンが にげます
+
+#org @gText_BwOpt_ChRotation
+ローテーション
+
+#org @gText_BwOpt_DescChRotation
+たたかいごとに さいしょに でる\nポケモンが じゅんばんに かわります
+
+#org @gText_BwOpt_ChGacha
+わざガチャ
+
+#org @gText_BwOpt_DescChGacha
+たたかいの たびに じぶんの わざが\nランダムな 4つに かわります
+
+#org @gText_BwOpt_ChSyakakiri
+Syakariki
+
+#org @gText_BwOpt_DescChSyakakiri
+ぜんぶの しばりを ONにします\nレントラーの しばりも ふくみます
+
+#org @gText_BwOpt_SyakakiriAsk
+ぜんぶ ONは とても むずかしいよ\nほんとうに いい？ Aはい Bいいえ
+
+#org @gText_BwOpt_SyakakiriDone
+ぜんぶの しばりを ONに したよ！\nかくにんして Aで ほぞん
+
+#org @gText_BwOpt_FolderBadge
+バッジリセット
+
+#org @gText_BwOpt_DescFolderBadge
+ジムを さいしょから あそぶために\nバッジを けします
+
+#org @gText_BwOpt_BadgeHoenn
+ホウエンの バッジを リセット
+
+#org @gText_BwOpt_BadgeSinnoh
+シンオウの バッジを リセット
+
+#org @gText_BwOpt_DescBadge
+バッジ 8こと ジムの しょうぶの\nきろくを けします どうぐは そのまま
+
+#org @gText_BwOpt_BadgeRegionHoenn
+ホウエンの バッジ
+
+#org @gText_BwOpt_BadgeRegionSinnoh
+シンオウの バッジ
+
+#org @gText_BwOpt_BadgeHint
+Aはい Bいいえ
+
+#org @gText_BwOpt_BadgeAsk1
+ほんとうに よろしいですね？
+
+#org @gText_BwOpt_BadgeAsk2
+いいんですか？
+
+#org @gText_BwOpt_BadgeDoneHoenn
+ホウエンの バッジを リセットしました\nジムに また ちょうせんできます
+
+#org @gText_BwOpt_BadgeDoneSinnoh
+シンオウの バッジを リセットしました\nジムに また ちょうせんできます
+
+#org @gText_BwOpt_BadgeInGym
+ジムの なかでは リセット できません
+
+#org @gText_BwOpt_BadgeReplayHoenn
+ホウエンの さいせん
+
+#org @gText_BwOpt_BadgeReplaySinnoh
+シンオウの さいせん
+
+#org @gText_BwOpt_BadgeReplayNone
+たたかえる あいてが いません
+
+#org @gText_BwOpt_BadgeReplayHint
+ひだりみぎでえらぶ Aでたたかう
+
+#org @gText_BwOpt_BadgeReplayDefeat
+まいりました！
+
+#org @gText_BwOpt_ChEscape
+きんきゅう だっしゅつ
+
+#org @gText_BwOpt_DescEscape
+ポケモンセンターなどに\nもどります つまったときの にげみち
+
+#org @gText_BwOpt_EscapeAsk
+ポケモンセンターに もどりますか？
+
+#org @gText_BwOpt_PbSkip
+ブレンダー
+
+#org @gText_BwOpt_DescPbSkip
+きのみブレンダーの ミニゲームを\nとばして すぐに けっかを みます
+
+#org @gText_BwOpt_PbPlay
+あそぶ
+
+#org @gText_BwOpt_PbSkipOn
+スキップ

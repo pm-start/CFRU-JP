@@ -1,0 +1,8 @@
+//ミナモのポケモンセンターのおねえさん（FEAT-contest S8・patches/0985）。
+//クイズのおねえさん（S10・ユーザー決定）: 問題文を出す窓。本文は C（HoennNative_QuizLadyBufferQuestion）が gStringVar1 に入れる（日本語版エメラルドの ROM の問題文・tools/contest/extract_jp_quiz.py）
+#org @HackScr_LadyQuizQuestion
+[BUFFER1]
+
+//★ 仮（原文に無い）: おねがいで道具を選ぶ前の 1 手間。CFRU のバッグにきのみは並ばない＝はいでバッグではなくきのみぶくろから選ぶ
+#org @HackScr_LadyAskBerry
+わたすものは きのみ ですか？\nいいえ なら どうぐから えらびます

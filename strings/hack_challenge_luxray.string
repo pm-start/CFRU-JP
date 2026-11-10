@@ -1,0 +1,7 @@
+// 縛り『ぜんぶレントラー』（patches/0609・src/hack_challenge_luxray.c・assembly/hack_challenge/fuuin_scripts.s の HackScr_ChallengeE_FinaleList）の文。会話の窓の幅（CLAUDE.md 6.25）。
+
+#org @gText_ChallengeE_FinaleLuxray
+『ぜんぶレントラー』を つらぬきとおした！
+
+#org @gText_LuxrayLove_Fixed
+リルの あいじょうは はずせない！

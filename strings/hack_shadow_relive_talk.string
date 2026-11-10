@@ -1,0 +1,27 @@
+//看護師のリライブの会話（patches/0965・段 G・assembly/hack_shadow_relive/relive_scripts.s）。**仮の文**（担当の案・ひらがな/カタカナだけ・場所は仮に看護師）。
+#org @gText_Relive_FirstGift
+あら！ ダークポケモンと たたかった のね？\nこれを あげるわ。\pスナッチボールを [BUFFER1]こ\nつかって とりもどしてあげて。
+
+#org @gText_Relive_NotReady
+ダークポケモンの こころは\nまだ とじているわね。
+
+#org @gText_Relive_Ask
+こころが ひらいた ダークポケモンを\nリライブ しますか？
+
+#org @gText_Relive_Done
+[BUFFER1]の こころの とびらが\nひらいた！\pダークの ちからは きえて もとの すがたに\nもどった！
+
+#org @gText_Relive_AllDone
+リライブは おわったわ。\nだいじに そだててあげてね。
+
+#org @gText_Relive_SupplyAsk
+スナッチボールを ほじゅう しますか？
+
+#org @gText_Relive_Supplied
+スナッチボールを [BUFFER1]こ\nわたしたわ。
+
+#org @gText_Relive_SupplyEnough
+スナッチボールは もう たりているわね。
+
+#org @gText_Relive_BagFull
+バッグが いっぱいね。\nにもつを せいりして きてね。

@@ -36,6 +36,7 @@ extern const u8 BattleScript_SandstormHailContinues[];
 extern const u8 BattleScript_WeatherDamage[];
 extern const u8 BattleScript_EndTurnWeatherEnd[];
 extern const u8 BattleScript_FogContinues[];
+extern const u8 BattleScript_StormySeaContinues[];   //[hack] patches/0952 あらしのうみ
 extern const u8 gText_DefogBlewAwayFog[];
 extern const u8 BattleScript_SeaOfFireDamage[];
 extern const u8 BattleScript_GrassyTerrainHeal[];

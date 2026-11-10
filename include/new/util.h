@@ -28,7 +28,7 @@ bool8 SpeciesWithDexNumOnTeam(u16 dexNum);
 bool8 CanSpeciesEvolve(u16 species);
 bool8 CanEvolve(struct Pokemon* mon);
 bool8 CouldHaveEvolvedViaLevelUp(struct Pokemon* mon);
-bool8 EvolveSpeciesByLevel(u16* species, u8 level);
+bool8 EvolveSpeciesByLevel(u16* species, u16 level);
 u32 GetBaseStatsTotal(const u16 species);
 u16 GetAbility1(const u16 species);
 u16 GetAbility2(const u16 species);
@@ -41,7 +41,7 @@ bool8 IsMonOfType(struct Pokemon* mon, u8 type);
 bool8 IsSpeciesOfType(u16 species, u8 type);
 bool8 IsMinior(u16 species);
 bool8 IsSpeciesAffectedByScalemons(u16 species);
-u8 GetVisualBaseStat(u8 statId, u16 species);
+u16 GetVisualBaseStat(u8 statId, u16 species); //[hack] patches/0678 u8 → u16
 //void DestroyMonIconSprite(struct Sprite* sprite);
 bool8 CanPartyMonBeGeneralStatused(struct Pokemon* mon);
 bool8 CanPartyMonBePutToSleep(struct Pokemon* mon);

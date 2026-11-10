@@ -7,7 +7,11 @@
 #include "../include/new/ai_util.h"
 #include "../include/new/battle_util.h"
 #include "../include/new/damage_calc.h"
+#include "../include/new/mega.h"
+#include "../include/new/move_menu.h"
 #include "../include/new/terastal.h"
+#include "lv200_custom_moves.h"
+#include "lv200_custom_move_ai.h"
 
 /*
     戦闘 AI の手直し（2026-10-02）
@@ -25,19 +29,46 @@
 u16 SecondAbility_OfSpecies(u16 species);
 u16 SecondAbility_OfMon(struct Pokemon* mon);
 
-//そのタイプの技が、この 3 つのタイプの相手にどれだけ効くか（TYPE_MUL_NORMAL = 1000）
-static u32 HackAI_TypeMul(u8 moveType, u8 t1, u8 t2, u8 t3)
+//[hack] patches/0915 相性の表の 1 マス（gTypeEffectiveness は 0＝等倍（TYPE_MUL_NO_DATA）・1＝効果なし（TYPE_MUL_NO_EFFECT）・500・2000）を倍率（1000＝等倍）に直す。
+//  ★ 表の値をそのまま掛けると、等倍のマス（0）が 1 つでもあると積が 0 になる（前の HackAI_TypeMul の不具合・patches/0915 でヤーティ・patches/0916 でテラスタルの判断を直した）
+static u32 HackAI_TableMul(u8 moveType, u8 defType)
+{
+	u32 v;
+
+	if (moveType >= NUMBER_OF_MON_TYPES || defType >= NUMBER_OF_MON_TYPES)
+		return TYPE_MUL_NORMAL;
+	v = gTypeEffectiveness[moveType][defType];
+	if (v == TYPE_MUL_NO_DATA)
+		return TYPE_MUL_NORMAL;
+	if (v == TYPE_MUL_NO_EFFECT)
+		return 0;
+	return v;
+}
+
+//技のタイプが、この 3 つのタイプ（防御）にどれだけ効くか（等倍＝1000・正しい倍率）
+u32 HackAI_TypeMulReal(u8 moveType, u8 t1, u8 t2, u8 t3)
 {
 	u32 mul = TYPE_MUL_NORMAL;
 
 	if (moveType >= NUMBER_OF_MON_TYPES)
 		return mul;
 	if (t1 < NUMBER_OF_MON_TYPES)
-		mul = (mul * gTypeEffectiveness[moveType][t1]) / TYPE_MUL_NORMAL;
+		mul = (mul * HackAI_TableMul(moveType, t1)) / TYPE_MUL_NORMAL;
 	if (t2 < NUMBER_OF_MON_TYPES && t2 != t1)
-		mul = (mul * gTypeEffectiveness[moveType][t2]) / TYPE_MUL_NORMAL;
+		mul = (mul * HackAI_TableMul(moveType, t2)) / TYPE_MUL_NORMAL;
 	if (t3 < NUMBER_OF_MON_TYPES && t3 != t1 && t3 != t2)
-		mul = (mul * gTypeEffectiveness[moveType][t3]) / TYPE_MUL_NORMAL;
+		mul = (mul * HackAI_TableMul(moveType, t3)) / TYPE_MUL_NORMAL;
+	return mul;
+}
+
+//技そのもの（1 つ目のタイプ＋表の 2 つ目のタイプ type2）が、この 3 つのタイプの相手にどれだけ効くか。damage_calc.c の TypeDamageModificationByDefTypes と同じ 2 周
+u32 HackAI_MoveMul(u16 move, u8 t1, u8 t2, u8 t3)
+{
+	u32 mul = HackAI_TypeMulReal(gBattleMoves[move].type, t1, t2, t3);
+	u8 second = MOVE_SECOND_TYPE(move);
+
+	if (second != 0xFF && second != gBattleMoves[move].type)
+		mul = (mul * HackAI_TypeMulReal(second, t1, t2, t3)) / TYPE_MUL_NORMAL;
 	return mul;
 }
 
@@ -55,8 +86,9 @@ bool8 HackAI_TeraBlocksKO(u8 bankAtk, u8 bankDef, u16 foeMove)
 		return FALSE;
 
 	moveType = GetMoveTypeSpecial(bankDef, foeMove);
-	now = HackAI_TypeMul(moveType, gBattleMons[bankAtk].type1, gBattleMons[bankAtk].type2, gBattleMons[bankAtk].type3);
-	after = HackAI_TypeMul(moveType, tera, tera, tera);
+	//[hack] patches/0916 表の 0（等倍）を 1000 に直してから掛ける（前は等倍のマスで積が 0 になり、「弱点を突かれる」を見落とし、「受けられる」を誤って足していた）
+	now = HackAI_TypeMulReal(moveType, gBattleMons[bankAtk].type1, gBattleMons[bankAtk].type2, gBattleMons[bankAtk].type3);
+	after = HackAI_TypeMulReal(moveType, tera, tera, tera);
 	return now > TYPE_MUL_NORMAL && after < TYPE_MUL_NORMAL;
 }
 
@@ -67,6 +99,53 @@ bool8 HackAI_PreferTerastal(u8 bankAtk, u8 bankDef)
 	if (bankAtk == bankDef || !BATTLER_ALIVE(bankDef))
 		return FALSE;
 	return HackAI_TeraBlocksKO(bankAtk, bankDef, IsValidMovePrediction(bankDef, bankAtk));
+}
+
+//技を決めたあとの「ギミック」（メガ・ウルトラバースト・Z・ダイマックス・テラスタル）を使うかの判定（patches/0631）
+//→ 上流の OpponentHandleChooseMove（src/battle_controller_opponent.c）にあった判定をそのまま切り出した。通常戦の相手の動きは変わらない。
+//→ バトルパレス（src/hoenn_palace.c）は両側（主人公側の自動操作も）これを呼ぶ。gBankTarget に狙う相手を入れてから呼ぶ
+void HackAI_ChooseGimmicks(struct ChooseMoveStruct* moveInfo, u8 chosenMoveId, u16 chosenMove)
+{
+	//You get 1 of 3 of the following gimmicks per Pokemon
+	if (moveInfo->possibleZMoves[chosenMoveId]) //Checked first b/c Rayquaza can do all 3
+	{
+		if (ShouldAIUseZMove(gActiveBattler, gBankTarget, moveInfo->moves[chosenMoveId]))
+			gNewBS->zMoveData.toBeUsed[gActiveBattler] = TRUE;
+	}
+	else if (moveInfo->canMegaEvolve)
+	{
+		if (!ShouldAIDelayMegaEvolution(gActiveBattler, gBankTarget, chosenMove))
+		{
+			if (moveInfo->megaVariance != MEGA_VARIANT_ULTRA_BURST)
+				gNewBS->megaData.chosen[gActiveBattler] = TRUE;
+			else if (moveInfo->megaVariance == MEGA_VARIANT_ULTRA_BURST)
+				gNewBS->ultraData.chosen[gActiveBattler] = TRUE;
+		}
+	}
+	else if (moveInfo->possibleMaxMoves[chosenMoveId] && moveInfo->canterastal) //Handles the "Can I Dynamax" checks
+	{
+		if (ShouldAIDynamax(gActiveBattler, gBankTarget))
+		{
+			if (ShouldAITerastal(gActiveBattler, gBankTarget) && HackAI_PreferTerastal(gActiveBattler, gBankTarget)) //[hack] patches/0121 素は 50% の乱数
+				gNewBS->terastalData.chosen[gActiveBattler] = TRUE;
+			else
+				gNewBS->dynamaxData.toBeUsed[gActiveBattler] = TRUE;
+		}
+		else if (ShouldAITerastal(gActiveBattler, gBankTarget))
+		{
+			gNewBS->terastalData.chosen[gActiveBattler] = TRUE;
+		}
+	}
+	else if (moveInfo->possibleMaxMoves[chosenMoveId]) //Handles the "Can I Dynamax" checks
+	{
+		if (ShouldAIDynamax(gActiveBattler, gBankTarget))
+			gNewBS->dynamaxData.toBeUsed[gActiveBattler] = TRUE;
+	}
+	else if (moveInfo->canterastal)
+	{
+		if (ShouldAITerastal(gActiveBattler, gBankTarget))
+			gNewBS->terastalData.chosen[gActiveBattler] = TRUE;
+	}
 }
 
 //HP を回復する道具（キズぐすりなど）を使うか（素は「減った HP が回復量より多い」だけで使う・ai_master.c）
@@ -132,6 +211,168 @@ bool8 HackAI_ShouldSwitchStatsDropped(void)
 		return FALSE;
 
 	gBattleStruct->switchoutIndex[SIDE(bank)] = PARTY_SIZE;
+	EmitTwoReturnValues(1, ACTION_SWITCH, 0);
+	return TRUE;
+}
+
+/*
+ * [hack] patches/0819 ロジックアリーナのロンジャの交代（役割論理）: 相手の場の子の一致技が自分の場の子に効果ばつぐんで、こちらがその場で倒せないとき、
+ * 控えの中で「相手の一致技を（相手の一致タイプのどれも）半減以下で受けられ、しかも弱点を突ける技（威力 60 以上）を持つ」子に交代する。
+ * ★ 繰り返しの上限: 出てきたばかりの子は交代しない（switchingCooldown）・1 回の戦闘で 3 回まで（回数は HOENN_VAR_YARTIE_OPP の 9〜11 ビット・src/hoenn_yartie.c）・シングルだけ。
+ */
+bool8 HoennYartie_InBattle(void);
+u8 HoennYartie_SwitchCount(void);
+void HoennYartie_NoteSwitch(void);
+#define YARTIE_MAX_SWITCHES 3
+
+static bool8 YartieStabHits(u8 foe, u8 t1, u8 t2, u8 t3, u32 relation) //relation: 1 = ばつぐん（2 倍をこえる）・0 = 半減以下（どの一致タイプも）
+{
+	u8 ft[3];
+	u32 k;
+
+	ft[0] = gBattleMons[foe].type1;
+	ft[1] = gBattleMons[foe].type2;
+	ft[2] = gBattleMons[foe].type3;
+	for (k = 0; k < 3; ++k)
+	{
+		u32 mul;
+
+		if (ft[k] >= NUMBER_OF_MON_TYPES || ft[k] == TYPE_MYSTERY || (k > 0 && (ft[k] == ft[0] || (k == 2 && ft[k] == ft[1]))))
+			continue;
+		mul = HackAI_TypeMulReal(ft[k], t1, t2, t3);   //[hack] patches/0915 等倍のマス（0）で積が 0 になる HackAI_TypeMul をやめた
+		if (relation && mul > TYPE_MUL_NORMAL)
+			return TRUE;
+		if (!relation && mul > TYPE_MUL_NOT_EFFECTIVE)
+			return FALSE;
+	}
+	return !relation;
+}
+
+/*
+ * [hack] patches/0915 ロンジャの交代の「怖さ」: 相手の場の子の実際の技 4 つ（GetBattleMonMove＝普通の AI と同じ全部の技）を見る。
+ * ★ 場の子（自分）への判定は、普通の AI の本物のダメージ計算（GetFinalAIMoveDamage）で、オリジナル技の特殊処理（威力・タイプ・相性の補正）も入る。
+ *   「怖い」＝1 つの技で倒される、または最大 HP の半分以上を削られる。
+ * ★ 控えの判定は表の type＋type2 の近似（HackAI_MoveMul）。控えには戦闘中の状態（足されるタイプ・威力の補正）が無い。
+ *   過小評価が残る: 実行時にタイプが決まる技（ノーマル Lv120＝いちばん効くタイプ）は「受けられない」技として控えの条件から外す（それしか怖い技が無いときは交代しない）。
+ *   水 Lv120 のように表の威力が 1 で実際の威力が実行時に決まる技は、場の子の判定（本物の計算）では拾うが、控えの判定は表のタイプだけ。
+ */
+static bool8 YartieMoveUnresistable(u16 move)
+{
+	return move == MOVE_LV200_NORMAL_120; //実行時にいちばん効くタイプへ変わる＝どの控えも半減で受けられない
+}
+
+//相手の場の子の技の中で、場の子（自分）にとって怖いもの（倒される／最大 HP の半分以上）を scary[] に入れる。戻り値＝その数。*readable＝攻撃技を 1 つでも読めたか
+static u32 YartieScaryMoves(u8 foe, u8 bank, u16* scary, bool8* readable)
+{
+	u32 i, n = 0;
+
+	*readable = FALSE;
+	for (i = 0; i < MAX_MON_MOVES; ++i)
+	{
+		u16 move = GetBattleMonMove(foe, i);
+		u32 dmg;
+
+		if (move == MOVE_NONE)
+			continue;
+		if (gBattleMoves[move].power == 0 && gBattleMoves[Lv200MoveAIBase(move)].power == 0)
+			continue;
+		*readable = TRUE;
+		dmg = GetFinalAIMoveDamage(move, foe, bank, 1, NULL);
+		if (dmg >= gBattleMons[bank].hp || dmg * 2 >= gBattleMons[bank].maxHP)
+			scary[n++] = move;
+	}
+	return n;
+}
+
+static bool8 YartieResistsMoves(const u16* moves, u32 n, u8 t1, u8 t2)
+{
+	u32 i;
+
+	for (i = 0; i < n; ++i)
+	{
+		if (YartieMoveUnresistable(moves[i]))
+			return FALSE;
+		if (HackAI_MoveMul(moves[i], t1, t2, t1) > TYPE_MUL_NOT_EFFECTIVE)
+			return FALSE;
+	}
+	return TRUE;
+}
+
+bool8 HackAI_ShouldSwitchYartie(void)
+{
+	u8 bank = gActiveBattler, foe = FOE(bank);
+	u8 first, last;
+	struct Pokemon* party;
+	u8 i, best = PARTY_SIZE;
+	u16 scary[MAX_MON_MOVES];
+	u32 nScary, nResist, k;
+	bool8 readable;
+	u8 ft1, ft2, ft3;
+
+	if (!HoennYartie_InBattle() || IS_DOUBLE_BATTLE || SIDE(bank) != B_SIDE_OPPONENT)
+		return FALSE;
+	if (gNewBS->ai.switchingCooldown[bank] || !BATTLER_ALIVE(foe) || HoennYartie_SwitchCount() >= YARTIE_MAX_SWITCHES)
+		return FALSE;
+	nScary = YartieScaryMoves(foe, bank, scary, &readable);
+	if (readable)
+	{
+		if (nScary == 0)
+			return FALSE;   //相手の技は怖くない
+	}
+	else if (!YartieStabHits(foe, gBattleMons[bank].type1, gBattleMons[bank].type2, gBattleMons[bank].type3, 1))
+		return FALSE;   //技が読めないときの代わり（今までの一致技とみなす判定）
+	if (CanKnockOut(bank, foe))
+		return FALSE;   //その場で倒せるなら撃つ
+	//受けられない技（実行時にタイプが決まる技）は控えの条件から外す。残りが無ければ交代しない
+	for (k = 0, nResist = 0; k < nScary; ++k)
+	{
+		if (!YartieMoveUnresistable(scary[k]))
+			scary[nResist++] = scary[k];
+	}
+	if (readable && nResist == 0)
+		return FALSE;
+	ft1 = gBattleMons[foe].type1;
+	ft2 = gBattleMons[foe].type2;
+	ft3 = gBattleMons[foe].type3;
+	Lv200CustomMove_AdjustTypes(foe, &ft1, &ft2, &ft3);   //足されるタイプ・封印されたタイプも防御の相性に入れる（場の子どうし）
+	if (IS_BLANK_TYPE(ft3))
+		ft3 = ft1;
+	party = LoadPartyRange(bank, &first, &last);
+	for (i = first; i < last; ++i)
+	{
+		u16 sp = GetMonData(&party[i], MON_DATA_SPECIES2, NULL);
+		u32 m;
+		bool8 hits = FALSE;
+
+		if (party[i].hp == 0 || sp == SPECIES_NONE || GetMonData(&party[i], MON_DATA_IS_EGG, NULL) || i == gBattlerPartyIndexes[bank])
+			continue;
+		if (readable)
+		{
+			if (!YartieResistsMoves(scary, nResist, gBaseStats[sp].type1, gBaseStats[sp].type2))
+				continue;   //相手の怖い技を半減以下で受けられない
+		}
+		else if (!YartieStabHits(foe, gBaseStats[sp].type1, gBaseStats[sp].type2, gBaseStats[sp].type2, 0))
+			continue;   //相手の一致技を半減以下で受けられない
+		for (m = 0; m < MAX_MON_MOVES && !hits; ++m)
+		{
+			u16 move = GetMonData(&party[i], MON_DATA_MOVE1 + m, NULL);
+
+			if (move != MOVE_NONE && MOVE_POWER(move) >= 60 && gBattleMoves[move].accuracy != 0 && gBattleMoves[move].accuracy < 70)
+				continue;
+			if (move != MOVE_NONE && MOVE_POWER(move) >= 60 && HackAI_MoveMul(move, ft1, ft2, ft3) > TYPE_MUL_NORMAL)
+				hits = TRUE;
+		}
+		if (hits)
+		{
+			best = i;
+			break;
+		}
+	}
+	if (best >= PARTY_SIZE)
+		return FALSE;
+
+	HoennYartie_NoteSwitch();
+	gBattleStruct->switchoutIndex[SIDE(bank)] = best;
 	EmitTwoReturnValues(1, ACTION_SWITCH, 0);
 	return TRUE;
 }

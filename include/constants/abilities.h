@@ -342,5 +342,15 @@
 #define ABILITY_SUN_BUTTERFLY 324   // たいようのちょう: 晴れのとき 晴れを保ち とくこう・すばやさ 1.5 倍（同じ子の Lv50 からの 2 つ目）
 #define ABILITY_MIWAKUNOUROKO 325   // ミワクノウロコ: いかく と同じ（ツキノウロコの Lv50 からの 2 つ目・src/second_ability.c・2026-10-11）
 #define ABILITY_TSUKINOMAMORI 326   // ツキノマモリ: クリアボディ と同じ（ツキノウロコの かくれ特性・src/ability_util.c）
+#define ABILITY_WARMUP 327          // ウォームアップ: かくとうタイプの技の威力 1.3 倍（1 つ目でも 2 つ目でも・src/hack_warmup_workbug.c・2026-10-17）
+#define ABILITY_WORKBUG 328         // しごとのむし: むしタイプの技の威力 1.5 倍（1 つ目でも 2 つ目でも・src/hack_warmup_workbug.c・2026-10-17）
 #define ABILITY_DRAGONBOULDER 320  // りゅうのいわお: ふゆう＋技の威力 2 倍＋ハードロック（特別なガブリアスZの 2 つ目の特性だけ・src/hack_dragon_boulder.c・2026-10-07）
-#define ABILITIES_COUNT (ABILITY_TSUKINOMAMORI + 1)
+#define ABILITY_REITONOOU 329      // れーとのおう: りゅうのよろい と同じ 4 効果（ちからもち・マルチスケイル・さめはだ・ちからずく）。Lv200 でお姉さんに話しかけて印を付けた特別なガブリアスだけ（src/hack_gible_egg.c・2026-10-23）
+#define ABILITY_GEKIKOU 330      // げきこう: ダメージで HP が最大の 1/2 超から 1/2 以下になると こうげき +1（イワオロチの かくれ特性・src/ability_battle_effects.c）
+#define ABILITY_HOMURANOAGO 331      // ほむらのあご: かむわざ 1.5 倍＋30% で やけど（加算・ゲンシガチゴラス・src/hack_fakemon.c）
+#define ABILITY_HAKUANOOU 332      // はくあのおう: いわわざもタイプ一致・いわわざの命中 1.3 倍（ゲンシガチゴラスの 2 つ目・src/hack_fakemon.c）
+#define ABILITY_GENSHINOUZU 333      // ゲンシのうず: 場に出たとき 天候を あらしのうみ（5 ターン・雨＋みず技の命中・いわ技の威力）にする（ゲンシオルカイザー・src/hack_orcaiser.c）
+#define ABILITY_MOCHIHADA 334      // もちはだ: ぬめぬめと同じ効果（ふれた あいての すばやさを さげる・バブチフ・オモチフワの かくれ特性・src/ability_battle_effects.c）
+#define ABILITY_YOROIPLATE 335      // よろいプレート: さめはだと同じ（直接攻撃を受けると相手の最大 HP の 1/8）（カセキメラ・src/ability_battle_effects.c・damage_calc.c）
+#define ABILITY_KOORINOUROKO 336      // こおりのうろこ: 天気が ゆきのとき 受けるダメージを半分（物理・特殊とも）（カセキメラ・src/ability_battle_effects.c・damage_calc.c）
+#define ABILITIES_COUNT (ABILITY_KOORINOUROKO + 1)

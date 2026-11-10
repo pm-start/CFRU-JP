@@ -1,3 +1,6 @@
+#include "hack_move_alias.h"
+#include "lv200_custom_moves.h"
+#include "shadow_moves.h" //[hack] patches/0955 段 D ダーク技
 #include "defines.h"
 #include "defines_battle.h"
 #include "../include/event_data.h"
@@ -22,6 +25,10 @@
 #include "../include/new/move_tables.h"
 #include "../include/new/util.h"
 #include "hack_affection.h" //[hack] patches/0240 なつき度（src/hack_affection.c）
+bool8 HackGibleAI_TryResist(u8 bank); //[hack] patches/0792 れーとのおうの振り払い（src/hack_gible_ai.c）
+extern u8 BattleScript_GibleResist[];
+extern u8 BattleScript_GibleResistWoke[];
+extern u8 BattleScript_GibleResistUnfroze[];
 /*
 attackcanceler.c
 	Handles any logic for discerning if a move can be used or is effective, eg. mold breaker, flinch status, truant, etc.
@@ -59,12 +66,16 @@ void atk00_attackcanceler(void)
 		return;
 	}
 
-	if (IS_MOLD_BREAKER(ABILITY(gBankAttacker), gCurrentMove) || gNewBS->dynamaxData.nullifiedStats) //There is a Mold Breaker
+	if (IS_MOLD_BREAKER(SecondAbility_MoldBreakerAbility(gBankAttacker), gCurrentMove) || gNewBS->dynamaxData.nullifiedStats) //There is a Mold Breaker
 	{
 		if (!gNewBS->dontActivateMoldBreakersAnymoreThisTurn) //Like after Neutralizing Gas disappears during a spread move
 		{
+			gNewBS->hackSecondAbilityIgnored = 0; //[hack] 2026-10-20 2 つ目の特性も無視する
 			for (i = 0; i < gBattlersCount; ++i)
 			{
+				if (i != gBankAttacker && ITEM_EFFECT(i) != ITEM_EFFECT_ABILITY_SHIELD && gMoldBreakerIgnoredAbilities[SecondAbility_OfBank(i)])
+					gNewBS->hackSecondAbilityIgnored |= gBitTable[i];
+
 				if (i != gBankAttacker
 				&& gMoldBreakerIgnoredAbilities[ABILITY(i)]
 				&& ITEM_EFFECT(i) != ITEM_EFFECT_ABILITY_SHIELD)
@@ -112,6 +123,7 @@ void atk00_attackcanceler(void)
 
 	if (gBattleMons[gBankAttacker].pp[gCurrMovePos] == 0
 	&& gCurrentMove != MOVE_STRUGGLE
+	&& !IsShadowMove(gCurrentMove) //[hack] patches/0955 段 D PP 0 でも使える
 	&& !(gHitMarker & (HITMARKER_x800000 | HITMARKER_NO_ATTACKSTRING))
 	&& !(gBattleMons[gBankAttacker].status2 & STATUS2_MULTIPLETURNS)
 	&& !gNewBS->DancerInProgress)
@@ -123,7 +135,7 @@ void atk00_attackcanceler(void)
 
 	gHitMarker &= ~(HITMARKER_x800000);
 
-	if (MoveIgnoresSubstitutes(gCurrentMove, ABILITY(gBankAttacker)))
+	if (MoveIgnoresSubstitutes(gCurrentMove, SecondAbility_AsIf(gBankAttacker, ABILITY_INFILTRATOR)))
 		gNewBS->bypassSubstitute = TRUE;
 
 	if (gNewBS->MoveBounceInProgress == 2) //Bounce just ended
@@ -173,7 +185,7 @@ void atk00_attackcanceler(void)
 		gBattlescriptCurrInstr = BattleScript_TookAttack;
 	}
 	else if (ProtectAffects(gCurrentMove, gBankAttacker, gBankTarget, FALSE)
-	 && (gCurrentMove != MOVE_CURSE || IsOfType(gBankAttacker, TYPE_GHOST))
+	 && (!MoveIs(gCurrentMove, MOVE_CURSE) || IsOfType(gBankAttacker, TYPE_GHOST))
 	 && ((!IsTwoTurnsMove(gCurrentMove) || (gBattleMons[gBankAttacker].status2 & STATUS2_MULTIPLETURNS))))
 	{
 		if (gBattleMoves[gCurrentMove].effect != EFFECT_RAMPAGE) //These are handled in CMD49
@@ -231,7 +243,16 @@ static u8 AtkCanceller_UnableToUseMove(void)
 
 				if (gBattleMons[gBankAttacker].status1 & STATUS1_SLEEP)
 				{
-					if (gCurrentMove != MOVE_SNORE && gCurrentMove != MOVE_SLEEPTALK && HackAffection_TryShakeOff(gBankAttacker)) //[hack] patches/0240 トレーナーの こえで めを さます
+					if (gCurrentMove != MOVE_SNORE && gCurrentMove != MOVE_SLEEPTALK && HackGibleAI_TryResist(gBankAttacker)) //[hack] patches/0792 れーとのおう: おうの いじで ふりはらって めを さます
+					{
+						gBattleMons[gBankAttacker].status1 &= ~(STATUS1_SLEEP);
+						gBattleMons[gBankAttacker].status2 &= ~(STATUS2_NIGHTMARE);
+						BattleScriptPushCursor();
+						gBattleCommunication[MULTISTRING_CHOOSER] = 0;
+						gBattlescriptCurrInstr = BattleScript_GibleResistWoke;
+						effect = 2;
+					}
+					else if (gCurrentMove != MOVE_SNORE && gCurrentMove != MOVE_SLEEPTALK && HackAffection_TryShakeOff(gBankAttacker)) //[hack] patches/0240 トレーナーの こえで めを さます
 					{
 						gBattleMons[gBankAttacker].status1 &= ~(STATUS1_SLEEP);
 						gBattleMons[gBankAttacker].status2 &= ~(STATUS2_NIGHTMARE);
@@ -266,9 +287,17 @@ static u8 AtkCanceller_UnableToUseMove(void)
 		case CANCELLER_FROZEN:
 			if (gBattleMons[gBankAttacker].status1 & STATUS1_FREEZE)
 			{
-				if (umodsi(Random(), 5))
+				if (umodsi(Random(), 5) || Lv200CustomMove_IsFixedFreeze(gBankAttacker)) //[hack] #35 P5 アブソルートゼロの3ターン固定は解凍しない
 				{
 					if ((!CheckTableForMove(gCurrentMove, gMovesCanUnfreezeAttacker) || gMoveResultFlags & MOVE_RESULT_FAILED)
+					&& HackGibleAI_TryResist(gBankAttacker)) //[hack] patches/0792 れーとのおう: おうの いじで こおりを とかす
+					{
+						gBattleMons[gBankAttacker].status1 &= ~(STATUS1_FREEZE);
+						BattleScriptPushCursor();
+						gBattleCommunication[MULTISTRING_CHOOSER] = 0;
+						gBattlescriptCurrInstr = BattleScript_GibleResistUnfroze;
+					}
+					else if ((!CheckTableForMove(gCurrentMove, gMovesCanUnfreezeAttacker) || gMoveResultFlags & MOVE_RESULT_FAILED)
 					&& HackAffection_TryShakeOff(gBankAttacker)) //[hack] patches/0240 トレーナーの こえで こおりを とかす
 					{
 						gBattleMons[gBankAttacker].status1 &= ~(STATUS1_FREEZE);
@@ -329,6 +358,14 @@ static u8 AtkCanceller_UnableToUseMove(void)
 		case CANCELLER_FLINCH: // flinch
 			if (gBattleMons[gBankAttacker].status2 & STATUS2_FLINCHED && !IsDynamaxed(gBankAttacker))
 			{
+				if (HackGibleAI_TryResist(gBankAttacker)) //[hack] patches/0792 れーとのおう: おうの いじで ひるみを ふりはらう
+				{
+					gBattleMons[gBankAttacker].status2 &= ~(STATUS2_FLINCHED);
+					BattleScriptPushCursor();
+					gBattlescriptCurrInstr = BattleScript_GibleResist;
+					gBattleStruct->atkCancellerTracker++;
+					return 1;
+				}
 				gProtectStructs[gBankAttacker].flinchImmobility = 1;
 				CancelMultiTurnMoves(gBankAttacker);
 				gBattlescriptCurrInstr = BattleScript_MoveUsedFlinched;
@@ -573,6 +610,12 @@ static u8 AtkCanceller_UnableToUseMove(void)
 						BattleScriptPushCursor();
 					}
 					#endif
+					else if (HackGibleAI_TryResist(gBankAttacker)) //[hack] patches/0792 れーとのおう: こんらんで じぶんを なぐるのを ふりはらう（まだ こんらんは続く）
+					{
+						gBattleCommunication[MULTISTRING_CHOOSER] = 0;
+						BattleScriptPushCursor(); //こんらんの文のあと 振り払いの文 → 技を続ける
+						BattleScriptPush(BattleScript_GibleResist);
+					}
 					else // confusion dmg
 					{
 						gBattleCommunication[MULTISTRING_CHOOSER] = 1;
@@ -597,6 +640,13 @@ static u8 AtkCanceller_UnableToUseMove(void)
 		case CANCELLER_PARALYSED: // paralysis
 			if ((gBattleMons[gBankAttacker].status1 & STATUS1_PARALYSIS) && Random() % 4 == 0)
 			{
+				if (HackGibleAI_TryResist(gBankAttacker)) //[hack] patches/0792 れーとのおう: おうの いじで しびれを ふりはらう（まひは治らない）
+				{
+					BattleScriptPushCursor();
+					gBattlescriptCurrInstr = BattleScript_GibleResist;
+					gBattleStruct->atkCancellerTracker++;
+					return 1;
+				}
 				if (HackAffection_TryShakeOff(gBankAttacker)) //[hack] patches/0240 トレーナーの こえで しびれを ふりはらう（まひは治らない）
 				{
 					BattleScriptPushCursor();
@@ -636,6 +686,11 @@ static u8 AtkCanceller_UnableToUseMove(void)
 				if (Random() % 100 < 50)
 				{
 					BattleScriptPushCursor();
+				}
+				else if (HackGibleAI_TryResist(gBankAttacker)) //[hack] patches/0792 れーとのおう: メロメロで うごけないのを ふりはらう
+				{
+					BattleScriptPushCursor(); //メロメロの文のあと 振り払いの文 → 技を続ける
+					BattleScriptPush(BattleScript_GibleResist);
 				}
 				else
 				{
@@ -697,7 +752,7 @@ static u8 AtkCanceller_UnableToUseMove(void)
 						break;
 
 					case SPECIES_AEGISLASH_BLADE:
-						if (gCurrentMove == MOVE_KINGSSHIELD)
+						if (MoveIs(gCurrentMove, MOVE_KINGSSHIELD))
 						{
 							DoFormChange(gBankAttacker, SPECIES_AEGISLASH, TRUE, TRUE, FALSE);
 							BattleScriptPushCursor();
@@ -1047,7 +1102,7 @@ static u8 AtkCanceller_UnableToUseMove(void)
 				gBattleCommunication[0] = 0; //For later
 				PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)
 			}
-			else if (gCurrentMove == MOVE_SURGINGSTRIKES || gCurrentMove == MOVE_TRIPLEDIVE)
+			else if (MoveIs(gCurrentMove, MOVE_SURGINGSTRIKES) || gCurrentMove == MOVE_TRIPLEDIVE)
 			{
 				gMultiHitCounter = 3;
 				PREPARE_BYTE_NUMBER_BUFFER(gBattleScripting.multihitString, 1, 0)
@@ -1142,7 +1197,7 @@ static bool8 TryActivateMagicCoat(u8 bankDef, u8 bankAtk, u16 currentMove)
 
 static bool8 TryActivateMagicBounce(u8 bankDef)
 {
-	if (ABILITY(bankDef) == ABILITY_MAGICBOUNCE && !BATTLER_SEMI_INVULNERABLE(bankDef))
+	if (BankHasAbility(bankDef, ABILITY_MAGICBOUNCE) && !BATTLER_SEMI_INVULNERABLE(bankDef))
 	{
 		gNewBS->MoveBounceInProgress = TRUE;
 		gNewBS->moveWasBouncedThisTurn = TRUE;
@@ -1279,10 +1334,10 @@ static u8 IsMonDisobedient(void)
 			obedienceLevel = BASE_OBEDIENCE_LEVEL;
 	#endif
 
-	if (gBattleMons[gBankAttacker].level <= obedienceLevel)
+	if (BM_LEVEL(gBattleMons[gBankAttacker]) <= obedienceLevel)
 		return 0;
 	rnd = (Random() & 255);
-	calc = (gBattleMons[gBankAttacker].level + obedienceLevel) * rnd >> 8;
+	calc = (BM_LEVEL(gBattleMons[gBankAttacker]) + obedienceLevel) * rnd >> 8;
 	if (calc < obedienceLevel)
 		return 0;
 
@@ -1296,8 +1351,8 @@ static u8 IsMonDisobedient(void)
 	}
 
 	rnd = (Random() & 255);
-	calc = (gBattleMons[gBankAttacker].level + obedienceLevel) * rnd >> 8;
-	if (calc < obedienceLevel && gCurrentMove != MOVE_FOCUSPUNCH && gCurrentMove != MOVE_BEAKBLAST && gCurrentMove != MOVE_SHELLTRAP)
+	calc = (BM_LEVEL(gBattleMons[gBankAttacker]) + obedienceLevel) * rnd >> 8;
+	if (calc < obedienceLevel && !MoveIs(gCurrentMove, MOVE_FOCUSPUNCH) && gCurrentMove != MOVE_BEAKBLAST && gCurrentMove != MOVE_SHELLTRAP)
 	{
 		calc = CheckMoveLimitations(gBankAttacker, gBitTable[gCurrMovePos], 0xFF);
 		if (calc == 0xF) // all moves cannot be used
@@ -1325,7 +1380,7 @@ static u8 IsMonDisobedient(void)
 	}
 	else
 	{
-		obedienceLevel = gBattleMons[gBankAttacker].level - obedienceLevel;
+		obedienceLevel = BM_LEVEL(gBattleMons[gBankAttacker]) - obedienceLevel;
 
 		calc = (Random() & 255);
 		if (calc < obedienceLevel && CanBePutToSleep(gBankAttacker, gBankAttacker, FALSE))
@@ -1381,12 +1436,12 @@ static bool8 IsTargetUnaffectedByPrankster(u8 bankAtk, u8 bankDef, u16 currentMo
 {
 	u8 moveTarget = GetBaseMoveTarget(gCurrentMove, gBankAttacker);
 
-	return ABILITY(bankAtk) == ABILITY_PRANKSTER
+	return BankHasAbility(bankAtk, ABILITY_PRANKSTER)
 		&& IsOfType(bankDef, TYPE_DARK)
 		&& (SPLIT(currentMove) == SPLIT_STATUS || (currentMove != chosenMove && SPLIT(chosenMove) == SPLIT_STATUS)) //This move was called by a status move (eg. Assist)
 		&& !(moveTarget & (MOVE_TARGET_OPPONENTS_FIELD | MOVE_TARGET_DEPENDS))
 		&& SIDE(bankAtk) != SIDE(bankDef) //Affects allies but not foes
-		&& (ABILITY(bankDef) != ABILITY_MAGICBOUNCE || !(gBattleMoves[currentMove].flags & FLAG_MAGIC_COAT_AFFECTED)) //This move would be bounced back and not affected
+		&& (!BankHasAbility(bankDef, ABILITY_MAGICBOUNCE) || !(gBattleMoves[currentMove].flags & FLAG_MAGIC_COAT_AFFECTED)) //This move would be bounced back and not affected
 		&& (!gProtectStructs[bankDef].bounceMove || !(gBattleMoves[currentMove].flags & FLAG_MAGIC_COAT_AFFECTED)) //Bounce back with Magic Coat if can
 		&& AttacksThisTurn(bankAtk, currentMove) == 2
 		&& !ProtectAffects(currentMove, bankAtk, bankDef, FALSE)

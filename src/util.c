@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "hack_base_stats_wide.h" //[hack] patches/0678
 #include "../include/random.h"
 #include "../include/constants/abilities.h"
 
@@ -9,6 +10,7 @@
 #include "../include/new/frontier.h"
 #include "../include/new/mega.h"
 #include "../include/new/terastal.h"
+#include "../include/new/achievements.h"   //[hack] patches/0500 Achievements_Notify
 /*
 util.c
 	general utility functions
@@ -147,6 +149,8 @@ void HandleSetPokedexFlag(u16 nationalNum, u8 caseId, u32 personality)
         GetSetPokedexFlag(nationalNum, caseId);
         if (caseId == FLAG_SET_CAUGHT) //[hack] 2026-10-09 src/hack_meteorite.c デオキシスを初めてつかまえたらいんせき
             HackMeteorite_OnCaught(nationalNum);
+        if (caseId == FLAG_SET_CAUGHT) //[hack] 2026-10-16 patches/0500 図鑑に「つかまえた」が増えた出来事（じっせき・図鑑の数／ポケモンの種類）をその場で確かめる
+            Achievements_Notify(ACH_EV_DEX);
         if (NationalPokedexNumToSpecies(nationalNum) == SPECIES_UNOWN)
             gSaveBlock2->pokedex.unownPersonality = personality;
         if (NationalPokedexNumToSpecies(nationalNum) == SPECIES_SPINDA)
@@ -154,8 +158,11 @@ void HandleSetPokedexFlag(u16 nationalNum, u8 caseId, u32 personality)
     }
 }
 
+bool8 HackChallengeLuxray_OnObtain(struct Pokemon* mon, bool8 markDex); //[hack] しばり『ぜんぶレントラー』src/hack_challenge_luxray.c
+
 void SetMonPokedexFlags(struct Pokemon* mon)
 {
+	HackChallengeLuxray_OnObtain(mon, FALSE); //[hack] 先に図鑑を付けてから GiveMonToPlayer へ渡す贈り物（ジラーチ・ウルガモス・ナナミ・ガチャ…）は 図鑑より前にレントラーにする（下でレントラーが「つかまえた」）
 	if (!GetMonData(mon, MON_DATA_IS_EGG, NULL))
 	{
 		u16 dexNum = SpeciesToNationalPokedexNum(GetMonData(mon, MON_DATA_SPECIES, NULL));
@@ -253,7 +260,7 @@ bool8 CouldHaveEvolvedViaLevelUp(struct Pokemon* mon)
 	return FALSE;
 }
 
-bool8 EvolveSpeciesByLevel(u16* species, u8 level)
+bool8 EvolveSpeciesByLevel(u16* species, u16 level)
 {
 	const struct Evolution* evolutions;
 	bool8 evolved = FALSE;
@@ -281,13 +288,7 @@ bool8 EvolveSpeciesByLevel(u16* species, u8 level)
 
 u32 GetBaseStatsTotal(const u16 species)
 {
-	u32 sum = 0;
-	u8* ptr = &gBaseStats[species].baseHP;
-
-	for (int i = 0; i < NUM_STATS; ++i)
-		sum += ptr[i];
-
-	return sum;
+	return HackBaseStatsTotal(species); //[hack] patches/0678
 }
 
 static u16 TryRandomizeAbility(u16 originalAbility, unusedArg u16 species)
@@ -379,14 +380,18 @@ bool8 AllHittingMoveWithTypeInMonMoveset(struct Pokemon* mon, u8 moveType)
 
 u8 HackDragonBoulder_Type2(const struct Pokemon* mon, u16 species, u8 type2); //[hack] patches/0207 りゅうのいわお（src/hack_dragon_boulder.c・特別なガブリアスZ は 2 つ目のタイプが いわ）
 
+u8 HackDebugMon_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0422 デバッグモン（src/hack_debug_mon.c・配る版は base をそのまま返す）
+
+u8 HackDelta_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0962 デルタ種のタイプ（src/hack_delta.c・印がデルタでなければ base をそのまま返す）
+
 u8 GetMonType(struct Pokemon* mon, u8 typeId)
 {
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
 
 	if (typeId == 0)
-		return (ShouldReplaceTypesWithCamomons()) ? GetCamomonsTypeByMon(mon, 0) : gBaseStats[species].type1;
+		return (ShouldReplaceTypesWithCamomons()) ? GetCamomonsTypeByMon(mon, 0) : HackDebugMon_Type(mon, species, 0, HackDelta_Type(mon, species, 0, gBaseStats[species].type1)); //[hack] patches/0422 デバッグモン・patches/0962 デルタ種
 	else
-		return (ShouldReplaceTypesWithCamomons()) ? GetCamomonsTypeByMon(mon, 1) : HackDragonBoulder_Type2(mon, species, gBaseStats[species].type2); //[hack] patches/0207 りゅうのいわお
+		return (ShouldReplaceTypesWithCamomons()) ? GetCamomonsTypeByMon(mon, 1) : HackDebugMon_Type(mon, species, 1, HackDelta_Type(mon, species, 1, HackDragonBoulder_Type2(mon, species, gBaseStats[species].type2))); //[hack] patches/0207 りゅうのいわお・patches/0422 デバッグモン・patches/0962 デルタ種
 }
 
 bool8 IsMonOfType(struct Pokemon* mon, u8 type)
@@ -413,14 +418,14 @@ bool8 IsSpeciesAffectedByScalemons(u16 species)
 	return TRUE;
 }
 
-u8 GetVisualBaseStat(u8 statId, u16 species) //For the Pokedex screen
+u16 GetVisualBaseStat(u8 statId, u16 species) //For the Pokedex screen
 {
-	u16 base = ((u8*) (&gBaseStats[species].baseHP))[statId];
+	u16 base = HackBaseStat(species, statId); //[hack] patches/0678
 
 	if (statId != STAT_HP && IsScaleMonsBattle() && IsSpeciesAffectedByScalemons(species))
 	{
-		u8 baseHP = gBaseStats[species].baseHP;
-		base = MathMin((base * (600 - baseHP)) / (GetBaseStatsTotal(species) - baseHP), 255); //Max 255
+		u16 baseHP = HackBaseStat(species, STAT_HP); //[hack] patches/0678
+		base = MathMin((base * (600 - baseHP)) / (GetBaseStatsTotal(species) - baseHP), HACK_BASE_STAT_MAX); //Max 255 //[hack] patches/0677
 	}
 
 	return base;

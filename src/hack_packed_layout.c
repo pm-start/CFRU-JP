@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "map_region.h"
 #include "../include/decompress.h"
 #include "../include/fieldmap.h"
 #include "../include/overworld.h"
@@ -15,6 +16,11 @@
  *   InitBackupMapLayoutData（08058330・hooks r3）: 印があれば VMap の後ろへ展開してから前へ写す（作業用のメモリは要らない）
  *   InitBackupMapLayoutConnections（08058388・hooks r1）: 素と同じ処理を C で。隣が圧縮なら残してある生の帯から写す
  * にする。マス目を直に読む所（バトルピラミッドの部屋・おしえテレビ）の地図は圧縮しない（生成器が外す）。
+ *
+ * ★ 2026-10-25（Redmine #112・patches/0814）: 縮めていない（生の）マス目の地図でも、隣から見える帯を差し替えられる。
+ *   FillConnection は、隣が縮めた地図ならその帯から、生の地図でも表 sViewFixBands（hack_view_fix_bands.h・
+ *   tools/fly_reloaded/write_view_fix_bands.py が layout_view_fix.json から書く）にレイアウトの番地＋側があればその帯から写す。
+ *   地図の中（自分のマス目）は素のまま。対象はカントーの 4 地図（(3,7)・(3,11)・(3,41)・(3,42)）。
  */
 
 #define PACKED_LAYOUT_MARK 0x4C
@@ -33,7 +39,7 @@ struct PackedLayoutMap
 
 bool8 HackInflate(const u8* src, u32 srcSize, u8* dst, u32 dstSize, void* work, u32 workSize);   //src/hack_inflate.c（patches/0319）
 bool8 HackSplit_IsBack(const void* src);                                        //src/hack_split_pics.c（dd）: 0x0A… の後ろ半分か
-bool8 HackSplit_Native(void);                                                   //直した mGBA（後ろ半分が見える）か
+bool8 HackSplit_Direct(const void* src);                                        //src をそのまま読めるか（直した mGBA の B。W＝128MB の上位 64MB は窓を切り替えないと読めない＝偽）
 u32 HackSplit_FetchEntryTo(const void* src, void* dst, u32 cap, const u8** out);  //後ろ半分の塊（4 バイト前に長さ）を dst（cap バイト・長さ + 1023 まで要る）へ。→ 長さ（0 = 読めない）・*out は中身の頭
 #define PACKED_FETCH_CAP 6144   //SD の写しの入れ物（縮めたマス目は最大 4,208 バイト + 区画の端数 1023・tools/mapfcomp/layout_deflate.py --check が見る）
 #define PACKED_DEFLATE_MAGIC 0x5A
@@ -79,7 +85,7 @@ void HackLayout_InitBackupMapLayoutData(const u16* map, u16 width, u16 height)
 
 		if (HackSplit_IsBack(lz))
 		{
-			if (HackSplit_Native())
+			if (HackSplit_Direct(lz))
 				srcLen = *(const u32*) ((u32) lz - 4);
 			else
 			{
@@ -140,6 +146,29 @@ void HackLayout_InitBackupMapLayoutData(const u16* map, u16 width, u16 height)
 /* ---- 隣の地図（素の Fill*Connection を C で・pokefirered src/fieldmap.c と同じ） ---------------------------- */
 enum { BAND_TOP, BAND_BOTTOM, BAND_LEFT, BAND_RIGHT };
 
+//★ 2026-10-25 カントー（生のマス目）の隣から見える帯の差し替え（Redmine #112・patches/0814・tools/fly_reloaded/write_view_fix_bands.py）。
+//  49e2de2e0 はカントーのマス目そのものを差し替えたため、その地図の中の端も壊れた。マス目は素の FR のままにして、隣が写す帯だけをここで差し替える。
+enum { VFB_TOP, VFB_BOTTOM, VFB_LEFT, VFB_RIGHT };   //BAND_* と同じ並び
+struct ViewFixBand
+{
+	u32 layout;          //レイアウトの番地
+	u8 side;             //VFB_*
+	const u16* band;     //縮めた形の帯と同じ並び（上下は幅×7・左は 8 列・右は 7 列）
+};
+#include "hack_view_fix_bands.h"
+
+static const u16* HackLayout_FindViewBand(const struct MapLayout* layout, u8 band)
+{
+	u32 i;
+
+	for (i = 0; i < sizeof(sViewFixBands) / sizeof(sViewFixBands[0]); i++)
+	{
+		if (sViewFixBands[i].layout == (u32) layout && sViewFixBands[i].side == band)
+			return sViewFixBands[i].band;
+	}
+	return NULL;
+}
+
 static void FillConnection(s32 x, s32 y, const struct MapHeader* connectedMapHeader, s32 x2, s32 y2, s32 width, s32 height, u8 band)
 {
 	const struct MapLayout* layout = connectedMapHeader->mapLayout;
@@ -148,32 +177,42 @@ static void FillConnection(s32 x, s32 y, const struct MapHeader* connectedMapHea
 	s32 stride;
 	u16* dest = &VMap.map[VMap.Xsize * y + x];
 	s32 i;
+	bool8 packed = IsPackedLayout(layout);
 
-	if (IsPackedLayout(layout))
+	if (packed)
 	{
 		const struct PackedLayoutMap* p = (const struct PackedLayoutMap*) layout->map;
 		switch (band) {
+			case BAND_TOP: src = p->top; break;
+			case BAND_BOTTOM: src = p->bottom; break;
+			case BAND_LEFT: src = p->left; break;
+			default: src = p->right; break;
+		}
+		if (src == NULL) //帯が無い（生成器の検算 verify_packed_layouts.py が無いことを確かめる）→ 何も写さない
+			return;
+	}
+	else
+		src = HackLayout_FindViewBand(layout, band);   //差し替えの帯が無ければ NULL（生のマス目から写す）
+
+	if (src != NULL)
+	{
+		//帯から写す（縮めた地図も、差し替えの帯のある生の地図も同じ並び）
+		switch (band) {
 			case BAND_TOP:
-				src = p->top;
 				stride = mapWidth;
 				break;
 			case BAND_BOTTOM:
-				src = p->bottom;
 				stride = mapWidth;
 				y2 -= layout->height - MAP_OFFSET_CELLS;
 				break;
 			case BAND_LEFT:
-				src = p->left;
 				stride = MAP_OFFSET_CELLS + 1;
 				break;
 			default:
-				src = p->right;
 				stride = MAP_OFFSET_CELLS;
 				x2 -= mapWidth - MAP_OFFSET_CELLS;
 				break;
 		}
-		if (src == NULL) //帯が無い（生成器の検算 verify_packed_layouts.py が無いことを確かめる）→ 何も写さない
-			return;
 	}
 	else
 	{
@@ -304,7 +343,11 @@ void HackLayout_InitBackupMapLayoutConnections(const struct MapHeader* mapHeader
 	connection = mapHeader->connections->connections;
 	for (i = 0; i < count; i++, connection++)
 	{
-		const struct MapHeader* cMap = GetMapHeaderFromConnection(connection);
+		const struct MapHeader* cMap;
+		/* キタカミなど、地方の境界からジョウトへ歩いて戻る入口も止める。 */
+		if (!MapRegion_IsTravelMapAllowed(connection->mapGroup, connection->mapNum))
+			continue;
+		cMap = GetMapHeaderFromConnection(connection);
 		s32 offset = connection->offset;
 
 		switch (connection->direction) {

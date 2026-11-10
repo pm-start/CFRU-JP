@@ -1,3 +1,4 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
 #include "../include/battle_anim.h"
@@ -297,8 +298,13 @@ bool8 IsBannedDynamaxSpecies(u16 species)
 	return FALSE;
 }
 
+bool8 HackDynamax_PlayerBlocked(u8 bank); //[hack] patches/0402 src/hack_kanto_dynamax.c
+
 bool8 CanDynamax(u8 bank)
 {
+	if (HackDynamax_PlayerBlocked(bank)) //[hack] patches/0402
+		return FALSE;
+
 	if (gBattleTypeFlags & BATTLE_TYPE_DYNAMAX && !gNewBS->dynamaxData.used[bank])
 		return GetDynamaxSpecies(bank, FALSE) != SPECIES_NONE;
 
@@ -307,6 +313,9 @@ bool8 CanDynamax(u8 bank)
 
 bool8 CanGigantamax(u8 bank)
 {
+	if (HackDynamax_PlayerBlocked(bank)) //[hack] patches/0402
+		return FALSE;
+
 	if (gBattleTypeFlags & BATTLE_TYPE_DYNAMAX && !gNewBS->dynamaxData.used[bank])
 		return GetDynamaxSpecies(bank, TRUE) != SPECIES_NONE;
 
@@ -513,6 +522,9 @@ static item_t FindBankDynamaxBand(u8 bank)
 
 bool8 DynamaxEnabled(u8 bank)
 {
+	if (HackDynamax_PlayerBlocked(bank)) //[hack] patches/0402 わたしたち戦は主人公がわを止める（技の画面・合図の表示もここを通る）
+		return FALSE;
+
 	if (gBattleTypeFlags & BATTLE_TYPE_DYNAMAX)
 	{
 		if (FindBankDynamaxBand(bank) == ITEM_NONE)
@@ -580,6 +592,9 @@ bool8 DoesDynamaxUsageStopMegaEvolution(u8 bank)
 
 static move_t GetTypeBasedMaxMove(u8 moveType, u8 moveSplit)
 {
+	if (moveType > TYPE_FAIRY) //[hack] patches/0408 #110: ステラ（0x18）・リル（0x19）の Max 技は無い。下の式だと Max 技の表の外（別の技）を引くので、ノーマル系にする
+		moveType = TYPE_NORMAL;
+
 	if (moveType < TYPE_FIRE)
 		return MOVE_MAX_STRIKE_P + (moveType * 2) + moveSplit;
 	else if (moveType >= TYPE_FAIRY)
@@ -611,6 +626,8 @@ static u8 GetMaxMoveType(u16 move, u8 bank, struct Pokemon* mon)
 		//Try to modify Max Move's type using ability
 		u16 maxMove = GetTypeBasedMaxMove(gBattleMoves[move].type, moveSplit);
 		moveType = GetMoveTypeSpecialPostAbility(maxMove, ability, FALSE);
+		if (moveType == gBattleMoves[maxMove].type) //[hack] 2026-10-20 2 つ目
+			moveType = GetMoveTypeSpecialPostAbility(maxMove, mon != NULL ? SecondAbility_OfMonActive(mon) : SecondAbility_OfBank(bank), FALSE);
 	}
 
 	return moveType;
@@ -1473,7 +1490,7 @@ bool8 ProtectedByMaxGuard(u8 bankDef, u16 move)
 {
 	if (gProtectStructs[bankDef].protected && IsDynamaxed(bankDef) 
 	&& move != MOVE_FEINT 
-	&& move != MOVE_MEANLOOK //Mean Look is probably a GF bug
+	&& !MoveIs(move, MOVE_MEANLOOK) //Mean Look is probably a GF bug
 	&& !IsMaxMoveWithEffect(move, MAX_EFFECT_BYPASS_PROTECT))
 	{
 		if (gBattleMoves[move].target & (MOVE_TARGET_DEPENDS | MOVE_TARGET_OPPONENTS_FIELD))
@@ -1639,7 +1656,7 @@ static u8 GetRaidShieldHealthRatio(u8 bank)
 {
 	u8 ratio;
 
-	switch (gBattleMons[bank].level) {
+	switch (BM_LEVEL(gBattleMons[bank])) {
 		case 0 ... 19:
 			ratio = 1; //Never
 			break;
@@ -1783,7 +1800,7 @@ void CreateRaidShieldSprites(void)
 
 u8 GetRaidBattleKOStatIncreaseAmount(u8 bank)
 {
-	u8 level = gBattleMons[bank].level;
+	u16 level = BM_LEVEL(gBattleMons[bank]);
 	if (FlagGet(FLAG_BATTLE_FACILITY))
 		level = MAX_LEVEL;
 
@@ -1801,7 +1818,7 @@ u8 GetRaidBattleKOStatIncreaseAmount(u8 bank)
 
 u8 GetRaidBattleRepeatedAttackChance(u8 bank)
 {
-	u8 level = gBattleMons[bank].level;
+	u16 level = BM_LEVEL(gBattleMons[bank]);
 	if (FlagGet(FLAG_BATTLE_FACILITY))
 		level = MAX_LEVEL;
 
@@ -1822,7 +1839,7 @@ u8 GetRaidBattleStatNullificationChance(u8 bank)
 	if (gDisableStructs[bank].isFirstTurn)
 		return 0; //Don't use first attack with this
 
-	u8 level = gBattleMons[bank].level;
+	u16 level = BM_LEVEL(gBattleMons[bank]);
 	if (FlagGet(FLAG_BATTLE_FACILITY))
 		level = MAX_LEVEL;
 

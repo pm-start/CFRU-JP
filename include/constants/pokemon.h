@@ -23,8 +23,10 @@
 #define TYPE_BLANK	  0x14
 #define TYPE_FAIRY	  0x17
 #define TYPE_STELLAR  0x18
+#define TYPE_RIL      0x19
+#define TYPE_SHADOW   0x1A   //[hack] patches/0955 段 D: ダーク技のタイプ（画面名「ダーク」・相性は表でなく IsShadowMove でコード処理）
 
-#define NUMBER_OF_MON_TYPES (TYPE_STELLAR + 1)
+#define NUMBER_OF_MON_TYPES (TYPE_SHADOW + 1)
 
 #define TYPE_NAME_LENGTH 5
 

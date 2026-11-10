@@ -51,6 +51,7 @@
 #include "../include/new/scrolling_multichoice.h"
 #include "../include/new/Vanilla_functions_battle.h"
 #include "../include/new/wild_encounter.h"
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
 /*
 scripting.c
 	handles all scripting specials or other functions associated with scripts
@@ -143,6 +144,17 @@ enum IVStatChecker
 	SetAllIVs
 };
 
+static u32 GetPartyStatVar8004(u8 req)   //[hack] patches/0763 努力値・個体値は窓口（上の桁の表も含む）
+{
+	struct Pokemon* m = &gPlayerParty[Var8004];
+
+	if (req >= MON_DATA_HP_EV && req <= MON_DATA_SPDEF_EV)
+		return HackMon_GetEv(m, req - MON_DATA_HP_EV);
+	if (req >= MON_DATA_HP_IV && req <= MON_DATA_SPDEF_IV)
+		return HackMon_GetIv(m, req - MON_DATA_HP_IV);
+	return GetMonData(m, req, NULL);
+}
+
 u32 GetMonDataFromVar8003(u8 dataRequest)
 {
 	u32 attr;
@@ -150,11 +162,23 @@ u32 GetMonDataFromVar8003(u8 dataRequest)
 		if (Var8003 == 1)
 			attr = GetBoxMonDataAt(Var8000, Var8001, dataRequest);
 		else
-			attr = GetMonData(&gPlayerParty[Var8004], dataRequest, NULL);
+			attr = GetPartyStatVar8004(dataRequest);
 	#else
-		attr = GetMonData(&gPlayerParty[Var8004], dataRequest, NULL);
+		attr = GetPartyStatVar8004(dataRequest);
 	#endif
 	return attr;
+}
+
+static void SetPartyStatVar8004(u8 req)
+{
+	struct Pokemon* m = &gPlayerParty[Var8004];
+
+	if (req >= MON_DATA_HP_EV && req <= MON_DATA_SPDEF_EV)
+		HackMon_SetEv(m, req - MON_DATA_HP_EV, Var8005);
+	else if (req >= MON_DATA_HP_IV && req <= MON_DATA_SPDEF_IV)
+		HackMon_SetIv(m, req - MON_DATA_HP_IV, Var8005);
+	else
+		SetMonData(m, req, &Var8005);
 }
 
 void SetMonDataFromVar8003(u8 dataRequest)
@@ -163,9 +187,9 @@ void SetMonDataFromVar8003(u8 dataRequest)
 		if (Var8003 == 1)
 			SetBoxMonDataAt(Var8000, Var8001, dataRequest, &Var8005);
 		else
-			SetMonData(&gPlayerParty[Var8004], dataRequest, &Var8005);
+			SetPartyStatVar8004(dataRequest);
 	#else
-		SetMonData(&gPlayerParty[Var8004], dataRequest, &Var8005);
+		SetPartyStatVar8004(dataRequest);
 	#endif
 }
 
@@ -273,7 +297,7 @@ u16 sp00B_CheckPokeball(void)
 	return GetMonDataFromVar8003(MON_DATA_POKEBALL);
 }
 
-u8 sp00C_CheckCaptureLocation(void)
+u16 sp00C_CheckCaptureLocation(void)   //L 案: 出会った場所は 16 ビット
 {
 	u16 partyId = Var8004;
 	if (partyId >= PARTY_SIZE)
@@ -366,8 +390,8 @@ void sp010_IVSetter(void)
 	if (partyId >= PARTY_SIZE || stat > SetAllIVs)
 		return;
 
-	if (amount > 31)
-		amount = 31;
+	if (amount > HACK_IV_MAX)
+		amount = HACK_IV_MAX; //[hack] patches/0677
 	Var8005 = amount;
 
 	switch(stat) {
@@ -570,7 +594,7 @@ bool8 CanHyperTraining(u16 partyId, u16 stat)
 {
 	if (partyId >= PARTY_SIZE || stat > CheckIVs_SpDef)
 		return FALSE;
-	return GetMonData(&gPlayerParty[partyId], MON_DATA_HP_IV + stat, NULL) != 31
+	return HackMon_GetIv(&gPlayerParty[partyId], stat) != HACK_IV_MAX
 		&& !(gPlayerParty[partyId].hyperTraining & gBitTable[stat]);
 }
 
@@ -1258,6 +1282,9 @@ void sp18B_DisplayImagesFromTable(void) {
 //Battle Specials//
 ///////////////////////////////////////////////////////////////////////////////////
 
+bool8 HackDelta_MonFlyingCover(const struct Pokemon* mon, u16 species); //[hack] patches/0962 元の種族がひこうのデルタ種（src/hack_delta_battle.c）
+u8 HackDelta_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0962 デルタ種のタイプ（src/hack_delta.c・印がデルタでなければ base をそのまま返す）
+
 bool8 CanMonParticipateInASkyBattle(struct Pokemon* mon)
 {
 	u16 species = mon->species;
@@ -1267,8 +1294,9 @@ bool8 CanMonParticipateInASkyBattle(struct Pokemon* mon)
 	||  CheckTableForSpecies(species, gSkyBattleBannedSpeciesList))
 		return FALSE;
 
-	if (gBaseStats[species].type1 == TYPE_FLYING
-	||  gBaseStats[species].type2 == TYPE_FLYING
+	if (HackDelta_Type(mon, species, 0, gBaseStats[species].type1) == TYPE_FLYING //[hack] patches/0962 デルタ種
+	||  HackDelta_Type(mon, species, 1, gBaseStats[species].type2) == TYPE_FLYING
+	||  HackDelta_MonFlyingCover(mon, species) //[hack] patches/0962 元の種族がひこうのデルタ種はひこうタイプ扱い
 	||  (GetMonAbility(mon) == ABILITY_LEVITATE || GetMonAbility(mon) == ABILITY_EELEVATE))
 		return TRUE;
 
@@ -1586,8 +1614,11 @@ void sp089_SetSafariCounter(void)
 }
 
 
+void HackSafari_ClearFeeders(void); //[hack] patches/0978 src/hack_safari_pokeblock.c
+
 void SetSafariZone(void)
 {
+	HackSafari_ClearFeeders(); //[hack] 2026-11-09 patches/0978 サファリに入るときポロックのおき場を全部 0 に（原文 EnterSafariMode の ClearAllPokeblockFeeders）
 	gSafariSteps = SAFARI_ZONE_MAX_STEPS;
 	gSafariBallNumber = SAFARI_ZONE_BALL_START;
 }
@@ -2279,6 +2310,8 @@ bool8 KeyboardKeyHandler_Character(u8 event)
 		&& gNamingScreenData->templateNum != NAMING_SCREEN_CHOOSE_NUMBER
 		&& gNamingScreenData->templateNum != NAMING_SCREEN_ENTER_PHRASE
 		&& gNamingScreenData->templateNum != NAMING_SCREEN_ENTER_PASSWORD
+		&& gNamingScreenData->templateNum != NAMING_SCREEN_ENTER_PASSWORD_1_OF_2
+		&& gNamingScreenData->templateNum != NAMING_SCREEN_ENTER_PASSWORD_2_OF_2
 		&& gNamingScreenData->templateNum != NAMING_SCREEN_ENTER_5_CHAR_PASSWORD)
 			gNamingScreenData->state = MAIN_STATE_START_PAGE_SWAP;
 		#endif
@@ -2432,6 +2465,30 @@ static const struct NamingScreenTemplate sEnterPasswordNamingScreenTemplate =
 	.title = gText_EnterPassword,
 };
 
+extern const u8 gText_EnterPassword1of2[];
+extern const u8 gText_EnterPassword2of2[];
+static const struct NamingScreenTemplate sEnterPassword1of2NamingScreenTemplate =
+{
+	.copyExistingString = 0,
+	.maxChars = 6,
+	.iconFunction = 0,
+	.addGenderIcon = 0,
+	.initialPage = 1,
+	.unused = 35,
+	.title = gText_EnterPassword1of2,
+};
+
+static const struct NamingScreenTemplate sEnterPassword2of2NamingScreenTemplate =
+{
+	.copyExistingString = 0,
+	.maxChars = 6,
+	.iconFunction = 0,
+	.addGenderIcon = 0,
+	.initialPage = 1,
+	.unused = 35,
+	.title = gText_EnterPassword2of2,
+};
+
 static const struct NamingScreenTemplate sEnter5CharPasswordNamingScreenTemplate =
 {
 	.copyExistingString = 0,
@@ -2467,6 +2524,8 @@ const struct NamingScreenTemplate* const sNamingScreenTemplates[] =
 	&sEnterPasswordNamingScreenTemplate,
 	&sEnter5CharPasswordNamingScreenTemplate,
 	&sEnterSpeciesNamingScreenTemplate,
+	&sEnterPassword1of2NamingScreenTemplate,
+	&sEnterPassword2of2NamingScreenTemplate,
 };
 
 void (*const sNamingScreenTitlePrintingFuncs[])(void) =
@@ -2475,6 +2534,8 @@ void (*const sNamingScreenTitlePrintingFuncs[])(void) =
 	(void*) (0x809EEC8 | 1),
 	(void*) (0x809EF1C | 1),
 	(void*) (0x809EF1C | 1),
+	(void*) (0x809EEC8 | 1),
+	(void*) (0x809EEC8 | 1),
 	(void*) (0x809EEC8 | 1),
 	(void*) (0x809EEC8 | 1),
 	(void*) (0x809EEC8 | 1),
@@ -2934,10 +2995,11 @@ bool8 ScrCmd_bufferitemnameplural(struct ScriptContext * ctx)
 	#define MAX_COINS 9999
 #endif
 
+void HackRamCheat_NoteCoins(u32 numCoins); //[hack] patches/0682 src/hack_ram_cheat.c
 u32 GetCoins(void)
 {
 	#ifdef SAVE_BLOCK_EXPANSION
-		return gPlayerCoins;
+		return gPlayerCoins ^ gSaveBlock2->encryptionKey; //[hack] patches/0627 RAM の中のコインは今のセッションの鍵で XOR（フラッシュに書く前に素に戻す・src/hack_session_key.c）
 	#else
 		return gSaveBlock1->coins;
 	#endif
@@ -2947,7 +3009,8 @@ u32 GetCoins(void)
 void SetCoins(u32 numCoins)
 {
 	#ifdef SAVE_BLOCK_EXPANSION
-		gPlayerCoins = numCoins;
+		gPlayerCoins = numCoins ^ gSaveBlock2->encryptionKey; //[hack] patches/0627 同上
+		HackRamCheat_NoteCoins(numCoins); //[hack] patches/0682 RAM チート検出の影（コインの正当な書き手はここだけ）
 	#else
 		gSaveBlock1->coins = MathMin(numCoins, 0xFFFF);
 	#endif
@@ -2989,7 +3052,8 @@ bool8 scrB3_CheckCoins(struct ScriptContext *ctx)
 {
 	#ifndef REPLACE_SOME_VANILLA_SPECIALS
 	u16 *ptr = GetVarPointer(ScriptReadHalfword(ctx));
-	*ptr = GetCoins();
+	u32 coinsNow = GetCoins(); //[hack] patches/0410 コインは u32（最大 99,999）、変数は u16。65,536 以上で 0 に戻らないよう 0xFFFF で頭打ちにする
+	*ptr = (coinsNow > 0xFFFF) ? 0xFFFF : (u16) coinsNow;
 	#else
 	u32 amount, arg;
 
@@ -3064,6 +3128,8 @@ bool8 scrB5_SubtractCoins(struct ScriptContext *ctx)
 
 void ConvertCoinInt(u32 coinAmount)
 {
+	if (coinAmount > MAX_COINS) //[hack] BUG-prize-coin-5digit 表示だけ上限で頭打ち（MAX_COINS_DIGITS けたをこえると先頭の数字が 10 以上になり「？」になる）。実際の枚数は変えない
+		coinAmount = MAX_COINS;
 	ConvertIntToDecimalStringN(gStringVar1, coinAmount, STR_CONV_MODE_RIGHT_ALIGN, MAX_COINS_DIGITS);
 }
 

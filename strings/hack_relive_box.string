@@ -1,0 +1,81 @@
+//リライブボックスの画面の文（patches/0975・FEAT-relive-box-ext）。**仮の文**（担当の案・ひらがな/カタカナだけ）。作りは strings/hack_egg_box.string と同じ。
+#org @gText_ReliveBox_Title
+リライブボックス
+
+#org @gText_ReliveBox_Empty
+・・・・・
+
+#org @gText_ReliveBox_Gauge
+こころ
+
+#org @gText_ReliveBox_Ready
+リライブできる
+
+#org @gText_ReliveBox_PartyTitle
+てもちの ダークを えらんでください
+
+#org @gText_ReliveBox_HelpList
+A あずける・ひきとる / B もどる
+
+#org @gText_ReliveBox_HelpParty
+A あずける / B もどる
+
+#org @gText_ReliveBox_AskTake
+ひきとりますか？ / A はい / B いいえ
+
+#org @gText_ReliveBox_Full1
+リライブボックスが いっぱいです
+
+#org @gText_ReliveBox_Full2
+ひきとってから あずけてください
+
+#org @gText_ReliveBox_NotDark1
+ダークの ポケモンしか
+
+#org @gText_ReliveBox_NotDark2
+あずけられません
+
+#org @gText_ReliveBox_LastMon1
+てもちに たたかえる ポケモンが
+
+#org @gText_ReliveBox_LastMon2
+いなくなるので あずけられません
+
+#org @gText_ReliveBox_PartyFull1
+てもちが いっぱいです
+
+#org @gText_ReliveBox_PartyFull2
+てもちを あけてから ひきとってください
+
+#org @gText_ReliveBox_NoDark
+あずけられる ダークが いません
+
+#org @gText_ReliveBox_NoDark2
+てもちに ダークが いるときに つかえます
+
+#org @gText_ReliveBox_Unavail1
+この mGBAでは つかえません
+
+#org @gText_ReliveBox_Unavail2
+さいしんの mGBAを つかってください
+
+#org @gText_ReliveBox_NeedReport1
+リライブボックスを つかうには
+
+#org @gText_ReliveBox_NeedReport2
+さきに レポートを かいてください
+
+#org @gText_ReliveBox_BadData1
+リライブボックスを よみこめません
+
+#org @gText_ReliveBox_BadData2
+セーブデータいこうツールで なおせるかも
+
+#org @gText_ReliveBox_WriteFail1
+かきこみに しっぱいしました
+
+#org @gText_ReliveBox_WriteFail2
+もういちど ためしてください
+
+#org @gText_ReliveBox_Done
+Aボタンで つづける

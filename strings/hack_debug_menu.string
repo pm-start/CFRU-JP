@@ -1,3 +1,7 @@
+#include "src/hack_build_flags.h"
+// ↑ ビルドの印（tools/build/build_rom.py が書く）。デバッグメニュー付きの版（--debug-menu）だけ文を組む（#ifdef HACK_DEBUG_MENU・patches/0417）
+
+#ifdef HACK_DEBUG_MENU
 #org @gText_HackDebug_Title
 デバッグメニュー
 
@@ -28,6 +32,27 @@
 #org @gText_HackDebug_Close
 とじる
 
+#org @gText_HackDebug_Kaizou
+かいぞう チェック
+
+#org @gText_HackDebug_KaizouOk
+かいぞう: みつからない
+
+#org @gText_HackDebug_KaizouNg
+あやしい:
+
+#org @gText_HackDebug_KaizouMoney
+ おかね
+
+#org @gText_HackDebug_KaizouCoin
+ コイン
+
+#org @gText_HackDebug_KaizouParty
+ てもち
+
+#org @gText_HackDebug_KaizouBox
+ はこ
+
 #org @gText_HackDebug_CatchOn
 ほかく100 あり
 
@@ -56,7 +81,7 @@
 ひだり・みぎ 1ずつ
 
 #org @gText_HackDebug_HelpBig
-Lおしながら100 / Rで10
+Lおしながら100 / Rで1000
 
 #org @gText_HackDebug_ItemGot
 アイテムをもらいました
@@ -93,6 +118,12 @@ A きりかえ / B もどる
 
 #org @gText_HackDebug_BadgesDone
 バッジをもらいました
+
+#org @gText_HackDebug_Fly
+そらをとぶさきをぜんぶ
+
+#org @gText_HackDebug_FlyDone
+とぶさきをかいほうしました
 
 #org @gText_HackDebug_WarpGroup
 ぐん
@@ -164,7 +195,7 @@ Lv
 きりかえました
 
 #org @gText_HackDebug_EditHelp
-ひだりみぎ 1 / R 10 / L 100
+ひだりみぎ 1 / L 100 / R 1000
 
 #org @gText_HackDebug_GetMonHelp
 A もらう / B もどる
@@ -195,6 +226,15 @@ A ひらく / ひだりみぎ ページ
 
 #org @gText_HackDebug_NoMon
 ポケモンがいません
+
+#org @gText_HackDebug_Gender
+しゅじんこうの せいべつ
+
+#org @gText_HackDebug_GenderBoy
+おとこのこ
+
+#org @gText_HackDebug_GenderGirl
+おんなのこ
 
 #org @gText_HackDebug_ESpecies
 しゅぞく
@@ -258,3 +298,278 @@ EV SPA
 
 #org @gText_HackDebug_EEvSpd
 EV SPD
+
+#org @gText_HackDebug_WarpMenu
+ワープのしゅるい
+
+#org @gText_HackDebug_WarpRegions
+ちほうへ ワープ
+
+#org @gText_HackDebug_WarpGyms
+ジムの いりぐちへ
+
+#org @gText_HackDebug_WarpRaw
+マップばんごうを してい
+
+#org @gText_HackDebug_WarpRegionHelp
+じょうげ:ちほう
+
+#org @gText_HackDebug_WarpGymHelp
+さゆう:ちほう じょうげ:ジム
+
+#org @gText_HackDebug_WarpUnavailable
+いりぐちを みつけられません
+
+#org @gText_HackDebug_RegionKanto
+カントー
+
+#org @gText_HackDebug_RegionHoenn
+ホウエン
+
+#org @gText_HackDebug_RegionJohto
+ジョウト
+
+#org @gText_HackDebug_RegionSinnoh
+シンオウ
+
+#org @gText_HackDebug_RegionKitakami
+キタカミ
+
+#org @gText_HackDebug_WarpPeople
+ひとの ところへ
+
+#org @gText_HackDebug_WarpPeopleHelp
+じょうげ:ひと
+
+#org @gText_HackDebug_WarpRoom
+デバッグルーム
+
+#org @gText_HackDebug_WarpUnova
+イッシュ
+
+#org @gText_HackDebug_WarpRoomHelp
+じょうげ:へや でぐち:マット
+
+#org @gText_HackDebug_Room0
+へや1 わたしたち・かいふく・ミラクル
+
+#org @gText_HackDebug_Room1
+へや2 ボールの みせ・でんせつの だい
+
+#org @gText_HackDebug_Room2
+へや3 チャンピオン・メガ・Zの みせ
+
+#org @gText_HackDebug_Room3
+へや4 でんせつの ポケモン
+
+#org @gText_HackDebug_Room4
+へや5 ひとの え 1
+
+#org @gText_HackDebug_Room5
+へや6 ひとの え 2
+
+#org @gText_HackDebug_Room6
+へや7 れんれあるき・ボール
+
+#org @gText_HackDebug_Room7
+へや8 はんてい そと
+
+#org @gText_HackDebug_Room8
+へや9 はんてい なか
+
+#org @gText_HackDebug_Spot0
+りる
+
+#org @gText_HackDebug_Spot1
+うい
+
+#org @gText_HackDebug_Spot2
+しだれ
+
+#org @gText_HackDebug_Spot3
+みるく
+
+#org @gText_HackDebug_Spot4
+なお
+
+#org @gText_HackDebug_Spot5
+かいり
+
+#org @gText_HackDebug_Spot6
+りっか
+
+#org @gText_HackDebug_Spot7
+しぃ
+
+#org @gText_HackDebug_Spot8
+らん
+
+#org @gText_HackDebug_Spot9
+いちご
+
+#org @gText_HackDebug_Spot10
+ミラクルこうかん
+
+#org @gText_HackDebug_Spot11
+でんせつ ツキリル
+
+#org @gText_HackDebug_Spot12
+でんせつ ウイシルシ
+
+#org @gText_HackDebug_Spot13
+でんせつ シダレアメ
+
+#org @gText_HackDebug_Spot14
+でんせつ ミルキハート
+
+#org @gText_HackDebug_Spot15
+でんせつ ナオガネ
+
+#org @gText_HackDebug_Spot16
+でんせつ カイリパルス
+
+#org @gText_HackDebug_Spot17
+でんせつ リッカユキ
+
+#org @gText_HackDebug_Spot18
+でんせつ シイバラ
+
+#org @gText_HackDebug_Spot19
+でんせつ ランキツネ
+
+#org @gText_HackDebug_Spot20
+でんせつ イチゴベリー
+
+#org @gText_HackDebug_Spot21
+シンオウ ミラクルこうかん
+
+#org @gText_HackDebug_Watashi
+わたしたちと たたかう
+
+#org @gText_HackDebug_WatashiHelp
+ひだりみぎ:ひと / A たたかう
+
+#org @gText_HackDebug_Clear
+クリアごのじょうたいに
+
+#org @gText_HackDebug_ClearDone
+じょうたいを かえました
+
+#org @gText_HackDebug_Wild
+やせいを だす
+
+#org @gText_HackDebug_WildHelp
+ひだりみぎ:かえる / A だす
+
+#org @gText_HackDebug_WildShiny
+いろちがい
+
+#org @gText_HackDebug_WildMoemon
+もえもん
+
+#org @gText_HackDebug_WildYes
+する
+
+#org @gText_HackDebug_WildNo
+しない
+
+#org @gText_HackDebug_EDmPower
+DMつよさ
+
+#org @gText_HackDebug_EDmType1
+DMタイプ1
+
+#org @gText_HackDebug_EDmType2
+DMタイプ2
+
+#org @gText_HackDebug_EDmAbility
+DMとくせい
+
+#org @gText_HackDebug_DmMax
+ぜんぶ255
+
+#org @gText_HackDebug_DmMin
+ぜんぶ1
+
+#org @gText_HackDebug_DmDefault
+ひょうじゅん
+
+// 2026-11-08 個体の印（patches/0958・src/hack_kind.c）。種類 なし／ヌシ／デルタ／ダーク・あたい 0〜255
+#org @gText_HackDebug_EKind
+しるし
+
+#org @gText_HackDebug_EKindValue
+しるしあたい
+
+#org @gText_HackDebug_KindNone
+なし
+
+#org @gText_HackDebug_KindNushi
+ヌシ
+
+#org @gText_HackDebug_KindDelta
+デルタ
+
+#org @gText_HackDebug_KindDark
+ダーク
+
+// 2026-10-16 戦闘中の捕獲情報（src/hack_debug_catch_info.c・patches/0425）。日本語版の文字の表には「.」と「%」が無いので、小数点は 。(0xAD)・パーセントは付けない
+// 2026-10-18 さいしょの ポケモン レントラー（旗 0xF13・切り替え）
+#org @gText_HackDebug_Luxray
+さいしょの ポケモン レントラー
+
+#org @gText_HackDebug_CatchInfo
+せんとうじょうほう
+
+#org @gText_HackDebug_CI_Rate
+ほかく
+
+#org @gText_HackDebug_CI_Hp
+HP
+
+#org @gText_HackDebug_CI_Trainer
+トレーナーせんは つかまえられない
+
+#org @gText_HackDebug_CI_Cant
+いまは つかまえられない
+
+#org @gText_HackDebug_CI_NoBall
+ボールが ない
+
+#org @gText_HackDebug_Phone
+でんわ
+
+#org @gText_HackDebug_PhoneHelp
+じょうげで あいて  Aで でんわが くる
+
+#org @gText_HackDebug_Trainer
+トレーナーと たたかう
+
+#org @gText_HackDebug_TrainerHelp
+L:100 R:1000 / A たたかう
+
+#org @gText_HackDebug_TrainerDefeat
+まいった！
+
+#org @gText_HackDebug_TrainerClass
+クラス
+
+#org @gText_HackDebug_Blender
+きのみブレンダー
+
+#org @gText_HackDebug_Blender1
+1にんようの ブレンダー
+
+#org @gText_HackDebug_Blender2
+2にんようの ブレンダー
+
+#org @gText_HackDebug_Blender3
+3にんようの ブレンダー
+
+#org @gText_HackDebug_BlenderMaster
+めいじんと ブレンダー
+
+#org @gText_HackDebug_BlenderHelp
+じょうげで えらぶ  Aで ひらく
+
+#endif

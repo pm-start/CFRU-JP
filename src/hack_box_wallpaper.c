@@ -12,6 +12,7 @@
 
 #define MENU_TEXT_FOREST 0x16
 #define MENU_TEXT_PEACH 0x27
+#define MENU_TEXT_ORI 0x28   //オリポケーズ（2026-10-21・壁紙 18・その他の 6 つ目・メニューの名前は strings/hack_boxwall.string）
 #define WALLPAPER_SET_ETCETERA 3
 
 #define InitMenu_ ((void (*)(void)) (0x080947DC | 1))
@@ -28,7 +29,10 @@ void HackBoxWall_AddWallpapersMenu(u8 wallpaperSet)
 		for (i = 0; i < 4; ++i)
 			SetMenuText_(MENU_TEXT_FOREST + wallpaperSet * 4 + i);
 		if (wallpaperSet == WALLPAPER_SET_ETCETERA)
+		{
 			SetMenuText_(MENU_TEXT_PEACH);
+			SetMenuText_(MENU_TEXT_ORI);
+		}
 	}
 	AddMenu_();
 }

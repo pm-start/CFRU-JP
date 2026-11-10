@@ -253,6 +253,7 @@
 #define EFFECT_REVIVAL_BLESSING 249
 #define EFFECT_ORDER_UP 250
 #define EFFECT_ENBUCHO 251   // えんぶちょう: 当てたあと自分の とくこう・とくぼう・すばやさ +1・相手を ほのおのうず に（2026-10-11・#95）
+#define EFFECT_HACK_CUSTOM 252 // 新技190件の共通入口（0593）
 #define EFFECT_MAX_MOVE 253
 #define EFFECT_SYNCHRONOISE 254
 

@@ -21,6 +21,7 @@
 .align 2
 .global EventScript_BoxLink
 EventScript_BoxLink:
+	call HackScr_Challenge_PcGate	@ patches/0510 しばり「PCりょうきん」（払えなければ ？？？の戦いで台本はここで終わる）
 	lockall
 	special SP_SHOW_POKEMON_STORAGE_SYSTEM_PC
 	waitstate

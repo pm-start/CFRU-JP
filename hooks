@@ -79,8 +79,7 @@ BattleStringExpandPlaceholders 80D88A8 2
 DisplayStatStageMessage 80D94DA 0
 BufferMaxMoveNameBattle 80D954A 0
 ExpandedAbilityNamesBattle2 80D9660 0
-MoveSelectionWindowCursorPos 8030152 1
-MoveSelectionWindowCursorPos2 8030192 1
+##[hack] patches/0930: 技を選ぶ画面の枠の作り直し（カーソルは枠の線）で、素のカーソルの位置の直し 2 つは要らなくなった（MoveSelectionCreate/DestroyCursorAt ごと C 版へ）
 
 ##Multi Hooks
 MultiEnemyPokeballReadoutHook 8048688 0
@@ -118,6 +117,10 @@ BattleAI_HandleItemUseBeforeAISetup 080C7EF0 0
 MegaRetrieveDataHook 80140E0 0
 HandleInputChooseMove 802E1EC 0
 MoveSelectionDisplayMoveEffectiveness 8030024 0
+MoveSelectionDisplayMoveNames 802FFB0 0
+MoveSelectionDisplayPpNumber 803005C 0
+MoveSelectionCreateCursorAt 8030138 2
+MoveSelectionDestroyCursorAt 8030180 2
 InitMoveSelectionsVarsAndStrings 08032428 0
 PlayerHandleStatusIconUpdateHook 8032790 1
 OpponentHandleStatusIconUpdateHook 80380E0 1
@@ -1002,7 +1005,16 @@ HackLinkSave_NoOp 080DB41C 0
 #[hack] patches/0196: ボックスの仮想化 M2。次のレポートで書くページが予備に収まらない操作を止める（assembly/hack_box_shelf/box_shelf_hooks.s）
 BoxShelf_PssInputHook 0808CD48 0
 BoxShelf_DepositHook 0808D858 0
+BoxShelf_WithdrawHook 0808D710 0
+HackNushi_CursorCB_Store 08124B30 1
 BoxShelf_IsPokemonStorageFull 08040694 0
+#FEAT-box100-unlock 箱の数（見える数 50 / 100）: 33 か所の分類は docs/claude/06_risks.md 6.118。レジスタは hook の書き込みに使う（そこで空いているもの）
+BoxShelf_VisNextHook 0808C660 3
+BoxShelf_VisPrevHook 0808C68C 3
+BoxShelf_VisChooseNextHook 0808CEB0 3
+BoxShelf_VisChoosePrevHook 0808CEEC 3
+BoxShelf_VisSearchHook 080CD9D8 3
+BoxShelf_VisScanHook 08093004 1
 
 #[hack] 2026-10-07 ミラクル交換（src/hack_wonder_trade.c・元は pkhk_BeGiNNeR さんのもの）: 交換の場面の文字（素の BufferTradeSceneStrings のゲーム内交換側 08050770）
 WonderTradeSceneStringsHook 08050770 0
@@ -1022,8 +1034,78 @@ HackSaveSlot_SwitchFlashBank 081C27DC 1
 #   081076B8 push {r4,r5,lr} / lsls / lsrs / adds -> 081076C0 movs r1,#2。r1 は 081076C0 で入れ直される -> 空く
 HackDex_RegisterHook 081076B8 1
 
+#[hack] 2026-10-15 patches/0384 図鑑の絵の Malloc（素の CreateTrainerCardSprite 0810CB98）: ポワルン（0x181・絵が 0x2000）だけ 0x2000・ほかは 0x1000（assembly/hack_dex/dex_hooks.s）
+#   0810CBD4 lsrs r6 / movs r0,#0x80 / lsls r0,#6 / bl Malloc の前半を潰す -> フックの中で同じことをして 0810CBDE へ戻る。r0 は空く。前の bytereplacement 0810CBD8 40 01（0308）は外した
+HackDexPic_AllocHook 0810CBD4 0
+
 ## 2026-10-10 タイトルのあとのメニューを BW に（src/bw_main_menu.c・bw-reloaded の main_menu）。素の 0800C1A0 の中・CFRU の時計の注意のフック（0800C1A4）の戻り先 0800C1AC
 BwMainMenuHook 0800C1AC 0
 
 ## 2026-10-12 ネット交換（src/hack_network_trade.c・pm-start/enchanted-network-trade・patches/0336）。素の SetBlockReceivedFlag 08009F44 の頭（8 バイト・r3）
 NetTrade_BlockHook 08009F44 3
+
+#[hack] 2026-10-16 patches/0480 カントー図鑑の数 → 全国図鑑の数（src/hack_dex_counts.c）。素の GetNationalPokedexCount 08088A68 は 386 種まで（DPE は 1039 種）→ CFRU の関数へ。r0 = 見た／捕まえた・r1 は空く
+GetNationalPokedexCount 08088A68 1
+#   素の GetProfOaksRatingMessageByCount 080CB5F0（push {lr} / r0 = 数）。段階を全国図鑑の種数に対する割合に。r1 は空く
+HackOakRatingMessageByCount 080CB5F0 1
+
+##[hack] 2026-10-16 patches/0550 縛り C モノタイプ: CreateBattleStartTask（全部の戦闘の入口）の頭 8 バイトを写して C を呼ぶ（assembly/hack_challenge/challenge_c_hooks.s）
+HackChallengeC_BattleStartHook 0807EDB8 3
+HackTmCasePowerHook 08133CCE 3
+HackSummaryPowerHook 08137258 2
+HackMoveScreenPowerHook 080E6338 3
+
+## [fix] 2026-10-18 通信交換の手持ち一覧のレベル（101 以上を 3 タイルで・assembly/hack_trade_ui/trade_menu_level_hook.s・tools/rom/verify_trade_ui.py）。素の 0804E8E0 の中・level/10 の除算の頭の 10 バイト（add r0,r6,#0 / movs r1,#10 / bl udiv / lsls r0,#24）を潰す。r3 は空く。素の出口 0804EA0A へ戻る
+TradeMenuLevelHook 0804E976 3
+#[hack] 2026-10-18 patches/0604 トレーナーカードの ずかんの星 = この改造の地方図鑑 13 個を そろえるごとに +1（src/hack_dex_counts.c・assembly/hack_dex/card_star_hook.s）
+#   0808930C 素の GetTrainerStarCount（r0 = カード・r1 は空く）／0808AC90 素の GetTrainerCardStars（r0 = 相手の番号・戻りを 4 まで）／08088B00 素の HasAllHoennMons（カードの [+3] の印・カントー）
+HackTrainerCardStars 0808930C 1
+HackGetTrainerCardStars 0808AC90 1
+HackCardCaughtAllKanto 08088B00 0
+#   0808A864 カードの色の表引き（素の 4 命令 8 バイト・r0 は表引きの前で空き）。星 5 個以上でも表の外を読まず金（4）に
+HackCardPalHook 0808A864 0
+#   0808B1AC 素の InitTrainerCard の BL 08089498（自分のカードを作る・通信用と同じ関数）＋ LDR r0,=08089169 ＋ BL 08000544 の前半。8 バイト潰して全部やり直し 0808B1B6（POP {r4,r5}）へ戻る。r0 = カード
+HackOwnCardHook 0808B1AC 3
+
+#[hack] FEAT-player-mei はじめの話の主人公選択を 3 択に（メイ・src/hack_oak_gender.c / assembly/hack_player_mei/oak_mei_hooks.s）
+#   Task_OakSpeech_ShowGenderOptions 0813069C・Task_OakSpeech_HandleGenderInput 081307B8（どちらも関数ごと置き換え・r1 空き）
+#   LoadTrainerPic の女の枝 08131A44（8 バイト・r1 空き・続きは 08131A68）
+#   PrintNameChoiceOptions 08131F10（4 件を並べるループの中・r3 空き・ループの先頭 F0E は潰さない）／GetDefaultName 08131F84・08131FE0
+HackOak_ShowGenderOptions 0813069C 1
+HackOak_HandleGenderInput 081307B8 1
+HackOakFemalePicHook 08131A44 1
+HackOakNameLoopHook 08131F10 3
+HackOakDefaultPlayerNameHook 08131F84 1
+HackOakDefaultRivalNameHook 08131FE0 1
+#[hack] 2026-11-03 patches/0945 図鑑の絵は♂（ふつう）: DexScreen の絵を作る bl CreateMonPicSprite_HandleDeoxys（081070C4）の前の movs r1,#8 / movs r3,#1 / bl の 8 バイト（r1 は空く・r0 species・r2 personality・スタックの引数はそのまま）
+HackDexMale_PicHook 081070C0 1
+
+#[hack] patches/0956 FEAT-shadow-c 段C オーラ: FR(J) ServerMain 08011C34（PUSH から始まる関数・bs_exec の別名と同じ番地・r0 空き）を src/hack_aura.c の HackAura_ServerMain で置き換える
+HackAura_ServerMain 8011C34 0
+#[hack] 2026-11-08 patches/0961 スナッチボール: ボールの成功の演出の 95 フレーム目（bl m4aMPlayAllStop / ldr r0,=0x13F / bl PlaySE の 10 バイト）を、スナッチで捕まえている最中だけ戦闘 BGM を続きから鳴らす版に（それ以外は同じ動き）
+HackSnatch_CaughtJingleHook 080F0F96 0
+##[hack] 2026-11-09 patches/0978 FEAT-pokeblock 段 6（ホウエンのサファリのポロック・src/hack_safari_pokeblock.c・assembly/hoenn_safari/safari_pokeblock_hooks.s）
+##  素の FR（JP）HandleInputChooseAction（0x080DE58C）の A ボタンの行き先の分かれ道（CMP r0,#1; BEQ; CMP r0,#1; BGT の 8 バイト）。r0＝カーソルが生きている引数・scratch は r1（直後に使われない）
+HackSafari_ActionHook 080DE5AC 1
+##  素の SafariHandleChooseAction（0x080DEC60）の「LDR r0,=gText_SafariZoneMenu; MOV r1,#2; BL BattlePutTextOnWindow」の 8 バイト。この時点で r0・r1 は死んでいる（scratch r0）
+HackSafari_MenuHook 080DEC78 0
+#[hack] 2026-11-09 patches/0985 FEAT-contest S1: 素の FR(J) Unused_ResetBgControlStruct 0800108C（呼び元 BL 0・参照の語 0・36 バイト・4 バイト境界＝入口 8 バイトを置き換える）を、素の IsContest 08072F2C への BL 110 か所（bytereplacement の CONTEST ブロック）の踏み台 src/hack_contest.c の HackContest_IsContest にする（固定 RAM 0x0203F040 が NULL でなければ 1）
+HackContest_IsContest 0800108C 0
+#[hack] 2026-11-09 patches/0985 FEAT-contest S2c: 素の FR(J) GetBattlerSpriteBGPriorityRank 08076054（呼び元 BL 32・引数が r0 なので入口の語の読み込みは r3（hooks の 3 列目＝S2d で 0 から直した・0 だと引数を壊す）・位置が 0 か 3 なら 2・それ以外 1）を src/hack_contest.c の HackContest_GetBattlerSpriteBGPriorityRank に置き換える（コンテスト中だけ 1＝原文エメラルドと同じ・それ以外は素のとおり）
+HackContest_GetBattlerSpriteBGPriorityRank 08076054 3
+#[hack] 2026-11-09 patches/0985 FEAT-contest S2d: 素の FR(J) LoadMoveBg 080730C8（static・呼び元 BL 2＝Task_FadeToBg と Cmd_changebg・素の US 0x08073924 と機械語が一致・4 バイト境界）を src/hack_contest.c の HackContest_LoadMoveBg に置き換える（コンテスト中だけ原文エメラルドの会場用の置き場・それ以外は素のとおり）
+HackContest_LoadMoveBg 080730C8 3
+#[hack] 2026-11-09 patches/0985 FEAT-contest S2d: 素の FR(J) LoadDefaultBg 08073110（static・呼び元 BL 1＝Task_FadeToBg・push {lr}; bl DrawMainBattleBackground; pop; bx・4 バイト境界）を src/hack_contest.c の HackContest_LoadDefaultBg に置き換える（コンテスト中は会場の絵を戻す・それ以外は素のとおり DrawMainBattleBackground）
+HackContest_LoadDefaultBg 08073110 0
+#[hack] 2026-11-09 patches/0985 FEAT-contest S2d: 素の FR(J) GetBattlerSpriteBGPriority 08076028（呼び元 BL 27・素の US 0x08076884 と機械語が一致・4 バイト境界）を src/hack_contest.c の HackContest_GetBattlerSpriteBGPriority に置き換える（コンテスト中は 2＝原文エメラルドと同じ・それ以外は素のとおり）
+HackContest_GetBattlerSpriteBGPriority 08076028 3
+#[hack] 2026-11-09 patches/0985 FEAT-contest S2d: 素の FR(J) GetBattleAnimBg1Data 08074A44（素の US と機械語が一致・引数 1・入口の語は r3・4 バイト境界）を src/hack_contest.c の HackContest_GetBattleAnimBg1Data に置き換える（コンテスト中はパレット 14・bgId 1・tilesOffset 0＝原文エメラルドと同じ・それ以外は素のとおり）
+HackContest_GetBattleAnimBg1Data 08074A44 3
+#[hack] 2026-11-09 patches/0985 FEAT-contest S2d: 素の FR(J) GetBattleAnimBgData 08074A6C（素の US と機械語が一致・引数 2・入口の語は r3・4 バイト境界）を src/hack_contest.c の HackContest_GetBattleAnimBgData に置き換える（コンテスト中はパレット 14・bgId 1・tilesOffset 0＝原文エメラルドと同じ・それ以外は素のとおり）
+HackContest_GetBattleAnimBgData 08074A6C 3
+#[hack] 2026-11-09 patches/0985 FEAT-contest S2d: 素の FR(J) GetBattleAnimBgDataByPriorityRank 08074AA4（素の US と機械語が一致・引数 2・入口の語は r3・4 バイト境界）を src/hack_contest.c の HackContest_GetBattleAnimBgDataByPriorityRank に置き換える（コンテスト中はパレット 14・bgId 1・tilesOffset 0＝原文エメラルドと同じ・それ以外は素のとおり）
+HackContest_GetBattleAnimBgDataByPriorityRank 08074AA4 3
+#[hack] 2026-11-09 patches/0985 FEAT-contest S3: 素の FR(J) MetatileBehavior_UnusedIsTallGrass 08059830（呼び元 BL 0・参照の語 0・素の ROM 全域の走査と全 task 枝・本流の hooks／bytereplacement／functionrewrites／repoints に記述なし・4 バイト境界・入口 8 バイトを置き換える）を、素の GetBattleBgPaletteNum 08074BF8（4 バイトで hook 不可）への呼び元 BL 2 か所（bytereplacement の CONTEST-PAL ブロック・080DF70C・080DF7D4）の踏み台 src/hack_contest.c の HackContest_GetBattleBgPaletteNum にする（引数なし・コンテスト中は 1＝原文エメラルドと同じ・それ以外は 2＝素のとおり）
+HackContest_GetBattleBgPaletteNum 08059830 0
+#[hack] 2026-11-09 patches/0985 FEAT-contest S5b: 素の FR(J) DisplayPartyPokemonData 0811FA3C（static・呼び元 BL 3＝RenderPartyMenuBox と 8123ABC/8123AC2・push {r4-r7,lr}・4 バイト境界・引数は r0＝手持ちの番号なので入口の語の読み込みは r1）を src/hack_contest_party.c の HackContest_DisplayPartyPokemonData に置き換える（menuType が CONTEST（2）だけ各行に「できる／できない」・それ以外は素と同じ内容）
+HackContest_DisplayPartyPokemonData 0811FA3C 1

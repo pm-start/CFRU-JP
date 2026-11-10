@@ -73,6 +73,7 @@ bool8 HackTrainingPouch_IsTrainingItem(u16 item)
 		case ITEM_LEVEL_DOWN:
 		case ITEM_GENDER_TOOL: //2026-10-06 きょせいどうぐ
 		case ITEM_DANGER_SUGAR: //2026-10-09 あぶないこなざとう
+		case ITEM_RUSTY_CROWN: //2026-10-16 さびたおうかん（個体値を 0 に・patches/0433）
 			return TRUE;
 	}
 	return FALSE;
@@ -270,21 +271,23 @@ void HackBagPage_PrintPocketName(void)
 	VanillaBagPrintTextOnWin1CenteredColor0(pocket == POCKET_ITEMS - 1 ? sBagPageNames[CurrentPage()] : sVanillaPocketNames[pocket], pocket);
 }
 
-//どうぐ のポケットのままページを替える（一覧を消して数え直し、向き 0 の切り替えで作り直す）
-static void ChangePage(u8 taskId, u8 page)
+//一覧の片づけは元のポケットで行い、向き 0 の再構築先だけを明示する。
+//端で -1/3 のポケットを素の切り替えに渡さない（バッグは 0..2）。
+static void ChangePageAndPocket(u8 taskId, u8 page, u8 pocket)
 {
 	u8* disp = sBagMenuDisplayPtr;
 	u16 n;
 
 	PlaySE(SE_BAG_POCKET);
 	VanillaSwitchPockets(taskId, 0, FALSE);   //今の一覧を片づける（カーソルの位置も書き戻す）
+	gBagMenuState.pocket = pocket;
 	VarSet(HACK_VAR_BAG_PAGE, page);
 	StoreBagItemCount();                      //新しいページの道具を前へ寄せて数える
-	n = GetNumItemsInPocket(POCKET_ITEMS - 1);
-	disp[0xA] = n;
-	disp[0xD] = (n + 1 > 6) ? 6 : n + 1;
-	gBagMenuState.cursorPos[0] = 0;
-	gBagMenuState.itemsAbove[0] = 0;
+	n = GetNumItemsInPocket(pocket);
+	disp[0xA + pocket] = n;
+	disp[0xD + pocket] = (n + 1 > 6) ? 6 : n + 1;
+	gBagMenuState.cursorPos[pocket] = 0;
+	gBagMenuState.itemsAbove[pocket] = 0;
 	/* ★ 2026-10-11 ユーザーの動画「持ち物欄の一番下が永遠といけるようになってる・いろんな欄がバグる」:
 	   ここで 0 を返すと、素の入力の処理（Task_BagMenu_HandleInput）はそのまま ListMenu_ProcessInput と ListMenuGetScrollAndRow を
 	   片づけたばかりの一覧（data[0]）で呼び、古いスクロールの位置で上の 0 を書き戻していた → 新しいページの一覧が数より下までスクロールし、
@@ -304,8 +307,8 @@ u8 HackBagPage_ProcessPocketSwitchInput(u8 taskId, u8 pocketId)
 	if (animating && gTasks[taskId].data[BAG_TASK_RESET_CURSOR])   //ページを替えた次のコマ（一覧を作り直す前）
 	{
 		gTasks[taskId].data[BAG_TASK_RESET_CURSOR] = FALSE;
-		gBagMenuState.cursorPos[0] = 0;
-		gBagMenuState.itemsAbove[0] = 0;
+		gBagMenuState.cursorPos[gBagMenuState.pocket] = 0;
+		gBagMenuState.itemsAbove[gBagMenuState.pocket] = 0;
 	}
 
 	if ((sBagMenuDisplayPtr[5] & 0xF) != 0)   //並べ替え・入れ替えの途中
@@ -315,8 +318,9 @@ u8 HackBagPage_ProcessPocketSwitchInput(u8 taskId, u8 pocketId)
 	{
 		if (pocketId == POCKET_ITEMS - 1)
 		{
-			if (page > 0 && !animating)
-				ChangePage(taskId, page - 1);
+			if (!animating)
+				ChangePageAndPocket(taskId, page > 0 ? page - 1 : BAG_PAGE_OTHER,
+					page > 0 ? pocketId : POCKET_POKE_BALLS - 1);
 			return 0;
 		}
 		PlaySE(SE_BAG_POCKET);
@@ -329,11 +333,15 @@ u8 HackBagPage_ProcessPocketSwitchInput(u8 taskId, u8 pocketId)
 		if (pocketId == POCKET_ITEMS - 1 && page < BAG_PAGE_COUNT - 1)
 		{
 			if (!animating)
-				ChangePage(taskId, page + 1);
+				ChangePageAndPocket(taskId, page + 1, pocketId);
 			return 0;
 		}
-		if (pocketId >= POCKET_POKE_BALLS - 1)
+		if (pocketId == POCKET_POKE_BALLS - 1)
+		{
+			if (!animating)
+				ChangePageAndPocket(taskId, BAG_PAGE_OTHER, POCKET_ITEMS - 1);
 			return 0;
+		}
 		PlaySE(SE_BAG_POCKET);
 		return 2;
 	}

@@ -1502,6 +1502,7 @@ BS_075_SkyAttack:
 	call BattleScript_CheckPowerHerb
 	goto BS_MOVE_END
 
+.global BattleScript_FirstChargingTurn @[hack] #35 P5 ゆうだちのもりの台本から呼ぶ
 BattleScript_FirstChargingTurn:
 	attackcanceler
 	printstring 0x130 @;Blank String
@@ -1548,6 +1549,7 @@ PrintElectroShotString:
 	waitmessage DELAY_1SECOND
 	return
 
+.global BattleScript_CheckPowerHerb @[hack] #35 P5
 BattleScript_CheckPowerHerb:
 	waitmessage DELAY_1SECOND
 	jumpifhelditemeffect BANK_ATTACKER ITEM_EFFECT_MAISEN MaisenChargeBS @ [hack] patches/0292 まいせん（ためずに出す・なくならない）
@@ -3112,6 +3114,8 @@ BS_145_SkullBash:
 	jumpifsecondarystatus BANK_ATTACKER STATUS2_MULTIPLETURNS TwoTurnMovesSecondTurnBS
 	jumpifword ANDS HIT_MARKER HITMARKER_NO_ATTACKSTRING TwoTurnMovesSecondTurnBS
 	setbyte TWOTURN_STRINGID, 0x2
+	jumpifmove MOVE_ELECTROSHOT BS_ElectroShotRainCheck @ [hack] patches/0595 エレクトロビームは あめなら 「ためる」を通らない（先に天気を見る）
+BS_SkullBashCharge:
 	call BattleScript_FirstChargingTurn
 	jumpifmove MOVE_METEORBEAM BS_MeteorBeam
 	jumpifmove MOVE_ELECTROSHOT BS_ElectroShot
@@ -3148,12 +3152,28 @@ BS_ElectroShot:
 	waitmessage DELAY_1SECOND
 SkipElectroShotStatBuff:
 	call BattleScript_CheckPowerHerb
-	call BattleScriptCheckRain
 	goto BS_MOVE_END
 
-BattleScriptCheckRain:
-	jumpifweather WEATHER_RAIN_ANY, TwoTurnMovesRaidBossSkipCharge
-	return
+@ [hack] patches/0595 あめのときは ため（STATUS2_MULTIPLETURNS・技のロック）も パワフルハーブの消費も通さず、
+@ 攻撃のキャンセル判定→PP→とくこう+1→そのまま攻撃。天気の見方は C の AttacksThisTurn と同じ（ノーてんき／エアロックで無効・ばんのうがさは関係なし）
+BS_ElectroShotRainCheck:
+	jumpifabilitypresent ABILITY_CLOUDNINE, BS_SkullBashCharge
+	jumpifabilitypresent ABILITY_AIRLOCK, BS_SkullBashCharge
+	jumpifweather WEATHER_RAIN_ANY, BS_ElectroShotRain
+	goto BS_SkullBashCharge
+
+BS_ElectroShotRain:
+	attackcanceler
+	ppreduce
+	setstatchanger STAT_SPATK | INCREASE_1
+	statbuffchange STAT_ATTACKER | STAT_BS_PTR | STAT_CERTAIN SkipElectroShotRainStatBuff
+	jumpifbyte EQUALS MULTISTRING_CHOOSER 0x2 SkipElectroShotRainStatBuff
+	setgraphicalstatchangevalues
+	playanimation BANK_ATTACKER ANIM_STAT_BUFF ANIM_ARG_1
+	printfromtable gStatUpStringIds
+	waitmessage DELAY_1SECOND
+SkipElectroShotRainStatBuff:
+	goto TwoTurnMovesRaidBossSkipCharge
 
 @;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -3299,6 +3319,7 @@ BS_155_Fly:
 	jumpifmove MOVE_DIVE BS_FirstTurnDive
 	jumpifmove MOVE_BOUNCE, BS_FirstTurnBounce
 	jumpifmove MOVE_DIG BS_FirstTurnDig
+	jumpifmove MOVE_LV200_GROUND_120 BS_FirstTurnDig @;[hack] ほりすすむ（#35 P2）: 独自効果は alias が自分自身なので個別に
 	goto BS_FirstTurnSemiInvulnerable
 
 BS_FirstTurnBounce:
@@ -5308,6 +5329,7 @@ BS_212_DragonDance:
 	ppreduce
 	jumpifmove MOVE_SHIFTGEAR ShiftGearBS
 	jumpifmove MOVE_SHELLSMASH ShellSmashBS
+	jumpifmove MOVE_LV200_BUG_140 ShellSmashBS @;[hack] だっぴのごうし（#35 P2）: からをやぶる＋状態異常を治す(治療は A.c の ActivateSuccessfulMove)
 	jumpifmove MOVE_FILLETAWAY FilletAwayBS
 
 DragonDanceBS:
@@ -6051,6 +6073,8 @@ BS_238_Blank:
 BS_239_TeamEffectsAndMagnetRise:
 	attackcanceler
 	jumpifmove MOVE_MAGNETRISE MagnetRiseBS
+	jumpifmove MOVE_LV200_FLYING_120 MagnetRiseBS @;[hack] たかとびのかまえ（#35 P2）: でんじふゆうの枝＋こうげき・すばやさ+1(A.c)
+	jumpifmove MOVE_LV200_FLYING_200 FlyingBarrierBS @;[hack] ひこうのけっかい（#35 P2）
 	attackstringnoprotean
 	ppreduce
 	callasm TailwindLuckyChantFunc
@@ -6072,6 +6096,18 @@ TailWindAbilitiesLoop:
 	copyhword USER_BANK BACKUP_HWORD @;Restore original attacker + target
 	goto BS_MOVE_END
 	
+@;ひこうのけっかい（#35 P2）: 自分側に5ターンの浮遊の印（A.c ActivateSuccessfulMove が flyingBarrierTimer[側]=5）。文は でんじふゆう の既存文を借用（Q1）
+FlyingBarrierBS:
+	attackstringnoprotean
+	ppreduce
+	tryactivateprotean
+	attackanimation
+	waitanimation
+	setword BATTLE_STRING_LOADER MagnetRiseSetString
+	printstring 0x184
+	waitmessage DELAY_1SECOND
+	goto BS_MOVE_END
+
 MagnetRiseBS:
 	attackstringnoprotean
 	ppreduce
@@ -6380,9 +6416,11 @@ Enbucho_RaiseSpd:
 
 @;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-.global BS_252_Blank
-BS_252_Blank:
-	goto BS_STANDARD_HIT
+.global BS_252_Lv200Custom
+BS_252_Lv200Custom:
+	@ callasm は復帰後に台本を5バイト進めるため、C側dispatcherが行き先-5を設定する。
+	@ 未登録・未実装の技は失敗台本へ送り、通常攻撃として成功させない。
+	callasm Lv200CustomMove_Dispatch
 	
 @;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

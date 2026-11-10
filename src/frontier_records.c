@@ -643,7 +643,7 @@ static void PrintCurrentRecords(void)
 	}
 
 	//Get Streaks
-	for (u8 level = 50; level <= 100; level += 50)
+	for (u16 level = 50; level <= 100; level += 50)
 	{
 		for (u8 partySize = 1; partySize <= 6; partySize += 5) //1 represents one record, 6 represents another
 		{

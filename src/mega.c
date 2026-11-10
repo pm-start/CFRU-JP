@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "defines_battle.h"
+#include "shadow_moves.h" //[hack] patches/0963 段 E ダークの間はメガ・Z 不可
 #include "../include/link.h"
 #include "../include/string_util.h"
 #include "../include/constants/items.h"
@@ -64,12 +65,15 @@ u8 HackMomoIce_MegaCount(u8 bank)
 	{
 		if (evolutions[i].method == EVO_NONE)
 			break;
-		if (evolutions[i].method == EVO_MEGA && evolutions[i].param != 0 && evolutions[i].unknown == MEGA_VARIANT_STANDARD)
+		if (evolutions[i].method == EVO_MEGA && evolutions[i].param != 0 && evolutions[i].unknown == MEGA_VARIANT_STANDARD
+		 && evolutions[i].param != ITEM_GARCHOMPITE_X) //[hack] patches/0813 ガブリアスナイトXの行は ももアイスの「何番目のメガ」に数えない（メガガブリアスの二重になる）
 			++count;
 	}
 	return count;
 	#endif
 }
+
+bool8 HackGibleEgg_CanUseX(const struct Pokemon* mon); //[hack] patches/0813 src/hack_gible_egg.c
 
 const struct Evolution* CanMegaEvolve(unusedArg u8 bank, unusedArg bool8 CheckUBInstead)
 {
@@ -78,6 +82,9 @@ const struct Evolution* CanMegaEvolve(unusedArg u8 bank, unusedArg bool8 CheckUB
 	#else
 
 	if (!CheckUBInstead && !MegaEvolutionEnabled(bank)) //Ultra Burst doesn't need Mega Ring
+		return NULL;
+
+	if (Shadow_IsBattlerDark(bank)) //[hack] patches/0963 段 E ダークの間はメガシンカ・ウルトラバーストできない
 		return NULL;
 
 	if (IsMegaZMoveBannedBattle()
@@ -105,9 +112,13 @@ const struct Evolution* CanMegaEvolve(unusedArg u8 bank, unusedArg bool8 CheckUB
 			if ((!CheckUBInstead && evolutions[i].unknown == MEGA_VARIANT_STANDARD) || (CheckUBInstead && evolutions[i].unknown == MEGA_VARIANT_ULTRA_BURST))
 			{
 				if (evolutions[i].param == mon->item)
+				{
+					if (mon->item == ITEM_GARCHOMPITE_X && !HackGibleEgg_CanUseX(mon)) //[hack] patches/0813 ガブリアスナイトXは とくべつなガブリアスだけ
+						continue;
 					return &evolutions[i];
+				}
 
-				if (momoWant != 0xFF) //[hack] patches/0183 ももアイスは選んだ番目のメガ
+				if (momoWant != 0xFF && evolutions[i].param != ITEM_GARCHOMPITE_X) //[hack] patches/0183 ももアイスは選んだ番目のメガ（patches/0813 X の行は数えない）
 				{
 					if (momoIndex == momoWant)
 						return &evolutions[i];
@@ -209,6 +220,7 @@ ability_t GetBankMegaFormAbility(u8 megaBank, u8 foe)
 	return ability;
 }
 
+void HackGibleSwitch_NoteMega(u8 bank); //[hack] patches/0791 src/hack_gible_switch.c
 const u8* DoMegaEvolution(u8 bank)
 {
 	struct Pokemon* mon = GetBankPartyData(bank);
@@ -222,6 +234,7 @@ const u8* DoMegaEvolution(u8 bank)
 		gNewBS->backupAbility = ABILITY(bank); //So Abilities like Delta Stream & Neutralizing Gas are removed properly
 
 		DoFormChange(bank, evolutions->targetSpecies, TRUE, TRUE, TRUE);
+		HackGibleSwitch_NoteMega(bank); //[hack] patches/0791 メガシンカしたターンは メガ↔メガZ の切り替えをしない
 
 		gBattleScripting.bank = bank;
 		gLastUsedItem = mon->item;
@@ -249,12 +262,13 @@ const u8* DoPrimalReversion(u8 bank, u8 caseId)
 	const struct Evolution* evolutions = gEvolutionTable[mon->species];
 	u16 item = mon->item;
 
-	if (item != ITEM_NONE)
 	{
 		for (u8 i = 0; i < EVOS_PER_MON; ++i)
 		{
 			if (evolutions[i].method == EVO_MEGA && evolutions[i].unknown == MEGA_VARIANT_PRIMAL
-			&& (evolutions[i].param == item || item == ITEM_MOMO_ICE)) //[hack] patches/0184 ももアイスでも ゲンシカイキ（2026-10-06）
+			&& ((item != ITEM_NONE && (evolutions[i].param == item || item == ITEM_MOMO_ICE)) //[hack] patches/0184 ももアイスでも ゲンシカイキ（2026-10-06）
+			 || (evolutions[i].param == MOVE_MASAKURUBAITSU && MonKnowsMove(mon, MOVE_MASAKURUBAITSU)) //[hack] patches/0801 2026-10-25 マサクルバイツを覚えたガチゴラス（ゲンシガチゴラス）
+			 || (evolutions[i].param == MOVE_KOKAINOKIBA && MonKnowsMove(mon, MOVE_KOKAINOKIBA)))) //[hack] patches/0952 2026-11-02 こかいのきばを覚えたオルカイザー（ゲンシオルカイザー・Redmine #230）
 			{
 				DoFormChange(bank, evolutions[i].targetSpecies, TRUE, TRUE, TRUE);
 
@@ -596,11 +610,10 @@ const u8* GetTrainerName(u8 bank)
 	}
 	else
 	{
-		u8 class = gTrainers[trainerId].trainerClass;
 		u8* name = NULL;
 
 		if (trainerId < RAID_BATTLE_MULTI_TRAINER_TID)
-			name = TryGetRivalNameByTrainerClass(class);
+			name = TryGetRivalNameByTrainerId(trainerId); //[hack] patches/0386 足したチャンピオン（シロナ・ワタル）は自分の名前
 
 		if (name == NULL)
 		{
@@ -627,6 +640,15 @@ u8* TryGetRivalNameByTrainerClass(unusedArg u8 class)
 		else
 	#endif
 			return NULL;
+}
+
+//[hack] patches/0386 トレーナーの番号で見る版。素の FR のトレーナー（HACK_FR_TRAINER_COUNT より前）だけライバルの名前にする
+u8* TryGetRivalNameByTrainerId(u16 trainerId)
+{
+	if (trainerId >= HACK_FR_TRAINER_COUNT)
+		return NULL;
+
+	return TryGetRivalNameByTrainerClass(gTrainers[trainerId].trainerClass);
 }
 
 void MegaRetrieveData(void)

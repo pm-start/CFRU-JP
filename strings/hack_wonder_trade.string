@@ -298,6 +298,29 @@
 #org @gText_WonderTrade_HoennIntro
 ホウエンの ミラクルこうかんは ちょっと\nとくべつ！\pでんせつや まぼろしの ポケモンが\nまじることも あるし\pいろちがいが くることも あるんだって！
 
+#org @gText_WonderTrade_SinnohIntro
+シンオウの ミラクルこうかんは ちょっと\nとくべつ！\pウルトラビーストや パラドックスの\nポケモンが まじることも あるんだって！\pいろちがいが くることも あるんだって！
+
 #org @gText_WonderTrade_NoSpecialMon
-その ウルガモスは とくべつな
-ポケモンなので だせません
+その ウルガモスは\nとくべつな ポケモンなので だせません
+
+#org @gText_WonderTrade_NoDarkMon
+ダークポケモンは こうかんに だせません
+
+#org @gText_WonderTrade_Notice6V
+6Vの ポケモンが きた！
+
+#org @gText_WonderTrade_NoticeHidden
+かくれとくせいの ポケモンが きた！
+
+#org @gText_WonderTrade_NoticeBoth
+6Vで かくれとくせいの ポケモンが\nきた！
+
+#org @gText_WonderTrade_Price
+1かい 1000えん かかるけど いい？
+
+#org @gText_WonderTrade_NoMoney
+おかねが たりないみたい
+
+#org @gText_WonderTrade_NeedHallOfFame
+でんどういりした トレーナーとだけ\nこうかんしてるんだ

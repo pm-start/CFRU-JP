@@ -1,0 +1,17 @@
+#org @gText_RustyCrown_WhichMon
+どの ポケモンに つかう？
+
+#org @gText_RustyCrown_WhichStat
+どの ちからの こたいちを 0に する？
+
+#org @gText_RustyCrown_Confirm
+[BUFFER1]の [BUFFER2]の\nこたいちは いま [BUFFER3]。\p0に しますか？
+
+#org @gText_RustyCrown_Done
+[BUFFER1]の [BUFFER2]の\nこたいちが 0に なった！
+
+#org @gText_RustyCrown_NoEffect
+[BUFFER1]の [BUFFER2]には\nこうかが ないようだ…
+
+#org @gText_RustyCrown_Egg
+タマゴには つかえません

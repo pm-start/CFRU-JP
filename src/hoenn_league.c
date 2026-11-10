@@ -6,6 +6,7 @@
 #include "Tables/hoenn_script_flags.h"
 #include "Tables/sinnoh_flags.h"
 #include "map_region.h"
+#include "hack_legend_encounter.h"
 
 /*
 hoenn_league.c
@@ -71,10 +72,15 @@ u16 HoennLeagueRematchTrainer(u16 trainerId)
     ★ 2026-10-12 ユーザー（5e 経由）「殿堂入りのあとの戻り先はマサラタウンの家の前（カントー・ホウエンと同じ）」:
       シンオウも印を消すだけで、行き先はマサラ（つづきからの戻る場所もマサラ）。sinnoh_flags.h の SINNOH_LEAGUE_PC_* はもう使わない
 */
+void HackGymTier_OnLeagueClear(void); //[hack] patches/0470 src/hack_gym_tiers.c
+
 void HoennLeague_SetWarpsAfterHallOfFame(void)
 {
 	u8 group = MAP_GROUP_TOWNS, num = MAP_NUM_PALLET_TOWN;
 	s16 x = 6, y = 8;
+
+	HackLegend_OnHallOfFame();	//わたしたちの伝説 10 匹の捕まえた／倒した印を下ろす（また出会える・どの地方の殿堂入りでも）
+	HackGymTier_OnLeagueClear();	//[hack] patches/0470 ジムリーダーの再戦: 「もう戦った」→「まだ」・シンオウの殿堂入りの印（下で SINNOH_FLAG_LEAGUE_HOF が消える前に）
 
 	if (FlagGet(SINNOH_FLAG_LEAGUE_HOF))
 	{
@@ -109,8 +115,8 @@ void HoennLeague_SetWarpsAfterHallOfFame(void)
     ・制覇 2 回目（強化されたリーグ）: 印 HOENN_FLAG_ISLANDS_OPEN を立てる → ミナモの船乗りがみなみのことう・さいはてのことうへ
     ★ 回数（HOENN_VAR_LEAGUE_WINS）は同じ差し替えの中で先に 1 足してある
 */
-extern void CreateHoennRoamer(u16 species, u8 level);   /* src/roamer.c（patches/0093） */
-#define HOENN_ROAMER_LEVEL_LATI 40
+extern void CreateHoennRoamer(u16 species, u16 level);   /* src/roamer.c（patches/0093） */
+#define HOENN_ROAMER_LEVEL_LATI 110 //[hack] 2026-10-17 殿堂入りのあとの徘徊＝チャンピオンの最高以上（tools/kanto/level_curve.py の progress_level('HOENN', 9, 40)・verify_hoenn_islands.py が見る）
 
 void HoennNative_LeagueHallOfFame(void)
 {

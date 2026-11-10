@@ -2,12 +2,12 @@
 #pragma once
 
 //Milestone rewards: given once each when the unlock count is reached. The position is the save flag index.
-#define NUM_ACH_REWARDS 11
+#define NUM_ACH_REWARDS 13
 
 static const struct AchievementReward sAchievementRewards[NUM_ACH_REWARDS] =
 {
 	{5, ITEM_RARE_CANDY, 3},
-	{10, ITEM_ULTRA_BALL, 20},
+	{10, ITEM_GREAT_BALL, 15},
 	{20, ITEM_PP_MAX, 5},
 	{30, ITEM_RARE_CANDY, 10},
 	{40, ITEM_MASTER_BALL, 1},
@@ -17,4 +17,6 @@ static const struct AchievementReward sAchievementRewards[NUM_ACH_REWARDS] =
 	{80, ITEM_GOLD_BOTTLE_CAP, 2},
 	{90, ITEM_ABILITY_PATCH, 3},
 	{100, ITEM_MASTER_BALL, 5},
+	{110, ITEM_EXP_CANDY_XXL, 5},
+	{116, ITEM_MASTER_BALL, 5},
 };

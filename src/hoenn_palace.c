@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "defines_battle.h"
+#include "hack_move_alias.h"
 #include "../include/event_data.h"
 #include "../include/random.h"
 
@@ -39,7 +40,9 @@
  *     エメラルドはその技を選んでから「かなしばりで だせない」などを出す（CFRU の選ぶ画面の確かめは、選び直しを求めるので使えない）
  *   - ねむり・こおりの子が「うまく出せない」を引いたときは、ふつうの技の流れに任せる（ねむり・こおりの判定は CFRU の attackcanceler が行う。
  *     エメラルドは palacetryescapestatus で同じ判定をしてから「うまく出せない」を出す）
- *   - メガシンカ・Z 技・ダイマックス・テラスタルはしない（エメラルドに無い・技を選ぶ画面が無い）
+ *   - メガシンカ・ウルトラバースト・Z 技・ダイマックス・テラスタルは、通常戦の相手の AI と同じ判定（HackAI_ChooseGimmicks）で、
+ *     主人公側の自動操作も相手側も使う（ユーザー 2026-10-20 の許可＝「エメラルドどおり」の例外・BUG-frontier-palace-mega-tera・patches/0631。
+ *     エメラルドに無い・技を選ぶ画面が無いので、主人公側にも AI の判定を使う。持ち物・旗・1 戦に 1 回などの決まりは通常戦のまま）
  */
 
 #define HOENN_FACILITY_PALACE 1             //HOENN_VAR_FRONTIER_FACILITY（0 タワー / 1 パレス）
@@ -352,7 +355,7 @@ static u16 ChooseMoveAndTarget(void)
 	}
 
 	move = gBattleMons[bank].moves[chosen];
-	if (move == MOVE_CURSE)
+	if (MoveIs(move, MOVE_CURSE)) //[hack] のろいと同じ効果元の新技も
 		moveTarget = IsOfType(bank, TYPE_GHOST) ? MOVE_TARGET_SELECTED : MOVE_TARGET_USER;
 	else
 		moveTarget = gBattleMoves[move].target;
@@ -365,11 +368,26 @@ static u16 ChooseMoveAndTarget(void)
 		return chosen | (GetBattlerAtPosition(SIDE(bank) ^ BIT_SIDE) << 8);
 }
 
+void HackAI_ChooseGimmicks(struct ChooseMoveStruct* moveInfo, u8 chosenMoveId, u16 chosenMove); //[hack] patches/0631・src/ai_hack.c
+
 static void EmitPalaceChoice(void)
 {
 	u16 choice = ChooseMoveAndTarget();
+	u8 chosenMoveId = choice & 0xFF;
 
-	EmitMoveChosen(1, choice & 0xFF, choice >> 8, FALSE, FALSE, FALSE, FALSE, FALSE);
+	//ギミック（メガ・ウルトラバースト・Z・ダイマ・テラ）。うまく出せないときは使わない。どちらの側も同じ AI の判定
+	if (!gProtectStructs[gActiveBattler].palaceUnableToUseMove)
+	{
+		struct ChooseMoveStruct* moveInfo = (struct ChooseMoveStruct*)(&gBattleBufferA[gActiveBattler][4]);
+
+		if (chosenMoveId < MAX_MON_MOVES && moveInfo->moves[chosenMoveId] != MOVE_NONE)
+		{
+			gBankTarget = choice >> 8;
+			HackAI_ChooseGimmicks(moveInfo, chosenMoveId, moveInfo->moves[chosenMoveId]);
+		}
+	}
+
+	EmitMoveChosen(1, chosenMoveId, choice >> 8, gNewBS->megaData.chosen[gActiveBattler], gNewBS->ultraData.chosen[gActiveBattler], gNewBS->zMoveData.toBeUsed[gActiveBattler], gNewBS->dynamaxData.toBeUsed[gActiveBattler], gNewBS->terastalData.chosen[gActiveBattler]);
 }
 
 //主人公の技選び（素の命令の表 0x0820D2F4 の CONTROLLER_CHOOSEMOVE・repoints）

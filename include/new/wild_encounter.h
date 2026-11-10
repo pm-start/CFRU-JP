@@ -10,7 +10,8 @@
  */
 
 //Exported Functions
-void CreateWildMon(u16 species, u8 level, u8 monHeaderIndex, bool8 purgeParty);
+void CreateWildMon(u16 species, u16 level, u8 monHeaderIndex, bool8 purgeParty);
+void CreateWildMonNoKind(u16 species, u16 level, u8 monHeaderIndex, bool8 purgeParty); //[hack] patches/0960 印の判定を通らない版（レイド・幽霊戦）
 u8 PickUnownLetter(u16 species, u8 headerIndex);
 void TryUpdateSwarm(void);
 bool8 IsValidSwarmIndex(u8 index);

@@ -87,6 +87,7 @@ AddSingleTmFix:
 	strh r0, [r4, #0x2]
 AddTmToBag:
 	ldrh r0, [r4, #0xA]	@item
+	bl HackLuxrayLove_ShopItem	@[hack] patches/0617 しばり「ぜんぶレントラー」のあいだ 買った道具は リルの あいじょう（モンスターボールだけ そのまま）・r4（タスクのデータ）と r5（taskId）は C が守る
 	ldrh r1, [r4, #0x2]	@qty
 	bl BagAddItem
 	lsl r0, r0, #0x18

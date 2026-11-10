@@ -35,7 +35,7 @@ extern const u32 gHackScsdCoreSize;
 //tools/supercard/core/scsd_core.c の struct ScsdIo と同じ並び
 struct ScsdIo
 {
-	u32 op;        //0 見分け＋RCA の取り直し・1 読む
+	u32 op;        //0 見分け＋RCA の取り直し・1 読む・2 ROM の窓へ書く（lba＝書く番地・n＝バイト数・out＝RAM の元）
 	u32 lba;
 	u32 n;
 	u8 *out;
@@ -432,6 +432,24 @@ bool8 HackScsd_FileRead(void *fs, u32 sector, u32 n, void *out)
 void HackScsd_FileClose(void *fs)
 {
 	Free(fs);
+}
+
+//★ 2026-10-20 曲の窓（src/hack_music_window.c）: RAM の src（2 バイト境界）から ROM の窓の番地 dst へ n バイト（2 の倍数）を書く。
+//中核の op 2（SDRAM を書き込み可にして 16 ビットで書き、モード 1 に戻して読み戻す）。TRUE = 書けて読み戻しも一致。
+//SuperCard でない（mGBA・ほかのカートリッジ）ときは書き込みが効かず読み戻しで食い違う＝FALSE（呼ぶ側は先に HackScsd_FileOpen で SuperCard を確かめる）
+bool8 HackScsd_WriteRom(u32 dst, const void *src, u32 n)
+{
+	struct ScsdIo io;
+
+	if ((dst & 1) || (n & 1) || ((u32) src & 1) || n == 0)
+		return FALSE;
+	io.op = 2;
+	io.lba = dst;
+	io.n = n;
+	io.out = (u8 *) src;
+	io.rca = 0;
+	io.sdhc = 0;
+	return HackScsd_Run(&io) == SCSD_OK;
 }
 
 //SDTEST.BIN を見分けて SDPIC_STATUS に置く（見出し "PKSSDPIC" を確かめる）

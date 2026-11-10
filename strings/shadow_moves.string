@@ -1,0 +1,18 @@
+//ダーク技（段 D・src/shadow_moves.c・assembly/battle_scripts/shadow_move_scripts.s）の戦闘の文。ひらがな・カタカナだけ。
+#org @gText_ShadowSkyStarts
+そらが やみに\nおおわれた！
+
+#org @gText_ShadowSkyContinues
+やみが あたりを\nおおっている！
+
+#org @gText_ShadowSkyEnds
+やみが はれた！
+
+#org @gText_ShadowSkyDamage
+[ATTACKER]は\nやみに むしばまれた！
+
+#org @gText_ShadowShedDone
+かべの こうかが\nきえさった！
+
+#org @gText_ShadowHalfDone
+みんなの たいりょくが\nはんぶんに なった！

@@ -1,3 +1,4 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
 #include "../include/battle_anim.h"
@@ -11,6 +12,7 @@
 #include "../include/new/battle_util.h"
 #include "../include/new/stat_buffs.h"
 #include "../include/new/item_battle_scripts.h"
+#include "lv200_custom_moves.h"
 #include "hack_affection.h" //[hack] patches/0240 なつき度（src/hack_affection.c）
 /*
 stat_buffs.c
@@ -96,7 +98,7 @@ void atk20_jumpifstat(void)
 	u8 value = gBattleMons[bank].statStages[gBattlescriptCurrInstr[3] - 1];
 	s8 comparison = gBattlescriptCurrInstr[4];
 
-	if (ABILITY(bank) == ABILITY_CONTRARY)
+	if (BankHasAbility(bank, ABILITY_CONTRARY))
 	{
 		comparison -= 12;
 		comparison *= - 1;
@@ -146,12 +148,12 @@ void atk48_playstatchangeanimation(void)
 	gActiveBattler = GetBankForBattleScript(T2_READ_8(gBattlescriptCurrInstr + 1));
 	statsToCheck = T2_READ_8(gBattlescriptCurrInstr + 2);
 
-	if (ABILITY(gActiveBattler) == ABILITY_SIMPLE)
+	if (BankHasAbility(gActiveBattler, ABILITY_SIMPLE))
 		flags |= ATK48_STAT_BY_TWO;
 
 	if (flags & ATK48_STAT_NEGATIVE) // goes down
 	{
-		if (ABILITY(gActiveBattler) == ABILITY_CONTRARY)
+		if (BankHasAbility(gActiveBattler, ABILITY_CONTRARY))
 			goto STAT_ANIM_UP;
 
 	STAT_ANIM_DOWN:	;
@@ -175,9 +177,11 @@ void atk48_playstatchangeanimation(void)
 						changeableStatsCount++;
 					}
 				}
-				else if (!CanStatNotBeLowered(currStat, gActiveBattler, (gBattlescriptCurrInstr[1] == BS_GET_TARGET) ? gBankAttacker : gActiveBattler, ability)
-					&& !(AbilityBlocksIntimidate(ability) && IsIntimidateActive())
-					&& !(ability == ABILITY_MIRRORARMOR && gBankAttacker != gBankTarget && gActiveBattler == gBankTarget))
+			else if (Lv200CustomMove_CanLowerStat(gActiveBattler, (gBattlescriptCurrInstr[1] == BS_GET_TARGET) ? gBankAttacker : gActiveBattler,
+				!CanStatNotBeLowered(currStat, gActiveBattler, (gBattlescriptCurrInstr[1] == BS_GET_TARGET) ? gBankAttacker : gActiveBattler, ability))
+					&& !((AbilityBlocksIntimidate(ability) || AbilityBlocksIntimidate(SecondAbility_OfBank(gActiveBattler))) && IsIntimidateActive()) //[hack] 2026-10-20 2 つ目
+			&& !Lv200CustomMove_ShouldReflectStatDrop(gActiveBattler, gBankAttacker,
+				ability == ABILITY_MIRRORARMOR && gBankAttacker != gBankTarget && gActiveBattler == gBankTarget))
 				{
 					if (STAT_STAGE(gActiveBattler, currStat) > STAT_STAGE_MIN)
 					{
@@ -200,7 +204,7 @@ void atk48_playstatchangeanimation(void)
 
 	else // goes up
 	{
-		if (ABILITY(gActiveBattler) == ABILITY_CONTRARY)
+		if (BankHasAbility(gActiveBattler, ABILITY_CONTRARY))
 			goto STAT_ANIM_DOWN;
 
 	STAT_ANIM_UP:	;
@@ -212,7 +216,9 @@ void atk48_playstatchangeanimation(void)
 
 		while (statsToCheck != 0)
 		{
-			if (statsToCheck & 1 && gBattleMons[gActiveBattler].statStages[currStat - 1] < 12)
+			if (statsToCheck & 1
+			&& Lv200CustomMove_CanRaiseStat(gActiveBattler, gBankAttacker, TRUE)
+			&& gBattleMons[gActiveBattler].statStages[currStat - 1] < 12)
 			{
 				statAnimId = startingStatAnimId + currStat;
 				changeableStatsCount++;
@@ -231,7 +237,7 @@ void atk48_playstatchangeanimation(void)
 
 	if (gNewBS->SpectralThiefActive)
 	{
-		if (ABILITY(gActiveBattler) == ABILITY_CONTRARY)
+		if (BankHasAbility(gActiveBattler, ABILITY_CONTRARY))
 		{
 			statAnimId = STAT_ANIM_MULTIPLE_MINUS1; //Invert stat changes
 			changeableStatsCount = 0xFF;
@@ -309,10 +315,12 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 
 	if ((statValue << 0x18) < 0) // stat decrease
 	{
-		if (ABILITY(gActiveBattler) == ABILITY_CONTRARY) //★ Champions（patches/0070） あまのじゃくは Z 技の追加効果にも効く（ユーザー判断）
+		if (BankHasAbility(gActiveBattler, ABILITY_CONTRARY)) //★ Champions（patches/0070） あまのじゃくは Z 技の追加効果にも効く（ユーザー判断）
 			goto RAISE_STAT_BUFF;
 
 	LOWER_STAT_BUFF:
+	if (!Lv200CustomMove_CanLowerStat(gActiveBattler, gBankAttacker, TRUE))
+		return STAT_CHANGE_DIDNT_WORK;
 		if (ITEM_EFFECT(gActiveBattler) == ITEM_EFFECT_MOMO_ICE) //[hack] patches/0175 ももアイスは能力が下がらない（相手の技も自分の技も）
 		{
 			if (flags == STAT_CHANGE_BS_PTR)
@@ -353,8 +361,8 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 		}
 		else if (BankSideHasMist(gActiveBattler)
 		&& !certain
-		&& gCurrentMove != MOVE_CURSE
-		&& ABILITY(gBankAttacker) != ABILITY_INFILTRATOR)
+		&& !MoveIs(gCurrentMove, MOVE_CURSE)
+		&& !BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR))
 		{
 			if (flags == STAT_CHANGE_BS_PTR)
 			{
@@ -373,7 +381,7 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 			return STAT_CHANGE_DIDNT_WORK;
 		}
 
-		else if (gCurrentMove != MOVE_CURSE
+		else if (!MoveIs(gCurrentMove, MOVE_CURSE)
 			  && notProtectAffected != TRUE
 			  && JumpIfMoveAffectedByProtect(gCurrentMove, gBankAttacker, gBankTarget, TRUE))
 		{
@@ -383,7 +391,7 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 
 		else if ((IsClearBodyAbility(ability)
 			  || (ability == ABILITY_FLOWERVEIL && IsOfType(gActiveBattler, TYPE_GRASS)))
-		&& !certain && gCurrentMove != MOVE_CURSE)
+		&& !certain && !MoveIs(gCurrentMove, MOVE_CURSE))
 		{
 			if (flags == STAT_CHANGE_BS_PTR)
 			{
@@ -407,8 +415,8 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 
 		else if (gBattleTypeFlags & BATTLE_TYPE_DOUBLE
 		&& IsOfType(gActiveBattler, TYPE_GRASS)
-		&& ABILITY(PARTNER(gActiveBattler)) == ABILITY_FLOWERVEIL
-		&& !certain && gCurrentMove != MOVE_CURSE)
+		&& BankHasAbility(PARTNER(gActiveBattler), ABILITY_FLOWERVEIL)
+		&& !certain && !MoveIs(gCurrentMove, MOVE_CURSE))
 		{
 			if (flags == STAT_CHANGE_BS_PTR)
 			{
@@ -429,7 +437,7 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 		}
 
 		else if ((AbilityPreventsLoweringStat(ability, statId)
-			  || (IsIntimidateActive() && AbilityBlocksIntimidate(ability)))
+			  || (IsIntimidateActive() && (AbilityBlocksIntimidate(ability) || AbilityBlocksIntimidate(SecondAbility_OfBank(gActiveBattler))))) //[hack] 2026-10-20 2 つ目
 		&& !certain)
 		{
 			if (flags == STAT_CHANGE_BS_PTR)
@@ -450,7 +458,7 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 			return STAT_CHANGE_DIDNT_WORK;
 		}
 		else if (ITEM_EFFECT(gActiveBattler) == ITEM_EFFECT_CLEAR_AMULET
-			&& !certain && gCurrentMove != MOVE_CURSE)
+			&& !certain && !MoveIs(gCurrentMove, MOVE_CURSE))
 		{
 			if (flags == STAT_CHANGE_BS_PTR)
 			{
@@ -473,7 +481,9 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 			}
 			return STAT_CHANGE_DIDNT_WORK;
 		}
-		else if (ability == ABILITY_MIRRORARMOR && !affectsUser && gBankAttacker != gBankTarget && gActiveBattler == gBankTarget)
+	else if (Lv200CustomMove_ShouldReflectStatDrop(gActiveBattler, gBankAttacker,
+		ability == ABILITY_MIRRORARMOR) && !affectsUser
+	&& gBankAttacker != gBankTarget && gActiveBattler == gBankTarget)
 		{
 			if (flags == STAT_CHANGE_BS_PTR)
 			{
@@ -536,10 +546,15 @@ u8 ChangeStatBuffs(s8 statValue, u8 statId, u8 flags, const u8* BS_ptr)
 	//Stat Increase
 	else
 	{
-		if (ABILITY(gActiveBattler) == ABILITY_CONTRARY) //★ Champions（patches/0070）
+		if (BankHasAbility(gActiveBattler, ABILITY_CONTRARY)) //★ Champions（patches/0070）
 			goto LOWER_STAT_BUFF;
 
 	RAISE_STAT_BUFF:
+	if (!Lv200CustomMove_CanRaiseStat(gActiveBattler, gBankAttacker, TRUE))
+	{
+		gBattleCommunication[MULTISTRING_CHOOSER] = 2;
+		return STAT_CHANGE_DIDNT_WORK;
+	}
 		statValue = GET_STAT_BUFF_VALUE(statValue);
 
 		if (ability == ABILITY_SIMPLE /*★ Champions（patches/0070） たんじゅんは Z 技の追加効果にも効く */)
@@ -615,7 +630,7 @@ u8 CanStatNotBeLowered(u8 statId, u8 bankDef, u8 bankAtk, u16 defAbility)
 
 	if (STAT_STAGE(bankDef, statId) == STAT_STAGE_MIN)
 		return STAT_AT_MIN;
-	else if (BankSideHasMist(bankDef) && bankDef != bankAtk && ABILITY(bankAtk) != ABILITY_INFILTRATOR)
+	else if (BankSideHasMist(bankDef) && bankDef != bankAtk && !BankHasAbility(bankAtk, ABILITY_INFILTRATOR))
 		return STAT_PROTECTED_BY_MIST;
 
 	if (IsClearBodyAbility(defAbility)
@@ -623,7 +638,7 @@ u8 CanStatNotBeLowered(u8 statId, u8 bankDef, u8 bankAtk, u16 defAbility)
 	|| ITEM_EFFECT(bankDef) == ITEM_EFFECT_CLEAR_AMULET
 	|| ITEM_EFFECT(bankDef) == ITEM_EFFECT_MOMO_ICE) //[hack] patches/0175
 		return STAT_PROTECTED_BY_GENERAL_ABILITY;
-	else if (ABILITY(PARTNER(bankDef)) == ABILITY_FLOWERVEIL && IsOfType(bankDef, TYPE_GRASS))
+	else if (BankHasAbility(PARTNER(bankDef), ABILITY_FLOWERVEIL) && IsOfType(bankDef, TYPE_GRASS))
 		return STAT_PROTECTED_BY_PARTNER_ABILITY;
 	else if (AbilityPreventsLoweringStat(defAbility, statId))
 		return STAT_PROTECTED_BY_SPECIFIC_ABILITY;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../global.h"
+#include "../constants/vars.h"
 #include "dynamax.h"
 
 //Exported Functions
@@ -20,7 +21,7 @@ bool8 IsGSCupBattle();
 bool8 IsRandomBattleTowerBattle();
 bool8 RayquazaCanMegaEvolveInFrontierBattle();
 bool8 DynamaxAllowedInTier(u8 tier);
-u8 GetBattleFacilityLevel(u8 tier);
+u16 GetBattleFacilityLevel(u8 tier);
 void UpdateTypesForCamomons(u8 bank);
 u8 GetCamomonsTypeByMon(struct Pokemon* mon, u8 whichType);
 //u8 GetCamomonsTypeBySpread(struct BattleTowerSpread* spread, u8 whichType); - Defined further down
@@ -46,7 +47,7 @@ bool8 IsMonBannedInTier(struct Pokemon* mon, u8 tier);
 u16 GetCurrentBattleTowerStreak(void);
 u16 GetBattleMineStreak(u8 type, u8 tier);
 u16 GetMaxBattleTowerStreakForTier(u8 tier);
-u16 GetBattleTowerStreak(u8 currentOrMax, u16 inputBattleStyle, u16 inputTier, u16 partySize, u8 level);
+u16 GetBattleTowerStreak(u8 currentOrMax, u16 inputBattleStyle, u16 inputTier, u16 partySize, u16 level);
 
 //Functions Hooked In:
 u16 sp052_GenerateFacilityTrainer(void);
@@ -85,7 +86,7 @@ enum BattleFacilities
 	NUM_BATTLE_FACILITIES,
 };
 
-#define BATTLE_FACILITY_NUM VarGet(0x403A) //Temp Var
+#define BATTLE_FACILITY_NUM VarGet(VAR_BATTLE_FACILITY_NUM)
 
 enum
 {

@@ -20,6 +20,8 @@
 #include "../include/constants/items.h"
 #include "../include/constants/songs.h"
 #include "Tables/hoenn_script_flags.h"
+#include "hoenn_frontier_level.h"
+#include "hoenn_frontier_rec.h"
 
 /*
  * ホウエンのバトルピラミッド（#5・2026-10-03 ユーザー「全部一気に」→「エメラルドどおりで一気に」）。
@@ -122,8 +124,8 @@ struct HoennPyramidData
 };
 #define PYRAMID_BAG_IN_USE 0x8000
 #define PYRAMID_BAG_ITEMS_COUNT 10
-//バトルバッグ（エメラルドの frontier.pyramidBag）: レベルごとに 10 枠・素のバッグと同じ ItemSlot（数は暗号化したまま）・0x51C6〜0x51ED
-#define PYRAMID_BAG_SLOTS ((struct ItemSlot *)&gExpandedVars[HOENN_VAR_PYRAMID_BAG - 0x5000])
+//バトルバッグ（エメラルドの frontier.pyramidBag）: レベルごと（50・オープン・49・100 の 4 つ・BagSlots()）に 10 枠・素のバッグと同じ ItemSlot（数は暗号化したまま）・0x51C6〜0x51ED
+#define PYRAMID_BAG_SLOTS ((struct ItemSlot *)HoennFrontierRec_ExpVar(HOENN_VAR_PYRAMID_BAG))
 #define gBagPocketsCFRU ((struct BagPocketsCFRU *)0x20397D8)   //src/item.c の gBagPockets
 struct BagPocketsCFRU
 {
@@ -140,7 +142,7 @@ struct BagPocketsCFRU
 };
 #define HOENN_PYRAMID_DATA_FIRST 0x51B7
 #define HOENN_PYRAMID_DATA_LAST 0x51C5
-#define PYR ((struct HoennPyramidData *)&gExpandedVars[HOENN_VAR_PYRAMID_DATA - 0x5000])
+#define PYR ((struct HoennPyramidData *)HoennFrontierRec_ExpVar(HOENN_VAR_PYRAMID_DATA))   //★ 2026-10-20 移した変数は追加のセーブ領域の入れ物の中（src/hoenn_frontier_rec.c）
 
 struct BackupMapLayoutFR { s32 width; s32 height; u16 *map; };
 #define VMap (*(struct BackupMapLayoutFR *)0x03005080)   //素 FRLG の VMap（MapGridGetMetatileIdAt 08058704 が読む）
@@ -164,7 +166,7 @@ bool8 HoennHill_OnFloor(void); //src/hoenn_trainer_hill.c
 
 static u8 LvlMode(void)
 {
-	return VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0 ? FRONTIER_LVL_OPEN : FRONTIER_LVL_50;
+	return HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE)) ? FRONTIER_LVL_OPEN : FRONTIER_LVL_50;
 }
 
 static u16 Floor(void)
@@ -172,9 +174,43 @@ static u16 Floor(void)
 	return VarGet(HOENN_VAR_TOWER_BATTLE_NUM);
 }
 
+//連勝（抜けた階の数）と最高。レベル49・100（mode 2・3）は別の記録（追加のセーブ領域・src/hoenn_frontier_rec.c）・50 とオープンは今までの予約変数
+static u16 PyrStreakGet(u16 mode, bool8 max)
+{
+	if (HOENN_LVL_SEPARATE(mode))
+		return HoennFrontierRec_Get(HFR_FAC_PYRAMID, 0, mode, max);
+	return VarGet((max ? HOENN_VAR_PYRAMID_MAX_STREAK : HOENN_VAR_PYRAMID_STREAK) + HOENN_LVL_OPENCLASS(mode));
+}
+
+static void PyrStreakSet(u16 mode, bool8 max, u16 value)
+{
+	if (HOENN_LVL_SEPARATE(mode))
+		HoennFrontierRec_Set(HFR_FAC_PYRAMID, 0, mode, max, value);
+	else
+		VarSet((max ? HOENN_VAR_PYRAMID_MAX_STREAK : HOENN_VAR_PYRAMID_STREAK) + HOENN_LVL_OPENCLASS(mode), value);
+}
+
+//バトルバッグの置き場（2026-10-22 BUG-pyramid-bag-4modes・エメラルドは lvlMode ごとにバッグを持つ）: 50・オープン・49・100 の 4 つが別々。
+//50・オープンは今までの予約変数 0x51C6〜（HOENN_VAR_PYRAMID_BAG・10 枠ずつ 2 面）・49・100 は追加のセーブ領域（HFR v3 の pyrBag・src/hoenn_frontier_rec.c）。
+//HoennFrontierRec_PyramidBag は呼ぶたびに入れ物を dirty にする（次のレポートで書く）。LvlMode()（野生・拾い物の 50側／オープン側の表選び）とは別
+static struct ItemSlot* BagSlots(void)
+{
+	u16 mode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
+
+	if (HOENN_LVL_SEPARATE(mode))
+		return (struct ItemSlot*) HoennFrontierRec_PyramidBag(mode);
+	return PYRAMID_BAG_SLOTS + HOENN_LVL_OPENCLASS(mode) * PYRAMID_BAG_ITEMS_COUNT;
+}
+
+//連勝中の旗（activeFlags）の bit: 50 = 0・オープン = 1・49 = 2・100 = 3（bit15 はバトルバッグ）
+static u8 ActiveBit(u16 mode)
+{
+	return HOENN_LVL_SEPARATE(mode) ? mode : HOENN_LVL_OPENCLASS(mode);
+}
+
 static u16 WinStreak(void)
 {
-	return VarGet(HOENN_VAR_PYRAMID_STREAK + LvlMode());
+	return PyrStreakGet(VarGet(HOENN_VAR_TOWER_LVL_MODE), FALSE);
 }
 
 static u32 Round(void)
@@ -192,6 +228,12 @@ bool8 HoennPyramid_OnFloor(void)
 static bool8 OnTop(void)
 {
 	return gSaveBlock1->location.mapGroup == HOENN_PYRAMID_FLOOR_GROUP && gSaveBlock1->location.mapNum == HOENN_PYRAMID_TOP_NUM;
+}
+
+//階か頂上にいるか（ピラミッドの中のレポート・src/hoenn_tower.c の HoennPyramid_SaveBegin）
+bool8 HoennPyramid_OnFloorOrTop(void)
+{
+	return HoennPyramid_OnFloor() || OnTop();
 }
 
 /* ---- 階の型・部屋の並び（エメラルドどおり） ----------------------------------------------------------- */
@@ -803,12 +845,14 @@ void HoennPyramid_GenerateWildMon(void)
 		for (i = 0; i < 3; ++i)
 			if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) != SPECIES_NONE)
 				best = MathMax(best, GetMonData(&gPlayerParty[i], MON_DATA_LEVEL, NULL));
+		if (VarGet(HOENN_VAR_TOWER_LVL_MODE) == HOENN_LVL_MODE_100) //★ レベル100 は手持ちに関係なく 100
+			best = 100;
 		lvl = (s32) best - wildMons[id].lvl;
 		lvl = lvl - 5 + (s32) (Random() % 11);
 	}
 	else
 	{
-		lvl = wildMons[id].lvl - 5 + (s32) (Random() % 11);
+		lvl = wildMons[id].lvl - 5 + (s32) (Random() % 11) + (HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE)) - 50); //★ レベル49 は 1 つ下げる
 	}
 	if (lvl < 1)
 		lvl = 1;
@@ -861,11 +905,11 @@ void HoennPyramid_WriteFlashBuffer(u8 flashLevel)
 /* ---- スクリプトから（エメラルドの CallBattlePyramidFunction・Var8004 で選ぶ） ------------------------------------ */
 static void InitPyramidChallenge(void)
 {
-	u32 lvlMode = LvlMode();
+	u16 mode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
 
 	VarSet(HOENN_VAR_TOWER_BATTLE_NUM, 0);
-	if (!(PYR->activeFlags & (1 << lvlMode)))
-		VarSet(HOENN_VAR_PYRAMID_STREAK + lvlMode, 0);
+	if (!(PYR->activeFlags & (1 << ActiveBit(mode))))
+		PyrStreakSet(mode, FALSE, 0);
 	gTrainerBattleOpponent_A = 0;
 	gBattleOutcome = 0;
 }
@@ -879,38 +923,40 @@ static void InitPyramidChallenge(void)
 #define PYRAMID_DATA_WIN_STREAK_ACTIVE_OPEN 6
 #define PYRAMID_DATA_TRAINER_FLAGS 7
 
+//占い師（受付）の 3〜6 は HoennTower_LvlMenuToClass が Var8007 に入れた選択（0 = 50・1 = オープン・2 = 49・3 = 100）に合わせる
+//（50 の欄＝50 か 49・オープンの欄＝オープンか 100）
 static void GetBattlePyramidData(void)
 {
-	u32 lvlMode = LvlMode();
+	u16 curMode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
 
 	switch (Var8005) {
 		case PYRAMID_DATA_PRIZE:
 			gSpecialVar_LastResult = PYR->prize;
 			break;
 		case PYRAMID_DATA_WIN_STREAK:
-			gSpecialVar_LastResult = VarGet(HOENN_VAR_PYRAMID_STREAK + lvlMode);
+			gSpecialVar_LastResult = PyrStreakGet(curMode, FALSE);
 			break;
 		case PYRAMID_DATA_WIN_STREAK_ACTIVE:
-			gSpecialVar_LastResult = (PYR->activeFlags >> lvlMode) & 1;
+			gSpecialVar_LastResult = (PYR->activeFlags >> ActiveBit(curMode)) & 1;
 			break;
 		case PYRAMID_DATA_WIN_STREAK_50:
-			gSpecialVar_LastResult = VarGet(HOENN_VAR_PYRAMID_STREAK + FRONTIER_LVL_50);
+			gSpecialVar_LastResult = PyrStreakGet((Var8007 == HOENN_LVL_MODE_49) ? HOENN_LVL_MODE_49 : HOENN_LVL_MODE_50, FALSE);
 			break;
 		case PYRAMID_DATA_WIN_STREAK_OPEN:
-			gSpecialVar_LastResult = VarGet(HOENN_VAR_PYRAMID_STREAK + FRONTIER_LVL_OPEN);
+			gSpecialVar_LastResult = PyrStreakGet((Var8007 == HOENN_LVL_MODE_100) ? HOENN_LVL_MODE_100 : HOENN_LVL_MODE_OPEN, FALSE);
 			break;
 		case PYRAMID_DATA_WIN_STREAK_ACTIVE_50:
-			gSpecialVar_LastResult = PYR->activeFlags & 1;
+			gSpecialVar_LastResult = (PYR->activeFlags >> ActiveBit((Var8007 == HOENN_LVL_MODE_49) ? HOENN_LVL_MODE_49 : HOENN_LVL_MODE_50)) & 1;
 			break;
 		case PYRAMID_DATA_WIN_STREAK_ACTIVE_OPEN:
-			gSpecialVar_LastResult = (PYR->activeFlags >> 1) & 1;
+			gSpecialVar_LastResult = (PYR->activeFlags >> ActiveBit((Var8007 == HOENN_LVL_MODE_100) ? HOENN_LVL_MODE_100 : HOENN_LVL_MODE_OPEN)) & 1;
 			break;
 	}
 }
 
 static void SetBattlePyramidData(void)
 {
-	u32 lvlMode = LvlMode();
+	u16 curMode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
 	u32 i;
 
 	switch (Var8005) {
@@ -918,13 +964,13 @@ static void SetBattlePyramidData(void)
 			PYR->prize = Var8006;
 			break;
 		case PYRAMID_DATA_WIN_STREAK:
-			VarSet(HOENN_VAR_PYRAMID_STREAK + lvlMode, Var8006);
+			PyrStreakSet(curMode, FALSE, Var8006);
 			break;
 		case PYRAMID_DATA_WIN_STREAK_ACTIVE:
 			if (Var8006)
-				PYR->activeFlags |= (1 << lvlMode);
+				PYR->activeFlags |= (1 << ActiveBit(curMode));
 			else
-				PYR->activeFlags &= ~(1 << lvlMode);
+				PYR->activeFlags &= ~(1 << ActiveBit(curMode));
 			break;
 		case PYRAMID_DATA_TRAINER_FLAGS: //エメラルドの pyramidTrainerFlags（負けたとき 255 = 全員戦った扱い）
 			for (i = 0; i < MAX_PYRAMID_TRAINERS; ++i)
@@ -970,6 +1016,8 @@ static void SeedPyramidFloor(void)
 		FlagClear(PYRAMID_TRAINER_FLAG_BASE + i);
 }
 
+void HoennPyramid_ApplyBag (void);   //下で定義（バトルバッグの表の向け直し・検算が本体を探す綴りと変えてある）
+
 //道具の玉（エメラルドの SetPickupItem）→ Var8000 = 道具・Var8001 = 1
 static void SetPickupItem(void)
 {
@@ -1002,6 +1050,7 @@ static void SetPickupItem(void)
 	else
 		Var8000 = sPickupItemsLvl50[round][sPickupItemSlots[i][1]];
 	Var8001 = 1;
+	HoennPyramid_ApplyBag();   //歩いて入った床は地図の読み込みで表が素のバッグに戻っている: 拾う前にバトルバッグへ向け直す（IN_USE が無ければ何もしない）
 }
 
 //拾った玉を消す（エメラルドの HidePyramidItem: 旗ではなく置き場を画面の外へ）
@@ -1143,13 +1192,13 @@ static void ShowPostBattleHintText(void)
 
 static void UpdatePyramidWinStreak(void)
 {
-	u32 lvlMode = LvlMode();
-	u16 streak = VarGet(HOENN_VAR_PYRAMID_STREAK + lvlMode);
+	u16 mode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
+	u16 streak = PyrStreakGet(mode, FALSE);
 
 	if (streak < 999)
-		VarSet(HOENN_VAR_PYRAMID_STREAK + lvlMode, ++streak);
-	if (streak > VarGet(HOENN_VAR_PYRAMID_MAX_STREAK + lvlMode))
-		VarSet(HOENN_VAR_PYRAMID_MAX_STREAK + lvlMode, streak);
+		PyrStreakSet(mode, FALSE, ++streak);
+	if (streak > PyrStreakGet(mode, TRUE))
+		PyrStreakSet(mode, TRUE, streak);
 }
 
 static void GetCurrentBattlePyramidLocation(void)
@@ -1254,14 +1303,37 @@ void HoennPyramid_GetHint(void)
 //src/item.c の SetMemoryForBagStorage のあと（patches/0131）: バトルバッグを使っている間は「どうぐ」をその 10 枠に・ほかは 0 枠
 void HoennPyramid_ApplyBag(void)
 {
+	struct ItemSlot* slots;
+
+	//★ 2026-11-03 perf-region-3: ピラミッドの 3 つの地図（受付・階・頂上＝同じ群の 25〜27）の外では何もしない。
+	//  PYRAMID_BAG_IN_USE を立てるのは受付の HoennPyramid_TakeBattleBag だけ・下ろすのは受付の台本／緊急脱出／タイトルの後始末の ReturnBattleBag（どれも IN_USE のあと
+	//  この 3 つの地図の外へ出ない）なので、外では IN_USE は立っておらず 答えは変わらない。外で PYR-> を読むと、野外へ戻る 1 回（CB2_ReturnToFieldLocal）が
+	//  追加のセーブ領域の入れ物をフラッシュから読み（約 87,000 サイクル＝0.3 コマ）、入れ物を dirty にしていた。検算 tools/rom/verify_perf_region_3.py
+	if (gSaveBlock1->location.mapGroup != HOENN_PYRAMID_FLOOR_GROUP
+	 || gSaveBlock1->location.mapNum < HOENN_PYRAMID_LOBBY_NUM || gSaveBlock1->location.mapNum > HOENN_PYRAMID_TOP_NUM)
+		return;
 	if (!(PYR->activeFlags & PYRAMID_BAG_IN_USE))
 		return;
-	gBagPocketsCFRU->itemRam = PYRAMID_BAG_SLOTS + LvlMode() * PYRAMID_BAG_ITEMS_COUNT;
+	//★ 2026-10-21 BUG-pyramid-held-items-B: エメラルドは ピラミッドの中の AddBagItem／RemoveBagItem／CheckBagHasItem／CheckBagHasSpace を
+	//  道具の種類（ポケット）に関わらず全部バトルバッグ（10 枠）へ向ける（item.c の AddPyramidBagItem 等）。素の関数は道具のポケットで表を選ぶので、
+	//  5 つのポケットの表を全部この 10 枠に向ける（きのみ・ボール・わざマシンも入る）。一覧に出すのは「どうぐ」だけ（src/item.c StoreBagItemCount）
+	slots = BagSlots();
+	gBagPocketsCFRU->itemRam = slots;
 	gBagPocketsCFRU->itemAmount = PYRAMID_BAG_ITEMS_COUNT;
-	gBagPocketsCFRU->keyItemAmount = 0;
-	gBagPocketsCFRU->pokeBallAmount = 0;
-	gBagPocketsCFRU->tmAmount = 0;
-	gBagPocketsCFRU->berryAmount = 0;
+	gBagPocketsCFRU->keyItemRam = slots;
+	gBagPocketsCFRU->keyItemAmount = PYRAMID_BAG_ITEMS_COUNT;
+	gBagPocketsCFRU->pokeBallRam = slots;
+	gBagPocketsCFRU->pokeBallAmount = PYRAMID_BAG_ITEMS_COUNT;
+	gBagPocketsCFRU->tmRam = slots;
+	gBagPocketsCFRU->tmAmount = PYRAMID_BAG_ITEMS_COUNT;
+	gBagPocketsCFRU->berryRam = slots;
+	gBagPocketsCFRU->berryAmount = PYRAMID_BAG_ITEMS_COUNT;
+}
+
+//バトルバッグを使っている間か（src/item.c の一覧の数え方が見る: 「どうぐ」以外のポケットの一覧は 0 件にする）
+bool8 HoennPyramid_BagIsApplied(void)
+{
+	return (PYR->activeFlags & PYRAMID_BAG_IN_USE) != 0;
 }
 
 //src/move_menu.c（patches/0131）: 施設の戦いでもピラミッドの中ならバッグを開ける（エメラルドの BATTLE_TYPE_FRONTIER_NO_PYRAMID）
@@ -1281,7 +1353,7 @@ void HoennPyramid_TakeBattleBag(void)
 	HoennPyramid_ApplyBag();
 	if (fresh)
 	{
-		struct ItemSlot* slots = PYRAMID_BAG_SLOTS + LvlMode() * PYRAMID_BAG_ITEMS_COUNT;
+		struct ItemSlot* slots = BagSlots();
 
 		for (i = 0; i < PYRAMID_BAG_ITEMS_COUNT; ++i)
 		{
@@ -1294,49 +1366,136 @@ void HoennPyramid_TakeBattleBag(void)
 	gSpecialVar_LastResult = fresh;
 }
 
-//挑戦のポケモンの持ち物をバトルバッグへ（エメラルドの DoBattlePyramidMonsHaveHeldItem + TryStoreHeldItemsInPyramidBag）。
-//入った子は一時変数 0x4006 の印（選んだ順・ビット）・LASTRESULT = 0 持ち物なし / 1 全部入った / 2 入りきらない子がいる（その子は持ったまま）
-#define VAR_TEMP_STORED 0x4006
+//バトルバッグ（10 枠）への出し入れを自分で数えて行う（2026-10-21・実機: 満杯でも素の AddBagItem が TRUE を返して何も入らず消えた）。数は平文
+#define PYRAMID_BAG_SLOT_MAX 99    //エメラルドの MAX_BAG_ITEM_CAPACITY（include/constants/items.h）。素の AddBagItem（床の拾い物）は 9999 のまま
+static struct ItemSlot* PyramidBagSlots(void)
+{
+	return BagSlots();
+}
+
+//入れられたら TRUE。道具の種類は問わない（エメラルドの AddPyramidBagItem はポケットで選り分けない・2026-10-21 BUG-pyramid-held-items-B）・同じ物の枠に足せなければ空き枠・無ければ FALSE
+static bool8 PyramidBagAdd(u16 item)
+{
+	struct ItemSlot* slots = PyramidBagSlots();
+	u32 i;
+
+	if (item == ITEM_NONE)
+		return FALSE;
+	for (i = 0; i < PYRAMID_BAG_ITEMS_COUNT; ++i)
+		if (slots[i].itemId == item && slots[i].quantity > 0 && slots[i].quantity < PYRAMID_BAG_SLOT_MAX)
+		{
+			++slots[i].quantity;
+			return TRUE;
+		}
+	for (i = 0; i < PYRAMID_BAG_ITEMS_COUNT; ++i)
+		if (slots[i].itemId == ITEM_NONE || slots[i].quantity == 0)
+		{
+			slots[i].itemId = item;
+			slots[i].quantity = 1;
+			return TRUE;
+		}
+	return FALSE;
+}
+
+static void PyramidBagRemoveOne(u16 item)
+{
+	struct ItemSlot* slots = PyramidBagSlots();
+	u32 i;
+
+	for (i = 0; i < PYRAMID_BAG_ITEMS_COUNT; ++i)
+		if (slots[i].itemId == item && slots[i].quantity > 0)
+		{
+			if (--slots[i].quantity == 0)
+				slots[i].itemId = ITEM_NONE;
+			return;
+		}
+}
+
+//挑戦のポケモンがピラミッドの中で持ち物を変えていたら、その持ち物をバトルバッグへ（エメラルドの TryStoreHeldItemsInPyramidBag の代わり）。
+//★ 2026-10-21 BUG-battle-pyramid-held-items: エメラルドは終わりに元の手持ちの持ち物まで消してバトルバッグへ移していた
+//  （「ピラミッドで手に入れた物は持ち出せない」）。ユーザー報告「元の持ち物が預けられず、クリア時に没収される」→ 元の手持ち（SavePlayerParty の退避）の
+//  持ち物はそのまま返し（スクリプトの SP_LOAD_PARTY が読み戻す）、バトルバッグに入るのは「挑戦の中で変わった物」だけにする。
+//  入れ替え・外したときにバッグへ入った元の持ち物は、元の子に戻るので 1 個バッグから除く（二重になるのを防ぐ）。
+//★ 2026-10-21 BUG-pyramid-held-items-B（ユーザー「パソコンに送るな。エメラルドの処理に合わせて」→「エメラルド通りにして」）:
+//  入りきらない物はパソコンへ送らない。エメラルドと同じく、入らなかった物は挑戦の子に持たせたまま残し、スクリプトが
+//  「バトルバッグの物をすてる／もたせた物を取る・すてる」の整理（PickItemsToKeep）を、全部の子の持ち物が無くなるまで繰り返す。
+//  元の持ち物と同じまま変わっていない子は、ここで持ち物を外す（元の持ち物は SP_LOAD_PARTY で元の子に戻るため、整理の対象にしない）。
+//LASTRESULT = 0 移す物なし / 1 全部バトルバッグに入った / 2 入りきらない物が子に残った（整理が要る）
 void HoennPyramid_StoreHeldItems(void)
 {
 	u32 i;
-	u16 stored = 0, none = TRUE, full = FALSE;
+	u16 packed = VarGet(HOENN_VAR_TOWER_SELECTED);
+	u16 moved = 0, left = FALSE;
 
 	for (i = 0; i < 3; ++i)
 	{
-		u16 item = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL);
+		u8 slot = (packed >> (3 * i)) & 7;
+		u16 item, orig, none = ITEM_NONE;
 
-		if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_NONE || item == ITEM_NONE)
+		if (slot < 1 || slot > PARTY_SIZE || GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
 			continue;
-		none = FALSE;
-		if (AddBagItem(item, 1))
-			stored |= 1 << i;
+		item = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL);
+		orig = GetMonData(&gSaveBlock1->playerParty[slot - 1], MON_DATA_HELD_ITEM, NULL);
+		if (item == orig)
+		{
+			if (item != ITEM_NONE)
+				SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &none);   //元の持ち物は元の子に戻る（整理の対象にしない）
+			continue;
+		}
+		if (orig != ITEM_NONE)
+			PyramidBagRemoveOne(orig);
+		if (item == ITEM_NONE)
+			continue;
+		moved = TRUE;
+		if (PyramidBagAdd(item))
+			SetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, &none);
 		else
-			full = TRUE;
+			left = TRUE;
 	}
-	VarSet(VAR_TEMP_STORED, stored);
-	gSpecialVar_LastResult = none ? 0 : (full ? 2 : 1);
+	gSpecialVar_LastResult = !moved ? 0 : (left ? 2 : 1);
+}
+
+//エメラルドの DoBattlePyramidMonsHaveHeldItem: 挑戦の子のだれかがまだ持ち物を持っているか → LASTRESULT
+void HoennPyramid_DoMonsHaveHeldItem(void)
+{
+	u32 i;
+
+	gSpecialVar_LastResult = FALSE;
+	for (i = 0; i < 3; ++i)
+		if (GetMonData(&gPlayerParty[i], MON_DATA_SPECIES, NULL) != SPECIES_NONE
+		 && GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL) != ITEM_NONE)
+		{
+			gSpecialVar_LastResult = TRUE;
+			break;
+		}
+}
+
+//持ち物の整理の間だけ立てる印（手持ちの画面の行動表を「取る／すてる／やめる」にする・src/party_menu.c）。スクリプトの中だけで立って降りるので保存されない
+#define PYRAMID_PICK_MODE 0x4000
+void HoennPyramid_PickModeStart(void)
+{
+	PYR->activeFlags |= PYRAMID_PICK_MODE;
+}
+
+void HoennPyramid_PickModeEnd(void)
+{
+	PYR->activeFlags &= ~PYRAMID_PICK_MODE;
+}
+
+bool8 HoennPyramid_PickModeOn(void)
+{
+	return (PYR->activeFlags & PYRAMID_PICK_MODE) != 0;
+}
+
+bool8 HoennPyramid_PickBagAdd(u16 item)
+{
+	return PyramidBagAdd(item);
 }
 
 //バトルバッグを返してふつうのバッグに戻す（ポケットの表を作り直す）
 void HoennPyramid_ReturnBattleBag(void)
 {
-	PYR->activeFlags &= ~PYRAMID_BAG_IN_USE;
+	(void) BagSlots();   //49・100 のバッグは追加のセーブ領域の入れ物の中: 直後のレポート（終わり）で中身が書かれるよう dirty にする（ポインタ越しの書き込みは dirty を立てない）
+	PYR->activeFlags &= ~(PYRAMID_BAG_IN_USE | PYRAMID_PICK_MODE);
 	SetMemoryForBagStorage();
-}
-
-//元の手持ちの、挑戦に出た子の持ち物を消す（エメラルドの ClearPyramidPartyHeldItems）。Var8005 = 消す子の印（選んだ順・ビット）
-void HoennPyramid_ClearHeldItems(void)
-{
-	u16 packed = VarGet(HOENN_VAR_TOWER_SELECTED);
-	u16 none = ITEM_NONE;
-	u32 i;
-
-	for (i = 0; i < 3; ++i)
-	{
-		u8 slot = (packed >> (3 * i)) & 7;
-
-		if ((Var8005 & (1 << i)) && slot >= 1 && slot <= PARTY_SIZE)
-			SetMonData(&gPlayerParty[slot - 1], MON_DATA_HELD_ITEM, &none);
-	}
 }

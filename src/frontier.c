@@ -245,7 +245,7 @@ const u8* const sBattleCircusEffectDescriptions[] =
 };
 
 //This file's functions:
-static u8 AdjustLevelForTier(u8 level, u8 tier);
+static u16 AdjustLevelForTier(u16 level, u8 tier);
 static void LoadProperStreakData(u8* facilityNum, u8* currentOrMax, u8* battleStyle, u8* tier, u8* partySize, u8* level);
 
 u8 GetFrontierTrainerClassId(u16 trainerId, u8 battlerNum)
@@ -341,7 +341,7 @@ const u8* GetFrontierTrainerName(u16 trainerId, u8 battlerNum)
 				name = gRaidPartners[partnerId].name;
 			break;
 		default:
-			name = TryGetRivalNameByTrainerClass(gTrainers[trainerId].trainerClass);
+			name = TryGetRivalNameByTrainerId(trainerId); //[hack] patches/0386 足したチャンピオン（シロナ・ワタル）は自分の名前
 			if (name == NULL) //Rival name isn't tied to a trainer class
 				name = gTrainers[trainerId].trainerName;
 			break;
@@ -511,7 +511,7 @@ bool8 DynamaxAllowedInTier(u8 tier)
 	return FALSE;
 }
 
-u8 GetBattleFacilityLevel(u8 tier)
+u16 GetBattleFacilityLevel(u8 tier)
 {
 	return AdjustLevelForTier(VarGet(VAR_BATTLE_FACILITY_POKE_LEVEL), tier);
 }
@@ -1212,7 +1212,7 @@ u16 GetMaxBattleTowerStreakForTier(u8 tier)
 	return max;
 }
 
-static u8 AdjustLevelForTier(u8 level, u8 tier)
+static u16 AdjustLevelForTier(u16 level, u8 tier)
 {
 	if (IsLittleCupTier(tier))
 		return 5;
@@ -1223,9 +1223,18 @@ static u8 AdjustLevelForTier(u8 level, u8 tier)
 	return level;
 }
 
-u16 GetBattleTowerStreak(u8 currentOrMax, u16 inputBattleStyle, u16 inputTier, u16 partySize, u8 level)
+bool8 HoennFrontierRec_TowerStreak(u8 currentOrMax, u16* out); //src/hoenn_frontier_rec.c
+
+u16 GetBattleTowerStreak(u8 currentOrMax, u16 inputBattleStyle, u16 inputTier, u16 partySize, u16 level)
 {
 	u8 facilityNum = BATTLE_FACILITY_NUM;
+	u16 recStreak;
+
+	//[hack] ホウエンのタワーでレベル49・100 のときは別の記録（追加のセーブ領域）。「今の施設」の読み出し（引数が全部既定）だけ回す
+	if (inputBattleStyle == 0xFFFF && inputTier == 0xFFFF && partySize == 0xFFFF && level == 0
+	 && HoennFrontierRec_TowerStreak(currentOrMax, &recStreak))
+		return recStreak;
+
 	u8 battleStyle = (inputBattleStyle == 0xFFFF) ? VarGet(VAR_BATTLE_FACILITY_BATTLE_TYPE) : inputBattleStyle;
 	u8 tier = (inputTier == 0xFFFF) ? VarGet(VAR_BATTLE_FACILITY_TIER) : inputTier;
 	u8 size = (partySize == 0xFFFF) ? VarGet(VAR_BATTLE_FACILITY_POKE_NUM) : partySize;
@@ -1258,7 +1267,7 @@ void sp055_UpdateBattleFacilityStreak(void)
 	u8 battleStyle = VarGet(VAR_BATTLE_FACILITY_BATTLE_TYPE);
 	u8 tier = VarGet(VAR_BATTLE_FACILITY_TIER);
 	u8 partySize = VarGet(VAR_BATTLE_FACILITY_POKE_NUM);
-	u8 level = AdjustLevelForTier(VarGet(VAR_BATTLE_FACILITY_POKE_LEVEL), tier);
+	u16 level = AdjustLevelForTier(VarGet(VAR_BATTLE_FACILITY_POKE_LEVEL), tier);
 	LoadProperStreakData(&facilityNum, &dummy, &battleStyle, &tier, &partySize, &level);
 
 	u16* currentStreak, *maxStreak;
@@ -1912,7 +1921,7 @@ void sp072_LoadBattleCircusEffects(void)
 void sp073_ModifyTeamForBattleTower(void)
 {
 	u8 tier = VarGet(VAR_BATTLE_FACILITY_TIER);
-	u8 level = (tier == BATTLE_FACILITY_LITTLE_CUP || tier == BATTLE_FACILITY_LC_CAMOMONS) ? 5
+	u16 level = (tier == BATTLE_FACILITY_LITTLE_CUP || tier == BATTLE_FACILITY_LC_CAMOMONS) ? 5
 			 : (IS_SINGLE_100_RECORD_TIER(tier)) ? 100 : VarGet(VAR_BATTLE_FACILITY_POKE_LEVEL);
 
 	level = MathMax(1, MathMin(level, MAX_LEVEL));

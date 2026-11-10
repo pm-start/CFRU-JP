@@ -80,6 +80,16 @@ void HackMonId_PackComp(void* comp, u32 v)
 	c[C_BALL] = (c[C_BALL] & 0x1F) | (((v >> 29) & 7) << 5);
 }
 
+//★ 2026-10-15 patches/0393 ボールの番号は 32 以上がある（わたしたちのボール 32〜37）: 縮めた形のボールの欄は下 5 ビットしか残らない
+//  （上の 3 ビットは ID）ので、6 本目のビット（0x20）は +0x13 の bit0（isBadEgg・いつも 0）に入れる。前のセーブはこのビットが 0＝今までのボールのまま。
+//  戻すときは ClearSpare が復元（HackMonId_PackBall は PackComp の前に呼ぶ＝ボールの欄がまだ元の値のとき）
+#define SANITY_BALL_HI 0x01
+void HackMonId_PackBall(void* comp)
+{
+	u8* c = comp;
+	c[OFF_SANITY] = (c[OFF_SANITY] & ~SANITY_BALL_HI) | ((c[C_BALL] >> 5) & SANITY_BALL_HI);
+}
+
 void HackMonId_ClearSpare(struct BoxPokemon* mon)   //80 バイトの形に戻したあと、入れ物のビットを消す
 {
 	u8* b = (u8*) mon;
@@ -88,9 +98,9 @@ void HackMonId_ClearSpare(struct BoxPokemon* mon)   //80 バイトの形に戻�
 	b[OFF_MARKINGS] &= 0x0F;
 	b[OFF_LANG] &= 0x07;
 	Wr16(b + B_METINFO, Rd16(b + B_METINFO) & ~(3 << 13));
-	b[OFF_SANITY] &= 0x0F;
 	b[OFF_TERA] &= 0x1F;
-	b[B_BALL] &= 0x1F;
+	b[B_BALL] = (b[B_BALL] & 0x1F) | ((b[OFF_SANITY] & SANITY_BALL_HI) << 5);   //★ patches/0393 6 本目のボールのビットを +0x13 の bit0 から戻す
+	b[OFF_SANITY] &= 0x0E;                                                        //上の 4 ビット（ID）と bit0（ボールのビット）を消す
 }
 
 u32 HackMonId_Get(const struct BoxPokemon* mon)
@@ -170,6 +180,69 @@ void HackMonId_MakeMoemon(struct BoxPokemon* mon)
 	HackMonId_Set(mon, (tid & 0xFFFF) | (sid << 16));
 }
 
+//★ 2026-10-20 FEAT-gible-moemon-tenp クチバのフカマルのタマゴ（src/hack_gible_egg.c）: タマゴを作るときに 1/16 で決める。
+//  ユーザー「クチバでもらえるフカマル、1/16で（添付の）ガブリアスになるmoemonにして」「タマゴのときにmoemonかどうか決まる」。
+//  当たり＝裏 ID を「フカマル・ガバイト・ガブリアス（メガ・メガZも）が Kogasa の絵（0443-2・0444-2・0445-2）になる」当たりに（下の TENP_SID）。
+//  はずれ＝裏 ID を Moémon の当たりでないものに＝この子は一生ふつうの絵（性格値の 1/16 は裏 ID があるので見ない）。色違いはどちらも（タマゴは必ず色違い）。
+//  DPE の src/hack_moemon.c の HackMoemon_Slot（Tenp の絵を選ぶ式・メガは ガブリアスの絵）と同じ式。
+#define TENP_PICK_WANT 1       //どの種族の絵の数（4・4・5）でも 2 枚目（-2）になる＝ 1 % 4 == 1 % 5 == 1
+#define TENP_SID_MASK 3        //メガの絵を ガブリアスの -2 に替える印（ふつうの当たりに混ざる割合を 1/4 に減らす）
+#define TENP_SID_BITS 3
+#define TENP_SID(x) (MOEMON_HIT_OF(x) && MOEMON_PICK_OF(x) % MOEMON_PICK_LCM == TENP_PICK_WANT && (((x) & TENP_SID_MASK) == TENP_SID_BITS))
+
+bool8 HackMonId_RollTenp(void)   //★ 2026-10-28 BUG-moemon-special-gabu ユーザー「クチバのがガブリアスは全部これになる」＝1/16 をやめて全員 Tenp の当たり（Moémon OFF のあいだはふつうの絵）
+{
+	return TRUE;
+}
+
+//★ 2026-10-28 FIX-gible-tenp-old-saves: 0.61.x までに配った「はずれ」のクチバのフカマル系を、つづきからで Tenp の当たりに直す（HackVersionFix_GibleTenp・src/hack_gible_egg.c）。
+//  id は今の ID（0 = まだ無い）・shiny は今の色違い。もう Tenp の当たりなら id をそのまま返す（何度呼んでも同じ）。直すときは色違いを保つ（表 ^ 裏 < 8）。通常色なら < 8 にならない表 ID
+u32 HackMonId_ToTenp(u32 id, bool8 shiny, u32 pers)
+{
+	u32 h = pers * 0x9E3779B1u, n = 0, want, k, sid = 0, tid;
+
+	if (id != 0 && TENP_SID(id >> 16))
+		return id;
+	h ^= h >> 15;
+	h *= 0x85EBCA6Bu;
+	h ^= h >> 13;                       //性格値から決める（乱数でなく・同じ子は何度やっても同じ・子ごとに違う ID＝技の回数や上の桁の表の鍵が混ざらない）
+	for (k = 0; k < 0x10000; ++k)       //Tenp の当たりの裏 ID は 15 個ほど: その中から n 番目を選ぶ（均等）
+	{
+		if (TENP_SID(k))
+			++n;
+	}
+	want = (h >> 8) % n;
+	for (k = 0; k < 0x10000; ++k)
+	{
+		if (TENP_SID(k) && want-- == 0)
+		{
+			sid = k;
+			break;
+		}
+	}
+	if (shiny)
+		tid = sid ^ (h & 7);                //色違い: 裏 ID と XOR して 8 未満（0〜7）
+	else
+		tid = sid ^ (0x100 | (h & 0xFF));   //通常色: 8 以上
+	return (tid & 0xFFFF) | (sid << 16);
+}
+
+void HackMonId_MakeClubGible(struct BoxPokemon* mon, bool8 tenp)
+{
+	u32 start = Random(), k, sid = 0, tid;
+
+	for (k = 0; k < 0x10000; ++k)
+	{
+		sid = (start + k) & 0xFFFF;
+		if (tenp ? TENP_SID(sid) : !MOEMON_HIT_OF(sid))
+			break;
+	}
+	do
+		tid = sid ^ (Random() % SHINY_THRESHOLD);   //タマゴは必ず色違い
+	while ((tid & 0xFFFF) == 0 && sid == 0);
+	HackMonId_Set(mon, (tid & 0xFFFF) | (sid << 16));
+}
+
 //★ 2026-10-11 ホウエンのミラクル交換（src/hack_wonder_trade.c）: 性格値を作り直さず（6.5）、自身の ID を色違いの当たりにする。
 //  裏 ID は PickSid（Moémon の当たり・はずれは性格値の式のまま）・表 ID は裏 ID と XOR して SHINY_THRESHOLD 未満に
 void HackMonId_MakeShiny(struct BoxPokemon* mon)
@@ -199,6 +272,14 @@ static void SetIdParts(struct BoxPokemon* mon, bool8 shiny, bool8 moemon)
 	HackMonId_Set(mon, (tid & 0xFFFF) | (sid << 16));
 }
 
+//★ 2026-10-16 patches/0429 ミラクル交換のバッジの倍（src/hack_wonder_trade.c）: 色違い・Moémon の当たりを自身の ID だけで決め直す（性格値は触らない・6.5）
+void HackMonId_SetParts(struct BoxPokemon* mon, bool8 shiny, bool8 moemon)
+{
+	HackMonId_Ensure(mon);
+	SetIdParts(mon, shiny, moemon);
+}
+
+#ifdef HACK_DEBUG_MENU   //★ 2026-10-16 patches/0417 ふだんの版に入れない（呼ぶのはデバッグメニューだけ）
 void HackMonId_SetShiny(struct BoxPokemon* mon, bool8 on)
 {
 	HackMonId_Ensure(mon);
@@ -209,6 +290,13 @@ void HackMonId_SetMoemon(struct BoxPokemon* mon, bool8 on)
 {
 	HackMonId_Ensure(mon);
 	SetIdParts(mon, HackMonId_IsShinyBox(mon), on);
+}
+#endif
+
+//★ 2026-10-15 patches/0393 わたしたち 10 人の手持ち（src/hack_watashitachi.c）: 色違いかつ Moémon の当たりの ID（性格値は触らない・6.5）
+void HackMonId_MakeShinyMoemon(struct BoxPokemon* mon)
+{
+	SetIdParts(mon, TRUE, TRUE);
 }
 
 void HackMonId_Ensure(struct BoxPokemon* mon)
@@ -226,6 +314,15 @@ bool8 HackMonId_IsMoemonHit(const struct BoxPokemon* mon)   //萌えもんの当
 	return MOEMON_HIT_OF(id >> 16);
 }
 
+//箱の縮めた 58 バイト（CompressedPokemon）のまま、HackMonId_IsMoemonHit と同じ定義で当たりか（0.63.1 Moémon の世代の控え・箱を 80 バイト形に直さずに数える）
+bool8 HackMonId_CompIsMoemonHit(const struct CompressedPokemon* comp)
+{
+	u32 id = HackMonId_UnpackComp(comp);
+	if (id == 0)
+		return MOEMON_HIT_OF(comp->personality) && !HackMoemonSwitch_IsOldMon(comp->personality);
+	return MOEMON_HIT_OF(id >> 16);
+}
+
 bool8 HackMonId_IsShinyBox(const struct BoxPokemon* mon)
 {
 	u32 id = HackMonId_Get(mon);
@@ -237,8 +334,6 @@ bool8 HackMonId_IsMonShiny(struct Pokemon* mon)
 {
 	return HackMonId_IsShinyBox((struct BoxPokemon*) mon);
 }
-
-extern struct CompressedPokemon* const sPokemonBoxPtrs[25];   //20〜25 箱（棚でない箱・src/pokemon_storage_system.c）
 
 //functionrewrites: IsShinyOtIdPersonality 08043AE4
 bool8 HackMonId_IsShinyOtIdPersonality(u32 otId, u32 personality)
@@ -256,8 +351,6 @@ bool8 HackMonId_IsShinyOtIdPersonality(u32 otId, u32 personality)
 		//今の箱（パソコンの画面）。棚の箱は入れ物にあるときだけ見る（ここでフラッシュから読み込まない＝野生を作るたびに呼ばれる）
 		u8 box = StorageGetCurrentBox();
 		const u8* base = (const u8*) BoxShelf_PeekBoxMons(box);
-		if (base == NULL && BoxShelf_ShelfIndex(box) < 0 && box < 25)
-			base = (const u8*) sPokemonBoxPtrs[box];
 		for (i = 0; base != NULL && i < IN_BOX_COUNT; ++i)
 		{
 			const u8* c = base + i * sizeof(struct CompressedPokemon);
@@ -290,8 +383,6 @@ u32 HackMonId_MoemonKey(u32 personality)
 	{
 		u8 box = StorageGetCurrentBox();
 		const u8* base = (const u8*) BoxShelf_PeekBoxMons(box);
-		if (base == NULL && BoxShelf_ShelfIndex(box) < 0 && box < 25)
-			base = (const u8*) sPokemonBoxPtrs[box];
 		for (i = 0; base != NULL && i < IN_BOX_COUNT; ++i)
 		{
 			const u8* c = base + i * sizeof(struct CompressedPokemon);

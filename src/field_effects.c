@@ -20,6 +20,7 @@
 #include "../include/new/follow_me.h"
 #include "../include/new/overworld.h"
 #include "../include/new/util.h"
+#include "hack_mining.h" //[hack] patches/0873
 
 #define gFieldEffectObjectPaletteInfo0 (void*) 0x83693C8
 #define gFieldEffectObjectPaletteInfo1 (void*) 0x83693D0
@@ -830,6 +831,9 @@ void ChooseMiningSpotToShow(void)
 
 bool8 IsValidMiningSpot(s16 x, s16 y)
 {
+	return HackMining_IsDiggable(x, y); //[hack] patches/0873 Rボタンの走査は使わない（目の前の 0xA7 のかべで今日まだなら）
+
+	#if 0 //元の処理
 	u32 i;
 	u32 total = GetNumMiningSpots();
 
@@ -840,6 +844,7 @@ bool8 IsValidMiningSpot(s16 x, s16 y)
 	}
 	
 	return FALSE;
+	#endif
 }
 
 #endif

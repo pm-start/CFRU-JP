@@ -45,6 +45,16 @@ extern const u8 gText_BwrMain_Continue[], gText_BwrMain_NewGame[], gText_BwrMain
 extern const u8 gText_BwrMain_NetTrade[];   //★ 2026-10-12 ネット交換（strings/hack_network_trade.string）
 void CB2_NetTradeFromMain(void);   //src/hack_network_trade.c
 extern const u8 gText_BwrMain_OldSave1[], gText_BwrMain_OldSave2[];   //★ 2026-10-11 古いレポート
+extern const u8 gText_BwrMain_NewSave1[], gText_BwrMain_NewSave2[], gText_BwrMain_NewSave3[], gText_BwrMain_NewSave4[];   //★ 2026-10-15 新しい版のレポート
+extern const u8 gText_BwrMain_NeedTool1[], gText_BwrMain_NeedTool2[], gText_BwrMain_NeedTool3[], gText_BwrMain_NeedTool4[], gText_BwrMain_NeedTool5[];   //★ 2026-10-16 L 案: 古い形のレポート（セーブデータ移行ツールが要る）
+bool8 BoxShelf_IsOldFormat(void);   //src/hack_box_shelf.c
+extern const u8 gText_BwrMain_GiftChoice1[], gText_BwrMain_GiftChoice2[], gText_BwrMain_GiftChoiceNormal[], gText_BwrMain_GiftChoiceCode[];   //★ 2026-10-21 ふしぎなもらいもの の最初の選び（パスワードを いつも聞かない）
+extern const u8 gText_BwrMain_ConfirmNewGame1[], gText_BwrMain_ConfirmNewGame2[], gText_BwrMain_ConfirmYes[], gText_BwrMain_ConfirmNo[];   //★ 2026-10-15 さいしょから の確認
+extern const u8 gText_BwrMain_EscapeAsk1[], gText_BwrMain_EscapeAsk2[], gText_BwrMain_EscapeAsk3[];   //★ 2026-10-24 緊急脱出の確認（strings/hack_emergency_escape.string・patches/0751）
+void HackEscape_OnContinue(void);   //src/hack_emergency_escape.c
+bool8 HackSaveVersion_IsTooOld(u16 saved);   //src/hack_save_version.c（★ 2026-10-15）
+bool8 HackSaveVersion_IsTooNew(u16 saved);
+bool8 HackSaveCrypt_NewerKeyPresent(void);   //src/hack_save_crypt.c（★ 2026-10-21 段階 3・この ROM が鍵を持たない新しい版の区画があるか）
 extern const u8 gText_BwrMain_Team[], gText_BwrMain_Badges[], gText_BwrMain_Dex[], gText_BwrMain_Time[];
 extern void CB2_BwOptionMenu(void);   //src/bw_option_menu.c
 u8 GetAllBadgeCount(void);            //src/badge_count.c
@@ -60,6 +70,11 @@ void HackSaveVersion_OnContinue(void);   //src/hack_save_version.c
 #define IsMysteryGiftEnabled ((bool8 (*)(void)) (0x0806DAB0 | 1))   //素（このハックは bytereplacement でいつも TRUE＝ふしぎなもらいもの はいつも出る）
 
 enum { SAVED, SELECTED, ROUTE, AVATAR };
+//★ 2026-10-15 さいしょから の確認（ユーザー「案 (a)」）: data[HAS_REPORT]＝レポートがある（版で形 0 にする前の形が 0 でない）・
+//  data[CONFIRM_CURSOR]＝はい 0／いいえ 1。素の A の処理（Task_HandleMainMenuAPressed）が読むのは data[0]／data[1]。
+//  素へ渡す前に 2 つとも 0 に戻す（素が data[6]／data[7] を使うかは decomp で見ていない＝念のため）
+#define HAS_REPORT 6
+#define CONFIRM_CURSOR 7
 enum { ROUTE_NONE, ROUTE_OPTIONS, ROUTE_TITLE, ROUTE_GIFT, ROUTE_GIFT_MSG, ROUTE_NET_TRADE };
 
 //★ 2026-10-12 ネット交換（pm-start/enchanted-network-trade・src/hack_network_trade.c）: ふしぎなもらいもの の並び（形 2）は
@@ -94,6 +109,7 @@ static const u16 sTextPal[] = {0, 0x7BDE, 0x4631, 0x7E87, 0x51A7};
 static const u16 sFemaleNamePal[] = {0x2D3F, 0x2115};
 
 static void Task_BwMainInput(u8 taskId);
+static void OpenGiftChoice(u8 taskId);
 
 static void Print(const u8 *text, u8 x, u8 y, u8 color)
 {
@@ -223,6 +239,7 @@ static void Task_BwMainRoute(u8 taskId)
 //★ 2026-10-11 シリアルコード（patches/0329）: まず合言葉の入力画面（12 文字）へ。戻ったら HackSerial_AfterInput が結果の文を gStringVar4 に入れ、
 //  メニューを開き直してこのタスクで出す（data[ROUTE] = ROUTE_GIFT_MSG）。何も打たずに けってい なら今までの おくりもの
 static void CB2_BwMainGiftAfterInput(void);
+static void CB2_BwMainGiftAfterInput1(void);
 
 static void Task_BwMainGift(u8 taskId)
 {
@@ -235,7 +252,8 @@ static void Task_BwMainGift(u8 taskId)
 		FreeAllWindowBuffers();
 		DestroyTask(taskId);
 		gStringVar1[0] = EOS;
-		DoNamingScreen(NAMING_SCREEN_ENTER_PASSWORD, gStringVar1, 0, 0, 0, CB2_BwMainGiftAfterInput);
+		gStringVar2[0] = EOS;
+		DoNamingScreen(NAMING_SCREEN_ENTER_PASSWORD_1_OF_2, gStringVar1, 0, 0, 0, CB2_BwMainGiftAfterInput1);
 		return;
 	}
 	if (data[ROUTE] == ROUTE_GIFT_MSG)
@@ -260,11 +278,30 @@ static void Task_BwMainGift(u8 taskId)
 	}
 }
 
+//1／2 から戻る: 空なら今までの空の扱い・字があれば gStringVar2 に退避して 2／2 を開く（日本語版の名前入力は 5〜8 字の作りで 12 字が描けないため 6 字ずつ 2 回）
+static void CB2_BwMainGiftAfterInput1(void)
+{
+	if (gStringVar1[0] == EOS)
+	{
+		gStringVar2[0] = EOS;
+		CB2_BwMainGiftAfterInput();
+		return;
+	}
+	StringCopy(gStringVar2, gStringVar1);
+	gStringVar1[0] = EOS;
+	DoNamingScreen(NAMING_SCREEN_ENTER_PASSWORD_2_OF_2, gStringVar1, 0, 0, 0, CB2_BwMainGiftAfterInput);
+}
+
 //入力画面から戻る（DoNamingScreen の戻り先）
 static void CB2_BwMainGiftAfterInput(void)
 {
 	u8 taskId;
 
+	if (gStringVar1[0] != EOS || gStringVar2[0] != EOS)
+	{
+		StringAppend(gStringVar2, gStringVar1);   //1／2 ＋ 2／2（空のときは gStringVar1 が空のまま今までの扱い）
+		StringCopy(gStringVar1, gStringVar2);
+	}
 	HackSerial_AfterInput();
 	BwMainMenuReopen();
 	taskId = FindTaskIdByFunc(Task_BwMainInput);
@@ -273,6 +310,200 @@ static void CB2_BwMainGiftAfterInput(void)
 		gTasks[taskId].data[ROUTE] = ROUTE_GIFT_MSG;
 		gTasks[taskId].func = Task_BwMainGift;
 	}
+}
+
+//★ 2026-10-15 ユーザー「案 (a)」: レポートがあるとき（新しすぎる・古すぎるで つづきから が出ない形も）、さいしょから を選んだら
+//  「さいしょから はじめると いまの レポートが きえます。よろしいですか？」の はい／いいえ（初期位置は いいえ・いいえ／B でメニューへ）。
+//  レポートの無いカートリッジ（形 0 で HAS_REPORT 0）では聞かない。さいしょから の並びは 形 0 で 0 行目・形 1／2 で 1 行目。
+//  判定だけの関数（ホストの検算 tools/build/verify_save_version_guard.py が clang でそのまま組む・ほかを呼ばない）
+static bool8 NeedsNewGameConfirm(const s16 *data)
+{
+	return data[HAS_REPORT] && data[SELECTED] == (data[SAVED] ? 1 : 0);
+}
+
+static void PrintNewGameConfirm(s16 *data)
+{
+	static const u8 sCursor[] = {0xEF, EOS};   //▶（素の文字コード・src/hack_save_slot.c と同じ）
+
+	FillWindowPixelBuffer(0, PIXEL_FILL(0));
+	Print(gText_BwrMain_ConfirmNewGame1, 16, 8, 1);
+	Print(gText_BwrMain_ConfirmNewGame2, 16, 24, 1);
+	Print(gText_BwrMain_ConfirmYes, 32, 48, 1);
+	Print(gText_BwrMain_ConfirmNo, 32, 64, 1);
+	Print(sCursor, 16, data[CONFIRM_CURSOR] ? 64 : 48, 1);
+	CopyWindowToVram(0, 3);
+}
+
+static void Task_BwMainConfirm(u8 taskId)
+{
+	s16 *data = gTasks[taskId].data;
+
+	if (gPaletteFade->active)
+		return;
+	if (JOY_NEW(DPAD_UP | DPAD_DOWN))
+	{
+		PlaySE(SE_SELECT);
+		data[CONFIRM_CURSOR] ^= 1;
+		PrintNewGameConfirm(data);
+	}
+	else if (JOY_NEW(B_BUTTON) || (JOY_NEW(A_BUTTON | START_BUTTON) && data[CONFIRM_CURSOR]))
+	{
+		PlaySE(SE_SELECT);   //いいえ／B: メニューを開き直す（ふしぎなもらいもの の文から戻るのと同じ・先に窓を返す）
+		FreeAllWindowBuffers();
+		BwMainMenuReopen();
+	}
+	else if (JOY_NEW(A_BUTTON | START_BUTTON))
+	{
+		PlaySE(SE_SELECT);   //はい: 今までの さいしょから と同じ（data[0] 形・data[1] カーソルは触っていない）
+		data[HAS_REPORT] = 0;
+		data[CONFIRM_CURSOR] = 0;
+		BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+		gTasks[taskId].func = Task_HandleMainMenuAPressed;
+	}
+}
+
+static void OpenNewGameConfirm(u8 taskId)
+{
+	s16 *data = gTasks[taskId].data;
+	u32 i;
+
+	for (i = 0; i < MAX_SPRITES; ++i)
+		gSprites[i].invisible = TRUE;   //主人公と手持ちの絵が文に重なるので隠す（メニューを開き直すと作り直す）
+	data[CONFIRM_CURSOR] = 1;          //初期位置は いいえ
+	PrintNewGameConfirm(data);
+	gTasks[taskId].func = Task_BwMainConfirm;
+}
+
+//★ 2026-10-24 緊急脱出（patches/0751・TODO #144・ユーザー「緊急脱出機能つけておいて。最寄りのポケセンに強制転送。」）:
+//  「つづきから」を L と R を押したまま選ぶと、はい／いいえ。はい = セーブを読んだあと 最後に回復した所のポケモンセンターの中から始める（src/hack_emergency_escape.c）。
+//  いいえ = ふつうの つづきから。B = メニューにもどる。壁に埋まる・台本が止まるなどで スタートメニューも開けないときの逃げ道。初期位置は いいえ
+static bool8 EscapeComboHeld(void)
+{
+	return (gMain.heldKeys & (L_BUTTON | R_BUTTON)) == (L_BUTTON | R_BUTTON);
+}
+
+static void PrintEscapeConfirm(s16 *data)
+{
+	static const u8 sCursor[] = {0xEF, EOS};   //▶
+
+	FillWindowPixelBuffer(0, PIXEL_FILL(0));
+	Print(gText_BwrMain_EscapeAsk1, 16, 8, 1);
+	Print(gText_BwrMain_EscapeAsk2, 16, 24, 1);
+	Print(gText_BwrMain_EscapeAsk3, 16, 40, 1);
+	Print(gText_BwrMain_ConfirmYes, 32, 64, 1);
+	Print(gText_BwrMain_ConfirmNo, 32, 80, 1);
+	Print(sCursor, 16, data[CONFIRM_CURSOR] ? 80 : 64, 1);
+	CopyWindowToVram(0, 3);
+}
+
+static void Task_BwMainEscapeConfirm(u8 taskId)
+{
+	s16 *data = gTasks[taskId].data;
+
+	if (gPaletteFade->active)
+		return;
+	if (JOY_NEW(DPAD_UP | DPAD_DOWN))
+	{
+		PlaySE(SE_SELECT);
+		data[CONFIRM_CURSOR] ^= 1;
+		PrintEscapeConfirm(data);
+	}
+	else if (JOY_NEW(B_BUTTON))
+	{
+		PlaySE(SE_SELECT);
+		FreeAllWindowBuffers();
+		BwMainMenuReopen();
+	}
+	else if (JOY_NEW(A_BUTTON | START_BUTTON))
+	{
+		PlaySE(SE_SELECT);
+		HackSaveVersion_OnContinue();   //つづきからと同じ（版の戻し・影の作り直し）。そのあと はい なら行き先を最寄りのポケセンに置き換える
+		if (!data[CONFIRM_CURSOR])
+			HackEscape_OnContinue();
+		data[HAS_REPORT] = 0;
+		data[CONFIRM_CURSOR] = 0;
+		BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
+		gTasks[taskId].func = Task_HandleMainMenuAPressed;   //data[0] 形・data[1] カーソル（素と同じ並び）
+	}
+}
+
+static void OpenEscapeConfirm(u8 taskId)
+{
+	s16 *data = gTasks[taskId].data;
+	u32 i;
+
+	for (i = 0; i < MAX_SPRITES; ++i)
+		gSprites[i].invisible = TRUE;   //主人公と手持ちの絵が文に重なるので隠す
+	data[CONFIRM_CURSOR] = 1;          //初期位置は いいえ
+	PrintEscapeConfirm(data);
+	gTasks[taskId].func = Task_BwMainEscapeConfirm;
+}
+
+//★ 2026-10-21 ふしぎなもらいもの の最初の選び: 0 ふつうに うけとる（今までの おくりもの＝合言葉なし）／1 シリアルコードを いれる（12 文字を 6 字ずつ 2 回）
+//  初期位置は 0。B はメニューへ。ふつうの受け取りは何も打たずに けってい した時と同じ（gStringVar1／2 を空にして CB2_BwMainGiftAfterInput）
+static void PrintGiftChoice(s16 *data)
+{
+	static const u8 sCursor[] = {0xEF, EOS};   //▶
+
+	FillWindowPixelBuffer(0, PIXEL_FILL(0));
+	Print(gText_BwrMain_GiftChoice1, 16, 8, 1);
+	Print(gText_BwrMain_GiftChoice2, 16, 24, 1);
+	Print(gText_BwrMain_GiftChoiceNormal, 32, 48, 1);
+	Print(gText_BwrMain_GiftChoiceCode, 32, 64, 1);
+	Print(sCursor, 16, data[CONFIRM_CURSOR] ? 64 : 48, 1);
+	CopyWindowToVram(0, 3);
+}
+
+static void Task_BwMainGiftChoice(u8 taskId)
+{
+	s16 *data = gTasks[taskId].data;
+
+	if (gPaletteFade->active)
+		return;
+	if (JOY_NEW(DPAD_UP | DPAD_DOWN))
+	{
+		PlaySE(SE_SELECT);
+		data[CONFIRM_CURSOR] ^= 1;
+		PrintGiftChoice(data);
+	}
+	else if (JOY_NEW(B_BUTTON))
+	{
+		PlaySE(SE_SELECT);
+		FreeAllWindowBuffers();
+		BwMainMenuReopen();
+	}
+	else if (JOY_NEW(A_BUTTON | START_BUTTON))
+	{
+		PlaySE(SE_SELECT);
+		if (data[CONFIRM_CURSOR])
+		{
+			data[CONFIRM_CURSOR] = 0;
+			BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);   //シリアルコード: 暗くしてから入力画面へ（Task_BwMainGift ROUTE_GIFT）
+			data[ROUTE] = ROUTE_GIFT;
+			gTasks[taskId].func = Task_BwMainGift;
+		}
+		else
+		{
+			data[CONFIRM_CURSOR] = 0;
+			FreeAllWindowBuffers();
+			DestroyTask(taskId);
+			gStringVar1[0] = EOS;
+			gStringVar2[0] = EOS;
+			CB2_BwMainGiftAfterInput();   //空の扱い＝今までの おくりもの（HackMG_Receive）→ メニューを開き直して結果の文
+		}
+	}
+}
+
+static void OpenGiftChoice(u8 taskId)
+{
+	s16 *data = gTasks[taskId].data;
+	u32 i;
+
+	for (i = 0; i < MAX_SPRITES; ++i)
+		gSprites[i].invisible = TRUE;
+	data[CONFIRM_CURSOR] = 0;
+	PrintGiftChoice(data);
+	gTasks[taskId].func = Task_BwMainGiftChoice;
 }
 
 static void Task_BwMainInput(u8 taskId)
@@ -285,10 +516,18 @@ static void Task_BwMainInput(u8 taskId)
 	last = data[SAVED] == 2 ? 4 : (data[SAVED] ? 2 : 1);
 	if (JOY_NEW(A_BUTTON | START_BUTTON) && data[SAVED] == 2 && data[SELECTED] == 2)
 	{
-		PlaySE(SE_SELECT);   //ふしぎなもらいもの: 暗くしてから合言葉の入力画面へ（★ 2026-10-11 シリアルコード）
-		BeginNormalPaletteFade(PALETTES_ALL, 0, 0, 16, RGB_BLACK);
-		data[ROUTE] = ROUTE_GIFT;
-		gTasks[taskId].func = Task_BwMainGift;
+		PlaySE(SE_SELECT);   //★ 2026-10-21 ふしぎなもらいもの: まず「ふつうに うけとる／シリアルコードを いれる」を選ぶ（前は いつも合言葉の入力画面が先だった）
+		OpenGiftChoice(taskId);
+	}
+	else if (JOY_NEW(A_BUTTON | START_BUTTON) && data[SAVED] && data[SELECTED] == 0 && EscapeComboHeld())
+	{
+		PlaySE(SE_SELECT);   //★ 2026-10-24 緊急脱出: つづきから を L と R を押したまま選んだ
+		OpenEscapeConfirm(taskId);
+	}
+	else if (JOY_NEW(A_BUTTON | START_BUTTON) && NeedsNewGameConfirm(data))
+	{
+		PlaySE(SE_SELECT);   //★ 2026-10-15 レポートがあるときの さいしょから: 暗くせずに はい／いいえ
+		OpenNewGameConfirm(taskId);
 	}
 	else if (JOY_NEW(A_BUTTON | START_BUTTON | B_BUTTON))
 	{
@@ -350,16 +589,41 @@ static void BwMainSetup(s16 saved, bool8 releaseWindows)
 	u8 taskId, bg;
 	s16 *data;
 	u8 reg;
-	bool8 tooOld = FALSE;
+	bool8 tooOld = FALSE, tooNew = FALSE, needTool = FALSE;
+	s16 hasReport = saved != 0;   //★ 2026-10-15 版で形 0 にする前＝レポートがあるか（さいしょから の確認）
 
 	//★ 2026-10-11 ユーザー「バージョンがかなり古いセーブデータは読み込めないようにしたい」→「v0.35.2 より前」「文を出して はじめから だけ」→
 	//  同日「セーブデータの互換 36.2 未満は切り捨てる方向で」: レポートの版（予約変数 0x50EF・src/hack_save_version.c・無ければ 0）が
 	//  HACK_SAVE_MIN_VERSION（tools/build/build_save_version.py の MIN_VERSION・いま 0.36.2）より古ければ「つづきから」を出さない。
 	//  レポートそのものは書き換えない（さいしょから で新しくレポートを書くまで残る）。形 0 にすると素の A の処理も さいしょから だけになる
-	if (saved && VarGet(HACK_VAR_SAVE_VERSION) < HACK_SAVE_MIN_VERSION)
+	//★ 2026-10-15 ユーザー確定「今の ROM より新しい版でレポートしたセーブを開いたら知らせて、つづきから を使えないようにする」:
+	//  レポートの版が今の HACK_SAVE_VERSION より新しいときも同じに形 0（さいしょから・せってい だけ＝ふしぎなもらいもの・ミラクルこうかん の
+	//  レポートを書く道も出ない）にして、新しい版の文を出す。レポートは書き換えない。入れた版より後の ROM でしか効かない
+	//★ 2026-10-21 段階 3（セーブ難読化）: 本体の組に この ROM が鍵を持たない新しい版の区画があれば、それは「あたらしい バージョンの レポート」。
+	//  その区画は読めず（署名を潰して返す）メニューの形が 0（レポート無し）で来るので、ここで hasReport も立てて 止める画面と さいしょから の確認を出す。
+	//  古い方の組が読めて つづきから できてしまう（新しい進みを一つ前に巻き戻す）のも この確かめで止める
+	if (HackSaveCrypt_NewerKeyPresent())
+	{
+		hasReport = TRUE;
+		saved = 0;
+		tooNew = TRUE;
+	}
+	else if (saved && BoxShelf_IsOldFormat())
+	{
+		//★ 2026-10-16 L 案（箱のポケモンの形が変わった）: 古い形のレポート（対応表の印 SHEL）は つづきから を出さず「セーブデータ移行ツール」を案内する。
+		//  レポートは書き換えない（さいしょから で新しく書くまで残る）。見分けは BoxShelf_OnLoad が NewGame の前に覚える。版の変数より先に見る（古い形のセーブは版が 0 や古いこともあるが、案内は「移行ツール」が正しい）
+		saved = 0;
+		needTool = TRUE;
+	}
+	else if (saved && HackSaveVersion_IsTooOld(VarGet(HACK_VAR_SAVE_VERSION)))
 	{
 		saved = 0;
 		tooOld = TRUE;
+	}
+	else if (saved && HackSaveVersion_IsTooNew(VarGet(HACK_VAR_SAVE_VERSION)))
+	{
+		saved = 0;
+		tooNew = TRUE;
 	}
 
 	SetVBlankCallback(NULL);
@@ -399,6 +663,8 @@ static void BwMainSetup(s16 saved, bool8 releaseWindows)
 	data[SAVED] = saved;
 	data[SELECTED] = 0;
 	data[AVATAR] = MAX_SPRITES;
+	data[HAS_REPORT] = hasReport;
+	data[CONFIRM_CURSOR] = 0;
 	FillWindowPixelBuffer(0, PIXEL_FILL(0));
 	if (saved)
 	{
@@ -426,6 +692,21 @@ static void BwMainSetup(s16 saved, bool8 releaseWindows)
 		{
 			Print(gText_BwrMain_OldSave1, 16, 80, 3);
 			Print(gText_BwrMain_OldSave2, 16, 96, 3);
+		}
+		else if (needTool)   //2026-10-16 古い形のレポート: 5 行（y 64〜128・色 3）
+		{
+			Print(gText_BwrMain_NeedTool1, 16, 64, 3);
+			Print(gText_BwrMain_NeedTool2, 16, 80, 3);
+			Print(gText_BwrMain_NeedTool3, 16, 96, 3);
+			Print(gText_BwrMain_NeedTool4, 16, 112, 3);
+			Print(gText_BwrMain_NeedTool5, 16, 128, 3);
+		}
+		else if (tooNew)   //古いレポートと同じ所・同じ色から 4 行（4 行目は さいしょから でレポートを書くと消える注意）
+		{
+			Print(gText_BwrMain_NewSave1, 16, 80, 3);
+			Print(gText_BwrMain_NewSave2, 16, 96, 3);
+			Print(gText_BwrMain_NewSave3, 16, 112, 3);
+			Print(gText_BwrMain_NewSave4, 16, 128, 3);
 		}
 	}
 	UpdateSelection(data);

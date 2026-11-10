@@ -7,6 +7,8 @@
 #include "../include/new/util.h"
 #include "hoenn_factory_data.h"
 #include "Tables/hoenn_script_flags.h"
+#include "hoenn_frontier_level.h"
+#include "hoenn_frontier_rec.h"
 
 /*
  * ホウエンのバトルファクトリー（#5・2026-10-03 ユーザー「全部一気に」→「エメラルドどおりで一気に」）
@@ -19,7 +21,7 @@
  *   rentalMons[6]          → HOENN_VAR_FACTORY_RENTAL + 0〜5（選ぶ画面では候補 6 匹・挑戦中は 0〜2 が自分・3〜5 が直前の相手）
  *   gFrontierTempParty[3]  → HOENN_VAR_FACTORY_OPP + 0〜2（次の相手）
  *   factoryWinStreaks / factoryRecordWinStreaks → HOENN_VAR_FACTORY_STREAK / _MAX_STREAK（src/hoenn_tower.c が足し引きする）
- *   factoryRentsCount      → HOENN_VAR_FACTORY_RENTS（+ モード * 2 + レベル）
+ *   factoryRentsCount      → HOENN_VAR_FACTORY_RENTS（+ モード * 2 + レベル）。レベル49・100 は HFR v3 の rents（2026-10-21 ユーザー「A全部修正」・エメラルドはレベル種別ごとに独立）
  *   sPerformedRentalSwap   → HOENN_VAR_FACTORY_STATE のビット 0
  *   ポケモンは 1 語 = 表の番号（下 10 ビット・src/hoenn_frontier.c の sHoennFrontierMons・エメラルドの gBattleFrontierMons と同じ並び）
  *   + 個体値 << 10（エメラルドは個体値を rentalMons[].ivs に持つ）
@@ -48,7 +50,7 @@ extern u16 HoennFactory_MonSpecies(u16 monId);
 extern u16 HoennFactory_MonItem(u16 monId);
 extern u16 HoennFactory_MonMove(u16 monId, u8 slot);
 extern u16 HoennFrontier_ChooseNewTrainer(u16 challengeNum, u16 battleNum); //src/hoenn_frontier.c
-extern void HoennFactory_CreateMon(struct Pokemon* mon, u8 level, const struct BattleTowerSpread* spread, bool8 forPlayer); //src/build_pokemon.c（patches/0128）
+extern void HoennFactory_CreateMon(struct Pokemon* mon, u16 level, const struct BattleTowerSpread* spread, bool8 forPlayer); //src/build_pokemon.c（patches/0128）
 
 //エメラルドの sFixedIVTable（周回ごと・[ふつう, 7 人目]）
 static const u8 sFixedIVTable[][2] = {{3, 6}, {6, 9}, {9, 12}, {12, 15}, {15, 18}, {21, 31}, {31, 31}, {31, 31}};
@@ -62,16 +64,40 @@ static const u16 sInitialRentalMonRanges[][2] =
 
 static u8 ModeIndex(void)
 {
-	return (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0);
+	return (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 }
 
 static bool8 IsOpenLevel(void)
 {
-	return VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0;
+	return HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
+}
+
+//交換の回数（エメラルドの factoryRentsCount[モード][レベル]）。レベル49・100 は別の置き場（HFR v3）・50 とオープンは今までの予約変数
+static u16 RentsGet(void)
+{
+	u16 mode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
+
+	if (HOENN_LVL_SEPARATE(mode))
+		return HoennFrontierRec_GetRents(VarGet(HOENN_VAR_TOWER_MODE) == 1, mode);
+	return VarGet(HOENN_VAR_FACTORY_RENTS + ModeIndex());
+}
+
+static void RentsSet(u16 value)
+{
+	u16 mode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
+
+	if (HOENN_LVL_SEPARATE(mode))
+		HoennFrontierRec_SetRents(VarGet(HOENN_VAR_TOWER_MODE) == 1, mode, value);
+	else
+		VarSet(HOENN_VAR_FACTORY_RENTS + ModeIndex(), value);
 }
 
 static u16 Streak(void)
 {
+	u16 mode = VarGet(HOENN_VAR_TOWER_LVL_MODE);
+
+	if (HOENN_LVL_SEPARATE(mode)) //レベル49・100 は別の記録（追加のセーブ領域・src/hoenn_frontier_rec.c・src/hoenn_tower.c が足し引きする）
+		return HoennFrontierRec_Get(HFR_FAC_FACTORY, VarGet(HOENN_VAR_TOWER_MODE) == 1, mode, FALSE);
 	return VarGet(HOENN_VAR_FACTORY_STREAK + ModeIndex());
 }
 
@@ -82,7 +108,7 @@ static u8 ChallengeNum(void)
 
 static u8 Level(void)
 {
-	return IsOpenLevel() ? 100 : 50;   //★ 2026-10-09 上限を 200 にしたが、レンタルは今までどおり Lv100（決まったレベルのものは 100 のまま）
+	return (VarGet(HOENN_VAR_TOWER_LVL_MODE) == HOENN_LVL_MODE_OPEN) ? MAX_LEVEL : HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE)); //オープンは MAX_LEVEL（200）・レベル100 は 100・レベル49 は 49・レベル50 は 50   //★ 2026-10-25 ユーザー「オープンは200」（FIX-factory-open-lv200）。2026-10-09 から Lv100 だったのを変更（決まったレベル 100 は 100 のまま）
 }
 
 //エメラルドの GetFactoryMonFixedIV（BUGFIX の範囲の確かめ）
@@ -104,7 +130,7 @@ static u16 FactoryMonId(u8 challengeNum, bool8 useBetterRange)
 //エメラルドの GetNumPastRentalsRank
 static u8 RentalRank(void)
 {
-	u16 rents = VarGet(HOENN_VAR_FACTORY_RENTS + ModeIndex());
+	u16 rents = RentsGet();
 
 	if (rents < 15) return 0;
 	if (rents < 22) return 1;
@@ -141,7 +167,7 @@ void HoennFactory_InitChallenge(void)
 	u32 i;
 
 	if (Streak() == 0)
-		VarSet(HOENN_VAR_FACTORY_RENTS + ModeIndex(), 0);
+		RentsSet(0);
 	for (i = 0; i < FACTORY_SELECTABLE; ++i)
 		VarSet(HOENN_VAR_FACTORY_RENTAL + i, FACTORY_NONE);
 	for (i = 0; i < FACTORY_PARTY_SIZE; ++i)
@@ -416,13 +442,12 @@ void HoennFactory_SetSwapped(void)
 //勝ったあと（エメラルドの DefeatedOpponent の WIN_STREAK_SWAPS）: 交換していれば交換の回数を 1 足す
 void HoennFactory_CountRentAfterWin(void)
 {
-	u16 var = HOENN_VAR_FACTORY_RENTS + ModeIndex();
 	u16 state = VarGet(HOENN_VAR_FACTORY_STATE);
 
 	if (state & FACTORY_STATE_SWAPPED)
 	{
-		if (VarGet(var) < FACTORY_MAX_STREAK)
-			VarSet(var, VarGet(var) + 1);
+		if (RentsGet() < FACTORY_MAX_STREAK)
+			RentsSet(RentsGet() + 1);
 		VarSet(HOENN_VAR_FACTORY_STATE, state & ~FACTORY_STATE_SWAPPED);
 	}
 }
@@ -430,7 +455,7 @@ void HoennFactory_CountRentAfterWin(void)
 //連勝が切れた（負け・リタイア・書かずにやめた）: 交換の回数も 0 に（エメラルドは次の挑戦の頭）
 void HoennFactory_ResetRents(void)
 {
-	VarSet(HOENN_VAR_FACTORY_RENTS + ModeIndex(), 0);
+	RentsSet(0);
 }
 
 /* ---- 画面（src/hoenn_factory_screen.c）から ----------------------------------------------------------- */

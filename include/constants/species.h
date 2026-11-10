@@ -1503,4 +1503,44 @@
 // バイバニラ（かいはつしゃのすがた）・ももアイスを持たせた姿
 #define SPECIES_VANILLUXE_DEV 0x5D5
 /* VANILLUXE_DEV END */
-#define NUM_SPECIES (SPECIES_VANILLUXE_DEV + 1)
+/* WATASHI_LEGENDS BEGIN (tools/custom_mon/watashitachi_legends/build_legends.py) */
+#define SPECIES_TSUKIRIRU 0x5D6
+#define SPECIES_UISHIRUSHI 0x5D7
+#define SPECIES_SHIDAREAME 0x5D8
+#define SPECIES_MILKIHEART 0x5D9
+#define SPECIES_NAOGANE 0x5DA
+#define SPECIES_KAIRIPULSE 0x5DB
+#define SPECIES_RIKKAYUKI 0x5DC
+#define SPECIES_SHIIBARA 0x5DD
+#define SPECIES_RANKITSUNE 0x5DE
+#define SPECIES_ICHIGOBERRY 0x5DF
+/* WATASHI_LEGENDS END */
+/* DEBUG_MON BEGIN (tools/custom_mon/debug_mon/build_debug_mon.py) */
+// デバッグモン（デバッグ用・見た目はレントラー・tools/custom_mon/debug_mon）
+#define SPECIES_DEBUGMON_MAX 0x5E0
+#define SPECIES_DEBUGMON_MIN 0x5E1
+/* DEBUG_MON END */
+/* IWA_GACHI BEGIN (tools/custom_mon/iwaorochi_gachigoras/build_fakemon.py) */
+#define SPECIES_IWAOROCHI 0x5E2
+#define SPECIES_GENSHIGACHIGORAS 0x5E3
+/* IWA_GACHI END */
+/* ARAWANA BEGIN (tools/custom_mon/arawana/build_arawana.py・やん之助) */
+#define SPECIES_ARAWANA_BLUE 0x5E4
+#define SPECIES_ARAWANA_RED 0x5E5
+/* ARAWANA END */
+/* ORCAISER BEGIN (tools/custom_mon/orcaiser/build_orcaiser.py) */
+#define SPECIES_KOSHAL 0x5E6
+#define SPECIES_ORCAISER 0x5E7
+#define SPECIES_GENSHIORCAISER 0x5E8
+/* ORCAISER END */
+/* SILVA_MOCHI BEGIN (tools/custom_mon/silva_mochi/build_silva_mochi.py・Silva) */
+#define SPECIES_BUBUCHIFU 0x5E9
+#define SPECIES_OMOCHIFUWA 0x5EA
+/* SILVA_MOCHI END */
+/* KASEKIMERA BEGIN (tools/custom_mon/kasekimera/build_kasekimera.py・やん之助) */
+#define SPECIES_PACHINIKUSU 0x5EB
+#define SPECIES_DANKURUO 0x5EC
+#define SPECIES_SUTEGORADON 0x5ED
+#define SPECIES_PURECHIRUDO 0x5EE
+/* KASEKIMERA END */
+#define NUM_SPECIES (SPECIES_PURECHIRUDO + 1)

@@ -1,0 +1,4 @@
+// しばり「いっぱつしょうぶ」（縛り F・patches/0951 仮・assembly/hack_challenge/challenge_f_blind_scripts.s）の戦闘の文。戦闘の文は 会話の字（1 字 9 画素・1 行 21 字まで）。
+
+#org @gText_OneShotFled
+[TARGET]は\nにげだした！

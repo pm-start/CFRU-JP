@@ -13,7 +13,7 @@
     関係ない素の人の色になっていた → 上の 8 ビットも見る:
       表 0          素と同じ（素の GetColorFromTextColorTable 0813D468・変数で決まる見た目 0xF0〜 は素の VarGetObjectEventGraphicsId 0806DD98）
       表 7          src/Tables/npc_text_colors.h（tools/rom/build_npc_text_colors.py）
-      表 1〜5       連れ歩きのポケモン → 2（ポケモン）
+      表 1〜5・9・10 連れ歩きのポケモン → 2（ポケモン）
       ほか          3（ほか）
     色の番号は素と同じ: 0 男・1 女・2 ポケモン・3 ほか。textcolor で決めた色（gSpecialVar_TextColor）がいちばん先（素と同じ）。
 */
@@ -41,12 +41,18 @@ u8 HackNpcTextColor_ContextNpc(void)
 	if (hi == 0)
 	{
 		if (lo >= OBJ_EVENT_GFX_VAR_0)
-			lo = VarGetObjectEventGraphicsId_(lo - OBJ_EVENT_GFX_VAR_0);
-		return GetColorFromTextColorTable_(lo);
+		{
+			u16 v = VarGet(VAR_OBJ_GFX_ID_0 + (lo - OBJ_EVENT_GFX_VAR_0));   //[hack] FEAT-contest S8: 16 ビットで読む（表 7 の絵も変数で指せる）
+
+			lo = v & 0xFF;
+			hi = v >> 8;
+		}
+		if (hi == 0)
+			return GetColorFromTextColorTable_(lo);
 	}
 	if (hi == NPC_TEXT_COLOR_TABLE)
 		return (lo < NPC_TEXT_COLOR_COUNT) ? sHackNpcTextColors[lo] : NPC_TEXT_COLOR_NEUTRAL;
-	if (hi >= 1 && hi <= 5)
+	if ((hi >= 1 && hi <= 5) || hi == 9 || hi == 10)   /* 表 9・10 = 連れ歩きの続き（patches/0409） */
 		return NPC_TEXT_COLOR_MON;
 	return NPC_TEXT_COLOR_NEUTRAL;
 }

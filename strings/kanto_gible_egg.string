@@ -27,3 +27,21 @@
 
 #org @gText_KantoGibleEgg_AllDone
 ガブリアスと いっしょに どこまでも\nつよく なってね！
+
+#org @gText_KantoGibleEgg_ReitoOffer
+まあ！ [BUFFER1]の レベルが\n200に なったのね！\pれーとのおうの ちからを さずけても\nいいかしら？
+
+#org @gText_KantoGibleEgg_ReitoDone
+えいっ！\p[BUFFER1]の とくせいが\nれーとのおうに なったわ！\pこれからも いっしょに がんばってね！
+
+#org @gText_KantoGibleEgg_ReitoDeclined
+そう…… じゅんびが できたら また こえを\nかけてね
+
+#org @gText_KantoGibleEgg_ReitoHint
+その ガブリアス…… レベル200に\nなったら いいことが あるかも！\pそのときは また みせに きてね！
+
+#org @gText_KantoGibleEgg_SawSpecial
+まあ！ その ガブリアス……\nとくべつな ちからを かんじるわ！\pあなたに ぴったりの メガストーンを\nあげるわ！
+
+#org @gText_KantoGibleEgg_XAfter
+ガブリアスナイトXは とくべつな\nガブリアスだけの メガストーンよ\pもたせて たたかえば メガと メガZを\nじざいに かえられるわ！

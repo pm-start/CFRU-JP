@@ -25,6 +25,9 @@ struct DamageCalc
 	u16 defAbility;
 	u16 atkPartnerAbility;
 	u16 defPartnerAbility;
+	u16 atkPartnerAbility2; //[hack] 2026-10-20 攻め側の相棒の 2 つ目の特性（バッテリー・パワースポット用・無ければ ABILITY_NONE）
+	u16 atkAbility2; //[hack] 2026-10-20 2 つ目の特性（src/second_ability.c・バンクから読むときだけ。無ければ ABILITY_NONE）
+	u16 defAbility2;
 
 	u8 atkItemEffect;
 	u8 atkItemQuality;
@@ -61,7 +64,7 @@ struct DamageCalc
 	u8 moveType;
 	u8 moveSplit;
 	u8 resultFlags;
-	u8 basePower;
+	u16 basePower; //[hack] patches/0582 (#126): 威力 256 以上の技（もとは u8）
 
 	u8 atkImposterBank;
 	u8 defImposterBank;
@@ -109,6 +112,11 @@ void CalculateShellSideArmSplits(void);
 u8 GetNaturalGiftMoveType(u16 item);
 u8 GetNaturalGiftMovePower(u16 item);
 u32 GetActualSpeciesWeight(u16 species, u16 ability, u8 itemEffect, u8 bank, bool8 checkNimble);
+
+u8 GetLightBallClass(u16 species); //[hack] patches/0871 でんきだまの対象の種類
+#define LIGHT_BALL_NONE 0
+#define LIGHT_BALL_PIKACHU_LINE 1
+#define LIGHT_BALL_MOUSE 2
 
 //Functions Hooked In
 u8 GetSummaryScreenMoveType(u16 move, struct Pokemon* mon);

@@ -5,13 +5,19 @@
 #include "../include/link.h"
 #include "../include/string_util.h"
 #include "../include/text.h"
+#include "../include/event_data.h"
 #include "../include/constants/flags.h"
 #include "../include/constants/trainers.h"
+#include "hack_oak_phone.h"
+extern const u8 gText_HackPhone_OakClass[];
+extern const u8 gText_HackPhone_OakName[];
 
 #include "../include/new/battle_strings.h"
 #include "../include/new/battle_strings_2.h"
 #include "../include/new/battle_util.h"
 #include "../include/new/dynamax.h"
+#include "hack_wild_chain.h"   //[hack] patches/0353
+extern const u8 gText_HackWildChainAppeared[]; //[hack] patches/0353 strings/hack_wild_chain.string
 #include "../include/new/frontier.h"
 #include "../include/new/general_battle_strings.h"
 #include "../include/new/mega.h"
@@ -151,6 +157,8 @@ void BufferStringBattle(u16 stringID)
 				stringPtr = BattleText_TwoWildPkmnAppeared; //0x83FD2BF
 			else if (gBattleTypeFlags & BATTLE_TYPE_OLD_MAN)
 				stringPtr = BattleText_WildPkmnAppearedPause; //0x83FD2AA
+			else if (HackWildChain_Count() > 0) //[hack] patches/0353 野生のむれの 2 回目から
+				stringPtr = gText_HackWildChainAppeared;
 			else
 				stringPtr = BattleText_WildPkmnAppeared; //0x83FD284
 		}
@@ -585,7 +593,9 @@ u32 BattleStringExpandPlaceholders(const u8* src, u8* dst)
 				toCpy = GetAbilityName(gNewBS->abilitiesPerBank[gEffectBank]);
 				break;
 			case B_TXT_TRAINER1_CLASS: // trainer class name
-				if (gTrainerBattleOpponent_A == 0x400) //Lol Secret Bases
+				if (FlagGet(HACK_FLAG_OAK_PIC))
+					toCpy = gText_HackPhone_OakClass;
+				else if (gTrainerBattleOpponent_A == 0x400) //Lol Secret Bases
 					toCpy = gTrainerClassNames[GetSecretBaseTrainerNameIndex()];
 				else if (gTrainerBattleOpponent_A == TRAINER_OPPONENT_C00)
 					toCpy = gTrainerClassNames[sub_8043E08()];
@@ -599,7 +609,9 @@ u32 BattleStringExpandPlaceholders(const u8* src, u8* dst)
 					toCpy = gTrainerClassNames[gTrainers[gTrainerBattleOpponent_A].trainerClass];
 				break;
 			case B_TXT_TRAINER1_NAME: // trainer1 name
-				if (gTrainerBattleOpponent_A == 0x400) //Was used for Secret Bases in Ruby
+				if (FlagGet(HACK_FLAG_OAK_PIC))
+					toCpy = gText_HackPhone_OakName;
+				else if (gTrainerBattleOpponent_A == 0x400) //Was used for Secret Bases in Ruby
 				{	//Despite there being no Secret Bases in Fire Red, this is still present in the original code. Why GF?
 					for (i = 0; i < (s32) ARRAY_COUNT(gBattleResources->secretBase->trainerName); ++i)
 						text[i] = gBattleResources->secretBase->trainerName[i];
@@ -642,7 +654,8 @@ u32 BattleStringExpandPlaceholders(const u8* src, u8* dst)
 							toCpy = GetExpandedPlaceholder(ExpandPlaceholder_RivalName);
 						else
 					#elif defined OVERWRITE_RIVAL
-						if (class == 0x51 || class == 0x59 || class == 0x5A)
+						if ((class == 0x51 || class == 0x59 || class == 0x5A)
+						&& gTrainerBattleOpponent_A < HACK_FR_TRAINER_COUNT) //[hack] patches/0386 シロナ（926）・ワタル（916）は自分の名前（「グリーン」と出ていた）
 							toCpy = GetExpandedPlaceholder(ExpandPlaceholder_RivalName);
 						else
 					#endif
@@ -795,7 +808,8 @@ u32 BattleStringExpandPlaceholders(const u8* src, u8* dst)
 							toCpy = GetExpandedPlaceholder(ExpandPlaceholder_RivalName);
 						else
 					#elif defined OVERWRITE_RIVAL
-						if (class == 0x51 || class == 0x59 || class == 0x5A)
+						if ((class == 0x51 || class == 0x59 || class == 0x5A)
+						&& VarGet(VAR_SECOND_OPPONENT) < HACK_FR_TRAINER_COUNT) //[hack] patches/0386 足したチャンピオンは自分の名前
 							toCpy = GetExpandedPlaceholder(ExpandPlaceholder_RivalName);
 						else
 					#endif

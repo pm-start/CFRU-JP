@@ -1,6 +1,7 @@
 #include "defines.h"
 #include "../include/window.h"
 #include "Tables/bw_card_pic.h"
+#include "hack_player_mei_pics.h" //★ FEAT-player-mei-2
 
 /*
     トレーナーカードの主人公を「縮めない全身」にする（#20・2026-09-23）
@@ -36,6 +37,7 @@ u16 BwCreateTrainerCardSprite(u16 species, u32 otId, u32 personality, bool8 isFr
                               u16 destX, u16 destY, u8 paletteSlot, u8 windowId, bool8 isTrainer)
 {
     const u8 *tall = NULL;
+    bool8 mei = FALSE;
     u16 ret = BwCard_CreateTrainerCardSprite(species, otId, personality, isFrontPic,
                                              destX, destY, paletteSlot, windowId, isTrainer);
 
@@ -45,9 +47,17 @@ u16 BwCreateTrainerCardSprite(u16 species, u32 otId, u32 personality, bool8 isFr
             tall = gBwCardPicMale;
         else if (species == BW_CARD_PIC_FEMALE_ID)
             tall = gBwCardPicFemale;
+        else if (species == TRAINER_PIC_MEI) //★ FEAT-player-mei-2: メイは立ち絵 64x96 を高さ 78 に縮めた 64x80
+        {
+            tall = gBwMeiCardPic;
+            mei = TRUE;
+        }
     }
     if (tall != NULL)
         BlitBitmapRectToWindow(windowId, tall, 0, 0, BW_CARD_PIC_W, BW_CARD_PIC_H,
                                destX, 0, BW_CARD_PIC_W, BW_CARD_PIC_H);
+    /* ★ メイの立ち絵は正面（205 番の 64x64）とパレットが別。素が読ませた正面のパレットを立ち絵のものに替える（BG パレット paletteSlot） */
+    if (mei && tall != NULL)
+        LoadPalette(gBwMeiTallPal, paletteSlot * 16, 32);
     return ret;
 }

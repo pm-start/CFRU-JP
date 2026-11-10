@@ -1,5 +1,7 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
 #include "../include/random.h"
 
 #include "../include/new/accuracy_calc.h"
@@ -11,6 +13,7 @@
 #include "../include/new/util.h"
 #include "../include/new/move_tables.h"
 #include "../include/new/move_battle_scripts.h"
+bool8 HoennYartie_InBattle(void); //[hack] patches/0915 src/hoenn_yartie.c
 #include "hack_affection.h" //[hack] patches/0240 なつき度（src/hack_affection.c）
 /*
 accuracy_calc.c
@@ -65,8 +68,8 @@ ACCURACY_CHECK_START:
 			gBattlescriptCurrInstr += 7;
 		}
 		else if (gStatuses3[gBankTarget] & STATUS3_SEMI_INVULNERABLE
-			  && ABILITY(gBankAttacker) != ABILITY_NOGUARD
-			  && ABILITY(gBankTarget) != ABILITY_NOGUARD)
+			  && !BankHasAbility(gBankAttacker, ABILITY_NOGUARD)
+			  && !BankHasAbility(gBankTarget, ABILITY_NOGUARD))
 		{
 			gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);
 		}
@@ -113,7 +116,13 @@ ACCURACY_CHECK_START:
 				|| (gNewBS->noResultString[bankDef] && gNewBS->noResultString[bankDef] != 2))
 					continue; //Don't bother with this target
 
-				if (!JumpIfMoveAffectedByProtect(move, gBankAttacker, bankDef, FALSE) //Don't jump yet, jump later
+				bool8 lv200Protected = JumpIfMoveAffectedByProtect(move, gBankAttacker, bankDef, FALSE); //Don't jump yet, jump later
+				if (!lv200Protected && Lv200CustomMove_ConsumeDodge(move, gBankAttacker, bankDef)) //[hack] ぶんしんのまい: 必中技も外れる（#35 P4）
+				{
+					gNewBS->ResultFlags[bankDef] = MOVE_RESULT_MISSED;
+					gNewBS->missStringId[bankDef] = gBattleCommunication[6] = 2; //STRINGID_PKMNAVOIDEDATTACK
+				}
+				else if (!lv200Protected
 				&& !AccuracyCalcHelper(move, bankDef))
 				{
 					u32 calc = AccuracyCalc(move, gBankAttacker, bankDef);
@@ -211,6 +220,8 @@ bool8 ProtectAffects(u16 move, u8 bankAtk, u8 bankDef, bool8 set)
 	{
 		effect = 1;
 		gNewBS->missStringId[bankDef] = gBattleCommunication[6] = 1;
+		if (contact && set && item && (Lv200CustomMove_IsWingGuard(bankDef) || Lv200CustomMove_IsHeartGuard(bankDef))) //[hack] つばさのまもり: 触れた相手を強制交代（#35 P2）／ハートのまもり: メロメロ（#35 P5）
+			gProtectStructs[bankAtk].touchedProtectLike = 1;
 	}
 	else if (gProtectStructs[bankDef].KingsShield && protectFlag && split != SPLIT_STATUS)
 	{
@@ -326,8 +337,9 @@ bool8 DoesProtectionMoveBlockMove(u8 bankAtk, u8 bankDef, u16 atkMove, u16 prote
 	if (!CheckTableForMove(atkMove, gMovesThatLiftProtectTable)
 	&& ABILITY(bankAtk) != ABILITY_UNSEENFIST && ABILITY(bankAtk) != ABILITY_PIERCING_DRILL)
 	{
-		switch (protectMove) {
+		switch (EffectiveMove(protectMove)) {
 			case MOVE_PROTECT:
+			case MOVE_LV200_FLYING_150: //[hack] つばさのまもり＝まもる（#35 P2）
 			case MOVE_SPIKYSHIELD:
 			case MOVE_BANEFULBUNKER:
 				return protectFlag != 0;
@@ -336,6 +348,7 @@ bool8 DoesProtectionMoveBlockMove(u8 bankAtk, u8 bankDef, u16 atkMove, u16 prote
 			case MOVE_OBSTRUCT:
 			case MOVE_SILKTRAP:
 			case MOVE_BURNINGBULWARK:
+			case MOVE_LV200_FIRE_150: //[hack] ほのおのころも（#35 P2）
 				return protectFlag && split != SPLIT_STATUS;
 
 			case MOVE_MATBLOCK:
@@ -391,8 +404,8 @@ static bool8 AccuracyCalcHelper(u16 move, u8 bankDef)
 	//then always hitting telekinesis except 0HKO moves,
 	//then 0 acc moves
 	if (((gStatuses3[bankDef] & STATUS3_ALWAYS_HITS) && gDisableStructs[bankDef].bankWithSureHit == gBankAttacker)
-	||   (ABILITY(gBankAttacker) == ABILITY_NOGUARD) || (ABILITY(bankDef) == ABILITY_NOGUARD)
-	||   (move == MOVE_TOXIC && IsOfType(gBankAttacker, TYPE_POISON))
+	||   (BankHasAbility(gBankAttacker, ABILITY_NOGUARD)) || (BankHasAbility(bankDef, ABILITY_NOGUARD))
+	||   (MoveIs(move, MOVE_TOXIC) && IsOfType(gBankAttacker, TYPE_POISON))
 	||   (CheckTableForMove(move, gAlwaysHitWhenMinimizedMoves) && gStatuses3[bankDef] & STATUS3_MINIMIZED)
 	||  ((gStatuses3[bankDef] & STATUS3_TELEKINESIS) && gBattleMoves[move].effect != EFFECT_0HKO)
 	||	 gBattleMoves[move].accuracy == 0
@@ -404,7 +417,7 @@ static bool8 AccuracyCalcHelper(u16 move, u8 bankDef)
 	else if (WEATHER_HAS_EFFECT)
 	{
 		if (((gBattleWeather & WEATHER_RAIN_ANY) && CheckTableForMove(move, gAlwaysHitInRainMoves) && ITEM_EFFECT(bankDef) != ITEM_EFFECT_UTILITY_UMBRELLA)
-		||  ((gBattleWeather & WEATHER_HAIL_ANY) && move == MOVE_BLIZZARD))
+		||  ((gBattleWeather & WEATHER_HAIL_ANY) && MoveIs(move, MOVE_BLIZZARD)))
 		{
 			//JumpIfMoveFailed(7, move);
 			doneStatus = TRUE;
@@ -415,6 +428,7 @@ static bool8 AccuracyCalcHelper(u16 move, u8 bankDef)
 	return doneStatus;
 }
 
+#include "hack_move_evo.h" //[hack] patches/0932 技の熟練度（HackMoveMastery_*）
 u32 AccuracyCalc(u16 move, u8 bankAtk, u8 bankDef)
 {
 	return AccuracyCalcPassDefAbilityItemEffect(move, bankAtk, bankDef, ABILITY(bankDef), ITEM_EFFECT(bankDef));
@@ -475,12 +489,23 @@ static u32 AccuracyCalcPassDefAbilityItemEffect(u16 move, u8 bankAtk, u8 bankDef
 	if (defAbility == ABILITY_WONDERSKIN && moveSplit == SPLIT_STATUS && moveAcc > 50)
 		moveAcc = 50;
 
+	//[hack] patches/0915 ロジックアリーナのロンジャが撃つ技は、元の命中に +30（100 で打ち止め）。必中（0）と一撃必殺は除く。ランク・特性・道具・天気の補正はこのあとに掛かる
+	if (moveAcc != 0 && gBattleMoves[move].effect != EFFECT_0HKO && SIDE(bankAtk) == B_SIDE_OPPONENT && HoennYartie_InBattle())
+		moveAcc = (moveAcc >= 70) ? 100 : moveAcc + 30;
+
+	moveAcc = HackMoveMastery_Accuracy(bankAtk, move, moveAcc); //[hack] patches/0932 技の熟練度（命中型・自分の側の子だけ・100 で止める）
+
 	calc = gAccuracyStageRatios[buff].dividend * moveAcc;
 	calc = udivsi(calc, gAccuracyStageRatios[buff].divisor);
 
-	switch (atkAbility) {
+	for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (atkAbility) : SecondAbility_OfBank(bankAtk); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 		case ABILITY_COMPOUNDEYES:
 			calc = udivsi((calc * 130), 100); // 1.3 Compound Eyes boost
+			break;
+
+		case ABILITY_HAKUANOOU: //[hack] 2026-10-25 はくあのおう（ゲンシガチゴラスの 2 つ目・patches/0800）: いわタイプの技の命中 1.3 倍
+			if (gBattleMoves[move].type == TYPE_ROCK)
+				calc = udivsi((calc * 130), 100);
 			break;
 
 		case ABILITY_HUSTLE:
@@ -490,14 +515,18 @@ static u32 AccuracyCalcPassDefAbilityItemEffect(u16 move, u8 bankAtk, u8 bankDef
 
 		case ABILITY_VICTORYSTAR:
 			calc = udivsi((calc * 110), 100); // 1.1 Victory Star boost
-	}
+	} }
 
 	if (IS_DOUBLE_BATTLE && ABILITY(PARTNER(bankAtk)) == ABILITY_VICTORYSTAR)
 		calc = udivsi((calc * 110), 100); // 1.1 Victory Star partner boost
 
+	//[hack] patches/0952 2026-11-02 あらしのうみ: みず技の命中 ×1.2（かさ をもつ相手には効かない＝雨と同じ）
+	if (WEATHER_HAS_EFFECT && defEffect != ITEM_EFFECT_UTILITY_UMBRELLA && (gBattleWeather & WEATHER_RAIN_DOWNPOUR) && gBattleMoves[move].type == TYPE_WATER)
+		calc = udivsi((calc * 120), 100);
+
 	if (WEATHER_HAS_EFFECT)
 	{
-		switch (defAbility) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (defAbility) : SecondAbility_OfBank(bankDef); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_SANDVEIL:
 				if (gBattleWeather & WEATHER_SANDSTORM_ANY)
 					calc = udivsi((calc * 80), 100); // 0.8 Sand Veil loss
@@ -506,7 +535,7 @@ static u32 AccuracyCalcPassDefAbilityItemEffect(u16 move, u8 bankAtk, u8 bankDef
 			case ABILITY_SNOWCLOAK:
 				if (gBattleWeather & WEATHER_HAIL_ANY)
 					calc = udivsi((calc * 80), 100); // 0.8 Snow Cloak loss
-		}
+		} }
 
 		if (gBattleWeather & WEATHER_FOG_ANY)
 		{
@@ -553,7 +582,7 @@ static u32 AccuracyCalcPassDefAbilityItemEffect(u16 move, u8 bankAtk, u8 bankDef
 	if (gBattleMoves[move].accuracy == 0) //Always hit
 		calc = 0xFFFF;
 
-	return calc;
+	return Lv200CustomMove_ModifyAccuracy(move, bankAtk, bankDef, calc);
 }
 
 u32 VisualAccuracyCalc(u16 move, u8 bankAtk, u8 bankDef)
@@ -562,16 +591,16 @@ u32 VisualAccuracyCalc(u16 move, u8 bankAtk, u8 bankDef)
 	u16 defAbility = GetRecordedAbility(bankDef);
 	u32 acc = AccuracyCalcPassDefAbilityItemEffect(move, bankAtk, bankDef, defAbility, defEffect);
 
-	if (ABILITY(bankAtk) == ABILITY_NOGUARD || defAbility == ABILITY_NOGUARD
+	if (BankHasAbility(bankAtk, ABILITY_NOGUARD) || defAbility == ABILITY_NOGUARD
 	|| (gStatuses3[bankDef] & STATUS3_ALWAYS_HITS && gDisableStructs[bankDef].bankWithSureHit == bankAtk)
-	|| (move == MOVE_TOXIC && IsOfType(bankAtk, TYPE_POISON))
+	|| (MoveIs(move, MOVE_TOXIC) && IsOfType(bankAtk, TYPE_POISON))
 	|| (CheckTableForMove(move, gAlwaysHitWhenMinimizedMoves) && gStatuses3[bankDef] & STATUS3_MINIMIZED)
 	|| ((gStatuses3[bankDef] & STATUS3_TELEKINESIS) && gBattleMoves[move].effect != EFFECT_0HKO))
 		acc = 0xFFFF; //No Miss
 	else if (WEATHER_HAS_EFFECT)
 	{
 		if (((gBattleWeather & WEATHER_RAIN_ANY) && CheckTableForMove(move, gAlwaysHitInRainMoves) && ITEM_EFFECT(bankDef) != ITEM_EFFECT_UTILITY_UMBRELLA)
-		||  ((gBattleWeather & WEATHER_HAIL_ANY) && move == MOVE_BLIZZARD))
+		||  ((gBattleWeather & WEATHER_HAIL_ANY) && MoveIs(move, MOVE_BLIZZARD)))
 			acc = 0xFFFF; //No Miss
 	}
 
@@ -598,12 +627,19 @@ u32 VisualAccuracyCalc_NoTarget(u16 move, u8 bankAtk)
 	&& CheckTableForMove(move, gAlwaysHitInRainMoves))
 		moveAcc = 50;
 
+	moveAcc = HackMoveMastery_Accuracy(bankAtk, move, moveAcc); //[hack] patches/0932 技の熟練度（命中型）
+
 	calc = gAccuracyStageRatios[acc].dividend * moveAcc;
 	calc = udivsi(calc, gAccuracyStageRatios[acc].divisor);
 
-	switch (atkAbility) {
+	for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (atkAbility) : SecondAbility_OfBank(bankAtk); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 		case ABILITY_COMPOUNDEYES:
 			calc = udivsi((calc * 130), 100); // 1.3 Compound Eyes boost
+			break;
+
+		case ABILITY_HAKUANOOU: //[hack] 2026-10-25 はくあのおう（ゲンシガチゴラスの 2 つ目・patches/0800）: いわタイプの技の命中 1.3 倍
+			if (gBattleMoves[move].type == TYPE_ROCK)
+				calc = udivsi((calc * 130), 100);
 			break;
 
 		case ABILITY_HUSTLE:
@@ -613,10 +649,14 @@ u32 VisualAccuracyCalc_NoTarget(u16 move, u8 bankAtk)
 
 		case ABILITY_VICTORYSTAR:
 			calc = udivsi((calc * 110), 100); // 1.1 Victory Star boost
-	}
+	} }
 
 	if (IS_DOUBLE_BATTLE && ABILITY(PARTNER(bankAtk)) == ABILITY_VICTORYSTAR)
 		calc = udivsi((calc * 110), 100); // 1.1 Victory Star partner boost
+
+	//[hack] patches/0952 2026-11-02 あらしのうみ: みず技の命中 ×1.2（見た目の命中率の計算＝相手が決まっていないので かさ は見ない）
+	if (WEATHER_HAS_EFFECT && (gBattleWeather & WEATHER_RAIN_DOWNPOUR) && gBattleMoves[move].type == TYPE_WATER)
+		calc = udivsi((calc * 120), 100);
 
 	if (WEATHER_HAS_EFFECT && gBattleWeather & WEATHER_FOG_ANY)
 	{
@@ -646,12 +686,12 @@ u32 VisualAccuracyCalc_NoTarget(u16 move, u8 bankAtk)
 	}
 
 	if (atkAbility == ABILITY_NOGUARD
-		|| (move == MOVE_TOXIC && IsOfType(bankAtk, TYPE_POISON)))
+		|| (MoveIs(move, MOVE_TOXIC) && IsOfType(bankAtk, TYPE_POISON)))
 			calc = 0xFFFF; //No Miss
 	else if (WEATHER_HAS_EFFECT)
 	{
 		if (((gBattleWeather & WEATHER_RAIN_ANY) && CheckTableForMove(move, gAlwaysHitInRainMoves))
-		||  ((gBattleWeather & WEATHER_HAIL_ANY) && move == MOVE_BLIZZARD))
+		||  ((gBattleWeather & WEATHER_HAIL_ANY) && MoveIs(move, MOVE_BLIZZARD)))
 			calc = 0xFFFF; //No Miss
 	}
 

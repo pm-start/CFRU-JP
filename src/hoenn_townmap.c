@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "map_region.h"
 
 #include "../include/overworld.h"
 #include "../include/pokemon_icon.h"
@@ -266,7 +267,16 @@ struct TownMapCursor
 {
     s16 x;
     s16 y;
+    u16 spriteX, spriteY;       /* 素の MapCursor（pokefirered region_map.c）と同じ並び */
+    s16 horizontalMove, verticalMove;
+    u16 moveCounter;
+    u8 snapId, pad;
+    void *inputHandler;
+    u16 selectedMapsec;         /* +0x14 動き終わったときに控える地名 */
+    u16 selectedMapsecType;     /* +0x16 〃 の種類（そらをとぶの A はこれを見る） */
 };
+_Static_assert(__builtin_offsetof(struct TownMapCursor, selectedMapsec) == 0x14, "MapCursor.selectedMapsec は +0x14");
+_Static_assert(__builtin_offsetof(struct TownMapCursor, selectedMapsecType) == 0x16, "MapCursor.selectedMapsecType は +0x16");
 
 extern const u8 gExpandedTownMapLayout[];
 
@@ -294,6 +304,7 @@ static bool8 KitakamiTownMapEnabled(void);
       シンオウ（70〜80 個）は「地方ごとに番号を読み替える」仕組みが別に要る（資料を参照）。
    ================================================================ */
 #include "Tables/johto_townmap.h"
+#include "hack_johto.h"
 #include "../include/new/roamer.h"
 
 #define KANTO_TOWNMAP_PAGE   0
@@ -301,7 +312,9 @@ static bool8 KitakamiTownMapEnabled(void);
 
 static bool8 JohtoTownMapEnabled(void)
 {
-#ifdef JOHTO_TOWNMAP_DEBUG
+    if (!HackJohto_Open())   /* ★ patches/0986: HACK_OMIT_JOHTO の置き換え（開くまでは旗・デバッグ設定に関係なく出さない） */
+        return FALSE;
+#if defined(JOHTO_TOWNMAP_DEBUG)
     return TRUE;
 #else
     return FlagGet(JOHTO_FLAG_TOWNMAP);
@@ -1360,15 +1373,31 @@ static struct Sprite *HoennAbnIconSprite(u8 *state)
     u8 id = state[TOWNMAP_ABN_SPRITE];
     struct Sprite *sp;
 
-    if (id == 0)
+    if (id == 0 || id > MAX_SPRITES)
+    {
+        state[TOWNMAP_ABN_SPRITE] = 0;
         return NULL;
+    }
     sp = &gSprites[id - 1];
-    if (!sp->inUse || sp->callback != SpriteCB_PokeIcon)
+    if (!sp->inUse || sp->callback != SpriteCB_PokeIcon
+     || (const void *) sp->images != (const void *) GetMonIconTiles(GetIconSpecies(
+            state[TOWNMAP_ABN_LOC] >= HOENN_ABN_MARINE_START ? SPECIES_KYOGRE : SPECIES_GROUDON, 0), FALSE))
     {
         state[TOWNMAP_ABN_SPRITE] = 0;
         return NULL;
     }
     return sp;
+}
+
+/* 徘徊とは別所有なので、徘徊の一括解放だけでは消えない。 */
+static void HoennAbnIconFree(u8 *state)
+{
+    struct Sprite *sp = HoennAbnIconSprite(state);
+
+    if (sp != NULL)
+        DestroyMonIcon(sp);
+    state[TOWNMAP_ABN_SPRITE] = 0;
+    state[TOWNMAP_ABN_LOC] = 0;
 }
 
 static void HoennAbnIconTick(u8 *state)
@@ -1395,7 +1424,7 @@ static void HoennAbnIconTick(u8 *state)
         s32 x, y, n = 0, sumx = 0, sumy = 0;
         u8 id;
 
-        if (!hoenn)
+        if (!hoenn || sSwitchStateOpen != NULL)
             return;         /* ホウエンのページを開いたときに作る */
         hdr = Overworld_GetMapHeaderByGroupAndId(sHoennAbnRoutes[loc - 1][0],
                                                  sHoennAbnRoutes[loc - 1][1]);
@@ -1432,7 +1461,7 @@ static void HoennAbnIconTick(u8 *state)
     cx = state[TOWNMAP_ABN_CX];
     sx = hoenn ? ((SCROLL_PX(state) >> 3)) : 0;
     sp->pos1.x = (s16) (cx * 8 + 36 - sx * 8);
-    sp->invisible = (!hoenn || cx < sx || cx > sx + (HOENN_VIEW_W - 1));
+    sp->invisible = (!hoenn || sSwitchStateOpen != NULL || cx < sx || cx > sx + (HOENN_VIEW_W - 1));
 }
 
 /* ================================================================
@@ -1581,6 +1610,7 @@ void JohtoTownMapFreeIcons(void)
 
     if (state == NULL)
         return;
+    HoennAbnIconFree(state);
     TownMapIconsFree(state, TOWNMAP_JOHTO_ICONS, TOWNMAP_JOHTO_ICON_N);
     TownMapIconsFree(state, TOWNMAP_SINNOH_ICONS, TOWNMAP_SINNOH_ICON_N);
 }
@@ -1686,12 +1716,39 @@ static void JohtoTownMapIconsTick(u8 *state)
     }
 }
 
+/* ★ 2026-11-03 bug-fly-cursor（遊ぶ人の報告・0.62.6「シンオウのリーグでそらをとぶ → 切り替えでカントー／ナナシマ → 枠外のカーソルで A → 通信部屋」）:
+   素のタウンマップはカーソルの下の地名とその「種類」（0 なし / 1 道 / 2 訪問済み / 3 まだ）を**カーソルが動き終わったとき**だけ
+   控える（MapCursor +0x14 地名・+0x16 種類）。そらをとぶの A（Task_FlyMap の A）は**控えの種類**が 2 / 3 なら飛び、行き先は
+   そのとき新しく引いた地名（GetMapsecUnderCursor）で決める。ページを切り替えてもカーソルは動かないので、前のページ
+   （シンオウ・ホウエン）の町の種類 2 が残り、新しいページでは枠外（地名なし = 0xC5）なのに A が通り、0xC5 で表を引いて
+   ケーブルクラブ（通信部屋）の行を拾う。
+   → 毎フレーム、控えを今のページ・今のカーソルの値に合わせ直す（動き終わったときと同じ値なので普段は何も変わらない） */
+#define TownMapGetMapsecType ((u8 (*)(u16)) (0x080C47C0 | 1))
+
+static void TownMapRefreshCursorCache(void)
+{
+    struct TownMapCursor *cursor = sTownMapCursor;
+    u16 mapsec;
+    u16 type;
+
+    if (cursor == NULL)
+        return;
+    mapsec = GetMapsecUnderCursorExpanded();
+    type = TownMapGetMapsecType(mapsec);
+    if (cursor->selectedMapsec != mapsec)
+        cursor->selectedMapsec = mapsec;
+    if (cursor->selectedMapsecType != type)
+        cursor->selectedMapsecType = type;
+}
+
 void HoennFlyIconsTick(void)
 {
     u8 *state = sTownMapState;
 
     if (state == NULL)
         return;
+
+    TownMapRefreshCursorCache();
 
     /* ★ ここでは作り直さない（判断は絵を描くときの 1 か所だけ）。
        位置を合わせるだけ。 */

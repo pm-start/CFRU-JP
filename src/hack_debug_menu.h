@@ -8,11 +8,12 @@
 #define HACK_FLAG_DEBUG_INVINCIBLE 0xF0F   /* むてき（主人公の側がダメージを受けない）*/
 #define HACK_FLAG_DEBUG_OHKO       0xF10   /* いちげき（主人公の側の技で相手の HP を全部）*/
 #define HACK_FLAG_DEBUG_NOTRAINER  0xF11   /* トレーナーむし（視線で戦いが始まらない）*/
+#define HACK_FLAG_DEBUG_CATCHINFO  0xF12   /* せんとうじょうほう（戦闘中に捕獲率などを右上に出す・src/hack_debug_catch_info.c・5e の予備 0xF12〜0xF15 の先頭・2026-10-16）*/
+#define HACK_FLAG_DEBUG_LUXRAY     0xF13   /* さいしょの ポケモン レントラー♀（デバッグ版の切り替え・5e の予備 0xF12〜0xF15 の 2 番目・読むのは src/hack_starter_luxray.c の #ifdef HACK_DEBUG_MENU の中だけ・2026-10-18）*/
 
 #ifdef HACK_DEBUG_MENU
 void HackDebugMenu_TryOpen(void);   /* B＋Select（src/hack_network_trade.c の NetTrade_CB1 から）*/
-bool8 HackDebugMenu_CatchAll(void);
-bool8 HackDebugMenu_NoWild(void);                 /* wild_encounter.c・dexnav.c（patches/0342）*/
+bool8 HackDebugMenu_CatchAll(void);bool8 HackDebugMenu_NoWild(void);                 /* wild_encounter.c・dexnav.c（patches/0342）*/
 bool8 HackDebugMenu_NoTrainer(void);              /* overworld.c の CheckForTrainersWantingBattle */
 void HackDebugMenu_AdjustDamage(u8 bank);         /* general_bs_commands.c の atk0C_datahpupdate */
 #endif

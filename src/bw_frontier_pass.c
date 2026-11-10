@@ -105,6 +105,16 @@ extern const u8 gText_BwFp_Johto[];
 extern const u8 gText_BwFp_Sinnoh[];
 extern const u8 gText_BwFp_HintPass[];
 extern const u8 gText_BwFp_HintBack[];
+extern const u8 gText_BwFp_CapPrefix[];  /* [hack] patches/0599 じょうげん Lv */
+extern const u8 gText_BwFp_CapNone[];    /* [hack] patches/0599 じょうげん なし */
+extern const u8 gText_BwFp_CapRowLv[];   /* [hack] patches/0599 こ Lv（一覧の 1 行: ○こ Lv○○） */
+extern const u8 gText_BwFp_CapRowNone[]; /* [hack] patches/0599 こ なし */
+extern const u8 gText_BwFp_Kanto[];
+u8 GetRegionBadgeCount(u8 region);        /* src/badge_count.c */
+u8 GetRegionBadgeHighest(u8 region);      /* src/badge_count.c（[hack] patches/0620 持っているバッジのいちばん大きいジム番号 0〜8） */
+u8 HackLevelCap_PlaceRegion(void);        /* src/hack_level_cap.c（今いる所が表のある地方ならその番号・外なら 0xFF） */
+u8 HackLevelCap_FromRegion(u8 region, u8 badges); /* src/hack_level_cap.c（その地方でバッジ badges 個のときの上限・0 ＝ なし） */
+u8 HackChallengeB_LevelCap(void);        /* src/hack_challenge_b.c（今いる地方の上限と縛りの低いほう・0 ＝ なし＝ゲームが実際に使う値） */
 
 #define BWFP_FONT 2             /* 日本語の標準（せってい画面と同じ）*/
 
@@ -125,6 +135,11 @@ struct BwFpState
 /* パレットの置き場。0〜7 はパスの背景（エメラルドの 8 本）/
    拡大画面では 0〜3 が帯 */
 #define PAL_BADGE 8
+/* ★ 2026-10-12 0.42.2 ジョウト・シンオウのバッジの絵（DS の絵を縮めた・tools/trainercard/extract_ds_badges.py）は地方ごとに 15 色
+ *   （24 枚を 1 本に収められない）＝ホウエン 8・ジョウト 10・シンオウ 11 の行（0〜7 パス・9 地域・15 文字・10〜14 は空いていた） */
+#define PAL_BADGE_JOHTO 10
+#define PAL_BADGE_SINNOH 11
+#define PAL_BADGE_OF(n) ((n) < BW_FP_PER_REGION ? PAL_BADGE : (n) < 2 * BW_FP_PER_REGION ? PAL_BADGE_JOHTO : PAL_BADGE_SINNOH)
 #define PAL_TEXT 15
 
 /* BG1 のタイルの置き場。0 は空白にしておく */
@@ -139,7 +154,12 @@ static const u16 sTextPal[16] =
     RGB(10, 10, 12),    /* 2 濃い灰（クリーム色の地に書く字）*/
     RGB(22, 22, 20),    /* 3 薄い灰（その影）*/
     RGB(8, 16, 26),     /* 4 青（白い字の影）*/
+    RGB(28, 28, 29),    /* 5 [hack] patches/0599 題の札と同じ色（C_PILL）＝上限の札の地 */
+    RGB(15, 16, 18),    /* 6 〃 縁（C_PILL_EDGE） */
+    RGB(31, 27, 8),     /* 7 金（一覧の今の行） */
+    RGB(12, 8, 2),      /* 8 金の影 */
 };
+static const u8 sColorGold[3] = {0, 7, 8};
 static const u8 sColorDark[3] = {0, 2, 3};
 static const u8 sColorWhite[3] = {0, 1, 4};
 
@@ -154,11 +174,26 @@ enum
     /* 拡大画面 */
     WIN_BOARD_TITLE,
     WIN_BOARD_HINT,
+    WIN_BOARD_CAP,          /* [hack] patches/0599 題と案内のあいだの「じょうげん Lv80」 */
+    WIN_BOARD_LIST,         /* [hack] patches/0599 SELECT で出す 一覧（今いる地方のバッジ 0〜8 個の上限）。パスの窓と同じ場所（baseBlock 1〜180）を借りる＝同時には出ない */
     WIN_REGION0,
     WIN_REGION1,
     WIN_REGION2,
     WIN_COUNT,
 };
+
+/* [hack] patches/0599 バッジ画面の上の帯: 題の窓 x 1〜6・上限の窓 x 7〜20・案内の窓 x 21〜29（案内の窓は 20〜29 から 1 タイル縮め、字は同じ画素 172 に）（重ならない・verify_badge_screen_cap.py が見る） */
+#define BWFP_TITLE_W 6
+#define BWFP_CAP_LEFT 7
+#define BWFP_CAP_W 14
+#define BWFP_CAP_TEXT_X 0
+#define BWFP_LIST_W 10      /* 10 x 18 = 180 枚＝baseBlock 1〜180（パスの窓 4 枚の場所）。題・上限・案内の窓（181〜）とは重ならない */
+#define BWFP_LIST_H 18
+#define BWFP_PILL_X0 44     /* 上限の札（題の札の続き）の窓の中の x: 絵の札の中から 110 まで（絵の札は画面 x 4〜107・y 2〜13） */
+#define BWFP_PILL_X1 110
+#define BWFP_HINT_LEFT 21
+#define BWFP_HINT_W 9
+#define BWFP_HINT_TEXT_X 4
 
 #define REGION_WIN_Y(r) (BW_FP_BOARD_TITLE_ROWS + (r) * BW_FP_BAND_ROWS + 1)
 
@@ -173,16 +208,20 @@ static const struct WindowTemplate sWindowTemplates[] =
     [WIN_HINT] = {.bg = BG_TEXT, .tilemapLeft = 0, .tilemapTop = 18,
                   .width = 30, .height = 2, .paletteNum = PAL_TEXT, .baseBlock = 121},
     [WIN_BOARD_TITLE] = {.bg = BG_TEXT, .tilemapLeft = 1, .tilemapTop = 0,
-                         .width = 12, .height = 2, .paletteNum = PAL_TEXT, .baseBlock = 181},
-    [WIN_BOARD_HINT] = {.bg = BG_TEXT, .tilemapLeft = 20, .tilemapTop = 0,
-                        .width = 10, .height = 2, .paletteNum = PAL_TEXT, .baseBlock = 205},
+                         .width = BWFP_TITLE_W, .height = 2, .paletteNum = PAL_TEXT, .baseBlock = 181},   /* [hack] patches/0599 12 → 6 タイル（上限の窓に場所を譲る・「バッジ」は x 8〜41 に収まる） */
+    [WIN_BOARD_HINT] = {.bg = BG_TEXT, .tilemapLeft = BWFP_HINT_LEFT, .tilemapTop = 0,
+                        .width = BWFP_HINT_W, .height = 2, .paletteNum = PAL_TEXT, .baseBlock = 205},
+    [WIN_BOARD_CAP] = {.bg = BG_TEXT, .tilemapLeft = BWFP_CAP_LEFT, .tilemapTop = 0,
+                       .width = BWFP_CAP_W, .height = 2, .paletteNum = PAL_TEXT, .baseBlock = 279},
+    [WIN_BOARD_LIST] = {.bg = BG_TEXT, .tilemapLeft = 1, .tilemapTop = 2,
+                        .width = BWFP_LIST_W, .height = BWFP_LIST_H, .paletteNum = PAL_TEXT, .baseBlock = 1},
     [WIN_REGION0] = {.bg = BG_TEXT, .tilemapLeft = 0, .tilemapTop = REGION_WIN_Y(0),
                      .width = 6, .height = 3, .paletteNum = PAL_TEXT, .baseBlock = 225},
     [WIN_REGION1] = {.bg = BG_TEXT, .tilemapLeft = 0, .tilemapTop = REGION_WIN_Y(1),
                      .width = 6, .height = 3, .paletteNum = PAL_TEXT, .baseBlock = 243},
     [WIN_REGION2] = {.bg = BG_TEXT, .tilemapLeft = 0, .tilemapTop = REGION_WIN_Y(2),
                      .width = 6, .height = 3, .paletteNum = PAL_TEXT, .baseBlock = 261},
-    DUMMY_WIN_TEMPLATE,     /* 279 まで。0xE800 の手前（320 枚）に収まる */
+    DUMMY_WIN_TEMPLATE,     /* 307 まで（上限の窓は 279〜306）。0xE800 の手前（320 枚）に収まる */
 };
 
 static const struct BgTemplate sBgTemplates[] =
@@ -239,6 +278,7 @@ enum {
     TD_NEXT,                /* 暗転したあと何をするか */
     TD_SYMBOL0,             /* 記章のスプライト番号 7 個（無ければ 0xFF）*/
     TD_WAIT = TD_SYMBOL0 + 7, /* 描き直したあと明るくするまでのコマ */
+    TD_LIST,                /* [hack] patches/0599 拡大画面: 0 = バッジ / 1 = 上限の一覧（SELECT） */
 };
 
 enum { VIEW_PASS, VIEW_BOARD };
@@ -287,16 +327,17 @@ static void CopyRect(u16 *buf, const u16 *src, u8 x, u8 y, u8 w, u8 h)
 static void Put16(u8 n, u8 x, u8 y)
 {
     u16 t = TILE_BADGE0 + n * 4;
+    u8 pal = PAL_BADGE_OF(n);
 
-    FillBgTilemapBufferRect(BG_BADGE, t, x, y, 1, 1, PAL_BADGE);
-    FillBgTilemapBufferRect(BG_BADGE, t + 1, x + 1, y, 1, 1, PAL_BADGE);
-    FillBgTilemapBufferRect(BG_BADGE, t + 2, x, y + 1, 1, 1, PAL_BADGE);
-    FillBgTilemapBufferRect(BG_BADGE, t + 3, x + 1, y + 1, 1, 1, PAL_BADGE);
+    FillBgTilemapBufferRect(BG_BADGE, t, x, y, 1, 1, pal);
+    FillBgTilemapBufferRect(BG_BADGE, t + 1, x + 1, y, 1, 1, pal);
+    FillBgTilemapBufferRect(BG_BADGE, t + 2, x, y + 1, 1, 1, pal);
+    FillBgTilemapBufferRect(BG_BADGE, t + 3, x + 1, y + 1, 1, 1, pal);
 }
 
 /* ---- データの読み出し ----------------------------------------------- */
 
-/* バッジ n（0〜23）を持っているか。★ ホウエンの 8 枚だけが本物 */
+/* バッジ n（0〜23）を持っているか（ホウエン 0〜7・ジョウト 8〜15・シンオウ 16〜23） */
 static bool8 HasBadge(u8 n)
 {
     static const u16 sHoennBadgeFlags[BW_FP_PER_REGION] =
@@ -346,7 +387,7 @@ static void CreateSymbols(u8 taskId)
     LoadSpritePalette(&sSymbolPalGold);
     for (i = 0; i < BW_FP_NUM_SYMBOLS; ++i)
     {
-        u8 level = SymbolLevel(i);
+        u16 level = SymbolLevel(i);
         u8 id = 0xFF;
 
         if (level != 0)     /* 無いものは出さない（背景の八角形が見える）*/
@@ -469,11 +510,71 @@ static void DrawPass(u8 sel)
                 FillBgTilemapBufferRect(BG_BADGE,
                     TILE_MINI0 + r * BW_FP_PER_REGION + i,
                     BW_FP_MINI_COL0 + i,
-                    BW_FP_MINI_ROW0 + r * BW_FP_MINI_ROW_STEP, 1, 1, PAL_BADGE);
+                    BW_FP_MINI_ROW0 + r * BW_FP_MINI_ROW_STEP, 1, 1, PAL_BADGE_OF(r * BW_FP_PER_REGION));
 
     CopyBgTilemapBufferToVram(BG_TEXT);
     CopyBgTilemapBufferToVram(BG_BADGE);
     DrawPassHighlight(sel);
+}
+
+/* [hack] patches/0599 いま実際に効いている上限を題と案内のあいだに書く。値は戦闘・経験値と同じ HackChallengeB_LevelCap（0 ＝ なし） */
+static void DrawCapPill(void)
+{
+    /* 題の札（絵・画面 x 4〜107）の右にそのまま続く札を、字の窓に塗る（絵は触らない）。上下の縁は絵の札と同じ y 2 と 13、右の端は角を落とす */
+    FillWindowPixelRect(WIN_BOARD_CAP, 6, BWFP_PILL_X0, 2, BWFP_PILL_X1 - BWFP_PILL_X0, 12);
+    FillWindowPixelRect(WIN_BOARD_CAP, 5, BWFP_PILL_X0, 3, BWFP_PILL_X1 - BWFP_PILL_X0 - 1, 10);
+    FillWindowPixelRect(WIN_BOARD_CAP, 0, BWFP_PILL_X1 - 2, 2, 2, 1);
+    FillWindowPixelRect(WIN_BOARD_CAP, 0, BWFP_PILL_X1 - 1, 3, 1, 1);
+    FillWindowPixelRect(WIN_BOARD_CAP, 0, BWFP_PILL_X1 - 2, 13, 2, 1);
+    FillWindowPixelRect(WIN_BOARD_CAP, 0, BWFP_PILL_X1 - 1, 12, 1, 1);
+}
+
+static void PrintLevelCap(const u8 *color)
+{
+    u8 buf[24];
+    u8 cap = HackChallengeB_LevelCap();
+    const u8 *text = gText_BwFp_CapNone;
+
+    if (cap != 0)
+    {
+        u8 *end = StringCopy(buf, gText_BwFp_CapPrefix);
+
+        ConvertIntToDecimalStringN(end, cap, STR_CONV_MODE_LEFT_ALIGN, 3);
+        text = buf;
+    }
+    Print(WIN_BOARD_CAP, text, BWFP_CAP_TEXT_X, 1, color);
+}
+
+/* [hack] patches/0599 SELECT の一覧: 今いる地方（表のあるカントー／ホウエン／シンオウ）でバッジが 0〜8 個のときの上限。
+   値は HackLevelCap_FromRegion（FromPlace と同じ BadgeCapOfRow＝殿堂入り・バッジリセットを数える）。今のバッジの数の行は金色。上限なし（殿堂入り）の地方は「なし」。
+   黒い地（絵の BG2 を隠す）に白い字＝帯の色に左右されない */
+static void DrawCapList(u8 region)
+{
+    u8 buf[24];
+    u8 n, cur = GetRegionBadgeHighest(region);   /* [hack] patches/0620 今の行 ＝ 持っているバッジのいちばん大きいジム番号（HackLevelCap_FromPlace と同じ行） */
+    const u8 *name = (region == 0) ? gText_BwFp_Kanto : (region == 1) ? gText_BwFp_Hoenn : gText_BwFp_Sinnoh;
+
+    ClearText();
+    HideBg(BG_ART);
+    Print(WIN_BOARD_TITLE, name, 2, 1, sColorWhite);
+    Print(WIN_BOARD_HINT, gText_BwFp_HintBack, BWFP_HINT_TEXT_X, 1, sColorWhite);
+    PrintLevelCap(sColorWhite);
+    for (n = 0; n <= 8; ++n)
+    {
+        u8 cap = HackLevelCap_FromRegion(region, n);
+        u8 *p = ConvertIntToDecimalStringN(buf, n, STR_CONV_MODE_LEFT_ALIGN, 1);
+
+        p = StringCopy(p, cap != 0 ? gText_BwFp_CapRowLv : gText_BwFp_CapRowNone);
+        if (cap != 0)
+            ConvertIntToDecimalStringN(p, cap, STR_CONV_MODE_LEFT_ALIGN, 3);
+        Print(WIN_BOARD_LIST, buf, 2, n * 16, n == cur ? sColorGold : sColorWhite);
+    }
+    ShowWin(WIN_BOARD_TITLE);
+    ShowWin(WIN_BOARD_HINT);
+    ShowWin(WIN_BOARD_CAP);
+    ShowWin(WIN_BOARD_LIST);
+    CopyBgTilemapBufferToVram(BG_TEXT);
+    CopyBgTilemapBufferToVram(BG_BADGE);
 }
 
 static void DrawBoard(void)
@@ -484,11 +585,15 @@ static void DrawBoard(void)
     };
     u8 r, i;
 
+    ShowBg(BG_ART);                 /* [hack] patches/0599 一覧（BG2 を隠す）から戻ったとき */
     ClearText();
     Print(WIN_BOARD_TITLE, gText_BwFp_Badges, 8, 1, sColorDark);
-    Print(WIN_BOARD_HINT, gText_BwFp_HintBack, 12, 1, sColorWhite);
+    Print(WIN_BOARD_HINT, gText_BwFp_HintBack, BWFP_HINT_TEXT_X, 1, sColorWhite);
     ShowWin(WIN_BOARD_TITLE);
     ShowWin(WIN_BOARD_HINT);
+    DrawCapPill();
+    PrintLevelCap(sColorDark);
+    ShowWin(WIN_BOARD_CAP);
 
     for (r = 0; r < BW_FP_NUM_REGIONS; ++r)
     {
@@ -598,6 +703,8 @@ void CB2_BwFrontierPass(void)
                     TILE_BADGE0);
         LoadBgTiles(BG_BADGE, gBwFpMiniTiles, BW_FP_NUM_BADGES * 32, TILE_MINI0);
         LoadPalette(gBwFpBadgePal, PAL_BADGE * 16, 32);
+        LoadPalette(gBwFpBadgePalJohto, PAL_BADGE_JOHTO * 16, 32);
+        LoadPalette(gBwFpBadgePalSinnoh, PAL_BADGE_SINNOH * 16, 32);
         LoadPalette(sTextPal, PAL_TEXT * 16, 32);
         LoadPassArt();
         gMain.state++;
@@ -666,6 +773,16 @@ static void Task_Input(u8 taskId)
 
     if (data[TD_VIEW] == VIEW_BOARD)
     {
+        if (JOY_NEW(SELECT_BUTTON) && HackLevelCap_PlaceRegion() != 0xFF)   /* [hack] patches/0599 上限の一覧 ⇔ バッジ */
+        {
+            PlaySE(SE_SELECT);
+            data[TD_LIST] ^= 1;
+            if (data[TD_LIST])
+                DrawCapList(HackLevelCap_PlaceRegion());
+            else
+                DrawBoard();
+            return;
+        }
         if (JOY_NEW(B_BUTTON) || JOY_NEW(A_BUTTON))
         {
             PlaySE(SE_SELECT);
@@ -715,12 +832,14 @@ static void Task_FadeOut(u8 taskId)
     switch (data[TD_NEXT]) {
     case NEXT_BOARD:
         data[TD_VIEW] = VIEW_BOARD;
+        data[TD_LIST] = 0;
         ShowSymbols(taskId, FALSE);
         LoadBoardArt();
         DrawBoard();
         break;
     case NEXT_PASS:
         data[TD_VIEW] = VIEW_PASS;
+        ShowBg(BG_ART);             /* [hack] patches/0599 一覧から B で戻ったとき */
         LoadPassArt();
         DrawPass(data[TD_SEL]);
         ShowSymbols(taskId, TRUE);

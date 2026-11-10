@@ -14,6 +14,7 @@
 .equ SP_ADD_MENU, 0x25
 
 @ ★ 2026-10-11 コイン売り（tools/rom/build_hoenn.py の EXTRA_NPCS）: 素のタマムシのゲームコーナーの店員の台本（CeladonCity_GameCorner_EventScript_CoinsClerk）の選択肢から先を使う
+@   ★ 2026-10-15 その選択肢（081850B9）は coin_clerk.s の HackScr_CoinClerkMenu に差し替え済み（50・500・1000・さいだいまで・かずを えらぶ）
 .global HackScr_MauvilleCoinsClerk
 HackScr_MauvilleCoinsClerk:
 	lock

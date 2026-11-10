@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "hack_orcaiser.h" //[hack] patches/0952 HACK_IS_ORCAISER_LINE
 #include "../include/data2.h"
 #include "../include/event_data.h"
 #include "../include/new/text.h"
@@ -166,7 +167,9 @@ static bool8 GiftValid(u64 p)
 	if (GiftKind(p) == SERIAL_TYPE_MON)
 	{
 		u32 species = body >> 13, level = (body >> 5) & 0xFF;
-		return species != SPECIES_NONE && species < NUM_SPECIES && species != SPECIES_EGG && level >= 1 && level <= MAX_LEVEL;
+		return species != SPECIES_NONE && species < NUM_SPECIES && species != SPECIES_EGG && level >= 1 && level <= MAX_LEVEL
+		    && species != SPECIES_DEBUGMON_MAX && species != SPECIES_DEBUGMON_MIN   //★ 2026-10-16 デバッグモン（patches/0422）はシリアルコードで贈らない
+		    && !HACK_IS_FOSSIL_ONLY_MON(species);   //[hack] patches/0952 2026-11-02 コシャル系（入手は化石の復元だけ）はシリアルコードで贈らない
 	}
 	return FALSE;
 }
@@ -276,7 +279,7 @@ void HackSerial_GiveMon(void)
 	struct Pokemon mon;
 	u32 body = GiftBody(Pending());
 	u16 species = body >> 13;
-	u8 level = (body >> 5) & 0xFF;
+	u16 level = (body >> 5) & 0xFF;
 	u8 result;
 
 	CreateMon(&mon, species, level, 32, FALSE, 0, OT_ID_PLAYER_ID, 0);   //出会ったレベルの欄は 7 ビット（Lv128 から切れる・63 節）・ボールは CreateMon の既定（モンスターボール）
@@ -285,6 +288,7 @@ void HackSerial_GiveMon(void)
 	if (body & (1 << 3))
 		HackMonId_MakeMoemon((struct BoxPokemon*) &mon);
 	result = GiveMonToPlayer(&mon);
+	species = GetMonData(&mon, MON_DATA_SPECIES, NULL);   //[hack] しばり『ぜんぶレントラー』ON のときは レントラーになっている（OFF は同じ種族）＝名前の文と図鑑もその種族
 	gSpecialVar_LastResult = result;
 	StringCopy(gStringVar1, gSpeciesNames[species]);
 	if (result < 2)

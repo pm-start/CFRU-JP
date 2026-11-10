@@ -1,0 +1,195 @@
+#org @gText_Lv200A_PoisonKingStart
+[ATTACKER]の とくせいが\nポイズンヒールに なった！
+
+#org @gText_Lv200A_PoisonKingEnd
+[ATTACKER]の とくせいが\nもとに もどった！
+
+#org @gText_Lv200A_FinalCountStart
+なにかが ちかづいている…
+
+//LV200_TEXTS_Q30_BEGIN
+
+#org @gText_Lv200A_FlyingBarrierSet
+[ATTACKER]の がわに\nひこうの けっかいが はられた！
+
+#org @gText_Lv200A_FlyingBarrierEnd
+ひこうの けっかいが なくなった！
+
+#org @gText_Lv200A_HighSoar
+[ATTACKER]は\nたかく まいあがった！
+
+#org @gText_Lv200A_Molt
+[ATTACKER]は\nからを ぬぎすてた！
+
+#org @gText_Lv200A_FocusMind
+[ATTACKER]は\nせいしんを とういつした！
+
+#org @gText_Lv200A_StanceSet
+[ATTACKER]は\nぶんどうの かまえを とった！
+
+#org @gText_Lv200A_Afterimage
+[ATTACKER]は\nざんぞうを つくった！
+
+#org @gText_Lv200A_PupaSet
+[ATTACKER]は\nさなぎの からに こもった！
+
+#org @gText_Lv200A_Emerge
+[ATTACKER]は\nうかした！
+
+#org @gText_Lv200A_PowderCurtainSet
+[ATTACKER]の ばに\nりんぷんの カーテンが あらわれた！
+
+#org @gText_Lv200A_SteelWallSet
+[ATTACKER]の ばに\nてつの かべが あらわれた！
+
+#org @gText_Lv200A_QuartzSet
+[ATTACKER]の ばに\nかがやく クォーツが あらわれた！
+
+#org @gText_Lv200A_RockFieldSet
+ばに がんせきフィールドが\nあらわれた！
+
+#org @gText_Lv200A_MudFieldSet
+ばに ぬかるみが\nあらわれた！
+
+#org @gText_Lv200A_DarkVeilSet
+ばに やみの とばりが\nおりた！
+
+#org @gText_Lv200A_EggSet
+[TARGET]は\nたまごを うみつけられた！
+
+#org @gText_Lv200A_SoulContractSet
+[ATTACKER]と\n[TARGET]は\lたましいで つながった！
+
+#org @gText_Lv200A_GrudgeSet
+[ATTACKER]は\nうらみを のこした！
+
+#org @gText_Lv200A_StockVenomLayer
+[TARGET]に\nどくの そうが かさなった！
+
+#org @gText_Lv200A_CocoonArmorSet
+[ATTACKER]は\nかたい まゆを まとった！
+
+#org @gText_Lv200A_MirrorArmorSet
+[ATTACKER]は\nかがみの よろいを まとった！
+
+#org @gText_Lv200A_MetalArmorSet
+[ATTACKER]は\nはがねの よろいを まとった！
+
+#org @gText_Lv200A_TurboSet
+[ATTACKER]は\nギアを あげた！
+
+#org @gText_Lv200A_StanceEnd
+[ATTACKER]の かまえが\nきえた！
+
+#org @gText_Lv200A_PowderCurtainEnd
+りんぷんの カーテンが\nきえた！
+
+#org @gText_Lv200A_SteelWallEnd
+てつの かべが きえた！
+
+#org @gText_Lv200A_QuartzEnd
+かがやく クォーツが\nきえた！
+
+#org @gText_Lv200A_RockFieldEnd
+がんせきフィールドが\nきえた！
+
+#org @gText_Lv200A_MudFieldEnd
+ぬかるみが きえた！
+
+#org @gText_Lv200A_DarkVeilEnd
+やみの とばりが きえた！
+
+#org @gText_Lv200A_SoulContractEnd
+たましいの つながりが\nきえた！
+
+#org @gText_Lv200A_CocoonArmorEnd
+[ATTACKER]の\nまゆのよろいが きえた！
+
+#org @gText_Lv200A_MirrorArmorEnd
+[ATTACKER]の\nかがみのよろいが きえた！
+
+#org @gText_Lv200A_MetalArmorEnd
+[ATTACKER]の\nはがねのよろいが きえた！
+
+#org @gText_Lv200A_TurboEnd
+[ATTACKER]の ギアが\nもとに もどった！
+
+#org @gText_Lv200B_DeepSeaSet
+[ATTACKER]は\nしんかいの ちからを まとった！
+
+#org @gText_Lv200B_DeepSeaEnd
+[ATTACKER]の\nしんかいの ちからが きえた！
+
+#org @gText_Lv200B_UprootBuffsGone
+[TARGET]の\nのうりょくアップが きえた！
+
+#org @gText_Lv200B_WhirlpoolMirror
+[ATTACKER]は あいての\nのうりょくへんかを コピーした！
+
+#org @gText_Lv200B_FrostbiteSet
+[TARGET]は\nしもやけの じょうたいに なった！
+
+#org @gText_Lv200B_FrostbiteTick
+[ATTACKER]は\nしもやけの ダメージを うけた！
+
+#org @gText_Lv200B_FrozenHazardSet
+[TARGET]の あしもとに\nひょうけつが しかけられた！
+
+#org @gText_Lv200B_IceAgeSet
+あたりが こおりの\nタイプで あふれた！
+
+#org @gText_Lv200B_IceAgeEnd
+こおりの タイプの\nこうかが きえた！
+
+#org @gText_Lv200B_DarknessSet
+[ATTACKER]の ばに\nやみが あらわれた！
+
+#org @gText_Lv200B_DarknessEnd
+やみが きえた！
+
+#org @gText_Lv200B_NightSeaSet
+[ATTACKER]の ばに\nよるのうみが あらわれた！
+
+#org @gText_Lv200B_NightSeaEnd
+よるのうみが きえた！
+
+#org @gText_Lv200B_AbilityItemNullSet
+とくせいと どうぐの\nちからが きえた！
+
+#org @gText_Lv200B_AbilityItemNullEnd
+とくせいと どうぐの ちからが\nもどった！
+
+#org @gText_Lv200B_DragonPalaceSet
+[ATTACKER]の ばに\nりゅうのみやが あらわれた！
+
+#org @gText_Lv200B_DragonPalaceEnd
+りゅうのみやが きえた！
+
+#org @gText_Lv200B_RilGazeSet
+[TARGET]は\nのうりょくが あがらなくなった！
+
+#org @gText_Lv200B_RilGazeEnd
+[TARGET]の のうりょくが\nあがるように なった！
+
+#org @gText_Lv200B_KeepsakeSet
+[ATTACKER]は かたみを\nのこそうとしている！
+
+#org @gText_Lv200A_VenomShift
+[ATTACKER]と\n[TARGET]の\lじょうたいいじょうが いれかわった！
+
+#org @gText_Lv200A_ToxicWorse
+[TARGET]の どくが\nひどくなった！
+
+#org @gText_Lv200A_GearSwap
+[ATTACKER]は ぼうぎょと\nすばやさの ランクを いれかえた！
+
+#org @gText_Lv200A_Overhaul
+[ATTACKER]の さがった\nのうりょくが もとに もどった！
+
+#org @gText_Lv200A_FieldWipe
+[TARGET]の ばの\nこうかが きえさった！
+
+#org @gText_Lv200A_MirrorRound
+[ATTACKER]の わざが\nもういちど ひびく！
+
+//LV200_TEXTS_Q30_END

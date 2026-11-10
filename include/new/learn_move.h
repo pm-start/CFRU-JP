@@ -18,8 +18,8 @@ struct MovePair
 //Exported Functions
 void GiveBoxMonInitialMoveset(struct BoxPokemon* boxMon);
 u16 MonTryLearningNewMoveAfterEvolution(struct Pokemon* mon, bool8 firstMove);
-u8 GetLevelUpMovesBySpecies(u16 species, u16* moves);
-u8 GetLevelUpMovePairsBySpecies(u16 species, struct MovePair* moves);
+u16 GetLevelUpMovesBySpecies(u16 species, u16* moves); //[hack] patches/0598 戻り値 u8 → u16（技が 255 をこえる種族に備える）
+u16 GetLevelUpMovePairsBySpecies(u16 species, struct MovePair* moves);
 u16 BuildLearnableMoveset(struct Pokemon* mon, u16* moves);
 u16 BuildTMMoveset(struct Pokemon* mon, struct MovePair* moves);
 u16 BuildTutorMoveset(struct Pokemon* mon, struct MovePair* moves);
@@ -41,3 +41,4 @@ bool16 InitMoveRelearnerWindows(void);
 
 //Exported Constants
 #define MAX_LEARNABLE_MOVES 40
+#define MAX_LEVEL_UP_MOVES 512 // 一時配列用（Malloc／Calloc で確保する＝スタックに置かない）。画面の40件枠とは別。0.53.0 の最大 204 件・0.53.2 で約 410 件の見込み（patches/0598）。

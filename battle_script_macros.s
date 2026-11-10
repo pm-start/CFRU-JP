@@ -64,18 +64,18 @@
 	.byte 0xD
 	.endm
 
+	@ [hack] patches/0607 新技（Lv101〜200・Lv1〜100）は効果元の技へ alias されるので、技番号の比較は alias を通す。
+	@ callasm（5バイト）のあとに 比較する技(2)・飛び先(4) を置き、Lv200BS_JumpIfMove／JumpIfNotMove が読んで進める。
 	.macro jumpifmove compare, rom_address
-	.byte 0x2a
-	.byte EQUALS
-	.4byte CURRENT_MOVE
+	.byte 0xf8
+	.4byte Lv200BS_JumpIfMove
 	.2byte \compare
 	.4byte \rom_address
 	.endm
-	
+
 	.macro jumpifnotmove compare, rom_address
-	.byte 0x2a
-	.byte NOTEQUALS
-	.4byte CURRENT_MOVE
+	.byte 0xf8
+	.4byte Lv200BS_JumpIfNotMove
 	.2byte \compare
 	.4byte \rom_address
 	.endm

@@ -16,6 +16,7 @@
 #include "../include/new/evolution.h"
 #include "../include/new/form_change.h"
 #include "../include/new/util.h"
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダークの子の成長止め
 
 /*
 evolution.c
@@ -29,13 +30,16 @@ u16 GetEvolutionTargetSpecies(struct Pokemon* mon, u8 type, u16 evolutionItem)
 	u32 personality = mon->personality;
 	u16 species = mon->species;
 	u16 heldItem = mon->item;
-	u8 level;
+	u16 level;
 	u16 friendship;
 	u8 beauty = mon->beauty;
 	u16 upperPersonality = personality >> 16;
 	u8 holdEffect = ItemId_GetHoldEffect(heldItem);
 
 	if (holdEffect == ITEM_EFFECT_PREVENT_EVOLVE && type != 3)
+		return SPECIES_NONE;
+
+	if (type != 3 && Shadow_RefusesGrowth(mon)) //[hack] patches/0963 段 E ダークの間は進化しない（リライブのあとは普通に進化できる）
 		return SPECIES_NONE;
 
 	switch (type)
@@ -50,6 +54,11 @@ u16 GetEvolutionTargetSpecies(struct Pokemon* mon, u8 type, u16 evolutionItem)
 			{
 				case EVO_FRIENDSHIP:
 					if (friendship >= 220)
+						targetSpecies = gEvolutionTable[species][i].targetSpecies;
+					break;
+
+				case EVO_LEVEL_FRIENDSHIP: //[hack] 2026-11-08 Lv（param）以上＋なつき 220 以上（バブチフ→オモチフワ・patches/0969）
+					if (gEvolutionTable[species][i].param <= level && friendship >= 220)
 						targetSpecies = gEvolutionTable[species][i].targetSpecies;
 					break;
 
@@ -478,6 +487,7 @@ bool8 IsFriendshipEvolutionMethod(u8 method)
 		case EVO_FRIENDSHIP:
 		case EVO_FRIENDSHIP_DAY:
 		case EVO_FRIENDSHIP_NIGHT:
+		case EVO_LEVEL_FRIENDSHIP: //[hack] 2026-11-08（バブチフ→オモチフワ・patches/0969）
 		case EVO_MOVE_TYPE:
 			return TRUE;
 		default:
@@ -662,9 +672,12 @@ u8 GetMinimumLevel(u16 species)
 	}
 }
 
+bool8 HackChallengeLuxray_OnObtain(struct Pokemon* mon, bool8 markDex); //[hack] src/hack_challenge_luxray.c
+
 void CreateShedinja(u16 preEvoSpecies, struct Pokemon* mon)
 {
 	u32 data = 0;
+	bool8 luxray = FALSE;
 	if (gEvolutionTable[preEvoSpecies][0].method == EVO_LEVEL_NINJASK
 	&& gPlayerPartyCount < PARTY_SIZE
 	&& CheckBagHasItem(ITEM_POKE_BALL, 1)) //Must have a standard Poke Ball in the Bag
@@ -692,6 +705,7 @@ void CreateShedinja(u16 preEvoSpecies, struct Pokemon* mon)
 		SetMonData(&gPlayerParty[gPlayerPartyCount], MON_DATA_MAIL, (&data));
 
 		CalculateMonStats(&gPlayerParty[gPlayerPartyCount]);
+		luxray = HackChallengeLuxray_OnObtain(&gPlayerParty[gPlayerPartyCount], TRUE); //[hack] しばり『ぜんぶレントラー』: 増えたヌケニンもレントラー（図鑑もレントラーが「つかまえた」）
 		CalculatePlayerPartyCount();
 
 		// can't match it otherwise, ehh
@@ -699,7 +713,8 @@ void CreateShedinja(u16 preEvoSpecies, struct Pokemon* mon)
 		evos = evos2 + EVOS_PER_MON * preEvoSpecies;
 
 		GetSetPokedexFlag(SpeciesToNationalPokedexNum(evos[1].targetSpecies), FLAG_SET_SEEN);
-		GetSetPokedexFlag(SpeciesToNationalPokedexNum(evos[1].targetSpecies), FLAG_SET_CAUGHT);
+		if (!luxray)
+			GetSetPokedexFlag(SpeciesToNationalPokedexNum(evos[1].targetSpecies), FLAG_SET_CAUGHT);
 		RemoveBagItem(ITEM_POKE_BALL, 1);
 	}
 }

@@ -1386,6 +1386,7 @@ void FieldUseFunc_FormChangeItem(u8 taskId);
 void FieldUseFunc_AbilityCapsule(u8 taskId);
 void FieldUseFunc_ExpShare(u8 taskId);
 void FieldUseFunc_NatureMint(u8 taskId);
+void FieldUseFunc_PokeblockCase(u8 taskId);   //src/hack_pokeblock_case.c（FEAT-pokeblock 段 2）
 
 //Descriptions
 #define gText_ItemNone ((void*)0x083A06EF)
@@ -1629,6 +1630,41 @@ extern const u8 DESC_SPORT_BALL[];
 extern const u8 DESC_BEAST_BALL[];
 extern const u8 DESC_DREAM_BALL[];
 extern const u8 DESC_PARK_BALL[];
+extern const u8 DESC_START_BALL[]; //[hack] patches/0393
+extern const u8 gItemIcon_Start_BallTiles[];
+extern const u8 gItemIcon_Start_BallPal[];
+// WATASHI_BALLS_BEGIN externs
+extern const u8 DESC_MOON_PETAL_BALL[];
+extern const u8 gItemIcon_MoonPetalBallTiles[];
+extern const u8 gItemIcon_MoonPetalBallPal[];
+extern const u8 DESC_MEMORY_VEIL_BALL[];
+extern const u8 gItemIcon_MemoryVeilBallTiles[];
+extern const u8 gItemIcon_MemoryVeilBallPal[];
+extern const u8 DESC_TEAR_WISTERIA_BALL[];
+extern const u8 gItemIcon_TearWisteriaBallTiles[];
+extern const u8 gItemIcon_TearWisteriaBallPal[];
+extern const u8 DESC_SWEET_HEART_BALL[];
+extern const u8 gItemIcon_SweetHeartBallTiles[];
+extern const u8 gItemIcon_SweetHeartBallPal[];
+extern const u8 DESC_SILENT_HALO_BALL[];
+extern const u8 gItemIcon_SilentHaloBallTiles[];
+extern const u8 gItemIcon_SilentHaloBallPal[];
+extern const u8 DESC_GAME_PULSE_BALL[];
+extern const u8 gItemIcon_GamePulseBallTiles[];
+extern const u8 gItemIcon_GamePulseBallPal[];
+extern const u8 DESC_WINTER_BLOSSOM_BALL[];
+extern const u8 gItemIcon_WinterBlossomBallTiles[];
+extern const u8 gItemIcon_WinterBlossomBallPal[];
+extern const u8 DESC_THORN_HEART_BALL[];
+extern const u8 gItemIcon_ThornHeartBallTiles[];
+extern const u8 gItemIcon_ThornHeartBallPal[];
+extern const u8 DESC_FOX_SPIRIT_BALL[];
+extern const u8 gItemIcon_FoxSpiritBallTiles[];
+extern const u8 gItemIcon_FoxSpiritBallPal[];
+extern const u8 DESC_BERRY_BLOOM_BALL[];
+extern const u8 gItemIcon_BerryBloomBallTiles[];
+extern const u8 gItemIcon_BerryBloomBallPal[];
+// WATASHI_BALLS_END externs
 #define DESC_RED_SCARF ((void*)0x0839F202)
 #define DESC_BLUE_SCARF ((void*)0x0839F22D)
 #define DESC_PINK_SCARF ((void*)0x0839F258)
@@ -1822,6 +1858,16 @@ extern const u8 DESC_TM117[];
 extern const u8 DESC_TM118[];
 extern const u8 DESC_TM119[];
 extern const u8 DESC_TM120[];
+extern const u8 DESC_TM121[];   //[hack] patches/0861 やけっぱち
+extern const u8 DESC_TM122[];   //[hack] patches/0861 サンダーダイブ
+extern const u8 DESC_TM123[];   //[hack] patches/0861 ハードプレス
+extern const u8 DESC_TM124[];   //[hack] patches/0861 ドラゴンエール
+extern const u8 DESC_TM125[];   //[hack] patches/0861 みわくのボイス
+extern const u8 DESC_TM126[];   //[hack] patches/0861 サイコノイズ
+extern const u8 DESC_GENNAMA[];   //[hack] patches/0868 げんなま
+extern const u8 gItemIcon_GennamaTiles[];   //[hack] patches/0868（tools/items/gennama/build_gennama_icon.py）
+extern const u8 gItemIcon_GennamaPal[];
+extern const u8 DESC_TM127[];   //[hack] patches/0861 はやてがえし
 extern const u8 DESC_OCCA_BERRY[];
 extern const u8 DESC_PASSHO_BERRY[];
 extern const u8 DESC_WACAN_BERRY[];
@@ -2304,6 +2350,7 @@ void FieldUseFunc_MoveNote(u8 taskId);
 void FieldUseFunc_EVReset(u8 taskId);
 void FieldUseFunc_ShiningCharm(u8 taskId);
 void FieldUseFunc_BoxLink(u8 taskId);
+void FieldUseFunc_ExplorerKit(u8 taskId);   //[hack] patches/0873 たんけんセット（src/hack_mining.c）
 extern const u8 DESC_TIME_TV[];
 extern const u8 DESC_MOVE_NOTE[];
 extern const u8 DESC_PP_MINI[];
@@ -2360,4 +2407,24 @@ extern const u8 gItemIcon_Alola_StonePal[];
 extern const u8 DESC_CREEPER_ICE[];   //[hack] patches/0333 くりーぱーアイス
 extern const u8 gItemIcon_Creeper_IceTiles[];   //[hack] patches/0333（tools/items/creeper_ice/build_creeper_ice_icon.py）
 extern const u8 gItemIcon_Creeper_IcePal[];
+extern const u8 DESC_RUSTY_CROWN[];   //[hack] patches/0433 さびたおうかん
+extern const u8 DESC_RIRU_LOVE[];   //[hack] patches/0617 リルの あいじょう
+extern const u8 DESC_GARCHOMPITE_X[];   //[hack] patches/0813 ガブリアスナイトX
+extern const u8 gItemIcon_Garchompite_XTiles[];   //[hack] patches/0813（tools/items/garchompite_x/build_garchompite_x_icon.py）
+extern const u8 gItemIcon_Garchompite_XPal[];
+extern const u8 gItemIcon_Rusty_CrownTiles[];   //[hack] patches/0433（tools/items/rusty_crown/build_rusty_crown_icon.py）
+extern const u8 gItemIcon_Rusty_CrownPal[];
+void FieldUseFunc_RustyCrown(u8 taskId);   //[hack] patches/0433（src/hack_rusty_crown.c）
+extern const u8 DESC_EXPLORER_KIT[];   //[hack] patches/0873 たんけんセット
+extern const u8 DESC_KYOGA_FOSSIL[];   //[hack] patches/0952 きょがのカセキ
+extern const u8 gItemIcon_Kyoga_FossilTiles[];   //[hack] patches/0952（tools/custom_mon/orcaiser/src/fossil/item.png）
+extern const u8 gItemIcon_Kyoga_FossilPal[];
+extern const u8 DESC_SNATCH_BALL[];   //[hack] patches/0961 スナッチボール
+extern const u8 gItemIcon_Snatch_BallTiles[];   //[hack] patches/0961（tools/balls/build_snatch_ball.py）
+extern const u8 gItemIcon_Snatch_BallPal[];
+extern const u8 DESC_JOY_SCENT[];   //[hack] patches/0965 かおり 3 種（段 G）
+extern const u8 DESC_EXCITE_SCENT[];
+extern const u8 DESC_VIVID_SCENT[];
+extern const u8 DESC_SECRET_POTION[];   //FEAT-johto-s1 ひでんのくすり
+void FieldUseFunc_ShadowScent(u8 taskId);   //src/party_menu.c
 #endif

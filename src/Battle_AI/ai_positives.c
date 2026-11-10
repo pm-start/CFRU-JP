@@ -1,4 +1,6 @@
+#include "../lv200_custom_move_ai.h"
 #include "../defines.h"
+#include "../lv200_custom_move_ai.h"
 #include "../defines_battle.h"
 #include "../hack_difficulty.h"
 #include "../../include/random.h"
@@ -52,7 +54,7 @@ u8 AIScript_WildInstinct(const u8 bankAtk, const u8 bankDef, const u16 originalM
         if (damage == gBattleMons[bankDef].hp && accuracy >= 90)
             viability += 2 + rank / 12;
     }
-    else if ((gBattleMoves[move].effect == EFFECT_RESTORE_HP || gBattleMoves[move].effect == EFFECT_MORNING_SUN)
+    else if ((gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_RESTORE_HP || gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_MORNING_SUN)
     && (u32)gBattleMons[bankAtk].hp * 100 <= (u32)gBattleMons[bankAtk].maxHP * AI_WILD_INSTINCT_RECOVERY_HP_PERCENT
     && GetAmountToRecoverBy(bankAtk, bankDef, move) != 0)
         viability += 4 + rank / 6 + (cautious ? 2 : 0);
@@ -144,7 +146,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 	&& data->defItemEffect != ITEM_EFFECT_ABILITY_SHIELD)
 		defAbility = ABILITY_NONE;
 
-	u8 moveEffect = gBattleMoves[move].effect;
+	u8 moveEffect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 	u8 moveType = GetMoveTypeSpecial(bankAtk, move);
 	u8 moveSplit = CalcMoveSplit(bankAtk, move, bankDef);
 
@@ -200,7 +202,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 
 		case EFFECT_EXPLOSION:
 			if (predictedMove != MOVE_NONE //If foe isn't going to attack, don't kill yourself now
-			&&  gBattleMoves[predictedMove].effect != EFFECT_PROTECT)
+			&&  gBattleMoves[Lv200MoveAIBase(predictedMove)].effect != EFFECT_PROTECT)
 			{
 				if (data->atkItemEffect == ITEM_EFFECT_GEM
 				&& data->atkItemQuality == moveType) //AI Was meant to explode
@@ -332,7 +334,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_SPECIAL_ATTACK_UP_2:
 			if (IsMovePredictionPhazingMove(bankDef, bankAtk))
 				break;
-			switch (move)
+			switch (Lv200MoveAIBase(move))
 			{
 				case MOVE_GROWTH:
 				case MOVE_WORKUP:
@@ -397,7 +399,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_MINIMIZE:
 			if (IsMovePredictionPhazingMove(bankDef, bankAtk))
 				break;
-			if (move != MOVE_ACUPRESSURE)
+			if (Lv200MoveAIBase(move) != MOVE_ACUPRESSURE)
 			{
 				if (atkAbility != ABILITY_CONTRARY)
 					INCREASE_STAT_VIABILITY(STAT_STAGE_EVASION, STAT_STAGE_MAX, 4);
@@ -475,7 +477,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_MULTI_HIT:
 		case EFFECT_TRIPLE_KICK:
 		case EFFECT_DOUBLE_HIT: ;
-			u8 strongestMoveEffect = gBattleMoves[GetStrongestMove(bankAtk, bankDef)].effect;
+			u8 strongestMoveEffect = gBattleMoves[Lv200MoveAIBase(GetStrongestMove(bankAtk, bankDef))].effect;
 
 			if (IS_SINGLE_BATTLE
 			&& IsClassSweeper(class)
@@ -532,11 +534,11 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		AI_POISON_CHECKS:
 			if (!BadIdeaToPoison(bankDef, bankAtk))
 			{
-				if (MoveInMoveset(MOVE_VENOSHOCK, bankAtk)
-				||  MoveInMoveset(MOVE_HEX, bankAtk)
+				if (AIMoveInMoveset(MOVE_VENOSHOCK, bankAtk)
+				||  AIMoveInMoveset(MOVE_HEX, bankAtk)
 				||  MoveInMoveset(MOVE_BARBBARRAGE, bankAtk)
 				||  MoveInMoveset(MOVE_VENOMDRENCH, bankAtk)
-				||  atkAbility == ABILITY_MERCILESS)
+				||  (atkAbility == ABILITY_MERCILESS || SecondAbility_OfBank(bankAtk) == ABILITY_MERCILESS))
 					INCREASE_STATUS_VIABILITY(2);
 				else
 					INCREASE_STATUS_VIABILITY(1); //AI enjoys poisoning
@@ -569,7 +571,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 
 		case EFFECT_TRAP:
 		AI_TRAP:
-			if (MoveInMoveset(MOVE_RAPIDSPIN, bankDef)
+			if (AIMoveInMoveset(MOVE_RAPIDSPIN, bankDef)
 			||  IsOfType(bankDef, TYPE_GHOST)
 			||  data->defStatus2 & (STATUS2_WRAPPED))
 			{
@@ -594,8 +596,8 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 
 		case EFFECT_FOCUS_ENERGY:
 		AI_FOCUS_ENERGY:
-			if (atkAbility == ABILITY_SUPERLUCK
-			|| atkAbility == ABILITY_SNIPER
+			if ((atkAbility == ABILITY_SUPERLUCK || SecondAbility_OfBank(bankAtk) == ABILITY_SUPERLUCK)
+			|| (atkAbility == ABILITY_SNIPER || SecondAbility_OfBank(bankAtk) == ABILITY_SNIPER)
 			|| data->atkItemEffect == ITEM_EFFECT_SCOPE_LENS)
 				INCREASE_STATUS_VIABILITY(2);
 			else
@@ -629,7 +631,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_REFLECT:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_AURORAVEIL:
 				case MOVE_G_MAX_RESONANCE_P:
 				case MOVE_G_MAX_RESONANCE_S:
@@ -664,7 +666,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 					break;
 
 				else if ((defSpeedCalc >= atkSpeedCalc && defSpeedCalc / 2 < atkSpeedCalc) //You'll go first after paralyzing foe
-				|| MoveInMoveset(MOVE_HEX, bankAtk)
+				|| AIMoveInMoveset(MOVE_HEX, bankAtk)
 				|| FlinchingMoveInMoveset(bankAtk)
 				|| data->defStatus2 & STATUS2_INFATUATION
 				|| IsConfused(bankDef))
@@ -758,9 +760,9 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_LEECH_SEED:
 			if (IsOfType(bankDef, TYPE_GRASS)
 			|| data->defStatus3 & STATUS3_LEECHSEED
-			|| MoveInMoveset(MOVE_RAPIDSPIN, bankDef)
-			|| defAbility == ABILITY_LIQUIDOOZE
-			|| defAbility == ABILITY_MAGICGUARD)
+			|| AIMoveInMoveset(MOVE_RAPIDSPIN, bankDef)
+			|| (defAbility == ABILITY_LIQUIDOOZE || SecondAbility_OfBank(bankDef) == ABILITY_LIQUIDOOZE)
+			|| (defAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankDef) == ABILITY_MAGICGUARD))
 				break;
 			else
 				INCREASE_STATUS_VIABILITY(3);
@@ -830,7 +832,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_LOCK_ON:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_LASERFOCUS:
 					goto AI_FOCUS_ENERGY;
 
@@ -872,6 +874,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			&& CanTransferItem(SPECIES(bankAtk), data->defItem)
 			&& !(gNewBS->corrodedItems[SIDE(bankAtk)] & gBitTable[gBattlerPartyIndexes[bankAtk]])
 			&& !MoveInMoveset(MOVE_ACROBATICS, bankAtk)
+			&& !MoveInMoveset(MOVE_HAYATEZUKI, bankAtk) && !MoveInMoveset(MOVE_KAGIZUMEOTOSHI, bankAtk) && !MoveInMoveset(MOVE_LV200_FLYING_129, bankAtk) //[hack] FIX-acrobatics-evo
 			&& defAbility != ABILITY_STICKYHOLD
 			&& IsClassSweeper(class))
 			{
@@ -919,7 +922,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			goto AI_TRAP;
 
 		case EFFECT_NIGHTMARE:
-			if (defAbility == ABILITY_MAGICGUARD)
+			if ((defAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankDef) == ABILITY_MAGICGUARD))
 				break;
 			if (defAbility == ABILITY_COMATOSE || data->defStatus1 & STATUS1_SLEEP)
 				INCREASE_STATUS_VIABILITY(3);
@@ -936,7 +939,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			}
 			else
 			{
-				if (atkAbility == ABILITY_CONTRARY || defAbility == ABILITY_MAGICGUARD)
+				if (atkAbility == ABILITY_CONTRARY || (defAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankDef) == ABILITY_MAGICGUARD))
 					break;
 				else if (MoveInMoveset(MOVE_GYROBALL, bankAtk))
 					INCREASE_STAT_VIABILITY(STAT_STAGE_ATK, STAT_STAGE_MAX, 4); //Go until Gyro Ball can kill in 1 hit
@@ -951,7 +954,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_PROTECT: ;
-			switch (move)
+			switch (Lv200MoveAIBase(move))
 			{
 				case MOVE_QUICKGUARD:
 					if (predictedMove != MOVE_NONE && PriorityCalc(bankDef, ACTION_USE_MOVE, predictedMove) > 0)
@@ -1066,7 +1069,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			struct Pokemon* atkParty = LoadPartyRange(bankAtk, &firstId, &lastId);
 			struct Pokemon* defParty = LoadPartyRange(bankDef, &firstId, &lastId);
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_STICKYWEB:
 					for (i = 0; i < PARTY_SIZE; ++i) //Loop through attacker party
 					{
@@ -1161,7 +1164,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_FORESIGHT:
-			if (move == MOVE_MIRACLEEYE)
+			if (Lv200MoveAIBase(move) == MOVE_MIRACLEEYE)
 			{
 				if (STAT_STAGE(bankDef, STAT_STAGE_EVASION) > 6
 				|| (IsOfType(bankDef, TYPE_DARK) && (MoveTypeInMoveset(TYPE_PSYCHIC, bankAtk))))
@@ -1170,7 +1173,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			}
 			else
 			{
-				if (atkAbility == ABILITY_SCRAPPY || atkAbility == ABILITY_MINDSEYE)
+				if ((atkAbility == ABILITY_SCRAPPY || SecondAbility_OfBank(bankAtk) == ABILITY_SCRAPPY) || atkAbility == ABILITY_MINDSEYE)
 					break;
 				else if (STAT_STAGE(bankDef, STAT_STAGE_EVASION) > 6
 				|| (IsOfType(bankDef, TYPE_GHOST)
@@ -1203,13 +1206,13 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			|| atkAbility == ABILITY_SANDFORCE
 			|| atkAbility == ABILITY_SANDFORCE
 			|| atkAbility == ABILITY_OVERCOAT
-			|| atkAbility == ABILITY_MAGICGUARD
+			|| (atkAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtk) == ABILITY_MAGICGUARD)
 			|| data->atkItemEffect == ITEM_EFFECT_SAFETY_GOGGLES
 			|| IsOfType(bankAtk, TYPE_ROCK)
 			|| IsOfType(bankAtk, TYPE_STEEL)
 			|| IsOfType(bankAtk, TYPE_GROUND)
 			|| MoveInMoveset(MOVE_SHOREUP, bankAtk)
-			|| MoveInMoveset(MOVE_WEATHERBALL, bankAtk)
+			|| AIMoveInMoveset(MOVE_WEATHERBALL, bankAtk)
 			|| data->atkItemEffect == ITEM_EFFECT_SMOOTH_ROCK)
 			{
 				if (IsClassDoublesTeamSupport(class))
@@ -1276,7 +1279,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_BATON_PASS:
-			switch (move)
+			switch (Lv200MoveAIBase(move))
 			{
 				case MOVE_UTURN:
 				case MOVE_VOLTSWITCH:
@@ -1344,7 +1347,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			}
 
 			//At this point no entry hazards are to be removed
-			if (move != MOVE_RAPIDSPIN)
+			if (Lv200MoveAIBase(move) != MOVE_RAPIDSPIN)
 			{
 				if (gSideStatuses[SIDE(bankDef)] &
 					(SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN | SIDE_STATUS_SAFEGUARD | SIDE_STATUS_MIST)
@@ -1359,7 +1362,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 				{
 					if (IS_DOUBLE_BATTLE)
 					{
-						if (gBattleMoves[data->partnerMove].effect == EFFECT_SPIKES //Partner is going to set up hazards
+						if (gBattleMoves[Lv200MoveAIBase(data->partnerMove)].effect == EFFECT_SPIKES //Partner is going to set up hazards
 						&& !MoveWouldHitBeforeOtherMove(move, bankAtk, data->partnerMove, data->bankAtkPartner)) //Partner is going to set up before the potential Defog
 							break; //Don't use Defog if partner is going to set up hazards
 					}
@@ -1384,18 +1387,18 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 				IncreaseTailwindViability(&viability, class, bankAtk, bankDef);
 
 			else if (IsClassDoublesSetupAttacker(class)
-			&& atkAbility == ABILITY_SWIFTSWIM)
+			&& (atkAbility == ABILITY_SWIFTSWIM || SecondAbility_OfBank(bankAtk) == ABILITY_SWIFTSWIM))
 				IncreaseTailwindViability(&viability, class, bankAtk, bankDef);
 
 			else if (data->atkItemEffect != ITEM_EFFECT_UTILITY_UMBRELLA
-			&& (atkAbility == ABILITY_SWIFTSWIM
+			&& ((atkAbility == ABILITY_SWIFTSWIM || SecondAbility_OfBank(bankAtk) == ABILITY_SWIFTSWIM)
 			 || atkAbility == ABILITY_FORECAST
 			 || atkAbility == ABILITY_HYDRATION
 			 || atkAbility == ABILITY_RAINDISH
 			 || atkAbility == ABILITY_DRYSKIN
 			 || MoveEffectInMoveset(EFFECT_THUNDER, bankAtk) //Includes Hurricane
 			 || MoveEffectInMoveset(EFFECT_MORNING_SUN, bankDef)
-			 || MoveInMoveset(MOVE_WEATHERBALL, bankAtk)
+			 || AIMoveInMoveset(MOVE_WEATHERBALL, bankAtk)
 			 || MoveTypeInMoveset(TYPE_WATER, bankAtk)
 			 || MoveTypeInMoveset(TYPE_FIRE, bankDef)
 			 || data->atkItemEffect == ITEM_EFFECT_DAMP_ROCK))
@@ -1423,14 +1426,14 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			&& (atkAbility == ABILITY_CHLOROPHYLL
 			 || atkAbility == ABILITY_FLOWERGIFT
 			 || atkAbility == ABILITY_FORECAST
-			 || atkAbility == ABILITY_LEAFGUARD
+			 || (atkAbility == ABILITY_LEAFGUARD || SecondAbility_OfBank(bankAtk) == ABILITY_LEAFGUARD)
 			 || atkAbility == ABILITY_SOLARPOWER
 			 || atkAbility == ABILITY_HARVEST
 			 || MoveEffectInMoveset(EFFECT_SOLARBEAM, bankAtk)
 			 || MoveEffectInMoveset(EFFECT_MORNING_SUN, bankAtk)
 			 || MoveEffectInMoveset(EFFECT_THUNDER, bankDef)
-			 || MoveInMoveset(MOVE_WEATHERBALL, bankAtk)
-			 || MoveInMoveset(MOVE_GROWTH, bankAtk)
+			 || AIMoveInMoveset(MOVE_WEATHERBALL, bankAtk)
+			 || AIMoveInMoveset(MOVE_GROWTH, bankAtk)
 			 || MoveTypeInMoveset(TYPE_FIRE, bankAtk)
 			 || MoveTypeInMoveset(TYPE_WATER, bankDef)
 			 || data->atkItemEffect == ITEM_EFFECT_HEAT_ROCK))
@@ -1513,11 +1516,11 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			{
 				if (MoveWouldHitFirst(move, bankAtk, bankDef))
 				{
-					if (gBattleMoves[predictedMove].effect == EFFECT_EXPLOSION
-					||  gBattleMoves[predictedMove].effect == EFFECT_PROTECT)
+					if (gBattleMoves[Lv200MoveAIBase(predictedMove)].effect == EFFECT_EXPLOSION
+					||  gBattleMoves[Lv200MoveAIBase(predictedMove)].effect == EFFECT_PROTECT)
 						INCREASE_VIABILITY(3); //Past strongest move
 				}
-				else if (gBattleMoves[predictedMove].effect == EFFECT_SEMI_INVULNERABLE
+				else if (gBattleMoves[Lv200MoveAIBase(predictedMove)].effect == EFFECT_SEMI_INVULNERABLE
 				&& !BATTLER_SEMI_INVULNERABLE(bankDef))
 					INCREASE_VIABILITY(3); //Past strongest move
 			}
@@ -1531,7 +1534,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_FAKE_OUT:
-			if (move == MOVE_FAKEOUT
+			if (Lv200MoveAIBase(move) == MOVE_FAKEOUT
 			&& ShouldUseFakeOut(bankAtk, bankDef))
 			{
 				IncreaseFakeOutViability(&viability, class, bankAtk, bankDef, move);
@@ -1547,7 +1550,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_HAIL:
-			if (MoveInMoveset(MOVE_AURORAVEIL, bankAtk))
+			if (AIMoveInMoveset(MOVE_AURORAVEIL, bankAtk))
 			{
 				if (IsClassScreener(class))
 				{
@@ -1571,15 +1574,15 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			&& atkAbility == ABILITY_SLUSHRUSH)
 				IncreaseTailwindViability(&viability, class, bankAtk, bankDef);
 
-			else if (atkAbility == ABILITY_SNOWCLOAK
+			else if ((atkAbility == ABILITY_SNOWCLOAK || SecondAbility_OfBank(bankAtk) == ABILITY_SNOWCLOAK)
 			|| atkAbility == ABILITY_ICEBODY
 			|| atkAbility == ABILITY_FORECAST
 			|| atkAbility == ABILITY_SLUSHRUSH
-			|| atkAbility == ABILITY_MAGICGUARD
+			|| (atkAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtk) == ABILITY_MAGICGUARD)
 			|| atkAbility == ABILITY_OVERCOAT
-			|| MoveInMoveset(MOVE_BLIZZARD, bankAtk)
-			|| MoveInMoveset(MOVE_AURORAVEIL, bankAtk)
-			|| MoveInMoveset(MOVE_WEATHERBALL, bankAtk)
+			|| AIMoveInMoveset(MOVE_BLIZZARD, bankAtk)
+			|| AIMoveInMoveset(MOVE_AURORAVEIL, bankAtk)
+			|| AIMoveInMoveset(MOVE_WEATHERBALL, bankAtk)
 			|| MoveEffectInMoveset(EFFECT_MORNING_SUN, bankDef)
 			|| data->atkItemEffect == ITEM_EFFECT_ICY_ROCK)
 			{
@@ -1611,8 +1614,8 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 					else //(IsClassDoublesTeamSupport(class))
 						INCREASE_VIABILITY(11);
 				}
-				else if (MoveInMoveset(MOVE_HEX, bankAtk)
-				|| MoveInMoveset(MOVE_HEX, data->bankAtkPartner)
+				else if (AIMoveInMoveset(MOVE_HEX, bankAtk)
+				|| AIMoveInMoveset(MOVE_HEX, data->bankAtkPartner)
 				|| MoveInMoveset(MOVE_INFERNALPARADE, bankAtk)
 				|| PhysicalMoveInMoveset(bankDef))
 					INCREASE_STATUS_VIABILITY(2);
@@ -1700,7 +1703,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 				case ITEM_EFFECT_UTILITY_UMBRELLA:
 					if (atkAbility != ABILITY_SOLARPOWER && atkAbility != ABILITY_DRYSKIN)
 					{
-						switch (defAbility) {
+						for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (defAbility) : SecondAbility_OfBank(bankDef); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 							case ABILITY_SWIFTSWIM:
 								if (gBattleWeather & WEATHER_RAIN_ANY)
 									INCREASE_STATUS_VIABILITY(3); //Slow 'em down
@@ -1710,7 +1713,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 								if (gBattleWeather & WEATHER_SUN_ANY)
 									INCREASE_STATUS_VIABILITY(3); //Slow 'em down
 								break;
-						}
+						} }
 					}
 					break;
 
@@ -1830,7 +1833,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_SKILL_SWAP:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_WORRYSEED:
 				case MOVE_GASTROACID:
 				case MOVE_SIMPLEBEAM:
@@ -1864,7 +1867,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 
 		case EFFECT_REFRESH:
 		AI_REFRESH:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_PSYCHOSHIFT:
 					if (data->atkStatus1 & STATUS1_PSN_ANY)
 						goto AI_POISON_CHECKS;
@@ -1917,7 +1920,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_EXTREME_EVOBOOST: ;
 			u8 oldViability = viability;
 			
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_EXTREME_EVOBOOST:
 					for (i = STAT_STAGE_ATK; i <= STAT_STAGE_SPDEF; ++i)
 					{
@@ -1975,7 +1978,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_CALM_MIND:
 			if (atkAbility != ABILITY_CONTRARY)
 			{
-				switch (move) {
+				switch (Lv200MoveAIBase(move)) {
 					case MOVE_GEOMANCY:
 						if (data->atkItemEffect == ITEM_EFFECT_POWER_HERB)
 							INCREASE_STAT_VIABILITY(STAT_STAGE_SPEED, STAT_STAGE_MAX, 3);
@@ -1998,7 +2001,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_DRAGON_DANCE:
 			if (atkAbility != ABILITY_CONTRARY)
 			{
-				switch (move) {
+				switch (Lv200MoveAIBase(move)) {
 					case MOVE_SHELLSMASH:
 						if (data->atkItemEffect == ITEM_EFFECT_POWER_HERB)
 							INCREASE_STAT_VIABILITY(STAT_STAGE_SPEED, STAT_STAGE_MAX, 3);
@@ -2022,7 +2025,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_STAT_SWAP_SPLIT:
-			switch (move)
+			switch (Lv200MoveAIBase(move))
 			{
 				case MOVE_GUARDSWAP: //Prevent's getting caught in an infinite loop
 					if (STAT_STAGE(bankDef, STAT_STAGE_DEF) > STAT_STAGE(bankAtk, STAT_STAGE_DEF)
@@ -2140,7 +2143,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_SET_TERRAIN:
 			if (data->atkStatus3 & STATUS3_YAWN && CheckGrounding(bankAtk))
 			{
-				switch (move) {
+				switch (Lv200MoveAIBase(move)) {
 					case MOVE_ELECTRICTERRAIN:
 					case MOVE_MISTYTERRAIN:
 					case MOVE_MAX_LIGHTNING_P:
@@ -2165,7 +2168,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_FIELD_EFFECTS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_TRICKROOM:
 					if (!IsTrickRoomActive()
 					&& GetPokemonOnSideSpeedAverage(bankAtk) < GetPokemonOnSideSpeedAverage(bankDef))
@@ -2250,12 +2253,12 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_FEINT:
-			if (gBattleMoves[predictedMove].effect == EFFECT_PROTECT)
+			if (gBattleMoves[Lv200MoveAIBase(predictedMove)].effect == EFFECT_PROTECT)
 				INCREASE_VIABILITY(3);
 			break;
 
 		case EFFECT_ATTACK_BLOCKERS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_EMBARGO:
 					if (data->defItemEffect != 0)
 						INCREASE_STATUS_VIABILITY(1);
@@ -2293,7 +2296,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_TYPE_CHANGES:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_SOAK:
 					if (IsClassSweeper(class)
 					&& (MoveTypeInMoveset(bankAtk, TYPE_ELECTRIC) || MoveTypeInMoveset(bankAtk, TYPE_GRASS)))
@@ -2334,7 +2337,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			break;
 
 		case EFFECT_FAIRY_LOCK_HAPPY_HOUR:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_FAIRYLOCK:
 					if (!IsTrapped(bankDef, TRUE))
 					{
@@ -2355,7 +2358,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		case EFFECT_INSTRUCT_AFTER_YOU_QUASH:
 			if (IS_DOUBLE_BATTLE)
 			{
-				switch (move) {
+				switch (Lv200MoveAIBase(move)) {
 					case MOVE_QUASH:
 						if (!MoveWouldHitFirst(move, data->bankAtkPartner, bankDef)) //Attacker partner wouldn't go before target
 						{
@@ -2370,7 +2373,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		break;
 
 		case EFFECT_TEAM_EFFECTS:
-			switch (move)
+			switch (Lv200MoveAIBase(move))
 			{
 				case MOVE_TAILWIND:
 					IncreaseTailwindViability(&viability, class, bankAtk, bankDef);
@@ -2422,7 +2425,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			{
 				if (BATTLER_ALIVE(data->bankDefPartner)
 				&& GetHealthPercentage(data->bankDefPartner) < 12
-				&& ABILITY(data->bankDefPartner) != ABILITY_MAGICGUARD
+				&& !BankHasAbility(data->bankDefPartner, ABILITY_MAGICGUARD)
 				&& !IsOfType(data->bankDefPartner, TYPE_FIRE))
 					IncreaseDoublesDamageViabilityToScore(&viability, class, 10, bankAtk, bankDef);
 			}
@@ -2465,7 +2468,7 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			else if (!MoveEffectInMoveset(EFFECT_PROTECT, bankAtk)
 			&& MoveKnocksOutXHits(predictedMove, bankDef, bankAtk, 1) //Foe can kill attacker
 			&& StrongestMoveGoesFirst(move, bankAtk, bankDef) //Use strongest fast move
-			&& (!MoveInMoveset(MOVE_FAKEOUT, bankAtk) || !ShouldUseFakeOut(bankAtk, bankDef))) //Prefer Fake Out if it'll do something
+			&& (!AIMoveInMoveset(MOVE_FAKEOUT, bankAtk) || !ShouldUseFakeOut(bankAtk, bankDef))) //Prefer Fake Out if it'll do something
 			{
 				INCREASE_VIABILITY(9);
 			}
@@ -2476,8 +2479,8 @@ u8 AIScript_Positives(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 				if (MoveWouldHitFirst(move, bankAtk, bankDef)
 				|| !WillFaintFromSecondaryDamage(bankDef)
 				|| IsMovePredictionHealingMove(bankDef, bankAtk)
-				|| atkAbility == ABILITY_MOXIE
-				|| atkAbility == ABILITY_BEASTBOOST)
+				|| (atkAbility == ABILITY_MOXIE || SecondAbility_OfBank(bankAtk) == ABILITY_MOXIE)
+				|| (atkAbility == ABILITY_BEASTBOOST || SecondAbility_OfBank(bankAtk) == ABILITY_BEASTBOOST))
 					INCREASE_VIABILITY(2);
 			}
 		}
@@ -2510,7 +2513,7 @@ u8 AIScript_SemiSmart(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 		if (IS_DOUBLE_BATTLE && TARGETING_PARTNER)
 			return AIScript_Partner(bankAtk, data->bankAtkPartner, originalMove, originalViability, data);
 
-		switch (gBattleMoves[move].effect) {
+		switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 			case EFFECT_HIT:
 			case EFFECT_SLEEP:
 			case EFFECT_YAWN:
@@ -2606,7 +2609,7 @@ u8 AIScript_SemiSmart(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 			else if (!MoveEffectInMoveset(EFFECT_PROTECT, bankAtk)
 			&& MoveKnocksOutXHits(predictedMove, bankDef, bankAtk, 1) //Foe can kill attacker
 			&& StrongestMoveGoesFirst(move, bankAtk, bankDef) //Use strongest fast move
-			&& (!MoveInMoveset(MOVE_FAKEOUT, bankAtk) || !ShouldUseFakeOut(bankAtk, bankDef))) //Prefer Fake Out if it'll do something
+			&& (!AIMoveInMoveset(MOVE_FAKEOUT, bankAtk) || !ShouldUseFakeOut(bankAtk, bankDef))) //Prefer Fake Out if it'll do something
 			{
 				INCREASE_VIABILITY(9);
 			}
@@ -2617,8 +2620,8 @@ u8 AIScript_SemiSmart(const u8 bankAtk, const u8 bankDef, const u16 originalMove
 				if (MoveWouldHitFirst(move, bankAtk, bankDef)
 				|| !WillFaintFromSecondaryDamage(bankDef)
 				|| IsMovePredictionHealingMove(bankDef, bankAtk)
-				|| data->atkAbility == ABILITY_MOXIE
-				|| data->atkAbility == ABILITY_BEASTBOOST)
+				|| (data->atkAbility == ABILITY_MOXIE || SecondAbility_OfBank(bankAtk) == ABILITY_MOXIE)
+				|| (data->atkAbility == ABILITY_BEASTBOOST || SecondAbility_OfBank(bankAtk) == ABILITY_BEASTBOOST))
 					INCREASE_VIABILITY(2);
 			}
 		}

@@ -1,9 +1,12 @@
 #include "defines.h"
 #include "bw_follower_internal.h"
+#include "map_region.h"
+#include "hack_flag_fast.h" //[hack] 2026-11-03 perf-region-2 毎コマの旗の読み
 #include "../include/sprite.h"
 #include "../include/decompress.h"
 #include "../include/pokemon.h"
 #include "../include/event_object_movement.h"
+#include "../include/event_data.h"
 #include "../include/task.h"
 #include "../include/palette.h"
 #include "../include/field_player_avatar.h"
@@ -122,6 +125,8 @@ extern bool8 __attribute__((long_call)) FieldEffectActiveListContains(u8 id);
 static void BwFollowerLoadOwnPalette(void);
 static void BwFollowerCheckShinyPalette(struct EventObject *obj);
 static void Task_BwFollowerBall(u8 taskId);
+bool8 BwPalRefAddIfUsed(u8 slot);
+void BwPlayerKeepPalRef(void);
 static void BwFollowerReleaseFromBall(struct EventObject *obj);
 extern const struct CompressedSpriteSheet gBwFollowerBallSheet;
 extern const u16 *const gBwFollowerBallPal;
@@ -244,9 +249,8 @@ static const union AffineAnimCmd *const sBallAffineAnims[] = {
 #define BW_GROUP_SPECIAL         2
 #define BW_MAP_TRAINER_TOWER_LO  1      /*   群 2 の 1〜11 = トレーナータワー（バトル施設）*/
 #define BW_MAP_TRAINER_TOWER_HI 11
-#define BW_GROUP_HOENN_SPECIAL  69      /* ホウエンの特別地区 */
-#define BW_MAP_FRONTIER_LO       4      /*   群 69 の 4〜55 = バトルフロンティア */
-#define BW_MAP_FRONTIER_HI      55
+/* ホウエンの特別地区（群 69）のうちバトルフロンティア（4〜55 から 9〜13 を除く）は map_region.c の MapRegion_IsFrontierMap で決める。
+   ★ 9・10 は南の孤島・11〜13 はサファリゾーンなので連れ歩きを出す（4〜55 をまるごと禁止していて、サファリの北東・南東で消えた・0.53.1） */
 
 /* ★★ シートの大きさで 64x64 を見分ける。**「3072 より大きい」では駄目。**
    32x32 は 6 コマ(3072) と **8 コマ(4096・左右が別の種族)** の 2 通りあるので、
@@ -254,7 +258,7 @@ static const union AffineAnimCmd *const sBallAffineAnims[] = {
    （2026-09-20 に検算が捕まえた）。64x64 は 6 コマ x 2048 = 12288 の 1 通りだけ。 */
 #define BW_SHEET_SIZE_64     12288
 
-static bool8 BwFollowerBannedHere(void)
+bool8 BwFollowerBannedHere(void)   /* ★ 2026-10-26 #76 段 2: ハルカの連れ歩き（src/hack_heroine.c）も同じ禁止の地図を使う */
 {
     u8 group = gSaveBlock1->location.mapGroup;
     u8 num = gSaveBlock1->location.mapNum;
@@ -272,8 +276,7 @@ static bool8 BwFollowerBannedHere(void)
     if (group == BW_GROUP_SPECIAL
      && num >= BW_MAP_TRAINER_TOWER_LO && num <= BW_MAP_TRAINER_TOWER_HI)
         return TRUE;
-    if (group == BW_GROUP_HOENN_SPECIAL
-     && num >= BW_MAP_FRONTIER_LO && num <= BW_MAP_FRONTIER_HI)
+    if (MapRegion_IsFrontierMap(group, num))
         return TRUE;
 
     return FALSE;
@@ -376,6 +379,11 @@ static void BwFollowerFollowScriptedStep(struct EventObject *obj)
         return;                                 /* 主人公は動いていない */
     if (dx == 0 && dy == 0)
         return;                                 /* もう直前のマスにいる */
+    /* ★ 2026-10-17 トキワジムの押し戻し（jump_2_down）などで、FollowMe がもう連れ歩きを元のマスへ歩かせて「次の一歩で跳ぶ」
+       （delayedState）を立てている。そこへここの歩きを重ねると（mGBA: 16 コマ後に段差のマスへさらに 1 歩）、次の一歩の追いつき
+       ジャンプが 1 マス行き過ぎて主人公に重なる → 跳ぶ予定があるあいだはここで進めない */
+    if (gFollowerState.delayedState != 0)
+        return;
     if (obj->singleMovementActive || (obj->heldMovementActive && !obj->heldMovementFinished))
         return;                                 /* 連れ歩きが歩いている途中 */
     if (dx == 1 && dy == 0)       dir = DIR_EAST;
@@ -448,7 +456,14 @@ static bool8 BwInsideView(struct Coords16 c, s16 left, s16 right, s16 top, s16 b
 void BwFollowerSetDynamicGraphicsId(struct EventObject *obj)
 {
     if (obj->graphicsIdUpperByte == 0 && obj->graphicsIdLowerByte >= 0xF0)
-        obj->graphicsIdLowerByte = VarGetEventObjectGraphicsId(obj->graphicsIdLowerByte - 0xF0);
+    {
+        //[hack] FEAT-contest S8（patches/0985）: 変数は 16 ビット（上位バイト＝表の番号）のまま物体に写す。下位バイトだけ写すと表 0（素の絵）の番号になり、
+        //  ホウエンの歩く絵（表 7）は 0x98 以上で素の表の外＝絵が出なかった（実機）。値が 255 以下なら今までと同じ。
+        u16 v = VarGet(VAR_OBJ_GFX_ID_0 + (obj->graphicsIdLowerByte - 0xF0));
+
+        obj->graphicsIdLowerByte = v & 0xFF;
+        obj->graphicsIdUpperByte = v >> 8;
+    }
 }
 
 void BwFollowerRemoveIfOutsideView(struct EventObject *obj)
@@ -505,7 +520,9 @@ static void BwFollowerFixPaletteSlot(struct EventObject *obj)
     struct Sprite *sprite = &gSprites[obj->spriteId];
     u8 slot;
 
-    if (!BwFollowerValidIndex(BwFollowerIndexOf(gFollowerState.gfxId)) || FuncIsActiveTask(Task_BwFollowerBall))
+    /* ★ 2026-11-03 perf-region-2: 呼び元（BwFollowerHideForFieldEffect）は頭で Task_BwFollowerBall が動いていれば帰っていて、
+       ここまでの間にボールのタスクを作る道は無い（StartBall は呼ばれない）ので、毎コマ 16 個のタスクを探し直さない（約 315 サイクル） */
+    if (!BwFollowerValidIndex(BwFollowerIndexOf(gFollowerState.gfxId)))
         return;
     slot = BwFollowerPalSlot();
     if (sprite->oam.paletteNum != slot)
@@ -549,13 +566,24 @@ static u8 BwFollowerMakeBall(struct Sprite *follower, u8 frame)
     LoadCompressedSpriteSheetUsingHeap(&gBwFollowerBallSheet);
     if (GetSpriteTileStartByTag(BW_BALL_TILE_TAG) == 0xFFFF)
         return 0xFF;
+    /* 札のないボールも DestroySprite で参照数を減らすため、借りる分を先に取得する。
+       数が 0 または満杯なら、減算と釣り合わないボールを作らない。 */
+    if (!BwPalRefAddIfUsed(follower->oam.paletteNum))
+    {
+        FreeSpriteTilesByTag(BW_BALL_TILE_TAG);
+        return 0xFF;
+    }
     LoadPalette(gBwFollowerBallPal, 0x100 + follower->oam.paletteNum * 16, 32);
 
     /* ボールの足元を連れ歩きの足元に合わせる（16x32 なので中心は下端の 16 画素上） */
     id = CreateSprite(&sBallTemplate, follower->pos1.x,
                       follower->pos1.y - follower->centerToCornerVecY - 16, follower->subpriority);
     if (id >= MAX_SPRITES)
+    {
+        PalRefDecreaseCount(follower->oam.paletteNum);
+        FreeSpriteTilesByTag(BW_BALL_TILE_TAG);
         return 0xFF;
+    }
 
     ball = &gSprites[id];
     ball->oam.paletteNum = follower->oam.paletteNum;   /* 連れ歩きと同じ置き場（演出の間だけボールの色） */
@@ -573,6 +601,12 @@ static void BwFollowerKillBall(struct Task *task)
         task->tBallSprite = 0xFF;
     }
     FreeSpriteTilesByTag(BW_BALL_TILE_TAG);
+}
+
+/* ★ 2026-10-12 なみのりポケモンの絵（#114・src/hack_surf_sprite.c）が、ボールの演出の最中に札 BW_FOLLOWER_TILE_TAG を奪わないよう聞く */
+bool8 BwFollowerBallBusy(void)
+{
+    return FuncIsActiveTask(Task_BwFollowerBall);
 }
 
 static void Task_BwFollowerBall(u8 taskId)
@@ -1013,22 +1047,30 @@ static void BwFollowerSwapNow(struct EventObject *obj, u16 want)
    前は素の FieldEffectActiveListContains（08083418・32 個の表を毎回はじめから見る）を 7 回呼んでいて、毎コマ約 7,000 サイクル
    （デモ版の報告「処理落ち」）→ 同じ表（03000FC8・空き 0xFF）を 1 回だけ見る */
 #define BW_FIELD_EFFECT_ACTIVE_LIST ((const u8 *) 0x03000FC8)
-static bool8 BwFollowerCutsceneFieldEffectActive(void)
+bool8 BwFollowerCutsceneFieldEffectActive(void)   /* ★ 2026-10-26 #76 段 2: src/hack_heroine.c も使う */
 {
-    u32 i;
+    const u32 *words = (const u32 *) BW_FIELD_EFFECT_ACTIVE_LIST;     /* 03000FC8 は 4 の倍数 */
+    u32 k, j;
 
-    for (i = 0; i < 32; ++i)
+    /* ★ 2026-11-03 perf-region-2: 空き（0xFF）の 4 バイトは 1 語でまとめて飛ばす（ふだんは全部空き・毎コマ 約 500 → 約 60 サイクル）。
+       見る値と答えは前と同じ */
+    for (k = 0; k < 8; ++k)
     {
-        switch (BW_FIELD_EFFECT_ACTIVE_LIST[i])
+        if (words[k] == 0xFFFFFFFF)
+            continue;
+        for (j = 0; j < 4; ++j)
         {
-        case BW_FLDEFF_FIELD_MOVE_SHOW_MON:
-        case BW_FLDEFF_FIELD_MOVE_SHOW_MON_INIT:
-        case BW_FLDEFF_USE_FLY:
-        case BW_FLDEFF_USE_FLY_ANCIENT_TOMB:
-        case BW_FLDEFF_USE_TELEPORT:
-        case BW_FLDEFF_USE_DIG:
-        case BW_FLDEFF_POKECENTER_HEAL:
-            return TRUE;
+            switch (BW_FIELD_EFFECT_ACTIVE_LIST[k * 4 + j])
+            {
+            case BW_FLDEFF_FIELD_MOVE_SHOW_MON:
+            case BW_FLDEFF_FIELD_MOVE_SHOW_MON_INIT:
+            case BW_FLDEFF_USE_FLY:
+            case BW_FLDEFF_USE_FLY_ANCIENT_TOMB:
+            case BW_FLDEFF_USE_TELEPORT:
+            case BW_FLDEFF_USE_DIG:
+            case BW_FLDEFF_POKECENTER_HEAL:
+                return TRUE;
+            }
         }
     }
     return FALSE;
@@ -1044,8 +1086,12 @@ void BwFollowerHideForFieldEffect(void)
     /* ★ 2026-10-07 ユーザー「グレンタウンの1の島イベントで連れ歩きポケモンがうごかない」: CFRU の FollowMe（src/follow_me.c 229 行）は
        スクリプトの最中は主人公の歩きについていかない（マサキと船へ歩く場面などで置いていかれた）。CFRU の設定
        FLAG_FOLLOWER_IGNORE_ACTIVE_SCRIPT（0x926・2 つの config.h）が立っていればついていくので、いつも立てておく */
-    if (!FlagGet(FLAG_FOLLOWER_IGNORE_ACTIVE_SCRIPT))
+    if (!HackXFlagGet(FLAG_FOLLOWER_IGNORE_ACTIVE_SCRIPT))     /* ★ 2026-11-03 毎コマなので FlagGet を使わず直に読む（hack_flag_fast.h） */
         FlagSet(FLAG_FOLLOWER_IGNORE_ACTIVE_SCRIPT);
+
+    /* ★ 2026-10-15 回復の演出の後片付けで主人公の札（枠 0・0x1151）が帳簿から消え、出し直した連れ歩きが枠 0 を取って
+       主人公が連れ歩きの色になった（シオン・ニビのポケセン・src/bw_player_pal.c）。作り直しより前に毎コマ戻す */
+    BwPlayerKeepPalRef();
 
     if (FuncIsActiveTask(Task_BwFollowerBall))
         return;     /* 演出中 */
@@ -1132,6 +1178,27 @@ void BwFollowerHideForFieldEffect(void)
     if (gFollowerState.warpEnd && !obj->invisible)
         obj->invisible = TRUE;
 
+    /* ★ 2026-10-15 ダイビングで浮上した直後だけ なみのりの見た目が素の台になり、1 歩で直る（docs/research/2026-10-15_dive-surface-sprite.md）:
+       地図を読み直すと InitPlayerAvatar（src/character_customization.c）の BwFollowerUpdateFromParty → CreateFollowerAvatar が
+       連れ歩きを「見えないまま」作り（inProgress = TRUE）、そのあと素の InitObjectEventsLocal が SetPlayerAvatarTransitionFlags(なみのり) →
+       HackSurf_Create を呼ぶ。CreateSurferSprite は inProgress を見て諦め、素の台にする。見えないまま待つ連れ歩きは下の if で return するので、
+       ボールへしまわれるのは一歩目（CFRU の FollowMe が見せたあと）だった。
+       → なみのりで見えないまま待っているなら、演出なしで物体ごと消してボールの中にする（見えていないのでボールの演出は要らない）。
+         HackSurf_Update が 16 コマ以内に なみのりのポケモンの絵を作り直す。岸に上がったら今までどおり BW_BALL_IN からボールで出てくる。
+         CFRU の合図（浮上の台本の FollowMe_SetIndicatorToRecreateSurfBlob が立てる createSurfBlob）も消す＝連れ歩きに台を作らせない */
+    /* ★ 2026-10-16 つづきから直後のなみのりで なみのりのポケモンの絵が出ず主人公が素の台に乗ったままになる（docs/research/2026-10-16_surf-after-continue.md）:
+       報告者のセーブは連れ歩きの物体が見えないまま（invisible・warpEnd = 0・inProgress = 1）で保存されていて、warpEnd を条件にした上の塊に入れず、
+       CreateSurferSprite が inProgress を見て諦め続けた。見えない連れ歩きがなみのり中にいるのは warpEnd に関係なくおかしいので条件から外す */
+    if (obj->invisible && TestPlayerAvatarFlags(PLAYER_AVATAR_FLAG_SURFING))
+    {
+        gFollowerState.inProgress = FALSE;
+        gFollowerState.createSurfBlob = 0;
+        DestroySprite(&gSprites[obj->spriteId]);
+        RemoveEventObject(obj);
+        BW_BALL_STATE = BW_BALL_IN;
+        return;
+    }
+
     if (obj->invisible)
     {
         /* まだ姿を見せていない（ワープ直後など）。
@@ -1165,6 +1232,10 @@ void BwFollowerHideForFieldEffect(void)
              && !gPlayerAvatar->preventStep && !gPaletteFade->active)
                 BwFollowerAppearAfterWarp(obj);
         }
+        /* ★ 2026-10-16 見えないまま置き去りの連れ歩き（そういうセーブがある・invisible・warpEnd = 0）。ワープ後と同じ道（上）に乗せて出す */
+        else if (!gFollowerState.warpEnd && !gFollowerState.comeOutDoorStairs && !hide && BwFollowerCanRepositionNow(obj)
+              && !gPlayerAvatar->preventStep && !gPaletteFade->active)
+            gFollowerState.warpEnd = TRUE;
         return;
     }
 
@@ -1186,7 +1257,8 @@ void BwFollowerHideForFieldEffect(void)
         if (dy < 0) dy = -dy;
         /* ★ 2026-10-04 段差を跳び降りたあとは CFRU が「次の一歩で跳ぶ」を持って 2 マスうしろで待っている（正しい形）。
            そこで置き直すと跳ぶ予定と食い違い、次の一歩で主人公に重なった → そのときは置き直さない */
-        if (dx + dy > 1 && !(gFollowerState.delayedState != 0 && dx + dy == 2))
+        /* ★ 2026-10-17 主人公と同じマスに重なったまま（dx + dy == 0）も置き直す（前は 0 は対象外で、重なったまま直らなかった） */
+        if ((dx + dy > 1 && !(gFollowerState.delayedState != 0 && dx + dy == 2)) || dx + dy == 0)
         {
             EventObjectClearHeldMovement(obj);   /* 置き去りの所で受けていた動きを捨てる */
             BwFollowerPlaceBehindPlayer(FALSE);
@@ -1266,9 +1338,23 @@ static void BwFollowerCheckShinyPalette(struct EventObject *obj)
 /* ---- 手持ちの先頭から連れ歩きを組み立てる ----
    character_customization.c の InitPlayerAvatar（地図を作り直すたびに通る）から、
    CFRU の CreateFollowerAvatar() の直前に呼ばれる（patches/0022）。 */
+bool8 HackHeroine_WantsFollow(void);       /* src/hack_heroine.c（#76 段 2・ハルカの連れ歩き） */
+void HackHeroine_BuildState(void);
+bool8 HackHeroine_IsFollowing(void);
+
 void BwFollowerUpdateFromParty(void)
 {
     u16 gfxId;
+
+    /* ★ 2026-10-26 #76 段 2: ハルカの連れ歩き中（変数 HACK_VAR_HEROINE_FOLLOWER）は人の連れ歩きを組んでポケモンの連れ歩きは出さない。
+       ハルカが付いていた状態（保存された gFollowerState）が残っていて、もう付けない（水の中・施設・わかれた）ときは落として、ポケモンの連れ歩きに戻す */
+    if (HackHeroine_WantsFollow())
+    {
+        HackHeroine_BuildState();
+        return;
+    }
+    if (HackHeroine_IsFollowing())
+        gFollowerState.inProgress = FALSE;
 
     if (gFollowerState.inProgress && gFollowerState.map.id != DEFAULT_FOLLOWER_LOCAL_ID)
         return;     /* NPC の連れ歩き（sp0D1）が動いている。そちらを優先する */
@@ -1324,14 +1410,14 @@ void BwFollowerUpdateFromParty(void)
            別の地図へ移ると、次の地図で古い合図が効いてしまう。
            ここ（地図を作り直す所）で地図が変わっていたら落とす。
            ★ ふつうのドアの出入りでは、この関数のあとに合図が立つので消えない。 */
-        if (gFollowerState.map.number != gSaveBlock1->location.mapNum
-         || gFollowerState.map.group != gSaveBlock1->location.mapGroup)
+        if (gFollowerState.map.number != (u8) gSaveBlock1->location.mapNum
+         || gFollowerState.map.group != (u8) gSaveBlock1->location.mapGroup)
             gFollowerState.comeOutDoorStairs = FALSE;
         /* ★ 2026-10-04 ワープした（warpEnd）・地図が変わったら「次の一歩で跳ぶ」の残りを捨てる。段差を跳んだ直後にワープすると残り、
            ワープ先の 2 歩目で連れ歩きが 2 マス跳んで主人公に重なった（mGBA で再現） */
         if (gFollowerState.warpEnd
-         || gFollowerState.map.number != gSaveBlock1->location.mapNum
-         || gFollowerState.map.group != gSaveBlock1->location.mapGroup)
+         || gFollowerState.map.number != (u8) gSaveBlock1->location.mapNum
+         || gFollowerState.map.group != (u8) gSaveBlock1->location.mapGroup)
             gFollowerState.delayedState = 0;
         gFollowerState.map.number = gSaveBlock1->location.mapNum;
         gFollowerState.map.group = gSaveBlock1->location.mapGroup;

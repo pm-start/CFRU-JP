@@ -15,6 +15,9 @@
 #include "../include/event_data.h"
 #include "../include/quest_log.h"
 #include "party_menu_internal.h"
+#include "hack_challenge_b.h" //[hack] patches/0540 しばり B（レベルキャップ）
+#include "hack_fuuin.h" //[hack] patches/0560 縛り ふういんルーレット（レベルアップを数える）
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダークの子の成長止め
 
 /*
     けいけんアメ XS〜XL（2026-10-01）
@@ -93,7 +96,8 @@ static void ExpCandyNextLevel(u8 taskId)
 {
 	struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
 	s16 *stats = sPartyMenuInternal->data;
-	u8 level;
+	u16 level;
+	u16 levelBefore = GetMonData(mon, MON_DATA_LEVEL, NULL); //[hack] patches/0560 ふういんルーレット
 
 	/* BPRJ RareCandyStep UI/learning flow, without synthetic bag items. */
 	gSpecialVar_ItemId = ITEM_RARE_CANDY;
@@ -103,9 +107,15 @@ static void ExpCandyNextLevel(u8 taskId)
 	gPartyMenuUseExitCallback = TRUE;
 	WriteQuestLog(4, 0, ITEM_RARE_CANDY, 0xFFFF);
 	PlayFanfareByFanfareNum(0);
+	level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	/* ★ 2026-11-04 #240: 手持ちの枠（Lv・HP・最大 HP）は途中のレベルでも毎レベル描き直す（ふしぎなアメを続けて使うのと同じ）。
+	   2026-10-18（bfa04b6bc）は「重ね描きで前の数字が残る」と推定して最後の 1 回だけにしたが、残る原因は描き直しの回数でなく
+	   消す矩形（タイル単位）が文字の ink を覆っていなかったこと（tools/bwparty/build_bw_party.py RECT_DIMS・直し済み）。
+	   最後だけにすると途中のレベルの数字が枠に出ない（ユーザー報告 2026-11-04） */
 	UpdateMonDisplayInfoAfterRareCandy(gPartyMenu.slotId, mon);
 	GetMonNickname(mon, gStringVar1);
-	level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	if (level > levelBefore) //[hack] patches/0560 ふういんルーレット: けいけんアメの 1 レベルぶん（アメの流れは 1 レベルずつこの関数を通る）
+		HackFuuin_OnLevelsGained(levelBefore, level);
 	ConvertIntToDecimalStringN(gStringVar2, level, STR_CONV_MODE_LEFT_ALIGN, 3);
 	StringExpandPlaceholders(gStringVar4, (const u8*) 0x083DE267);
 	DisplayPartyMenuMessage(gStringVar4, TRUE);
@@ -177,7 +187,7 @@ static void ItemUseCB_ExpCandy(u8 taskId, TaskFunc func)
 	u16 item = gSpecialVar_ItemId;
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
 	u8 growth = gBaseStats[species].growthRate;
-	u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	u16 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
 	u32 exp = GetMonData(mon, MON_DATA_EXP, NULL);
 	u32 maxExp = gExperienceTables[growth][MAX_LEVEL];
 	u32 amount = ExpCandyIndex(item) < EXP_CANDY_COUNT ? sExpCandyAmount[ExpCandyIndex(item)] : 0;
@@ -185,7 +195,16 @@ static void ItemUseCB_ExpCandy(u8 taskId, TaskFunc func)
 	u8 newLevel;
 
 	PlaySE(SE_SELECT);
+	if (amount != 0 && HackChallengeB_AtLevelCap(mon)) //[hack] patches/0540 しばり B: 上限のレベルからは 使えない（アメは減らさない）
+	{
+		gPartyMenuUseExitCallback = FALSE;
+		DisplayPartyMenuMessage(HackChallengeB_CandyCappedText(), TRUE); //[hack] patches/0613 上限の数字つき
+		ScheduleBgCopyTilemapToVram(2);
+		gTasks[taskId].func = func;
+		return;
+	}
 	if (amount == 0 || level >= MAX_LEVEL || GetMonData(mon, MON_DATA_IS_EGG, NULL)
+	|| Shadow_RefusesGrowth(mon) //[hack] patches/0963 段 E ダークの子には効かない（アメは減らさない）
 	|| !RemoveBagItem(item, 1))
 	{
 		gPartyMenuUseExitCallback = FALSE;
@@ -196,6 +215,7 @@ static void ItemUseCB_ExpCandy(u8 taskId, TaskFunc func)
 	}
 
 	newExp = AddCandyExperience(exp, amount, maxExp);
+	newExp = HackChallengeB_ClampCandyExp(species, newExp); //[hack] patches/0540 しばり B: 上限のレベルの経験値でとめる（OFF なら そのまま）
 	newLevel = level;
 	while (newLevel < MAX_LEVEL && gExperienceTables[growth][newLevel + 1] <= newExp)
 		++newLevel;
@@ -208,7 +228,7 @@ static void ItemUseCB_ExpCandy(u8 taskId, TaskFunc func)
 		UpdateMonDisplayInfoAfterRareCandy(gPartyMenu.slotId, mon);
 		gPartyMenuUseExitCallback = TRUE;
 		GetMonNickname(mon, gStringVar1);
-		ConvertIntToDecimalStringN(gStringVar2, amount, STR_CONV_MODE_LEFT_ALIGN, 5);
+		ConvertIntToDecimalStringN(gStringVar2, amount, STR_CONV_MODE_LEFT_ALIGN, 6);
 		StringExpandPlaceholders(gStringVar4, gText_ExpCandyGotExp);
 		DisplayPartyMenuMessage(gStringVar4, TRUE);
 		ScheduleBgCopyTilemapToVram(2);

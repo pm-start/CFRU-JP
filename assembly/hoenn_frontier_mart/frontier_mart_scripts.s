@@ -151,6 +151,9 @@ HoennFrontierMart_TutorNoMove:
 .global HoennFrontierMart_Items
 HoennFrontierMart_Items:
 	.2byte 0x2	@ ITEM_ULTRA_BALL
+@ WATASHI_BALLS_BEGIN
+	.2byte 0x360	@ ITEM_GAME_PULSE_BALL（わたしたち かいり のボール・版 0.66.0 の店・tools/balls/watashi_ball_shops.py）
+@ WATASHI_BALLS_END
 	.2byte 0x15	@ ITEM_HYPER_POTION
 	.2byte 0x14	@ ITEM_MAX_POTION
 	.2byte 0x13	@ ITEM_FULL_RESTORE
@@ -213,6 +216,7 @@ HoennFrontierMart_BattleItems:
 	.2byte 0x2EF	@ ITEM_MIRROR_HERB
 	.2byte 0x2E5	@ ITEM_PUNCHING_GLOVE
 	.2byte 0x2F0	@ ITEM_ABILITY_SHIELD
+	.2byte 0x2E7	@ ITEM_BOOSTER_ENERGY（2026-10-22 ユーザー Q38a・Redmine #37・値段 10000）
 	.2byte 0xB7	@ ITEM_QUICK_CLAW
 	.2byte 0xBB	@ ITEM_KINGS_ROCK
 	.2byte 0xB3	@ ITEM_BRIGHT_POWDER

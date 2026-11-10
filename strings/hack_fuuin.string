@@ -1,0 +1,28 @@
+// 縛り『ふういんルーレット』（#123・src/hack_fuuin.c・assembly/hack_challenge/fuuin_scripts.s・assembly/battle_scripts/fuuin_battle_scripts.s）の文。会話の窓の幅（CLAUDE.md 6.25）。
+
+#org @gText_Fuuin_Spin
+ふういんルーレットが まわった！
+
+#org @gText_Fuuin_Mon
+[BUFFER1]は ふういんされた！\nボックスに おくられた！
+
+#org @gText_Fuuin_Item
+[BUFFER1]は ふういんされた！\nもう つかえない！
+
+#org @gText_Fuuin_Move
+[BUFFER1]は ふういんされた！\nだれも つかえない！
+
+#org @gText_Fuuin_Miss
+……しかし ふういんは からぶりした！
+
+#org @gText_Fuuin_Reseal
+[BUFFER1]は ふういんされている！\nボックスに もどされた！
+
+#org @gText_Fuuin_ItemSealed
+ふういんされていて つかえない！
+
+#org @gText_Fuuin_MoveSealed
+[CURRENT_MOVE]は ふういんされていて\nだすことが できない！\p
+
+#org @gText_Fuuin_Finale
+『ふういんルーレット』を まもりぬいた！

@@ -20,6 +20,7 @@ ability_t* GetAbilityLocationIgnoreNeutralizingGas(u8 bank);
 void RecordAbilityBattle(u8 bank, u16 ability);
 void ClearBattlerAbilityHistory(u8 bank);
 item_effect_t GetBankItemEffect(u8 bank);
+u8 GetBankItemEffectParam(u8 bank);
 item_effect_t GetMonItemEffect(const struct Pokemon* mon);
 item_effect_t GetRecordedItemEffect(u8 bank);
 void RecordItemEffectBattle(u8 bank, u8 itemEffect);
@@ -34,7 +35,7 @@ bool8 CanHitSemiInvulnerableTarget(u8 bankAtk, u8 bankDef, u16 move);
 bool8 CheckGrounding(u8 bank);
 bool8 NonInvasiveCheckGrounding(u8 bank, u16 defAbility, u8 defType1, u8 defType2, u8 defType3);
 bool8 CheckMonGrounding(struct Pokemon* mon);
-bool8 CheckGroundingByDetails(u16 species, u16 item, u16 ability);
+bool8 CheckGroundingByDetails(u16 species, u16 item, u16 ability, const struct Pokemon* mon); //[hack] patches/0962 mon はデルタ種のタイプ用（NULL 可）
 bool8 IsDamageHalvedDueToFullHP(u8 bank, u16 defAbility, u16 move, u16 atkAbility);
 u8 ViableMonCountFromBank(u8 bank);
 u8 ViableMonCountFromBankLoadPartyRange(u8 bank);
@@ -120,7 +121,7 @@ void HandleAbilityShieldGetAndLost(u8 bank);
 
 void ClearBankStatus(u8 bank);
 bool8 DoesSleepClausePrevent(u8 bank);
-bool8 CanBeGeneralStatused(u8 bankDef, u16 defAbility, u16 atkAbility, bool8 checkFlowerVeil);
+bool8 CanBeGeneralStatused(u8 bankDef, u16 defAbility, u16 atkAbility, bool8 checkFlowerVeil, u8 bankAtk);
 bool8 CanBePutToSleep(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil);
 bool8 CanBeYawned(u8 bankDef, u8 bankAtk);
 bool8 CanBePoisoned(u8 bankDef, u8 bankAtk, bool8 checkFlowerVeil);

@@ -8,6 +8,9 @@
 #include "../include/battle.h"
 #include "../include/constants/battle.h"
 #include "hack_battle_speed.h"
+#ifdef HACK_DEBUG_MENU
+#include "hack_debug_catch_info.h"   /* patches/0425 デバッグ版だけ */
+#endif
 
 /*
     たいせんそくど（戦闘の倍速 1〜4 倍）— 2026-10-09 ユーザー「後設定スクロールできない？」→ 増やす項目「たいせんそくど」。
@@ -84,6 +87,9 @@ void HackBattleSpeed_BattleMainCB2(void)
     u16 newKeys, newRaw, newRepeat;
 
     BattleMainCB2_Body(TRUE);
+    #ifdef HACK_DEBUG_MENU
+    HackDebugCatchInfo_Tick();   /* デバッグ版だけ: 戦闘中の捕獲情報（右上・patches/0425）。毎コマ 1 回（余分に回す間は呼ばない）*/
+    #endif
     extra = ExtraIterations();
     if (extra == 0)
         return;

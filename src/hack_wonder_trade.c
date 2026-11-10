@@ -1,6 +1,9 @@
 #include "defines.h"
+#include "hack_orcaiser.h" //[hack] patches/0952 HACK_IS_ORCAISER_LINE
+#include "hack_kind.h" //[hack] patches/0964 ダークは交換に出せない
 #include "../include/data2.h"
 #include "../include/constants/items.h"
+#include "../include/constants/abilities.h"
 #include "../include/event_data.h"
 #include "../include/pokemon.h"
 #include "../include/random.h"
@@ -355,15 +358,152 @@ const u8 gWonderTradeTypeOrder[WONDER_TRADE_TYPE_COUNT] =
 	TYPE_FLYING, TYPE_PSYCHIC, TYPE_BUG, TYPE_ROCK, TYPE_GHOST, TYPE_DRAGON, TYPE_DARK, TYPE_STEEL, TYPE_FAIRY,
 };
 
-static u16 GetRandomWonderTradeSpecies(void)
+//★ 2026-10-16 わたしたちの伝説 10 匹（SPECIES_TSUKIRIRU〜SPECIES_ICHIGOBERRY・図鑑 1030〜1039・tools/custom_mon/watashitachi_legends）は
+//  Lv180 の出会い（段 C）で手に入れる伝説なので、ミラクル交換には出さない
+#define IS_WATASHI_LEGEND(sp) ((sp) >= SPECIES_TSUKIRIRU && (sp) <= SPECIES_ICHIGOBERRY)
+//★ 2026-10-16 デバッグモン（SPECIES_DEBUGMON_MAX／MIN・patches/0422）もデバッグ用なので、ミラクル交換には出さない（図鑑の番号はレントラーと同じなので普通は引かれない・念のため）
+#define IS_DEBUG_MON(sp) ((sp) == SPECIES_DEBUGMON_MAX || (sp) == SPECIES_DEBUGMON_MIN)
+
+/*
+★ 2026-10-16 バッジの数によるミラクル交換の制限とごほうび（patches/0429・ユーザー決定）。
+  b = GetAllBadgeCount()（カントー・ホウエン・ジョウト・シンオウ各 8 の合計 0〜32・src/badge_count.c・旗を読むだけでセーブの形は変えない）。
+  数字は下の WT_ の定数 1 か所だけ（tools/rom/verify_wonder_badge.py が同じ式で表を作って確かめる・資料 2026-10-07_wonder-trade.md の表）。
+  ・色違い・Moémon（裏 ID の当たり）の出やすさ = 「今の確率にかける倍」。b = 0〜19 は 0.10 + 0.85 × b / 31 倍・20 個で 1.0 倍・20〜31 は 1.0 から 1.9 倍へ直線（31 個で 1.9 倍・2026-10-17）・32 個で 2 倍。
+    自然の色違い・かがやくおまもり・カイナの係の 1/16・Moémon の 1/16 のすべてに同じ倍をかける（クチバ専用の抽選は無い）。
+    1 倍より小さい: 当たったら「倍」の確率で残し、外れたら自身の ID を外れに作り直す。1 倍をこえる（〜2 倍）: 外れたとき同じ抽選をもう 1 回引き、その回の当たりを（倍 − 1）の確率で採る。
+    どちらも性格値は書き換えず自身の ID だけを替える（6.5・#70）。
+  ・もらう子のレベルの上限 = 15 + round(95 × b / 31)（31 個で 110・32 個はなし）。min(出した子のレベル, 上限)。
+  ・ウルトラビースト・パラドックス = 16 個から・伝説・幻 = 24 個から出る。カイナの「1/8 で伝説・幻」も 24 個から。
+  ・種族値の合計の上限は無い（ユーザー決定）。
+  ・32 個だけ: 3V 保証（ランダム 3 つを 31）・1/500 で 6V・隠れ特性 1/4（隠れ特性のある種族だけ）・引く前に 1/20 で伝説・幻・UB・パラドックスの中から選ぶ。
+    6V・隠れ特性が当たったら交換のあとに 1 行で知らせる（Var800B: 1 = 6V・2 = 隠れ特性・3 = 両方）。
+*/
+u8 GetAllBadgeCount(void);   //src/badge_count.c
+u8 HackLevelCap_Lerp(u8 badges, u8 base, u8 top, u8 steps);   //src/hack_level_cap.c（バッジの数 → レベルの上限の共通の式・#117）
+bool8 HackShiningCharm_Roll(void);   //src/hack_shining_charm.c
+u16 HackLegendRaid_Count(void);   //src/hack_legend_raid.c
+u16 HackLegendRaid_At(u16 i);
+bool8 HackLegendRaid_IsLegend(u16 species);
+u16 GetHiddenAbility(const u16 species);
+
+#define WT_BADGE_MAX 32                 //全部そろった
+#define WT_MULT_ONE 1000                //倍率は 1000 = 1 倍（1/1000 単位）
+#define WT_MULT_MIN 100                 //0 個 = 0.10 倍
+#define WT_MULT_SPAN 850                //31 個 = 0.10 + 0.85 = 0.95 倍
+#define WT_MULT_ALL 2000                //32 個 = 2 倍
+#define WT_MULT_STEPS 31                //0〜19 の式の分母（0〜31 を 31 等分・旧 0.10 + 0.85 × b / 31）
+#define WT_BOOST_FROM 20                //★ 2026-10-17 この個数から 1 倍をこえて上がる（ユーザー決定・案 A）
+#define WT_BOOST_START 1000             //20 個 = 1.0 倍
+#define WT_BOOST_SPAN 900               //31 個 = 1.0 + 0.9 = 1.9 倍（20〜31 は 11 等分）
+#define WT_BOOST_STEPS 11
+#define WT_NATURAL_SHINY_ODDS 8192      //自然の色違い（SHINY_THRESHOLD 8 / 65536）
+#define WT_MOEMON_ODDS 16               //Moémon の当たり（裏 ID 1/16・hack_mon_id.c）
+#define WT_LEVEL_BASE 15                //0 個のときの上限
+#define WT_LEVEL_SPAN 95                //31 個で 15 + 95 = 110
+#define WT_UB_PARADOX_BADGES 16
+#define WT_LEGEND_BADGES 24
+#define WT_ALL_PERFECT_IVS 3
+#define WT_ALL_SIX_V_ODDS 500
+#define WT_ALL_HIDDEN_ODDS 4
+#define WT_ALL_SPECIAL_PICK_ODDS 20     //仮置き（1/20）
+
+//ウルトラビースト（出典: src/achievements.c の sUltraBeasts を写した・static で外から読めないため）
+static const u16 sWonderUltraBeasts[] =
+{
+	SPECIES_NIHILEGO, SPECIES_BUZZWOLE, SPECIES_PHEROMOSA, SPECIES_XURKITREE, SPECIES_CELESTEELA,
+	SPECIES_KARTANA, SPECIES_GUZZLORD, SPECIES_POIPOLE, SPECIES_NAGANADEL, SPECIES_STAKATAKA, SPECIES_BLACEPHALON,
+};
+//パラドックス（過去 10 匹・未来 10 匹。コライドン・ミライドンは伝説・幻の一覧のほう）
+static const u16 sWonderParadox[] =
+{
+	SPECIES_GREAT_TUSK, SPECIES_SCREAM_TAIL, SPECIES_BRUTE_BONNET, SPECIES_FLUTTER_MANE, SPECIES_SLITHER_WING,
+	SPECIES_SANDY_SHOCKS, SPECIES_ROARING_MOON, SPECIES_WALKING_WAKE, SPECIES_GOUGING_FIRE, SPECIES_RAGING_BOLT,
+	SPECIES_IRON_TREADS, SPECIES_IRON_BUNDLE, SPECIES_IRON_HANDS, SPECIES_IRON_JUGULIS, SPECIES_IRON_MOTH,
+	SPECIES_IRON_THORNS, SPECIES_IRON_VALIANT, SPECIES_IRON_LEAVES, SPECIES_IRON_BOULDER, SPECIES_IRON_CROWN,
+};
+
+//★ 2026-10-23 #48 レイド（src/hack_legend_raid.c）が同じ一覧を読む（写さずに共有・配列は static のまま・ミラクル交換の挙動は変えない）。
+//  UB 11 → パラドックス 20 の順に 31 件
+u16 HackWonder_UbParadoxCount(void)
+{
+	return ARRAY_COUNT(sWonderUltraBeasts) + ARRAY_COUNT(sWonderParadox);
+}
+
+u16 HackWonder_UbParadoxAt(u16 i)
+{
+	if (i < ARRAY_COUNT(sWonderUltraBeasts))
+		return sWonderUltraBeasts[i];
+	i -= ARRAY_COUNT(sWonderUltraBeasts);
+	return i < ARRAY_COUNT(sWonderParadox) ? sWonderParadox[i] : SPECIES_NONE;
+}
+
+static bool8 WonderInTable(u16 species, const u16* table, u32 count)
+{
+	u32 i;
+	for (i = 0; i < count; ++i)
+		if (table[i] == species)
+			return TRUE;
+	return FALSE;
+}
+
+static u16 WonderMultiplier(u8 b)   //1/1000 単位
+{
+	if (b >= WT_BADGE_MAX)
+		return WT_MULT_ALL;
+	if (b >= WT_BOOST_FROM)   //20〜31: 1.0 倍から 1.9 倍へ直線（1 倍をこえた分は「外れたとき同じ抽選をもう 1 回引き、その回の当たりを extra/1000 の確率で採る」）
+		return WT_BOOST_START + (WT_BOOST_SPAN * (b - WT_BOOST_FROM)) / WT_BOOST_STEPS;
+	return WT_MULT_MIN + (WT_MULT_SPAN * b) / WT_MULT_STEPS;   //0〜19 は今までどおり
+}
+
+static u8 WonderLevelCap(u8 b)   //0 = 上限なし
+{
+	if (b >= WT_BADGE_MAX)
+		return 0;
+	return HackLevelCap_Lerp(b, WT_LEVEL_BASE, WT_LEVEL_BASE + WT_LEVEL_SPAN, WT_MULT_STEPS);   //四捨五入・共通の式（src/hack_level_cap.c・同じ値）
+}
+
+static bool8 WonderSpeciesOkForBadges(u16 species, u8 b)
+{
+	if (b < WT_LEGEND_BADGES && HackLegendRaid_IsLegend(species))
+		return FALSE;
+	if (b < WT_UB_PARADOX_BADGES
+	&& (WonderInTable(species, sWonderUltraBeasts, ARRAY_COUNT(sWonderUltraBeasts))
+	 || WonderInTable(species, sWonderParadox, ARRAY_COUNT(sWonderParadox))))
+		return FALSE;
+	return TRUE;
+}
+
+static u16 GetRandomWonderTradeSpecies(u8 badges)
 {
 	u32 tries;
 	u16 sel = VarGet(HACK_VAR_WONDER_TYPE);
 	bool8 byType = sel >= 1 && sel <= WONDER_TRADE_TYPE_COUNT;
 	u8 type = byType ? gWonderTradeTypeOrder[sel - 1] : 0;
 
+	//32 個: 引く前に 1/20 で 伝説・幻・UB・パラドックス の中から選ぶ（タイプ設定があれば 1 つ目のタイプが合うものだけ・100 回で届かなければふつうの抽選へ）
+	if (badges >= WT_BADGE_MAX && Random() % WT_ALL_SPECIAL_PICK_ODDS == 0)
+	{
+		u32 nLegend = HackLegendRaid_Count();
+		u32 nUb = ARRAY_COUNT(sWonderUltraBeasts);
+		u32 total = nLegend + nUb + ARRAY_COUNT(sWonderParadox);
+
+		for (tries = 0; tries < 100; ++tries)
+		{
+			u32 idx = Random() % total;
+			u16 species = idx < nLegend ? HackLegendRaid_At(idx)
+			            : (idx < nLegend + nUb ? sWonderUltraBeasts[idx - nLegend] : sWonderParadox[idx - nLegend - nUb]);
+
+			if (species != SPECIES_NONE && species < NUM_SPECIES && gBaseStats[species].baseHP != 0
+			&& !IS_WATASHI_LEGEND(species) && !IS_DEBUG_MON(species) && !HACK_IS_FOSSIL_ONLY_MON(species) //[hack] patches/0952 コシャル系（入手は化石の復元だけ）はミラクル交換に出さない
+			
+			&& (!byType || gBaseStats[species].type1 == type))
+				return species;
+		}
+	}
+
 	//タイプで絞るときは当たるまで引き直す（いちばん少ないタイプでも全体の 3% ほど＝平均 30 回ほど・上限 3000 回で ぜんぶ に戻す）
-	for (tries = 0; tries < (byType ? 3000 : 20); ++tries)
+	//ぜんぶ のときの上限は 20 → 200 回（バッジの数で外す種類が増えたため・外す種類は全体の 1 割ほど）
+	for (tries = 0; tries < (byType ? 3000 : 200); ++tries)
 	{
 		u16 roll = Random();
 		u16 species;
@@ -375,14 +515,18 @@ static u16 GetRandomWonderTradeSpecies(void)
 		species = NationalPokedexNumToSpecies(1 + roll % NATIONAL_DEX_COUNT);
 
 		if (species != SPECIES_NONE && species != SPECIES_EGG && species < NUM_SPECIES && gBaseStats[species].baseHP != 0
+		&& !IS_WATASHI_LEGEND(species) && !IS_DEBUG_MON(species) && !HACK_IS_FOSSIL_ONLY_MON(species) //[hack] patches/0952 コシャル系（入手は化石の復元だけ）はミラクル交換に出さない
+			 && WonderSpeciesOkForBadges(species, badges)
 		&& (!byType || gBaseStats[species].type1 == type))
 			return species;
 	}
 	if (byType)
-		for (tries = 0; tries < 20; ++tries)
+		for (tries = 0; tries < 200; ++tries)
 		{
 			u16 species = NationalPokedexNumToSpecies(1 + Random() % NATIONAL_DEX_COUNT);
-			if (species != SPECIES_NONE && species != SPECIES_EGG && species < NUM_SPECIES && gBaseStats[species].baseHP != 0)
+			if (species != SPECIES_NONE && species != SPECIES_EGG && species < NUM_SPECIES && gBaseStats[species].baseHP != 0
+			&& !IS_WATASHI_LEGEND(species) && !IS_DEBUG_MON(species) && !HACK_IS_FOSSIL_ONLY_MON(species) //[hack] patches/0952 コシャル系（入手は化石の復元だけ）はミラクル交換に出さない
+			 && WonderSpeciesOkForBadges(species, badges))
 				return species;
 		}
 	return SPECIES_PIKACHU;
@@ -428,6 +572,43 @@ static bool8 IsHoennWonderTrade(void)
 	return Var8007 == 1;
 }
 
+//★ 2026-10-23 #49 ユーザー「ホウエンのミラクル交換の配置方法を真似て　シンオウのミラクル交換作成して　ピックアップはウルトラビーストとパラドックス」
+//  「ミラクル交換の金額とかの仕様はホウエンとおなじで」: シンオウの係（台本 HackScr_WonderTrade_Sinnoh が Var8007 = 2 で呼ぶ）は、
+//  1/8 でウルトラビースト 11 匹＋パラドックス 20 匹の 31 匹から同じ確率で（バッジ 16 個から＝WT_UB_PARADOX_BADGES・伝説・幻は混ぜない）・
+//  1/16 で色違い（ホウエンと同じ。ほか＝値段・回数・せっていの こうかんタイプ・バッジの倍・32 個のごほうび は 3 地方共通）
+#define SINNOH_WONDER_PICKUP_ODDS 8
+static bool8 IsSinnohWonderTrade(void)
+{
+	return Var8007 == 2;
+}
+
+static bool8 IsPickupWonderTrade(void)   //ホウエンとシンオウの係（色違いの 1/16 を持つ）
+{
+	return Var8007 == 1 || Var8007 == 2;
+}
+
+//ウルトラビースト＋パラドックスから 1 匹（Random() は 16 ビットなので 65536 を割り切れない端は引き直す＝全員同じ確率）。選べなければ SPECIES_NONE
+static u16 GetRandomSinnohPickupSpecies(void)
+{
+	u32 tries;
+	u32 nUb = ARRAY_COUNT(sWonderUltraBeasts);
+	u32 total = nUb + ARRAY_COUNT(sWonderParadox);
+
+	for (tries = 0; tries < 200; ++tries)
+	{
+		u16 roll = Random();
+		u16 species;
+
+		if (roll >= 0x10000u - (0x10000u % total))
+			continue;
+		roll %= total;
+		species = roll < nUb ? sWonderUltraBeasts[roll] : sWonderParadox[roll - nUb];
+		if (species != SPECIES_NONE && species < NUM_SPECIES && gBaseStats[species].baseHP != 0)
+			return species;
+	}
+	return SPECIES_NONE;
+}
+
 void CreateWonderTradePokemon(void)
 {
 	u8 i;
@@ -435,19 +616,32 @@ void CreateWonderTradePokemon(void)
 	u8 nickname[POKEMON_NAME_LENGTH + 1];
 	u8 otGender;
 	u8 otIndex = Random() % WONDER_TRADE_NUM_OT_NAMES;
-	u16 species = (IsHoennWonderTrade() && Random() % HOENN_WONDER_LEGEND_ODDS == 0)
-	            ? HackLegendRaid_RandomSpecies() : GetRandomWonderTradeSpecies();
+	u8 badges = GetAllBadgeCount();
+	u16 species = (IsHoennWonderTrade() && badges >= WT_LEGEND_BADGES && Random() % HOENN_WONDER_LEGEND_ODDS == 0)
+	            ? HackLegendRaid_RandomSpecies() : GetRandomWonderTradeSpecies(badges);
 	u8 slot = Var8005;
-	u8 level;
+	u16 level, levelCap;
+	u16 notice = 0;
 	struct Pokemon* mon = &gEnemyParty[0];
+
+	//シンオウ: 1/8 でウルトラビースト・パラドックス（バッジ 16 個から・2026-10-23）
+	if (IsSinnohWonderTrade() && badges >= WT_UB_PARADOX_BADGES && Random() % SINNOH_WONDER_PICKUP_ODDS == 0)
+	{
+		u16 pick = GetRandomSinnohPickupSpecies();
+		if (pick != SPECIES_NONE)
+			species = pick;
+	}
 
 	if (slot >= PARTY_SIZE)
 		slot = 0;
 
-	//交換に出すポケモンと同じレベルで受け取る (通常のゲーム内交換と同じ)
+	//交換に出すポケモンと同じレベルで受け取る (通常のゲーム内交換と同じ)・バッジの数の上限つき
 	level = GetMonData(&gPlayerParty[slot], MON_DATA_LEVEL, NULL);
 	if (level == 0)
 		level = 5;
+	levelCap = WonderLevelCap(badges);
+	if (levelCap != 0 && level > levelCap)
+		level = levelCap;
 
 	//親ID・性格値はランダム(プレイヤーとは別の親)
 	CreateMon(mon, species, level, 32, FALSE, 0, OT_ID_PRESET, Random32());
@@ -472,8 +666,78 @@ void CreateWonderTradePokemon(void)
 	SetMonData(mon, MON_DATA_OT_NAME, otName);
 	SetMonData(mon, MON_DATA_OT_GENDER, &otGender);
 	SetMonData(mon, MON_DATA_NICKNAME, nickname);
-	if (IsHoennWonderTrade() && Random() % HOENN_WONDER_SHINY_ODDS == 0)
-		HackMonId_MakeShiny((struct BoxPokemon*) mon);   //ホウエン: 色違い（自身の ID で・2026-10-11）
+	//色違い・Moémon: 今の抽選の結果（自然・かがやくおまもり・ホウエンの 1/16・Moémon の 1/16）にバッジの数の倍をかける。自身の ID だけを替える（性格値は触らない・6.5）
+	{
+		struct BoxPokemon* box = (struct BoxPokemon*) mon;
+		bool8 shiny, moemon, shiny0, moemon0;
+		u16 mult = WonderMultiplier(badges);
+
+		HackMonId_Ensure(box);
+		shiny = shiny0 = HackMonId_IsShinyBox(box);
+		moemon = moemon0 = HackMonId_IsMoemonHit(box);
+		if (IsPickupWonderTrade() && Random() % HOENN_WONDER_SHINY_ODDS == 0)
+			shiny = TRUE;   //ホウエン: 色違い（2026-10-11）
+		if (mult < WT_MULT_ONE)
+		{
+			if (shiny && Random() % WT_MULT_ONE >= mult)
+				shiny = FALSE;
+			if (moemon && Random() % WT_MULT_ONE >= mult)
+				moemon = FALSE;
+		}
+		else if (mult > WT_MULT_ONE)   //1 倍をこえる: 外れたら同じ抽選をもう 1 回（採る確率は 倍 − 1）
+		{
+			u16 extra = mult - WT_MULT_ONE;
+
+			if (!shiny && Random() % WT_MULT_ONE < extra
+			&& (Random() % WT_NATURAL_SHINY_ODDS == 0 || HackShiningCharm_Roll()
+			 || (IsPickupWonderTrade() && Random() % HOENN_WONDER_SHINY_ODDS == 0)))
+				shiny = TRUE;
+			if (!moemon && Random() % WT_MULT_ONE < extra && Random() % WT_MOEMON_ODDS == 0)
+				moemon = TRUE;
+		}
+		if (shiny != shiny0 || moemon != moemon0)
+			HackMonId_SetParts(box, shiny, moemon);
+	}
+
+	//32 個のごほうび: 3V 保証・1/500 で 6V・隠れ特性 1/4
+	if (badges >= WT_BADGE_MAX)
+	{
+		u8 perfect = 31, n = 0;
+		bool8 picked[NUM_STATS];
+
+		for (i = 0; i < NUM_STATS; ++i)
+			picked[i] = FALSE;
+		if (Random() % WT_ALL_SIX_V_ODDS == 0)
+		{
+			n = NUM_STATS;
+			for (i = 0; i < NUM_STATS; ++i)
+				picked[i] = TRUE;
+			notice |= 1;
+		}
+		while (n < WT_ALL_PERFECT_IVS)
+		{
+			u8 statId = Random() % NUM_STATS;
+			if (!picked[statId])
+			{
+				picked[statId] = TRUE;
+				++n;
+			}
+		}
+		for (i = 0; i < NUM_STATS; ++i)
+			if (picked[i])
+				SetMonData(mon, MON_DATA_HP_IV + i, &perfect);
+
+		{
+			u16 hidden = GetHiddenAbility(species);
+			if (hidden != ABILITY_NONE && hidden != gBaseStats[species].ability1 && hidden != gBaseStats[species].ability2
+			&& Random() % WT_ALL_HIDDEN_ODDS == 0)
+			{
+				mon->hiddenAbility = TRUE;
+				notice |= 2;
+			}
+		}
+	}
+	Var800B = notice;   //交換のあとの知らせ（台本が見る）
 	CalculateMonStats(mon);
 
 #if WONDER_TRADE_RANDOM_BALL
@@ -546,6 +810,8 @@ void BufferInGameTradeSceneStrings(void)
 //  通信交換の場面（special 0xFE）を出さずにここで入れ替える（素の trade_scene.c の TradeMons と同じ: 入れ替え・なつき度 70・図鑑）。
 //  交換で進化する子とメールを持たせた子は、場面（進化の場面・メールの片付け）が要るのでいつもどおり場面を出す。
 //  入れ替えたら LASTRESULT = 1・gStringVar1 にもらった子の名前
+bool8 HackChallengeLuxray_OnObtain(struct Pokemon* mon, bool8 markDex);   //[hack] src/hack_challenge_luxray.c
+
 void WonderTrade_TrySkipScene(void)
 {
 	struct Pokemon* mine;
@@ -566,6 +832,7 @@ void WonderTrade_TrySkipScene(void)
 	tmp = *mine;
 	*mine = *theirs;
 	*theirs = tmp;
+	HackChallengeLuxray_OnObtain(mine, FALSE);   //[hack] しばり『ぜんぶレントラー』: もらった子をレントラー♀に（図鑑は下がレントラーの 見た・つかまえた）
 	if (!GetMonData(mine, MON_DATA_IS_EGG, NULL))
 	{
 		SetMonData(mine, MON_DATA_FRIENDSHIP, &friendship);
@@ -591,7 +858,9 @@ void WonderTrade_BufferChosen(void)
 
 	GetMonDisplayName(gStringVar1, mon);    //★ 2026-10-08 6 文字（元の作者さんの直しと同じ）
 	Var8006 = (item == ITEM_MOMO_ICE) ? 2 : (item != ITEM_NONE);   //★ 2026-10-09 2 = ももアイス（交換に出せない）
-	if (HackVolcarona_IsSpecial(mon))
+	if (HackKind_IsTradeRefused((struct BoxPokemon*) mon))
+		Var8006 = 4;   //[hack] patches/0964 4 = ダーク（出せない・段 I）
+	else if (HackVolcarona_IsSpecial(mon))
 		Var8006 = 3;   //★ 2026-10-11 3 = 特別なウルガモス（1 匹だけ・出せない・src/hack_volcarona.c・#95）
 	if (item != ITEM_NONE)
 		CopyItemName(item, gStringVar2);

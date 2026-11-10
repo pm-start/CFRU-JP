@@ -15,6 +15,8 @@
 #include "../include/new/frontier.h"
 #include "../include/new/multi.h"
 #include "../include/new/util.h"
+#include "hack_player_kind.h" //★ FEAT-player-mei
+#include "hack_player_mei_pics.h" //★ FEAT-player-mei-2（GetPlayerGender3・TRAINER_PIC_MEI・TRAINER_BACK_PIC_MEI）
 /*
 character_customization.c
 	functions for altering the player's sprite based on the current sprite/palette selections
@@ -105,6 +107,9 @@ static const struct CharacterCustomizationPaletteSwitch sCharacterPalSwitchTable
 	extern const struct EventObjectGraphicsInfo* const gHoennOwTable[256];
 	//★ 表 8 = 主人公の歩き・走りを BW の主人公に塗り替えたもの（src/Tables/bw_walk_gfx.c・#20 案 C）
 	extern const struct EventObjectGraphicsInfo* const gBwWalkOwTable[256];
+	//★ 表 9・10 = 連れ歩きの続き（通し番号 1280〜1791・patches/0409。表 6〜8 が使用中なので表 9 へ飛ぶ）
+	extern const struct EventObjectGraphicsInfo* const gBwFollowerOwTableExt1[256];
+	extern const struct EventObjectGraphicsInfo* const gBwFollowerOwTableExt2[256];
 	// create 255 OW tables
 	const struct EventObjectGraphicsInfo** const gOverworldTableSwitcher[255] =
 	{
@@ -117,6 +122,8 @@ static const struct CharacterCustomizationPaletteSwitch sCharacterPalSwitchTable
 		(NPCPtr*) gBwPlayerOwTable,
 		(NPCPtr*) gHoennOwTable,
 		(NPCPtr*) gBwWalkOwTable,
+		(NPCPtr*) gBwFollowerOwTableExt1,
+		(NPCPtr*) gBwFollowerOwTableExt2,
 		// etc...
 		// please note that this method makes compatability with OW Manager challenging
 	};
@@ -128,7 +135,8 @@ struct PlayerGraphics
 	u8 stateFlag;
 };
 
-static const struct PlayerGraphics sPlayerAvatarGfxIds[][2] =
+//★ FEAT-player-mei: 3 列目＝メイ（仮にトウコと同じ番号・表 11 などにメイの絵ができたらこの列の番号だけ書き換える）
+static const struct PlayerGraphics sPlayerAvatarGfxIds[][3] =
 {
 	//★ #20: 歩き・走りは素のレッド／リーフを BW のトウヤ／トウコに**塗り替えた絵**（表 8・案 C・2026-09-23）。
 	//   0x0800 = トウヤ / 0x0801 = トウコ（tools/bwplayer/build_bw_walk.py）。素に戻すときは
@@ -136,17 +144,27 @@ static const struct PlayerGraphics sPlayerAvatarGfxIds[][2] =
 	//   ★ 表 6 の 0x0600（DS の絵を縮めたもの）は 2026-09-20 に取りやめたまま使っていない。
 	//★ 2026-09-23: 自転車・なみのり・技を使う・つりざお・VS シーカー・潜水も同じ塗り替え（表 8 の 2〜13 番）。
 	//   素に戻すときは各行を EVENT_OBJ_GFX_RED_* / EVENT_OBJ_GFX_LEAF_* に戻すだけでよい。
-	[PLAYER_AVATAR_STATE_NORMAL] =     {{0x0800, PLAYER_AVATAR_FLAG_ON_FOOT},          {0x0801, PLAYER_AVATAR_FLAG_ON_FOOT}},
-	[PLAYER_AVATAR_STATE_BIKE] =       {{0x0802, PLAYER_AVATAR_FLAG_BIKE},               {0x0803, PLAYER_AVATAR_FLAG_BIKE}},
-	[PLAYER_AVATAR_STATE_SURFING] =    {{0x0804, PLAYER_AVATAR_FLAG_SURFING},         {0x0805, PLAYER_AVATAR_FLAG_SURFING}},
-	[PLAYER_AVATAR_STATE_FIELD_MOVE] = {{0x0806, PLAYER_AVATAR_FLAG_FIELD_MOVE},   {0x0807, PLAYER_AVATAR_FLAG_FIELD_MOVE}},
-	[PLAYER_AVATAR_STATE_FISHING] =    {{0x0808, 0},                                  {0x0809, 0}},
-	[PLAYER_AVATAR_STATE_VS_SEEKER] =  {{0x080A, 0},                                {0x080B, 0}},
-	[PLAYER_AVATAR_STATE_UNDERWATER] = {{0x080C, PLAYER_AVATAR_FLAG_UNDERWATER},   {0x080D, PLAYER_AVATAR_FLAG_UNDERWATER}},
+	[PLAYER_AVATAR_STATE_NORMAL] =     {{0x0800, PLAYER_AVATAR_FLAG_ON_FOOT},          {0x0801, PLAYER_AVATAR_FLAG_ON_FOOT}, {0x0801, PLAYER_AVATAR_FLAG_ON_FOOT}},
+	[PLAYER_AVATAR_STATE_BIKE] =       {{0x0802, PLAYER_AVATAR_FLAG_BIKE},               {0x0803, PLAYER_AVATAR_FLAG_BIKE}, {0x0803, PLAYER_AVATAR_FLAG_BIKE}},
+	[PLAYER_AVATAR_STATE_SURFING] =    {{0x0804, PLAYER_AVATAR_FLAG_SURFING},         {0x0805, PLAYER_AVATAR_FLAG_SURFING}, {0x0805, PLAYER_AVATAR_FLAG_SURFING}},
+	[PLAYER_AVATAR_STATE_FIELD_MOVE] = {{0x0806, PLAYER_AVATAR_FLAG_FIELD_MOVE},   {0x0807, PLAYER_AVATAR_FLAG_FIELD_MOVE}, {0x0807, PLAYER_AVATAR_FLAG_FIELD_MOVE}},
+	[PLAYER_AVATAR_STATE_FISHING] =    {{0x0808, 0},                                  {0x0809, 0}, {0x0809, 0}},
+	[PLAYER_AVATAR_STATE_VS_SEEKER] =  {{0x080A, 0},                                {0x080B, 0}, {0x080B, 0}},
+	[PLAYER_AVATAR_STATE_UNDERWATER] = {{0x080C, PLAYER_AVATAR_FLAG_UNDERWATER},   {0x080D, PLAYER_AVATAR_FLAG_UNDERWATER}, {0x080D, PLAYER_AVATAR_FLAG_UNDERWATER}},
 };
 
 void BwFollowerUpdateFromParty(void); //★ #16（src/bw_follower.c）
 u16 HoennBikeModeGfx(u8 gender, u16 normalGfx); //★ 2026-09-24 自転車のモード（src/hoenn_bike.c）
+
+//★ FEAT-player-mei: 引数の gender（0/1）を表の列に。土台が女（1）でメイの印があるときは 3 列目（メイ）。
+//   gender が 2 のときはそのまま（呼び元がメイを指定した）。通信の相手の絵は素の関数（0805C084）で引くのでここを通らない
+static u8 AvatarColumn(u8 gender)
+{
+	if (gender == FEMALE && GetPlayerGender3() == PLAYER_GENDER3_MEI)
+		return 2;
+	return gender;
+}
+
 
 //★ 2026-09-24: マッハ・ダートの絵（表 8 の 16〜19 番）を「自転車の絵」として数える。
 //   逆引き（絵 → 状態・性別）は素の表の番号でしか引けないので、通常の自転車の絵に直してから引く
@@ -209,7 +227,9 @@ NPCPtr GetEventObjectGraphicsInfo(u16 graphicsId)
 		#ifndef UNBOUND
 		if (spriteId > 239 && tableId == 0)
 		{
-			newId = VarGetEventObjectGraphicsId(spriteId + 16);
+			//[hack] FEAT-contest S8（patches/0985）: 素の VarGetObjectEventGraphicsId は u8 を返す＝上位バイト（表の番号）が落ちて、ホウエンの歩く絵（表 7）を変数 VAR_OBJ_GFX_ID_x で指せない。
+			//  変数を 16 ビットのまま読む（値が 255 以下なら今までと同じ・表 0 の絵）。
+			newId = VarGet(VAR_OBJ_GFX_ID_0 + (spriteId - EVENT_OBJ_GFX_VAR_0));
 			tableId = (newId >> 8) & 0xFF;	// upper byte
 			spriteId = (newId & 0xFF);		// lower byte
 		}
@@ -269,6 +289,7 @@ static u16 GetCustomGraphicsIdByState(u8 state)
 
 u16 GetPlayerAvatarGraphicsIdByStateIdAndGender(u8 state, u8 gender)
 {
+	gender = AvatarColumn(gender); //★ FEAT-player-mei
 	u16 graphicsId = GetCustomGraphicsIdByState(state);
 	if (graphicsId != 0)
 		return graphicsId;
@@ -286,6 +307,7 @@ u16 GetPlayerAvatarGraphicsIdByStateId(u8 state)
 
 u8 GetPlayerAvatarStateTransitionByGraphicsId(u16 graphicsId, u8 gender)
 {
+	gender = AvatarColumn(gender); //★ FEAT-player-mei
 	graphicsId = NormalizeBikeModeGfx(graphicsId); //★ 2026-09-24
     for (u8 state = 0; state < NELEMS(sPlayerAvatarGfxIds); ++state)
     {
@@ -303,7 +325,7 @@ u8 GetPlayerAvatarStateTransitionByGraphicsId(u16 graphicsId, u8 gender)
 u16 GetPlayerAvatarGraphicsIdByCurrentState(void)
 {
 	u8 state = 0;
-	u8 gender = gPlayerAvatar->gender;
+	u8 gender = AvatarColumn(gPlayerAvatar->gender); //★ FEAT-player-mei
     u8 flags = gPlayerAvatar->flags;
 
     for (; state < NELEMS(sPlayerAvatarGfxIds); ++state)
@@ -335,7 +357,7 @@ u8 GetPlayerAvatarGenderByGraphicsId(u16 gfxId)
 		for (u8 gender = 0; gender < NELEMS(sPlayerAvatarGfxIds[0]); ++gender)
 		{
 			if (sPlayerAvatarGfxIds[state][gender].graphicsId == gfxId)
-				return gender;
+				return gender == 2 ? FEMALE : gender; //★ FEAT-player-mei: 3 列目（メイ）は土台の女を返す（gPlayerAvatar->gender は 0/1 のまま）
 
 			u16 customGraphicsId = GetCustomGraphicsIdByState(state);
 			if (customGraphicsId != 0 && customGraphicsId == gfxId)
@@ -387,6 +409,10 @@ u8 PlayerGenderToFrontTrainerPicId(u8 gender, bool8 modify)
 	u16 trainerId = VarGet(VAR_TRAINERCARD_MALE + gender);
 	if (trainerId == 0)
 		trainerId = TRAINER_PIC_PLAYER_M + gender;
+	//★ FEAT-player-mei-2: 土台が女（1）でメイの印があるとき、前向きの絵（カード・VS・殿堂入り・図鑑・ドーム）はメイ（205 番）。
+	//   ★ 通信相手のトレーナーカードでもここを通る（呼び元は相手の gender を渡すだけ）ので、相手のカードにも自分がメイなら出る（既知の限界）
+	if (trainerId == TRAINER_PIC_PLAYER_M + FEMALE && gender == FEMALE && GetPlayerGender3() == PLAYER_GENDER3_MEI)
+		trainerId = TRAINER_PIC_MEI;
 
 	return trainerId;
 };
@@ -501,6 +527,8 @@ u16 GetBackspriteId(void)
 	{
 		if (VarGet(VAR_BACKSPRITE_SWITCH))
 			trainerPicId = VarGet(VAR_BACKSPRITE_SWITCH);
+		else if (GetPlayerGender3() == PLAYER_GENDER3_MEI) //★ FEAT-player-mei-2: メイの後ろ姿（6 番・5 コマ）
+			trainerPicId = TRAINER_BACK_PIC_MEI;
 		else
 			trainerPicId = gSaveBlock2->playerGender;
 	}

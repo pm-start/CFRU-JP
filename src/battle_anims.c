@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "defines_battle.h"
+#include "hack_move_alias.h" //[hack] FIX-moves-P6 EffectiveMove
 #include "../include/battle_anim.h"
 #include "../include/battle_interface.h"
 #include "../include/battle_gfx_sfx_util.h"
@@ -44,6 +45,17 @@ extern const struct CompressedSpriteSheet gBattleAnimPicTable[];
 extern const struct CompressedSpritePalette gBattleAnimPaletteTable[];
 extern const u8* const gMoveAnimations[];
 extern const u8* const gBattleAnims_General[];
+
+//[hack] FIX-moves-P6 新技（Lv101〜200・Lv1〜100・2 タイプ・伝説）のアニメは animation_from の技の台本を指す（gMoveAnimations の行が同じ）が、
+//sAnimMoveIndex は新技の番号のまま（実機で確認: うずしおダンス 0x7F4）。「sAnimMoveIndex == MOVE_X」の分岐は新技が素通りして既定のアニメ・音になっていた。
+//新技は gMoveAnimations の行が元の技と同じなら「その技のアニメ」とみなす（効果の判定の EffectiveMove とは別・アニメの元の技で見る）
+static bool8 AnimMoveIsBase(u16 baseMove)
+{
+	u16 move = sAnimMoveIndex;
+	if (move == baseMove)
+		return TRUE;
+	return move >= MOVE_TSUKINONAMIDA && move <= LAST_MOVE_INDEX && gMoveAnimations[move] == gMoveAnimations[baseMove];
+}
 
 //External functions:
 u8 __attribute__((long_call)) AddItemIconSprite(u16 tilesTag, u16 paletteTag, u16 itemId);
@@ -203,7 +215,7 @@ static u16 GetAnimAttackerSpecies(void)
 //Bullet Seed//
 bool8 IsAnimMoveBulletSeed(void)
 {
-	return sAnimMoveIndex == MOVE_BULLETSEED;
+	return AnimMoveIsBase(MOVE_BULLETSEED);
 }
 
 
@@ -242,7 +254,7 @@ void AnimTask_SetCamouflageBlend(u8 taskId)
 //Destiny Bond//
 bool8 IsAnimMoveDestinyBond(void)
 {
-	return sAnimMoveIndex == MOVE_DESTINYBOND;
+	return AnimMoveIsBase(MOVE_DESTINYBOND);
 }
 
 
@@ -268,7 +280,7 @@ const union AffineAnimCmd* const gSpriteAffineAnimTable_DoubleSlap[] =
 //Grudge//
 bool8 IsAnimMoveGrudge(void)
 {
-	return sAnimMoveIndex == MOVE_GRUDGE;
+	return AnimMoveIsBase(MOVE_GRUDGE);
 }
 
 
@@ -454,9 +466,10 @@ const union AffineAnimCmd* const gSpriteAffineAnimTable_WingAttackFeather[] =
 //Traping Moves
 void AnimTask_GetTrappedMoveAnimId(u8 taskId)
 {
-	switch (gBattleSpritesDataPtr->animationData->animArg)
+	switch (EffectiveMove(gBattleSpritesDataPtr->animationData->animArg)) //[hack] FIX-moves-P6 新技（拘束 74 件）は効果元の技の渦のアニメ（前は default の 0 になり、毎ターンの渦が出なかった）
 	{
 		case MOVE_FIRESPIN:
+		case MOVE_LV200_FIRE_110: //[hack] 独自効果のほむらのまとい（Lv200MoveAlias が自分自身を返すので EffectiveMove では元技に寄らない）
 		case MOVE_G_MAX_CENTIFERNO_P:
 		case MOVE_G_MAX_CENTIFERNO_S:
 			gBattleAnimArgs[0] = 1;
@@ -468,6 +481,7 @@ void AnimTask_GetTrappedMoveAnimId(u8 taskId)
 			gBattleAnimArgs[0] = 3;
 			break;
 		case MOVE_SANDTOMB:
+		case MOVE_LV200_GROUND_150: //[hack] 独自効果のすなのありじごく（同上）
 		case MOVE_G_MAX_SANDBLAST_P:
 		case MOVE_G_MAX_SANDBLAST_S:
 			gBattleAnimArgs[0] = 4;
@@ -990,7 +1004,7 @@ const union AffineAnimCmd* const gSpriteAffineAnimTable_MudBombBall[] =
 
 bool8 IsAnimMoveMudBomb(void)
 {
-	return sAnimMoveIndex == MOVE_MUDBOMB;
+	return AnimMoveIsBase(MOVE_MUDBOMB);
 }
 
 
@@ -1306,7 +1320,7 @@ const union AffineAnimCmd* const gSpriteAffineAnimTable_FusionFlareExplosion[] =
 
 void AnimTask_IsPoweredUpFusionMove(u8 taskId)
 {
-	gBattleAnimArgs[0] = gAnimMovePower > gBattleMoves[sAnimMoveIndex].power; //Power has been changed from what it is normally
+	gBattleAnimArgs[0] = gAnimMovePower > MOVE_POWER(sAnimMoveIndex); //[hack] patches/0582 (#126) //Power has been changed from what it is normally
 	DestroyAnimVisualTask(taskId);
 }
 
@@ -1835,7 +1849,7 @@ void AnimTask_IsAttackerShiny(u8 taskId)
 //Fairy Lock//
 bool8 IsAnimMoveFairyLock(void)
 {
-	return sAnimMoveIndex == MOVE_FAIRYLOCK;
+	return AnimMoveIsBase(MOVE_FAIRYLOCK);
 }
 
 //Destroys the chains for Fairy Lock
@@ -1997,7 +2011,7 @@ void AnimTask_CreateHyperspaceFuryMon(u8 taskId)
 //Ion Deluge//
 bool8 IsAnimMoveIonDeluge(void)
 {
-	return gBattleBufferA[gBattleAnimAttacker][0] == CONTROLLER_MOVEANIMATION && sAnimMoveIndex == MOVE_IONDELUGE;
+	return gBattleBufferA[gBattleAnimAttacker][0] == CONTROLLER_MOVEANIMATION && AnimMoveIsBase(MOVE_IONDELUGE);
 }
 
 

@@ -1214,6 +1214,7 @@ BattleScript_IceFaceTransform:
 
 BattleScript_EnduredSturdy:
 	pause 0x10
+	callasm Hack_SturdyPopupName @;[hack] 2026-10-22 second-ability sturdy popup name
 	call BattleScript_AbilityPopUp
 	printstring 0x99 @;STRINGID_PKMNENDUREDHIT
 	waitmessage DELAY_1SECOND
@@ -1487,6 +1488,7 @@ BattleScript_SturdyPreventsOHKO:
 	ppreduce
 	pause 0x10
 	copybyte BATTLE_SCRIPTING_BANK, TARGET_BANK
+	callasm Hack_SturdyPopupName @;[hack] 2026-10-22 second-ability sturdy popup name
 	call BattleScript_AbilityPopUp
 	printstring 0x1B @;STRINGID_ITDOESNTAFFECT
 	waitmessage DELAY_1SECOND

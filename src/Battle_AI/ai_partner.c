@@ -1,4 +1,6 @@
+#include "../lv200_custom_move_ai.h"
 #include "../defines.h"
+#include "../lv200_custom_move_ai.h"
 #include "../defines_battle.h"
 #include "../../include/random.h"
 #include "../../include/constants/items.h"
@@ -23,7 +25,7 @@ ai_partner.c
 
 #define PARTNER_MOVE_EFFECT_IS_SKILL_SWAP (gChosenMovesByBanks[bankAtkPartner] != MOVE_NONE \
 										&& gBattleStruct->moveTarget[bankAtkPartner] == bankAtk \
-										&& gBattleMoves[partnerMove].effect == EFFECT_SKILL_SWAP)
+										&& gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_SKILL_SWAP)
 
 extern move_effect_t gStatLoweringMoveEffects[];
 extern const struct NaturalGiftStruct gNaturalGiftTable[];
@@ -38,7 +40,7 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 	//Get relevant params
 	u8 bankDef = bankAtkPartner;
 	u16 move = TryReplaceMoveWithZMove(bankAtk, bankAtkPartner, originalMove);
-	u8 moveEffect = gBattleMoves[move].effect;
+	u8 moveEffect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 	u8 moveType = GetMoveTypeSpecial(bankAtk, move);
 	u16 partnerMove = data->partnerMove;
 
@@ -222,12 +224,12 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 
 	switch (moveEffect) {
 		case EFFECT_EVASION_UP:
-			if (move == MOVE_ACUPRESSURE && !partnerProtects)
+			if (Lv200MoveAIBase(move) == MOVE_ACUPRESSURE && !partnerProtects)
 				IncreaseHelpingHandViability(&viability, class);
 			break;
 
 		case EFFECT_RESTORE_HP:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_PURIFY: ;
 					u32 status = gBattleMons[bankAtkPartner].status1;
 					if (status != 0 && !partnerProtects)
@@ -298,13 +300,13 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 			|| atkPartnerAbility == ABILITY_SANDRUSH
 			|| atkPartnerAbility == ABILITY_SANDFORCE
 			|| atkPartnerAbility == ABILITY_OVERCOAT
-			|| atkPartnerAbility == ABILITY_MAGICGUARD
+			|| (atkPartnerAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtkPartner) == ABILITY_MAGICGUARD)
 			|| atkPartnerItemEffect == ITEM_EFFECT_SAFETY_GOGGLES
 			|| IsOfType(bankAtkPartner, TYPE_ROCK)
 			|| IsOfType(bankAtkPartner, TYPE_STEEL)
 			|| IsOfType(bankAtkPartner, TYPE_GROUND)
 			|| MoveInMoveset(MOVE_SHOREUP, bankAtkPartner)
-			|| MoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner))
+			|| AIMoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner))
 			{
 				if (IsClassDoublesTeamSupport(class))
 					INCREASE_VIABILITY(17);
@@ -316,15 +318,15 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 		case EFFECT_RAIN_DANCE:
 			if (atkPartnerItemEffect != ITEM_EFFECT_UTILITY_UMBRELLA
 			&& (MoveEffectInMoveset(EFFECT_THUNDER, bankAtkPartner)
-			 || MoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner)
+			 || AIMoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner)
 			 || atkPartnerItemEffect == ITEM_EFFECT_DAMP_ROCK
-			 || atkPartnerAbility == ABILITY_SWIFTSWIM
+			 || (atkPartnerAbility == ABILITY_SWIFTSWIM || SecondAbility_OfBank(bankAtkPartner) == ABILITY_SWIFTSWIM)
 			 || atkPartnerAbility == ABILITY_FORECAST
 			 || atkPartnerAbility == ABILITY_HYDRATION
 			 || atkPartnerAbility == ABILITY_RAINDISH
 			 || atkPartnerAbility == ABILITY_DRYSKIN
 			 || MoveEffectInMoveset(EFFECT_THUNDER, bankAtkPartner) //Includes Hurricane
-			 || MoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner)
+			 || AIMoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner)
 			 || MoveTypeInMoveset(TYPE_WATER, bankAtkPartner)))
 			{
 				if (IsClassDoublesTeamSupport(class))
@@ -339,13 +341,13 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 			&& (atkPartnerAbility == ABILITY_CHLOROPHYLL
 			 || atkPartnerAbility == ABILITY_FLOWERGIFT
 			 || atkPartnerAbility == ABILITY_FORECAST
-			 || atkPartnerAbility == ABILITY_LEAFGUARD
+			 || (atkPartnerAbility == ABILITY_LEAFGUARD || SecondAbility_OfBank(bankAtkPartner) == ABILITY_LEAFGUARD)
 			 || atkPartnerAbility == ABILITY_SOLARPOWER
 			 || atkPartnerAbility == ABILITY_HARVEST
 			 || MoveEffectInMoveset(EFFECT_SOLARBEAM, bankAtkPartner)
 			 || MoveEffectInMoveset(EFFECT_MORNING_SUN, bankAtkPartner)
-			 || MoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner)
-			 || MoveInMoveset(MOVE_GROWTH, bankAtkPartner)
+			 || AIMoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner)
+			 || AIMoveInMoveset(MOVE_GROWTH, bankAtkPartner)
 			 || MoveTypeInMoveset(TYPE_FIRE, bankAtkPartner)))
 			{
 				if (IsClassDoublesTeamSupport(class))
@@ -356,15 +358,15 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 			break;
 
 		case EFFECT_HAIL:
-			if (atkPartnerAbility == ABILITY_SNOWCLOAK
+			if ((atkPartnerAbility == ABILITY_SNOWCLOAK || SecondAbility_OfBank(bankAtkPartner) == ABILITY_SNOWCLOAK)
 			|| atkPartnerAbility == ABILITY_ICEBODY
 			|| atkPartnerAbility == ABILITY_FORECAST
 			|| atkPartnerAbility == ABILITY_SLUSHRUSH
-			|| atkPartnerAbility == ABILITY_MAGICGUARD
+			|| (atkPartnerAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtkPartner) == ABILITY_MAGICGUARD)
 			|| atkPartnerAbility == ABILITY_OVERCOAT
-			|| MoveInMoveset(MOVE_BLIZZARD, bankAtkPartner)
-			|| MoveInMoveset(MOVE_AURORAVEIL, bankAtkPartner)
-			|| MoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner))
+			|| AIMoveInMoveset(MOVE_BLIZZARD, bankAtkPartner)
+			|| AIMoveInMoveset(MOVE_AURORAVEIL, bankAtkPartner)
+			|| AIMoveInMoveset(MOVE_WEATHERBALL, bankAtkPartner))
 			{
 				if (IsClassDoublesTeamSupport(class))
 					INCREASE_VIABILITY(17);
@@ -405,7 +407,7 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 									  || atkPartnerAbility == ABILITY_SLOWSTART
 									  || atkPartnerAbility == ABILITY_DEFEATIST;
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_WORRYSEED:
 				case MOVE_GASTROACID:
 				case MOVE_SIMPLEBEAM:
@@ -431,7 +433,7 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 			break;
 
 		case EFFECT_TYPE_CHANGES:
-			if (move == MOVE_SOAK
+			if (Lv200MoveAIBase(move) == MOVE_SOAK
 			&& !partnerProtects
 			&&  atkPartnerAbility == ABILITY_WONDERGUARD
 			&& (gBattleMons[bankAtkPartner].type1 != TYPE_WATER
@@ -448,7 +450,7 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 			break;
 
 		case EFFECT_FIELD_EFFECTS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_IONDELUGE: ;
 					u16 foe1Move = IsValidMovePrediction(data->foe1, bankAtkPartner);
 					u16 foe2Move = IsValidMovePrediction(data->foe1, bankAtkPartner);
@@ -469,7 +471,7 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 			break;
 
 		case EFFECT_TEAM_EFFECTS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_MAGNETRISE:
 					if (CheckGrounding(bankAtk) == GROUNDED
 					&& DamagingAllHitMoveTypeInMoveset(bankAtkPartner, TYPE_GROUND)
@@ -487,8 +489,8 @@ u8 AIScript_Partner(const u8 bankAtk, const u8 bankAtkPartner, const u16 origina
 						if (!MoveWouldHitFirst(partnerMove, bankAtkPartner, data->foe1)
 						||  !MoveWouldHitFirst(partnerMove, bankAtkPartner, data->foe2))
 						{
-							if (gBattleMoves[partnerMove].effect == EFFECT_COUNTER
-							||  gBattleMoves[partnerMove].effect == EFFECT_MIRROR_COAT)
+							if (gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_COUNTER
+							||  gBattleMoves[Lv200MoveAIBase(partnerMove)].effect == EFFECT_MIRROR_COAT)
 								break; //These moves need to go last
 
 							IncreaseHelpingHandViability(&viability, class);

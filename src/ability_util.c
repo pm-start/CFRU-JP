@@ -72,7 +72,7 @@ bool8 AbilityPreventsLoweringStat(u16 ability, u8 statId)
 
 bool8 IsAffectedBySturdy(u16 defAbility, u8 bankDef)
 {
-	return defAbility == ABILITY_STURDY
+	return (defAbility == ABILITY_STURDY || SecondAbility_OfBank(bankDef) == ABILITY_STURDY) //[hack] 2026-10-22 2 つ目（かたやぶりは SecondAbility_OfBank が止める）
 		&& BATTLER_MAX_HP(bankDef);
 }
 
@@ -81,7 +81,7 @@ bool8 IsAffectedByBadDreams(u8 bank)
 	return BATTLER_ALIVE(bank)
 		&& (gBattleMons[bank].status1 & STATUS_SLEEP
 		 || ABILITY(bank) == ABILITY_COMATOSE)
-		&& ABILITY(bank) != ABILITY_MAGICGUARD;
+		&& !BankHasAbility(bank, ABILITY_MAGICGUARD);
 }
 
 bool8 IsTrappedByAbility(u8 bankDef, u16 trapAbility)

@@ -1068,7 +1068,7 @@ FILL_FF=True
 サイコブースト
 
 #org @NAME_LEECH_FANG
-Leech Fang
+リーチファング
 
 #org @NAME_AIR_SLASH
 エアスラッシュ
@@ -1500,7 +1500,7 @@ Leech Fang
 かたきうち
 
 #org @NAME_METAL_BASH
-Metal Bash
+メタルバッシュ
 
 #org @NAME_JUDGMENT
 さばきのつぶて
@@ -2304,163 +2304,163 @@ Gのちから
 ブレイブチャージ
 
 #org @Z_Move_1
-ZーMove 1
+ダッシュアタック
 
 #org @Z_Move_2
-ZーMove 2
+ダッシュアタック
 
 #org @Z_Move_3
-ZーMove 3
+げきれつけん
 
 #org @Z_Move_4
-ZーMove 4
+げきれつけん
 
 #org @Z_Move_5
-ZーMove 5
+ダイブクラッシュ
 
 #org @Z_Move_6
-ZーMove 6
+ダイブクラッシュ
 
 #org @Z_Move_7
-ZーMove 7
+ポイズンデリート
 
 #org @Z_Move_8
-ZーMove 8
+ポイズンデリート
 
 #org @Z_Move_9
-ZーMove 9
+ランドオーバー
 
 #org @Z_Move_10
-ZーMove 10
+ランドオーバー
 
 #org @Z_Move_11
-ZーMove 11
+エンドフォール
 
 #org @Z_Move_12
-ZーMove 12
+エンドフォール
 
 #org @Z_Move_13
-ZーMove 13
+セレクション
 
 #org @Z_Move_14
-ZーMove 14
+セレクション
 
 #org @Z_Move_15
-ZーMove 15
+あんやのいざない
 
 #org @Z_Move_16
-ZーMove 16
+あんやのいざない
 
 #org @Z_Move_17
-ZーMove 17
+らせんれんげき
 
 #org @Z_Move_18
-ZーMove 18
+らせんれんげき
 
 #org @Z_Move_19
-ZーMove 19
+フルフレイム
 
 #org @Z_Move_20
-ZーMove 20
+フルフレイム
 
 #org @Z_Move_21
-ZーMove 21
+アクアトルネード
 
 #org @Z_Move_22
-ZーMove 22
+アクアトルネード
 
 #org @Z_Move_23
-ZーMove 23
+ブルームシャイン
 
 #org @Z_Move_24
-ZーMove 24
+ブルームシャイン
 
 #org @Z_Move_25
-ZーMove 25
+ギガボルト
 
 #org @Z_Move_26
-ZーMove 26
+ギガボルト
 
 #org @Z_Move_27
-ZーMove 27
+サイブレイカー
 
 #org @Z_Move_28
-ZーMove 28
+サイブレイカー
 
 #org @Z_Move_29
-ZーMove 29
+ジオフリーズ
 
 #org @Z_Move_30
-ZーMove 30
+ジオフリーズ
 
 #org @Z_Move_31
-ZーMove 31
+ドラゴンバーン
 
 #org @Z_Move_32
-ZーMove 32
+ドラゴンバーン
 
 #org @Z_Move_33
-ZーMove 33
+ブラックホール
 
 #org @Z_Move_34
-ZーMove 34
+ブラックホール
 
 #org @Z_Move_35
-ZーMove 35
+スターインパクト
 
 #org @Z_Move_36
-ZーMove 36
+スターインパクト
 
 #org @Z_Move_37
-ZーMove 37
+カタストロピカ
 
 #org @Z_Move_38
-ZーMove 38
+1000まんボルト
 
 #org @Z_Move_39
-ZーMove 39
+サーフライド
 
 #org @Z_Move_40
-ZーMove 40
+エボルブースト
 
 #org @Z_Move_41
-ZーMove 41
+パンケーキ
 
 #org @Z_Move_42
-ZーMove 42
+スーパーノヴァ
 
 #org @Z_Move_43
-ZーMove 43
+アローズストライク
 
 #org @Z_Move_44
-ZーMove 44
+ダーククラッシャー
 
 #org @Z_Move_45
-ZーMove 45
+シンフォニア
 
 #org @Z_Move_46
-ZーMove 46
+エッジストーム
 
 #org @Z_Move_47
-ZーMove 47
+ぽかぽかフレンド
 
 #org @Z_Move_48
-ZーMove 48
+ソウルビート
 
 #org @Z_Move_49
-ZーMove 49
+ガーディアン
 
 #org @Z_Move_50
-ZーMove 50
+サンレイスマッシュ
 
 #org @Z_Move_51
-ZーMove 51
+ムーンレイストーム
 
 #org @Z_Move_52
-ZーMove 52
+そらこがすひかり
 
 #org @Z_Move_53
-ZーMove 53
+7つぼしストライク
 
 #org @NAME_MAX_GUARD
 ウォール
@@ -2994,7 +2994,7 @@ ZーMove 53
 しんそく
 
 #org @NAME_DRAGONSOATH
-りゅうのちかい
+ドラゴンのちかい
 
 #org @NAME_PIKAPAPOW
 ピカピカサンダー
@@ -3012,4 +3012,8479 @@ ZーMove 53
 ミワクノセンリツ
 
 #org @NAME_FRUITCANNON
-フルーツカノン
+くだものカノン
+
+#org @NAME_TSUKINONAMIDA
+ツキノナミダ
+
+#org @NAME_OMOIDEDUME
+オモイデヅメ
+
+#org @NAME_SAMISHIZUKI
+サミシヅキ
+
+#org @NAME_HIMITSUNOSHIRUSHI
+ヒミツノシルシ
+
+#org @NAME_FUJINOAME
+フジノアメ
+
+#org @NAME_MILKNOKISS
+ミルクノキス
+
+#org @NAME_HAGANENOISHI
+ハガネノイシ
+
+#org @NAME_HISCORE
+ハイスコア
+
+#org @NAME_DOKUBANANOYUKI
+ドクバナノユキ
+
+#org @NAME_IBARANOCHIKAI
+イバラノチカイ
+
+#org @NAME_KITSUNEBI
+キツネビ
+
+#org @NAME_AMAGAMI
+アマガミツキ
+
+#org @NAME_YOINOSHIZUKU
+ヨイノシズク
+
+#org @NAME_TSUKINOARASHI
+ツキノアラシ
+
+#org @NAME_SAMISHIIKOE
+サミシイコエ
+
+#org @NAME_TSUKIKAGE
+ツキカゲ
+
+#org @NAME_KETSUIDAIBU
+ケツイダイブ
+
+#org @NAME_WASUREMONO
+ワスレモノ
+
+#org @NAME_TSUKINOIYASHI
+ツキノイヤシ
+
+#org @NAME_NAKIOTOSHI
+ナキオトシ
+
+#org @NAME_TSUKINOUTA
+ツキノウタ
+
+#org @NAME_NAMIDANOHIKARI
+ナミダノヒカリ
+
+#org @NAME_TOWANOHANA
+トワノハナ
+
+#org @NAME_TSUKINOHOUKOU
+ツキノオタケビ
+
+#org @NAME_TSUKINOKIBA
+ツキノキバ
+
+#org @NAME_HARINOAME
+ハリノアメ
+
+#org @NAME_NAGORINOTSUME
+ナゴリノツメ
+
+#org @NAME_KIOKUNOYAIBA
+キオクノヤイバ
+
+#org @NAME_SHIZUKANAOMOI
+シズカナオモイ
+
+#org @NAME_NAMIDANOMAKU
+ナミダノマク
+#org @LV200_NAMES_0593_BEGIN
+#org @NAME_LV200_NORMAL_101
+ヘビーストンプ
+#org @NAME_LV200_NORMAL_102
+ボイスキャノン
+#org @NAME_LV200_NORMAL_103
+ダッシュスパーク
+#org @NAME_LV200_NORMAL_104
+ひゃくれつビンタ
+#org @NAME_LV200_NORMAL_105
+ほっとひといき
+#org @NAME_LV200_NORMAL_106
+ネックラリアット
+#org @NAME_LV200_NORMAL_107
+ブーストタックル
+#org @NAME_LV200_NORMAL_108
+エコーウェーブ
+#org @NAME_LV200_NORMAL_109
+ふんばりガード
+#org @NAME_LV200_NORMAL_110
+ぜんいんラッシュ
+#org @NAME_LV200_NORMAL_111
+ガッツアッパー
+#org @NAME_LV200_NORMAL_112
+ふみこみアタック
+#org @NAME_LV200_NORMAL_113
+とびだしクロー
+#org @NAME_LV200_NORMAL_114
+ぎゅうぎゅうハグ
+#org @NAME_LV200_NORMAL_115
+ゴロゴロボンバー
+#org @NAME_LV200_NORMAL_116
+ひらめきワンツー
+#org @NAME_LV200_NORMAL_117
+きまぐれのうた
+#org @NAME_LV200_NORMAL_118
+いやしのまどろみ
+#org @NAME_LV200_NORMAL_119
+ドシンバウンド
+#org @NAME_LV200_NORMAL_120
+アダプトブラスト
+#org @NAME_LV200_NORMAL_121
+しつけのビンタ
+#org @NAME_LV200_NORMAL_122
+えがおのひかり
+#org @NAME_LV200_NORMAL_123
+ラッキーパンチ
+#org @NAME_LV200_NORMAL_124
+どうもうブレイク
+#org @NAME_LV200_NORMAL_125
+ぱくぱくチャージ
+#org @NAME_LV200_NORMAL_126
+はずみダイブ
+#org @NAME_LV200_NORMAL_127
+ミラクルシャウト
+#org @NAME_LV200_NORMAL_128
+かけこみアタック
+#org @NAME_LV200_NORMAL_129
+コートのまい
+#org @NAME_LV200_NORMAL_130
+ラストコール
+#org @NAME_LV200_NORMAL_131
+ひっかきひっさつ
+#org @NAME_LV200_NORMAL_132
+ごうかいスイング
+#org @NAME_LV200_NORMAL_133
+チャームフォース
+#org @NAME_LV200_NORMAL_134
+フルスロットル
+#org @NAME_LV200_NORMAL_135
+パワフルダンス
+#org @NAME_LV200_NORMAL_136
+ふいうちバンプ
+#org @NAME_LV200_NORMAL_137
+だいちラッシュ
+#org @NAME_LV200_NORMAL_138
+にじいろシャウト
+#org @NAME_LV200_NORMAL_139
+ゴッドアップ
+#org @NAME_LV200_NORMAL_140
+リセットゴング
+#org @NAME_LV200_NORMAL_141
+おおぐいタックル
+#org @NAME_LV200_NORMAL_142
+はじけるコンボ
+#org @NAME_LV200_NORMAL_143
+さけびのうず
+#org @NAME_LV200_NORMAL_144
+タフネスフォース
+#org @NAME_LV200_NORMAL_145
+はじけるしぶき
+#org @NAME_LV200_NORMAL_146
+ボディランゲージ
+#org @NAME_LV200_NORMAL_147
+ふんぎりアタック
+#org @NAME_LV200_NORMAL_148
+ネイチャーコール
+#org @NAME_LV200_NORMAL_149
+ぐるっとまわる
+#org @NAME_LV200_NORMAL_150
+カウントダウン
+#org @NAME_LV200_NORMAL_151
+ひっさつのこえ
+#org @NAME_LV200_NORMAL_152
+ぶんぶんスイング
+#org @NAME_LV200_NORMAL_153
+ゆうゆうバウンス
+#org @NAME_LV200_NORMAL_154
+ワイルドアーム
+#org @NAME_LV200_NORMAL_155
+とどろきのいぶき
+#org @NAME_LV200_NORMAL_156
+つなわたり
+#org @NAME_LV200_NORMAL_157
+ごはんのじかん
+#org @NAME_LV200_NORMAL_158
+しめつけバグ
+#org @NAME_LV200_NORMAL_159
+かんぺきソロ
+#org @NAME_LV200_NORMAL_160
+ステップアップ
+#org @NAME_LV200_NORMAL_161
+いっちょくパンチ
+#org @NAME_LV200_NORMAL_162
+きょうれつダイブ
+#org @NAME_LV200_NORMAL_163
+せんぷうダッシュ
+#org @NAME_LV200_NORMAL_164
+ごりおしアタック
+#org @NAME_LV200_NORMAL_165
+じゃんぷボディ
+#org @NAME_LV200_NORMAL_166
+グッドモーニング
+#org @NAME_LV200_NORMAL_167
+おもいでのひかり
+#org @NAME_LV200_NORMAL_168
+ブルブルシェイク
+#org @NAME_LV200_NORMAL_169
+ひとしきりダイブ
+#org @NAME_LV200_NORMAL_170
+ふくびきアタック
+#org @NAME_LV200_NORMAL_171
+ぐんぐんチャージ
+#org @NAME_LV200_NORMAL_172
+どろんこダイブ
+#org @NAME_LV200_NORMAL_173
+たちむかうビンタ
+#org @NAME_LV200_NORMAL_174
+あおりトーク
+#org @NAME_LV200_NORMAL_175
+ひとふりのいやし
+#org @NAME_LV200_NORMAL_176
+ハッピーフラッグ
+#org @NAME_LV200_NORMAL_177
+プッシュオフ
+#org @NAME_LV200_NORMAL_178
+きあいのかけ
+#org @NAME_LV200_NORMAL_179
+ミニトルネード
+#org @NAME_LV200_NORMAL_180
+ミラーラウンド
+#org @NAME_LV200_NORMAL_181
+ビッグバウンス
+#org @NAME_LV200_NORMAL_182
+きのみハンター
+#org @NAME_LV200_NORMAL_183
+リベンジスマイル
+#org @NAME_LV200_NORMAL_184
+たたきおこし
+#org @NAME_LV200_NORMAL_185
+スタンプラッシュ
+#org @NAME_LV200_NORMAL_186
+あばれハンマー
+#org @NAME_LV200_NORMAL_187
+スピンキック
+#org @NAME_LV200_NORMAL_188
+ほえるがごとく
+#org @NAME_LV200_NORMAL_189
+ゴールドタックル
+#org @NAME_LV200_NORMAL_190
+イコールシェア
+#org @NAME_LV200_NORMAL_191
+ぐるぐるダンス
+#org @NAME_LV200_NORMAL_192
+いのちのうた
+#org @NAME_LV200_NORMAL_193
+ファンタジスタ
+#org @NAME_LV200_NORMAL_194
+ミリオンスマイル
+#org @NAME_LV200_NORMAL_195
+レジェンドクライ
+#org @NAME_LV200_NORMAL_196
+ヘビーバースト
+#org @NAME_LV200_NORMAL_197
+フィナーレパワー
+#org @NAME_LV200_NORMAL_198
+ファイナルコール
+#org @NAME_LV200_NORMAL_199
+かがやくこころ
+#org @NAME_LV200_NORMAL_200
+ハーフパス
+#org @NAME_LV200_FIGHTING_101
+せいけんパンチ
+#org @NAME_LV200_FIGHTING_102
+きあいはどうだん
+#org @NAME_LV200_FIGHTING_103
+ステップキック
+#org @NAME_LV200_FIGHTING_104
+ぼうだんパンチ
+#org @NAME_LV200_FIGHTING_105
+ひゃっかんダイブ
+#org @NAME_LV200_FIGHTING_106
+スープレックス
+#org @NAME_LV200_FIGHTING_107
+ちゅうだんキック
+#org @NAME_LV200_FIGHTING_108
+てっけんせいさい
+#org @NAME_LV200_FIGHTING_109
+ブレイクスルー
+#org @NAME_LV200_FIGHTING_110
+れんげきコンボ
+#org @NAME_LV200_FIGHTING_111
+ちからだめし
+#org @NAME_LV200_FIGHTING_112
+こころのまえげり
+#org @NAME_LV200_FIGHTING_113
+ばくれつのきあい
+#org @NAME_LV200_FIGHTING_114
+フルスイング
+#org @NAME_LV200_FIGHTING_115
+ふんばりナックル
+#org @NAME_LV200_FIGHTING_116
+いきなりドロップ
+#org @NAME_LV200_FIGHTING_117
+たいぼくのかまえ
+#org @NAME_LV200_FIGHTING_118
+かまえやぶり
+#org @NAME_LV200_FIGHTING_119
+ラッシュアップ
+#org @NAME_LV200_FIGHTING_120
+せいしんとういつ
+#org @NAME_LV200_FIGHTING_121
+ほうがんパンチ
+#org @NAME_LV200_FIGHTING_122
+どうじょうやぶり
+#org @NAME_LV200_FIGHTING_123
+スピンスマッシュ
+#org @NAME_LV200_FIGHTING_124
+きあいふたたび
+#org @NAME_LV200_FIGHTING_125
+ダブルナックル
+#org @NAME_LV200_FIGHTING_126
+うちおとしキック
+#org @NAME_LV200_FIGHTING_127
+クロスカウンター
+#org @NAME_LV200_FIGHTING_128
+こだまのせいけん
+#org @NAME_LV200_FIGHTING_129
+とびかかりダイブ
+#org @NAME_LV200_FIGHTING_130
+スピードナックル
+#org @NAME_LV200_FIGHTING_131
+せんしのつきさし
+#org @NAME_LV200_FIGHTING_132
+きあいスパーク
+#org @NAME_LV200_FIGHTING_133
+いっぱつげきたい
+#org @NAME_LV200_FIGHTING_134
+ぶつかりげいこ
+#org @NAME_LV200_FIGHTING_135
+こうげきスイッチ
+#org @NAME_LV200_FIGHTING_136
+どうじょうならい
+#org @NAME_LV200_FIGHTING_137
+はっけいフォース
+#org @NAME_LV200_FIGHTING_138
+せかいくだき
+#org @NAME_LV200_FIGHTING_139
+ぶんかいハンマー
+#org @NAME_LV200_FIGHTING_140
+ぎゃくふうがえし
+#org @NAME_LV200_FIGHTING_141
+きあいのいぶき
+#org @NAME_LV200_FIGHTING_142
+トライスピン
+#org @NAME_LV200_FIGHTING_143
+おおぶりうでぐみ
+#org @NAME_LV200_FIGHTING_144
+つばぜりあい
+#org @NAME_LV200_FIGHTING_145
+しゅぎょうけっか
+#org @NAME_LV200_FIGHTING_146
+だいちほうしゅ
+#org @NAME_LV200_FIGHTING_147
+サンドバスター
+#org @NAME_LV200_FIGHTING_148
+ぎゃくてんけん
+#org @NAME_LV200_FIGHTING_149
+ゼロレンジ
+#org @NAME_LV200_FIGHTING_150
+しんけんしょうぶ
+#org @NAME_LV200_FIGHTING_151
+つっぱりラリー
+#org @NAME_LV200_FIGHTING_152
+チャンプベルト
+#org @NAME_LV200_FIGHTING_153
+てあらいスイング
+#org @NAME_LV200_FIGHTING_154
+ぎりぎりのきわ
+#org @NAME_LV200_FIGHTING_155
+ライジングパンチ
+#org @NAME_LV200_FIGHTING_156
+たたかいのうた
+#org @NAME_LV200_FIGHTING_157
+ぶつかりコンボ
+#org @NAME_LV200_FIGHTING_158
+ひかりのこぶし
+#org @NAME_LV200_FIGHTING_159
+きあいのかたまり
+#org @NAME_LV200_FIGHTING_160
+つぶしのかた
+#org @NAME_LV200_FIGHTING_161
+しんくうれっぱ
+#org @NAME_LV200_FIGHTING_162
+ぶっとびプレス
+#org @NAME_LV200_FIGHTING_163
+いかりのつきあげ
+#org @NAME_LV200_FIGHTING_164
+しゅうちゅう
+#org @NAME_LV200_FIGHTING_165
+てっついスタンプ
+#org @NAME_LV200_FIGHTING_166
+ほうけんこうげき
+#org @NAME_LV200_FIGHTING_167
+せんてひっしょう
+#org @NAME_LV200_FIGHTING_168
+のこりのいっぱつ
+#org @NAME_LV200_FIGHTING_169
+こんじょうフック
+#org @NAME_LV200_FIGHTING_170
+ぶんどうのかまえ
+#org @NAME_LV200_FIGHTING_171
+フルコンボ
+#org @NAME_LV200_FIGHTING_172
+おおなげのかた
+#org @NAME_LV200_FIGHTING_173
+かくごのこぶし
+#org @NAME_LV200_FIGHTING_174
+スパークジャブ
+#org @NAME_LV200_FIGHTING_175
+いなずまキック
+#org @NAME_LV200_FIGHTING_176
+かわらくだき
+#org @NAME_LV200_FIGHTING_177
+ばくしんナックル
+#org @NAME_LV200_FIGHTING_178
+えんじんフック
+#org @NAME_LV200_FIGHTING_179
+れいかんウェーブ
+#org @NAME_LV200_FIGHTING_180
+ばくれつけん
+#org @NAME_LV200_FIGHTING_181
+ゴッドハンド
+#org @NAME_LV200_FIGHTING_182
+スーパーバスター
+#org @NAME_LV200_FIGHTING_183
+つよがりナックル
+#org @NAME_LV200_FIGHTING_184
+てんかドロップ
+#org @NAME_LV200_FIGHTING_185
+かんぼつげき
+#org @NAME_LV200_FIGHTING_186
+あばれラリー
+#org @NAME_LV200_FIGHTING_187
+きあいクロス
+#org @NAME_LV200_FIGHTING_188
+てんかむそう
+#org @NAME_LV200_FIGHTING_189
+ぜんぶいちげき
+#org @NAME_LV200_FIGHTING_190
+さいごのたたかい
+#org @NAME_LV200_FIGHTING_191
+ボルトフィスト
+#org @NAME_LV200_FIGHTING_192
+バトルマスターズ
+#org @NAME_LV200_FIGHTING_193
+せいなるこぶし
+#org @NAME_LV200_FIGHTING_194
+きわみのかた
+#org @NAME_LV200_FIGHTING_195
+むそうけんぽう
+#org @NAME_LV200_FIGHTING_196
+ラストバトル
+#org @NAME_LV200_FIGHTING_197
+かくとうじだい
+#org @NAME_LV200_FIGHTING_198
+はどうのひけん
+#org @NAME_LV200_FIGHTING_199
+さいきょうけん
+#org @NAME_LV200_FIGHTING_200
+おんぎのいちげき
+#org @NAME_LV200_FLYING_101
+スカイクラッシュ
+#org @NAME_LV200_FLYING_102
+ウィンドカッター
+#org @NAME_LV200_FLYING_103
+つばめくだき
+#org @NAME_LV200_FLYING_104
+ハネのおまじない
+#org @NAME_LV200_FLYING_105
+グライドダイブ
+#org @NAME_LV200_FLYING_106
+あらしのくちばし
+#org @NAME_LV200_FLYING_107
+ギガウィング
+#org @NAME_LV200_FLYING_108
+カゼキリバースト
+#org @NAME_LV200_FLYING_109
+スカイドライブ
+#org @NAME_LV200_FLYING_110
+おいかぜアタック
+#org @NAME_LV200_FLYING_111
+ひこうのまい
+#org @NAME_LV200_FLYING_112
+つむじスラスト
+#org @NAME_LV200_FLYING_113
+ブラストウィング
+#org @NAME_LV200_FLYING_114
+うずまきたつまき
+#org @NAME_LV200_FLYING_115
+ミストラルのかぜ
+#org @NAME_LV200_FLYING_116
+はねラッシュ
+#org @NAME_LV200_FLYING_117
+ホバリングキック
+#org @NAME_LV200_FLYING_118
+かぜのしらべ
+#org @NAME_LV200_FLYING_119
+スカイフォール
+#org @NAME_LV200_FLYING_120
+たかとびのかまえ
+#org @NAME_LV200_FLYING_121
+くうちゅうくびわ
+#org @NAME_LV200_FLYING_122
+そらをかける
+#org @NAME_LV200_FLYING_123
+ゲイルブレード
+#org @NAME_LV200_FLYING_124
+はばたきバースト
+#org @NAME_LV200_FLYING_125
+トルネードスピン
+#org @NAME_LV200_FLYING_126
+とっぷうリベンジ
+#org @NAME_LV200_FLYING_127
+はやぶさタックル
+#org @NAME_LV200_FLYING_128
+きりもみアロー
+#org @NAME_LV200_FLYING_129
+たかのつめ
+#org @NAME_LV200_FLYING_130
+きまぐれてんき
+#org @NAME_LV200_FLYING_131
+ソニックグライド
+#org @NAME_LV200_FLYING_132
+ふきあれるかぜ
+#org @NAME_LV200_FLYING_133
+スカイサンダー
+#org @NAME_LV200_FLYING_134
+ぜんぜんふぶき
+#org @NAME_LV200_FLYING_135
+かげろうのつばさ
+#org @NAME_LV200_FLYING_136
+そらのおうさま
+#org @NAME_LV200_FLYING_137
+ふわふわバウンス
+#org @NAME_LV200_FLYING_138
+うみどりのうた
+#org @NAME_LV200_FLYING_139
+ライジングブレス
+#org @NAME_LV200_FLYING_140
+ぜんりょくのはね
+#org @NAME_LV200_FLYING_141
+フライトコール
+#org @NAME_LV200_FLYING_142
+あらしのいたずら
+#org @NAME_LV200_FLYING_143
+グランドスラム
+#org @NAME_LV200_FLYING_144
+ファルコンパンチ
+#org @NAME_LV200_FLYING_145
+みだれつばさ
+#org @NAME_LV200_FLYING_146
+キリングウィンド
+#org @NAME_LV200_FLYING_147
+トルネードランス
+#org @NAME_LV200_FLYING_148
+つばさのよびごえ
+#org @NAME_LV200_FLYING_149
+サイクロンキラー
+#org @NAME_LV200_FLYING_150
+つばさのまもり
+#org @NAME_LV200_FLYING_151
+そらのしゅうげき
+#org @NAME_LV200_FLYING_152
+アクロスクリュー
+#org @NAME_LV200_FLYING_153
+エアブレイド
+#org @NAME_LV200_FLYING_154
+とびだしバスター
+#org @NAME_LV200_FLYING_155
+フライングダイブ
+#org @NAME_LV200_FLYING_156
+てんくうのいかり
+#org @NAME_LV200_FLYING_157
+きりさきウィング
+#org @NAME_LV200_FLYING_158
+せきらんうん
+#org @NAME_LV200_FLYING_159
+ガルーダのつばさ
+#org @NAME_LV200_FLYING_160
+ついふうチャージ
+#org @NAME_LV200_FLYING_161
+すなあらしのかぜ
+#org @NAME_LV200_FLYING_162
+つらぬきグライド
+#org @NAME_LV200_FLYING_163
+クラウドブラスト
+#org @NAME_LV200_FLYING_164
+ふうそくマッハ
+#org @NAME_LV200_FLYING_165
+そうふうスラスト
+#org @NAME_LV200_FLYING_166
+フェニックス
+#org @NAME_LV200_FLYING_167
+きりさくかぜ
+#org @NAME_LV200_FLYING_168
+ウィングバスター
+#org @NAME_LV200_FLYING_169
+かぜのたいふう
+#org @NAME_LV200_FLYING_170
+かぜのたいじ
+#org @NAME_LV200_FLYING_171
+いっせんのつばさ
+#org @NAME_LV200_FLYING_172
+ビッグウィング
+#org @NAME_LV200_FLYING_173
+てんくうきりもみ
+#org @NAME_LV200_FLYING_174
+ブレイブフラップ
+#org @NAME_LV200_FLYING_175
+ジェットゲイル
+#org @NAME_LV200_FLYING_176
+かぜのささやき
+#org @NAME_LV200_FLYING_177
+てんくうたつまき
+#org @NAME_LV200_FLYING_178
+ゴッドウィング
+#org @NAME_LV200_FLYING_179
+しんくうのやいば
+#org @NAME_LV200_FLYING_180
+ストームフロント
+#org @NAME_LV200_FLYING_181
+ほしのつばさ
+#org @NAME_LV200_FLYING_182
+スカイウォーカー
+#org @NAME_LV200_FLYING_183
+かがやくつばさ
+#org @NAME_LV200_FLYING_184
+うなるつばさ
+#org @NAME_LV200_FLYING_185
+スピンドライブ
+#org @NAME_LV200_FLYING_186
+ちょうくうやいば
+#org @NAME_LV200_FLYING_187
+ぜんかいブレイブ
+#org @NAME_LV200_FLYING_188
+そらわりアタック
+#org @NAME_LV200_FLYING_189
+アイアンフェザー
+#org @NAME_LV200_FLYING_190
+ぶんしんのまい
+#org @NAME_LV200_FLYING_191
+らいめいダイブ
+#org @NAME_LV200_FLYING_192
+フルフライト
+#org @NAME_LV200_FLYING_193
+ダイナミックカゼ
+#org @NAME_LV200_FLYING_194
+ミリオンウィング
+#org @NAME_LV200_FLYING_195
+きわみのあらし
+#org @NAME_LV200_FLYING_196
+てんくうのおうぎ
+#org @NAME_LV200_FLYING_197
+ファイナルゲイル
+#org @NAME_LV200_FLYING_198
+フルウィング
+#org @NAME_LV200_FLYING_199
+そらのはて
+#org @NAME_LV200_FLYING_200
+ひこうのけっかい
+#org @NAME_LV200_POISON_101
+ヘドロバースト
+#org @NAME_LV200_POISON_102
+どくばりシャワー
+#org @NAME_LV200_POISON_103
+どくどくフォール
+#org @NAME_LV200_POISON_104
+しょうきのいぶき
+#org @NAME_LV200_POISON_105
+くされドロップ
+#org @NAME_LV200_POISON_106
+ヴェノムタックル
+#org @NAME_LV200_POISON_107
+はくしょくのきり
+#org @NAME_LV200_POISON_108
+どくのよろい
+#org @NAME_LV200_POISON_109
+ポイズンクロス
+#org @NAME_LV200_POISON_110
+ベノムシャワー
+#org @NAME_LV200_POISON_111
+ふくろのどく
+#org @NAME_LV200_POISON_112
+マスクブレイク
+#org @NAME_LV200_POISON_113
+くちなわのきば
+#org @NAME_LV200_POISON_114
+ぜっさんヘドロ
+#org @NAME_LV200_POISON_115
+ぬけがらカット
+#org @NAME_LV200_POISON_116
+ドクガドライブ
+#org @NAME_LV200_POISON_117
+ベノムテラー
+#org @NAME_LV200_POISON_118
+ダストしぶき
+#org @NAME_LV200_POISON_119
+ひとさしどく
+#org @NAME_LV200_POISON_120
+ストックヴェノム
+#org @NAME_LV200_POISON_121
+ちゅうどくパワー
+#org @NAME_LV200_POISON_122
+じわじわスプレー
+#org @NAME_LV200_POISON_123
+ヘドロびんた
+#org @NAME_LV200_POISON_124
+しびれどくばり
+#org @NAME_LV200_POISON_125
+ガスバーナー
+#org @NAME_LV200_POISON_126
+どくのしぶき
+#org @NAME_LV200_POISON_127
+どくばりれんだ
+#org @NAME_LV200_POISON_128
+ダブルスティング
+#org @NAME_LV200_POISON_129
+ベノムスピア
+#org @NAME_LV200_POISON_130
+どくどくダンス
+#org @NAME_LV200_POISON_131
+ふんどのヘドロ
+#org @NAME_LV200_POISON_132
+もうどくのつき
+#org @NAME_LV200_POISON_133
+サルファーボム
+#org @NAME_LV200_POISON_134
+バイオハザード
+#org @NAME_LV200_POISON_135
+しょうきのうた
+#org @NAME_LV200_POISON_136
+ヴェノムダイブ
+#org @NAME_LV200_POISON_137
+ゆうどくノヴァ
+#org @NAME_LV200_POISON_138
+アシッドクエイク
+#org @NAME_LV200_POISON_139
+どくばりのあらし
+#org @NAME_LV200_POISON_140
+ふうじるどく
+#org @NAME_LV200_POISON_141
+ミストポイズン
+#org @NAME_LV200_POISON_142
+ヒルのチュウ
+#org @NAME_LV200_POISON_143
+あさのどくけし
+#org @NAME_LV200_POISON_144
+くさったおんぎ
+#org @NAME_LV200_POISON_145
+ベノムアーチ
+#org @NAME_LV200_POISON_146
+コブラストライク
+#org @NAME_LV200_POISON_147
+スモッグストーム
+#org @NAME_LV200_POISON_148
+ヘビのひとにらみ
+#org @NAME_LV200_POISON_149
+どくのまよい
+#org @NAME_LV200_POISON_150
+ひふくぶんかい
+#org @NAME_LV200_POISON_151
+やみのどくばり
+#org @NAME_LV200_POISON_152
+きょうあくパンチ
+#org @NAME_LV200_POISON_153
+どくのリング
+#org @NAME_LV200_POISON_154
+まよいのどく
+#org @NAME_LV200_POISON_155
+どくばりのまほう
+#org @NAME_LV200_POISON_156
+じゃあくのしずく
+#org @NAME_LV200_POISON_157
+どくばりミサイル
+#org @NAME_LV200_POISON_158
+ドラゴンヴェノム
+#org @NAME_LV200_POISON_159
+どくのこかげ
+#org @NAME_LV200_POISON_160
+しんこうスピード
+#org @NAME_LV200_POISON_161
+きばのどくばり
+#org @NAME_LV200_POISON_162
+ぼくめつのヘドロ
+#org @NAME_LV200_POISON_163
+ヴェノムミラー
+#org @NAME_LV200_POISON_164
+ファングリップ
+#org @NAME_LV200_POISON_165
+アシッドレイン
+#org @NAME_LV200_POISON_166
+どくどくラスト
+#org @NAME_LV200_POISON_167
+どくのトリック
+#org @NAME_LV200_POISON_168
+くさりのどく
+#org @NAME_LV200_POISON_169
+ざんしんなどく
+#org @NAME_LV200_POISON_170
+ヴェノムシフト
+#org @NAME_LV200_POISON_171
+やけつくどく
+#org @NAME_LV200_POISON_172
+ベノムジャイロ
+#org @NAME_LV200_POISON_173
+ふかいどくのきり
+#org @NAME_LV200_POISON_174
+ふきだすガス
+#org @NAME_LV200_POISON_175
+ヴェノムスピン
+#org @NAME_LV200_POISON_176
+ほうしのどく
+#org @NAME_LV200_POISON_177
+どくのはなびら
+#org @NAME_LV200_POISON_178
+スモッグバルーン
+#org @NAME_LV200_POISON_179
+ぱくりヴェノム
+#org @NAME_LV200_POISON_180
+ガスしょう
+#org @NAME_LV200_POISON_181
+どくばりドリル
+#org @NAME_LV200_POISON_182
+どくさいほうしゅ
+#org @NAME_LV200_POISON_183
+バイオクラッシュ
+#org @NAME_LV200_POISON_184
+ポイズンジャグル
+#org @NAME_LV200_POISON_185
+トキシックエッジ
+#org @NAME_LV200_POISON_186
+ぶっしょくぬまち
+#org @NAME_LV200_POISON_187
+ヴェノムドラゴン
+#org @NAME_LV200_POISON_188
+げきどくのしぶき
+#org @NAME_LV200_POISON_189
+ヴェノムクラック
+#org @NAME_LV200_POISON_190
+どくのいけにえ
+#org @NAME_LV200_POISON_191
+めいわくなガス
+#org @NAME_LV200_POISON_192
+ベノムインパクト
+#org @NAME_LV200_POISON_193
+しりょうばくはつ
+#org @NAME_LV200_POISON_194
+どくどくのうたげ
+#org @NAME_LV200_POISON_195
+ラストヴェノム
+#org @NAME_LV200_POISON_196
+バイオノヴァ
+#org @NAME_LV200_POISON_197
+アポカリミスト
+#org @NAME_LV200_POISON_198
+ヴェノムワールド
+#org @NAME_LV200_POISON_199
+パンデミック
+#org @NAME_LV200_POISON_200
+どくのおうさま
+#org @NAME_LV200_GROUND_101
+だいちのうねり
+#org @NAME_LV200_GROUND_102
+さじんバースト
+#org @NAME_LV200_GROUND_103
+どろのスコール
+#org @NAME_LV200_GROUND_104
+ちかのこえ
+#org @NAME_LV200_GROUND_105
+さばくのようさい
+#org @NAME_LV200_GROUND_106
+じわれのいきおい
+#org @NAME_LV200_GROUND_107
+つちけむり
+#org @NAME_LV200_GROUND_108
+ガレキのあらし
+#org @NAME_LV200_GROUND_109
+ぼうえいスコップ
+#org @NAME_LV200_GROUND_110
+すなぐいパンチ
+#org @NAME_LV200_GROUND_111
+じめんのこうしん
+#org @NAME_LV200_GROUND_112
+ちくわぶブロー
+#org @NAME_LV200_GROUND_113
+ぼんちストンプ
+#org @NAME_LV200_GROUND_114
+ねんどのよろい
+#org @NAME_LV200_GROUND_115
+どろみずキャノン
+#org @NAME_LV200_GROUND_116
+さばくのたいよう
+#org @NAME_LV200_GROUND_117
+ガイアクラッシュ
+#org @NAME_LV200_GROUND_118
+ほねダブルスロー
+#org @NAME_LV200_GROUND_119
+じならしのたび
+#org @NAME_LV200_GROUND_120
+ほりすすむ
+#org @NAME_LV200_GROUND_121
+あなほりダンス
+#org @NAME_LV200_GROUND_122
+どせいのはどう
+#org @NAME_LV200_GROUND_123
+すなあらしのまい
+#org @NAME_LV200_GROUND_124
+ひびわれアタック
+#org @NAME_LV200_GROUND_125
+どろんこリベンジ
+#org @NAME_LV200_GROUND_126
+グランドホールド
+#org @NAME_LV200_GROUND_127
+ずしんパンチ
+#org @NAME_LV200_GROUND_128
+ちかみずのうねり
+#org @NAME_LV200_GROUND_129
+おおすなのうた
+#org @NAME_LV200_GROUND_130
+さばくのオアシス
+#org @NAME_LV200_GROUND_131
+サンドボム
+#org @NAME_LV200_GROUND_132
+ほりほりダイブ
+#org @NAME_LV200_GROUND_133
+ジャンボタックル
+#org @NAME_LV200_GROUND_134
+どだいくずし
+#org @NAME_LV200_GROUND_135
+タイラントプレス
+#org @NAME_LV200_GROUND_136
+せつりのあらし
+#org @NAME_LV200_GROUND_137
+サソリテイル
+#org @NAME_LV200_GROUND_138
+てんちがえし
+#org @NAME_LV200_GROUND_139
+マグマショベル
+#org @NAME_LV200_GROUND_140
+ぬかるみ
+#org @NAME_LV200_GROUND_141
+だいちのいぶき
+#org @NAME_LV200_GROUND_142
+ばんりのバウンド
+#org @NAME_LV200_GROUND_143
+ちかぞこえんかい
+#org @NAME_LV200_GROUND_144
+じならしスタンプ
+#org @NAME_LV200_GROUND_145
+ギガントクエイク
+#org @NAME_LV200_GROUND_146
+あかつちのいかり
+#org @NAME_LV200_GROUND_147
+ふんじんバリア
+#org @NAME_LV200_GROUND_148
+ドリルダッシュ
+#org @NAME_LV200_GROUND_149
+ちほうのしらせ
+#org @NAME_LV200_GROUND_150
+すなのありじごく
+#org @NAME_LV200_GROUND_151
+サンドインパクト
+#org @NAME_LV200_GROUND_152
+スナのつるぎ
+#org @NAME_LV200_GROUND_153
+いしクラッシュ
+#org @NAME_LV200_GROUND_154
+どろんこファイト
+#org @NAME_LV200_GROUND_155
+なかばだいち
+#org @NAME_LV200_GROUND_156
+ゴリゴリスピン
+#org @NAME_LV200_GROUND_157
+さばくのおきて
+#org @NAME_LV200_GROUND_158
+たいちひとりじめ
+#org @NAME_LV200_GROUND_159
+てつぼうスイング
+#org @NAME_LV200_GROUND_160
+じばんくずし
+#org @NAME_LV200_GROUND_161
+ぬりかべガード
+#org @NAME_LV200_GROUND_162
+おもしクラッシュ
+#org @NAME_LV200_GROUND_163
+あれくるうだいち
+#org @NAME_LV200_GROUND_164
+ぼうふうのスナ
+#org @NAME_LV200_GROUND_165
+だいちとりで
+#org @NAME_LV200_GROUND_166
+ひらきなおり
+#org @NAME_LV200_GROUND_167
+ファントムドリル
+#org @NAME_LV200_GROUND_168
+どろだんごあらし
+#org @NAME_LV200_GROUND_169
+だいじしん
+#org @NAME_LV200_GROUND_170
+ちじょうしんどう
+#org @NAME_LV200_GROUND_171
+スカラベダッシュ
+#org @NAME_LV200_GROUND_172
+サンドウォール
+#org @NAME_LV200_GROUND_173
+ガイアバスター
+#org @NAME_LV200_GROUND_174
+ふみつぶし
+#org @NAME_LV200_GROUND_175
+さばくのまほう
+#org @NAME_LV200_GROUND_176
+どぶいたウェーブ
+#org @NAME_LV200_GROUND_177
+あなぐらパンチ
+#org @NAME_LV200_GROUND_178
+ひでりのだいち
+#org @NAME_LV200_GROUND_179
+だいちハンマー
+#org @NAME_LV200_GROUND_180
+だいちのめぐみ
+#org @NAME_LV200_GROUND_181
+ほろびのだいち
+#org @NAME_LV200_GROUND_182
+じばくじばん
+#org @NAME_LV200_GROUND_183
+ちかいのだいち
+#org @NAME_LV200_GROUND_184
+グラウンドゼロ
+#org @NAME_LV200_GROUND_185
+じなりダイブ
+#org @NAME_LV200_GROUND_186
+かたまるだいち
+#org @NAME_LV200_GROUND_187
+あたらしいだいち
+#org @NAME_LV200_GROUND_188
+ガイアストーム
+#org @NAME_LV200_GROUND_189
+おおじわれ
+#org @NAME_LV200_GROUND_190
+とどめのじしん
+#org @NAME_LV200_GROUND_191
+ちそうのさばく
+#org @NAME_LV200_GROUND_192
+かいそうのだいち
+#org @NAME_LV200_GROUND_193
+ちきゅうのいき
+#org @NAME_LV200_GROUND_194
+ゆるぎないだいち
+#org @NAME_LV200_GROUND_195
+はてなきさばく
+#org @NAME_LV200_GROUND_196
+ぜんりょくじめん
+#org @NAME_LV200_GROUND_197
+ばんぶつのだいち
+#org @NAME_LV200_GROUND_198
+アースゼロ
+#org @NAME_LV200_GROUND_199
+だいちのおう
+#org @NAME_LV200_GROUND_200
+すなのわな
+#org @NAME_LV200_ROCK_101
+ストーンバレット
+#org @NAME_LV200_ROCK_102
+いわのしらべ
+#org @NAME_LV200_ROCK_103
+つぶてガトリング
+#org @NAME_LV200_ROCK_104
+ダイヤカッター
+#org @NAME_LV200_ROCK_105
+がんせきキャノン
+#org @NAME_LV200_ROCK_106
+ごつごつアタック
+#org @NAME_LV200_ROCK_107
+かせきのいかり
+#org @NAME_LV200_ROCK_108
+サファイアビーム
+#org @NAME_LV200_ROCK_109
+ルビーカノン
+#org @NAME_LV200_ROCK_110
+ガーネットガード
+#org @NAME_LV200_ROCK_111
+ストーンフィスト
+#org @NAME_LV200_ROCK_112
+いんせきそうげき
+#org @NAME_LV200_ROCK_113
+エメラルドボム
+#org @NAME_LV200_ROCK_114
+せきえいフォール
+#org @NAME_LV200_ROCK_115
+かたいきずな
+#org @NAME_LV200_ROCK_116
+がんじょうのたて
+#org @NAME_LV200_ROCK_117
+こうぶつのいぶき
+#org @NAME_LV200_ROCK_118
+ゴロゴロストーン
+#org @NAME_LV200_ROCK_119
+ぶっとびいわ
+#org @NAME_LV200_ROCK_120
+いわおのうち
+#org @NAME_LV200_ROCK_121
+アンバーライト
+#org @NAME_LV200_ROCK_122
+がけくずし
+#org @NAME_LV200_ROCK_123
+こうがんバインド
+#org @NAME_LV200_ROCK_124
+えんすいしょう
+#org @NAME_LV200_ROCK_125
+ゲンブのこうら
+#org @NAME_LV200_ROCK_126
+ガレキのなみ
+#org @NAME_LV200_ROCK_127
+ごうがんハンマー
+#org @NAME_LV200_ROCK_128
+けっしょうだん
+#org @NAME_LV200_ROCK_129
+ストーンギア
+#org @NAME_LV200_ROCK_130
+ほりだしもの
+#org @NAME_LV200_ROCK_131
+ウルトラストーン
+#org @NAME_LV200_ROCK_132
+がんせきショット
+#org @NAME_LV200_ROCK_133
+いわきりカット
+#org @NAME_LV200_ROCK_134
+まっかなほうせき
+#org @NAME_LV200_ROCK_135
+いわのきょじん
+#org @NAME_LV200_ROCK_136
+すいしょうのうた
+#org @NAME_LV200_ROCK_137
+ストーンウォール
+#org @NAME_LV200_ROCK_138
+タイタンブレイク
+#org @NAME_LV200_ROCK_139
+がけっぷち
+#org @NAME_LV200_ROCK_140
+ひびわれスタンプ
+#org @NAME_LV200_ROCK_141
+ごろごろいわ
+#org @NAME_LV200_ROCK_142
+だいちのばんにん
+#org @NAME_LV200_ROCK_143
+きんこうせき
+#org @NAME_LV200_ROCK_144
+いわのかたまり
+#org @NAME_LV200_ROCK_145
+ゴーレムパンチ
+#org @NAME_LV200_ROCK_146
+グランドクロス
+#org @NAME_LV200_ROCK_147
+さんがんリング
+#org @NAME_LV200_ROCK_148
+ストーンジェット
+#org @NAME_LV200_ROCK_149
+ヘビーロック
+#org @NAME_LV200_ROCK_150
+いしくれのまく
+#org @NAME_LV200_ROCK_151
+ふっかつのかせき
+#org @NAME_LV200_ROCK_152
+ジェムストーム
+#org @NAME_LV200_ROCK_153
+せきじんのかまえ
+#org @NAME_LV200_ROCK_154
+いわやぶり
+#org @NAME_LV200_ROCK_155
+ストーンアート
+#org @NAME_LV200_ROCK_156
+てんがんブレイク
+#org @NAME_LV200_ROCK_157
+ドリルロック
+#org @NAME_LV200_ROCK_158
+ガーネットランス
+#org @NAME_LV200_ROCK_159
+いしのおうさま
+#org @NAME_LV200_ROCK_160
+ばくはつハザード
+#org @NAME_LV200_ROCK_161
+パワーストーン
+#org @NAME_LV200_ROCK_162
+かたいかたいいわ
+#org @NAME_LV200_ROCK_163
+サンドストーン
+#org @NAME_LV200_ROCK_164
+いわのつらら
+#org @NAME_LV200_ROCK_165
+ストーンパス
+#org @NAME_LV200_ROCK_166
+きばんのいかり
+#org @NAME_LV200_ROCK_167
+しょうげきせき
+#org @NAME_LV200_ROCK_168
+ごうがんダイブ
+#org @NAME_LV200_ROCK_169
+いわのインパクト
+#org @NAME_LV200_ROCK_170
+かせきリバイブ
+#org @NAME_LV200_ROCK_171
+こうてつのいわ
+#org @NAME_LV200_ROCK_172
+がんせきのおきて
+#org @NAME_LV200_ROCK_173
+いわいわラッシュ
+#org @NAME_LV200_ROCK_174
+きょだいガンセキ
+#org @NAME_LV200_ROCK_175
+ストーンコンボ
+#org @NAME_LV200_ROCK_176
+ほうせきのやま
+#org @NAME_LV200_ROCK_177
+ごうがんなだれ
+#org @NAME_LV200_ROCK_178
+ゴツゴツワールド
+#org @NAME_LV200_ROCK_179
+ひとかけらのいし
+#org @NAME_LV200_ROCK_180
+ロックフィールド
+#org @NAME_LV200_ROCK_181
+せいなるいわ
+#org @NAME_LV200_ROCK_182
+ごうせきドリル
+#org @NAME_LV200_ROCK_183
+ぐんじょうのやり
+#org @NAME_LV200_ROCK_184
+ストーンブレイク
+#org @NAME_LV200_ROCK_185
+ダイナロック
+#org @NAME_LV200_ROCK_186
+てんめつのいわ
+#org @NAME_LV200_ROCK_187
+ひだまりのいわ
+#org @NAME_LV200_ROCK_188
+ロックアーマー
+#org @NAME_LV200_ROCK_189
+ゴッドロック
+#org @NAME_LV200_ROCK_190
+かがやくクォーツ
+#org @NAME_LV200_ROCK_191
+たいりくのいかり
+#org @NAME_LV200_ROCK_192
+ストーンボム
+#org @NAME_LV200_ROCK_193
+ふっかつロック
+#org @NAME_LV200_ROCK_194
+きわみのいわ
+#org @NAME_LV200_ROCK_195
+がんせきのはて
+#org @NAME_LV200_ROCK_196
+いにしえのいかり
+#org @NAME_LV200_ROCK_197
+ジュエルノヴァ
+#org @NAME_LV200_ROCK_198
+ビッグバンロック
+#org @NAME_LV200_ROCK_199
+せかいのいわ
+#org @NAME_LV200_ROCK_200
+ラストストーン
+#org @NAME_LV200_BUG_101
+スウォームカット
+#org @NAME_LV200_BUG_102
+ハニースティング
+#org @NAME_LV200_BUG_103
+みつばちラッシュ
+#org @NAME_LV200_BUG_104
+かまきりカット
+#org @NAME_LV200_BUG_105
+いとスプレー
+#org @NAME_LV200_BUG_106
+はねあらしのうた
+#org @NAME_LV200_BUG_107
+こがねのやり
+#org @NAME_LV200_BUG_108
+かぶとわり
+#org @NAME_LV200_BUG_109
+りんぷんのまい
+#org @NAME_LV200_BUG_110
+さなぎのまもり
+#org @NAME_LV200_BUG_111
+よつばのつばさ
+#org @NAME_LV200_BUG_112
+きんいろのはね
+#org @NAME_LV200_BUG_113
+ちょうちょダンス
+#org @NAME_LV200_BUG_114
+ミツバチのうた
+#org @NAME_LV200_BUG_115
+カブトタックル
+#org @NAME_LV200_BUG_116
+シルクブレード
+#org @NAME_LV200_BUG_117
+ばっさりカッター
+#org @NAME_LV200_BUG_118
+どくあみのわな
+#org @NAME_LV200_BUG_119
+ふゆうのはね
+#org @NAME_LV200_BUG_120
+いとぬいのわざ
+#org @NAME_LV200_BUG_121
+ギガバタフライ
+#org @NAME_LV200_BUG_122
+くさむらのしかけ
+#org @NAME_LV200_BUG_123
+クワガタカッター
+#org @NAME_LV200_BUG_124
+でんしんのしらせ
+#org @NAME_LV200_BUG_125
+ダンゴとっしん
+#org @NAME_LV200_BUG_126
+アントストライク
+#org @NAME_LV200_BUG_127
+かたむしのいかり
+#org @NAME_LV200_BUG_128
+どくがのりんぷん
+#org @NAME_LV200_BUG_129
+ななほしアタック
+#org @NAME_LV200_BUG_130
+ぐんたいアタック
+#org @NAME_LV200_BUG_131
+きばのスティング
+#org @NAME_LV200_BUG_132
+そうがんアイ
+#org @NAME_LV200_BUG_133
+ぜつぼうのハチ
+#org @NAME_LV200_BUG_134
+かいこのあみ
+#org @NAME_LV200_BUG_135
+ホーンショット
+#org @NAME_LV200_BUG_136
+ひかりのりんぷん
+#org @NAME_LV200_BUG_137
+ムカデのしめつけ
+#org @NAME_LV200_BUG_138
+すずむしのはね
+#org @NAME_LV200_BUG_139
+こかげのしのび
+#org @NAME_LV200_BUG_140
+だっぴのごうし
+#org @NAME_LV200_BUG_141
+ゆらゆらドリル
+#org @NAME_LV200_BUG_142
+おどろのはね
+#org @NAME_LV200_BUG_143
+ちいさなだいぐん
+#org @NAME_LV200_BUG_144
+むしくいかじり
+#org @NAME_LV200_BUG_145
+はちのひとさし
+#org @NAME_LV200_BUG_146
+かまきりのおどし
+#org @NAME_LV200_BUG_147
+がっぷりかじり
+#org @NAME_LV200_BUG_148
+むしのいどころ
+#org @NAME_LV200_BUG_149
+のこぎりスライス
+#org @NAME_LV200_BUG_150
+いとあみふんしゃ
+#org @NAME_LV200_BUG_151
+はちみつのとげ
+#org @NAME_LV200_BUG_152
+せみしぐれ
+#org @NAME_LV200_BUG_153
+とうみんあけ
+#org @NAME_LV200_BUG_154
+けむしのいかり
+#org @NAME_LV200_BUG_155
+かりうどのきば
+#org @NAME_LV200_BUG_156
+ゆうわくりんぷん
+#org @NAME_LV200_BUG_157
+むしのはどう
+#org @NAME_LV200_BUG_158
+でんでんダッシュ
+#org @NAME_LV200_BUG_159
+ぐるぐるなげ
+#org @NAME_LV200_BUG_160
+むしのちょっかん
+#org @NAME_LV200_BUG_161
+かゆみのこな
+#org @NAME_LV200_BUG_162
+いっせいほうき
+#org @NAME_LV200_BUG_163
+ありじごくのわな
+#org @NAME_LV200_BUG_164
+ちょうせんばり
+#org @NAME_LV200_BUG_165
+みどりのやり
+#org @NAME_LV200_BUG_166
+カマキリのまい
+#org @NAME_LV200_BUG_167
+ひめいのとげ
+#org @NAME_LV200_BUG_168
+せいぎょのはね
+#org @NAME_LV200_BUG_169
+ふゆうのひだね
+#org @NAME_LV200_BUG_170
+りんぷんのかぜ
+#org @NAME_LV200_BUG_171
+むしのたてがみ
+#org @NAME_LV200_BUG_172
+ゆうえんのはね
+#org @NAME_LV200_BUG_173
+くわがたアーム
+#org @NAME_LV200_BUG_174
+いのちのみつ
+#org @NAME_LV200_BUG_175
+ぎらぎらのはね
+#org @NAME_LV200_BUG_176
+はいよるおもい
+#org @NAME_LV200_BUG_177
+どくばりスコール
+#org @NAME_LV200_BUG_178
+むしのあらし
+#org @NAME_LV200_BUG_179
+コンバート
+#org @NAME_LV200_BUG_180
+まゆのよろい
+#org @NAME_LV200_BUG_181
+カブトとっしん
+#org @NAME_LV200_BUG_182
+よるのむれ
+#org @NAME_LV200_BUG_183
+ほうせきのはね
+#org @NAME_LV200_BUG_184
+むしのえんそう
+#org @NAME_LV200_BUG_185
+そらとぶカナブン
+#org @NAME_LV200_BUG_186
+きょだいなあご
+#org @NAME_LV200_BUG_187
+だいぐんのいかり
+#org @NAME_LV200_BUG_188
+ムシムシウィング
+#org @NAME_LV200_BUG_189
+さいごのいっぴき
+#org @NAME_LV200_BUG_190
+たまごしかけ
+#org @NAME_LV200_BUG_191
+みつのあらし
+#org @NAME_LV200_BUG_192
+ごうれつばり
+#org @NAME_LV200_BUG_193
+ちょうのあらし
+#org @NAME_LV200_BUG_194
+カミキリブレード
+#org @NAME_LV200_BUG_195
+めざめのむし
+#org @NAME_LV200_BUG_196
+むしのこえ
+#org @NAME_LV200_BUG_197
+キングビートル
+#org @NAME_LV200_BUG_198
+むしだいしゅう
+#org @NAME_LV200_BUG_199
+じょおうアタック
+#org @NAME_LV200_BUG_200
+しじまのむれ
+#org @NAME_LV200_GHOST_101
+かげのしぐれ
+#org @NAME_LV200_GHOST_102
+ゴーストクロー
+#org @NAME_LV200_GHOST_103
+おどかしのしらせ
+#org @NAME_LV200_GHOST_104
+たたりのうず
+#org @NAME_LV200_GHOST_105
+おばけのうた
+#org @NAME_LV200_GHOST_106
+ゆうれいのつめ
+#org @NAME_LV200_GHOST_107
+ほねほねラッシュ
+#org @NAME_LV200_GHOST_108
+おんねんパンチ
+#org @NAME_LV200_GHOST_109
+のろいのかがみ
+#org @NAME_LV200_GHOST_110
+かげおさえ
+#org @NAME_LV200_GHOST_111
+たましいのゆくえ
+#org @NAME_LV200_GHOST_112
+さまようほのお
+#org @NAME_LV200_GHOST_113
+やみのそうしき
+#org @NAME_LV200_GHOST_114
+しのびよるかげ
+#org @NAME_LV200_GHOST_115
+おくりおおかみ
+#org @NAME_LV200_GHOST_116
+ゴーストダンス
+#org @NAME_LV200_GHOST_117
+ほろびのまえぶれ
+#org @NAME_LV200_GHOST_118
+まぼろしのつるぎ
+#org @NAME_LV200_GHOST_119
+ひとだまスピン
+#org @NAME_LV200_GHOST_120
+まよいごのさそい
+#org @NAME_LV200_GHOST_121
+のろいのかたな
+#org @NAME_LV200_GHOST_122
+きもだめしパンチ
+#org @NAME_LV200_GHOST_123
+やみのいたずら
+#org @NAME_LV200_GHOST_124
+ぶきみなこえ
+#org @NAME_LV200_GHOST_125
+ゴーストライト
+#org @NAME_LV200_GHOST_126
+かげわけアタック
+#org @NAME_LV200_GHOST_127
+むえんのかげ
+#org @NAME_LV200_GHOST_128
+ゆうれいのて
+#org @NAME_LV200_GHOST_129
+くらやみのぶつぎ
+#org @NAME_LV200_GHOST_130
+ぬけがらのかげ
+#org @NAME_LV200_GHOST_131
+ぶきみなほのお
+#org @NAME_LV200_GHOST_132
+ついばむぼうれい
+#org @NAME_LV200_GHOST_133
+ごはんのたたり
+#org @NAME_LV200_GHOST_134
+かげうちのまい
+#org @NAME_LV200_GHOST_135
+かげのダイブ
+#org @NAME_LV200_GHOST_136
+かなしばりのかぜ
+#org @NAME_LV200_GHOST_137
+やみのささやき
+#org @NAME_LV200_GHOST_138
+ねんりきのたたり
+#org @NAME_LV200_GHOST_139
+ゆうれいのむれ
+#org @NAME_LV200_GHOST_140
+うらみのこえ
+#org @NAME_LV200_GHOST_141
+こころのかげ
+#org @NAME_LV200_GHOST_142
+ミラクルシャドー
+#org @NAME_LV200_GHOST_143
+おばけのあいさつ
+#org @NAME_LV200_GHOST_144
+やみにひそむ
+#org @NAME_LV200_GHOST_145
+しんぞうつかみ
+#org @NAME_LV200_GHOST_146
+ゴーストフォール
+#org @NAME_LV200_GHOST_147
+やみよのかがみ
+#org @NAME_LV200_GHOST_148
+ゆめのなかのかげ
+#org @NAME_LV200_GHOST_149
+おんりょうさけび
+#org @NAME_LV200_GHOST_150
+しりょうのつどい
+#org @NAME_LV200_GHOST_151
+やみのしめつけ
+#org @NAME_LV200_GHOST_152
+ひやりシュート
+#org @NAME_LV200_GHOST_153
+しんくうのかげ
+#org @NAME_LV200_GHOST_154
+はいずりゴースト
+#org @NAME_LV200_GHOST_155
+おばけパレード
+#org @NAME_LV200_GHOST_156
+ゆうれいのきばつ
+#org @NAME_LV200_GHOST_157
+そうれいのうたげ
+#org @NAME_LV200_GHOST_158
+たましいカット
+#org @NAME_LV200_GHOST_159
+ゴーストバンプ
+#org @NAME_LV200_GHOST_160
+あのよのしらせ
+#org @NAME_LV200_GHOST_161
+かくれんぼ
+#org @NAME_LV200_GHOST_162
+うらめしラッシュ
+#org @NAME_LV200_GHOST_163
+シャドーキャノン
+#org @NAME_LV200_GHOST_164
+くらやみをまとう
+#org @NAME_LV200_GHOST_165
+ゆうれいのしらべ
+#org @NAME_LV200_GHOST_166
+きえるマジック
+#org @NAME_LV200_GHOST_167
+ゴーストのかまえ
+#org @NAME_LV200_GHOST_168
+こわいもの
+#org @NAME_LV200_GHOST_169
+むえんぼとけ
+#org @NAME_LV200_GHOST_170
+たましいけいやく
+#org @NAME_LV200_GHOST_171
+ばくしんのたたり
+#org @NAME_LV200_GHOST_172
+よなきのしらせ
+#org @NAME_LV200_GHOST_173
+かげのせかい
+#org @NAME_LV200_GHOST_174
+とりつくしま
+#org @NAME_LV200_GHOST_175
+たましいのりんぶ
+#org @NAME_LV200_GHOST_176
+ホロウナイト
+#org @NAME_LV200_GHOST_177
+ゴーストバスター
+#org @NAME_LV200_GHOST_178
+やみのてっつい
+#org @NAME_LV200_GHOST_179
+ゆうれいうず
+#org @NAME_LV200_GHOST_180
+やみのとばり
+#org @NAME_LV200_GHOST_181
+ひとだまのあらし
+#org @NAME_LV200_GHOST_182
+やみのこもりうた
+#org @NAME_LV200_GHOST_183
+かげぼうしいかり
+#org @NAME_LV200_GHOST_184
+くびなしライダー
+#org @NAME_LV200_GHOST_185
+ゴーストフェスタ
+#org @NAME_LV200_GHOST_186
+しにがみのかま
+#org @NAME_LV200_GHOST_187
+あくりょうアイ
+#org @NAME_LV200_GHOST_188
+ひゃっきのよる
+#org @NAME_LV200_GHOST_189
+ゴーストジャッジ
+#org @NAME_LV200_GHOST_190
+きょうふ
+#org @NAME_LV200_GHOST_191
+ほろびのかげ
+#org @NAME_LV200_GHOST_192
+やみのしんぞう
+#org @NAME_LV200_GHOST_193
+よのしらせ
+#org @NAME_LV200_GHOST_194
+ゴーストミサ
+#org @NAME_LV200_GHOST_195
+げんじつのかげ
+#org @NAME_LV200_GHOST_196
+ゴーストエンド
+#org @NAME_LV200_GHOST_197
+たましいのはて
+#org @NAME_LV200_GHOST_198
+ゴーストワールド
+#org @NAME_LV200_GHOST_199
+れいかいのうた
+#org @NAME_LV200_GHOST_200
+ふみとどまり
+#org @NAME_LV200_STEEL_101
+はがねクラッシュ
+#org @NAME_LV200_STEEL_102
+スチールビーム
+#org @NAME_LV200_STEEL_103
+てつのつめあと
+#org @NAME_LV200_STEEL_104
+ハガネウイング
+#org @NAME_LV200_STEEL_105
+ミラーカノン
+#org @NAME_LV200_STEEL_106
+ギアブレード
+#org @NAME_LV200_STEEL_107
+てっぺきスタンプ
+#org @NAME_LV200_STEEL_108
+アイアンライト
+#org @NAME_LV200_STEEL_109
+ターボギア
+#org @NAME_LV200_STEEL_110
+メタルアーマー
+#org @NAME_LV200_STEEL_111
+ヘビーバンカー
+#org @NAME_LV200_STEEL_112
+てつぼうビンタ
+#org @NAME_LV200_STEEL_113
+きりもみドリル
+#org @NAME_LV200_STEEL_114
+かがやくハガネ
+#org @NAME_LV200_STEEL_115
+はがねバスター
+#org @NAME_LV200_STEEL_116
+てつてつラッシュ
+#org @NAME_LV200_STEEL_117
+ぜんめんボルト
+#org @NAME_LV200_STEEL_118
+ごうきんパンチ
+#org @NAME_LV200_STEEL_119
+てっこうのまもり
+#org @NAME_LV200_STEEL_120
+はがねのトゲ
+#org @NAME_LV200_STEEL_121
+てのうちみせる
+#org @NAME_LV200_STEEL_122
+メタルスピン
+#org @NAME_LV200_STEEL_123
+きんぞくバット
+#org @NAME_LV200_STEEL_124
+スチールヘッド
+#org @NAME_LV200_STEEL_125
+てつのくさり
+#org @NAME_LV200_STEEL_126
+ぼうそうチェーン
+#org @NAME_LV200_STEEL_127
+はがねのきば
+#org @NAME_LV200_STEEL_128
+ミサイルパンチ
+#org @NAME_LV200_STEEL_129
+ダイヤウォール
+#org @NAME_LV200_STEEL_130
+ほうしんチューン
+#org @NAME_LV200_STEEL_131
+バネバッシュ
+#org @NAME_LV200_STEEL_132
+けっせんのおの
+#org @NAME_LV200_STEEL_133
+はがねドライブ
+#org @NAME_LV200_STEEL_134
+しんくうメタル
+#org @NAME_LV200_STEEL_135
+こうてつのうたげ
+#org @NAME_LV200_STEEL_136
+アーマープレス
+#org @NAME_LV200_STEEL_137
+てっかいだん
+#org @NAME_LV200_STEEL_138
+スチールスラム
+#org @NAME_LV200_STEEL_139
+でんじのロード
+#org @NAME_LV200_STEEL_140
+かがみのよろい
+#org @NAME_LV200_STEEL_141
+てつのカーテン
+#org @NAME_LV200_STEEL_142
+ジェットギア
+#org @NAME_LV200_STEEL_143
+ガードシールド
+#org @NAME_LV200_STEEL_144
+ダブルスチール
+#org @NAME_LV200_STEEL_145
+サイコメタル
+#org @NAME_LV200_STEEL_146
+せいてつのいかり
+#org @NAME_LV200_STEEL_147
+くろがねカノン
+#org @NAME_LV200_STEEL_148
+ハガネのやりつき
+#org @NAME_LV200_STEEL_149
+くろがねのやみ
+#org @NAME_LV200_STEEL_150
+やいばラッシュ
+#org @NAME_LV200_STEEL_151
+でんじりゅうけん
+#org @NAME_LV200_STEEL_152
+がっしりアーム
+#org @NAME_LV200_STEEL_153
+うずまきブレード
+#org @NAME_LV200_STEEL_154
+メカバースト
+#org @NAME_LV200_STEEL_155
+てつのかべ
+#org @NAME_LV200_STEEL_156
+いかりショット
+#org @NAME_LV200_STEEL_157
+だんがんパンチ
+#org @NAME_LV200_STEEL_158
+きょうじんパワー
+#org @NAME_LV200_STEEL_159
+アイアンメイデン
+#org @NAME_LV200_STEEL_160
+こうてつウォール
+#org @NAME_LV200_STEEL_161
+たたかうこうてつ
+#org @NAME_LV200_STEEL_162
+レーザーフォース
+#org @NAME_LV200_STEEL_163
+パンチングナイト
+#org @NAME_LV200_STEEL_164
+てっつい
+#org @NAME_LV200_STEEL_165
+スチールコア
+#org @NAME_LV200_STEEL_166
+ガードメタル
+#org @NAME_LV200_STEEL_167
+メルトダウン
+#org @NAME_LV200_STEEL_168
+ブレイクメタル
+#org @NAME_LV200_STEEL_169
+しんきろうギア
+#org @NAME_LV200_STEEL_170
+ターボエンジン
+#org @NAME_LV200_STEEL_171
+ナットブレイク
+#org @NAME_LV200_STEEL_172
+ハンマーヘッド
+#org @NAME_LV200_STEEL_173
+バリスティック
+#org @NAME_LV200_STEEL_174
+サーチライト
+#org @NAME_LV200_STEEL_175
+こうてつしんぞう
+#org @NAME_LV200_STEEL_176
+スチームパンク
+#org @NAME_LV200_STEEL_177
+ラストウェポン
+#org @NAME_LV200_STEEL_178
+メタルパルス
+#org @NAME_LV200_STEEL_179
+はがねのおきて
+#org @NAME_LV200_STEEL_180
+ギアスワップ
+#org @NAME_LV200_STEEL_181
+ギアストーム
+#org @NAME_LV200_STEEL_182
+ヘビーハンマー
+#org @NAME_LV200_STEEL_183
+てつのはて
+#org @NAME_LV200_STEEL_184
+ダイナスチール
+#org @NAME_LV200_STEEL_185
+ちきゅうてつ
+#org @NAME_LV200_STEEL_186
+ギャラクシー
+#org @NAME_LV200_STEEL_187
+ハガネのきわみ
+#org @NAME_LV200_STEEL_188
+ブラスターメタル
+#org @NAME_LV200_STEEL_189
+スーパーノヴァ
+#org @NAME_LV200_STEEL_190
+オーバーホール
+#org @NAME_LV200_STEEL_191
+てんじょうのてつ
+#org @NAME_LV200_STEEL_192
+ゴッドアイアン
+#org @NAME_LV200_STEEL_193
+てつのていおう
+#org @NAME_LV200_STEEL_194
+ぜんしょくメタル
+#org @NAME_LV200_STEEL_195
+こうてつのしん
+#org @NAME_LV200_STEEL_196
+メタルレクイエム
+#org @NAME_LV200_STEEL_197
+ハガネのらせん
+#org @NAME_LV200_STEEL_198
+アイアンジャッジ
+#org @NAME_LV200_STEEL_199
+こうきんのおう
+#org @NAME_LV200_STEEL_200
+さびつかせ
+#org @NAME_LV200_FIRE_101
+フレアバースト
+#org @NAME_LV200_FIRE_102
+ひのこのあらし
+#org @NAME_LV200_FIRE_103
+ほのおのいのり
+#org @NAME_LV200_FIRE_104
+あついなみだ
+#org @NAME_LV200_FIRE_105
+ほのおぐるま
+#org @NAME_LV200_FIRE_106
+サンシャイン
+#org @NAME_LV200_FIRE_107
+ほむらのつるぎ
+#org @NAME_LV200_FIRE_108
+ひだまりアタック
+#org @NAME_LV200_FIRE_109
+ドラゴンブレイズ
+#org @NAME_LV200_FIRE_110
+ほむらのまとい
+#org @NAME_LV200_FIRE_111
+ぶきみなほむら
+#org @NAME_LV200_FIRE_112
+やきつくすひかり
+#org @NAME_LV200_FIRE_113
+ひのこれんだ
+#org @NAME_LV200_FIRE_114
+かえんのこぶし
+#org @NAME_LV200_FIRE_115
+かえんのたつまき
+#org @NAME_LV200_FIRE_116
+ほのおのやりなげ
+#org @NAME_LV200_FIRE_117
+ねっぷうストーム
+#org @NAME_LV200_FIRE_118
+ぼうえんのひかり
+#org @NAME_LV200_FIRE_119
+マグマブレード
+#org @NAME_LV200_FIRE_120
+もえるチャージ
+#org @NAME_LV200_FIRE_121
+ひのたまアタック
+#org @NAME_LV200_FIRE_122
+バーニングダンス
+#org @NAME_LV200_FIRE_123
+ほのおのかたまり
+#org @NAME_LV200_FIRE_124
+ひばなダッシュ
+#org @NAME_LV200_FIRE_125
+ようがんボール
+#org @NAME_LV200_FIRE_126
+かえんだいもんじ
+#org @NAME_LV200_FIRE_127
+ひのとりはばたき
+#org @NAME_LV200_FIRE_128
+ほむらのこえ
+#org @NAME_LV200_FIRE_129
+バーストキック
+#org @NAME_LV200_FIRE_130
+やけどのしるし
+#org @NAME_LV200_FIRE_131
+かえんのクロー
+#org @NAME_LV200_FIRE_132
+ふんかのまえぶれ
+#org @NAME_LV200_FIRE_133
+ひのいろのしっぽ
+#org @NAME_LV200_FIRE_134
+れんごくのつめ
+#org @NAME_LV200_FIRE_135
+ほのおのたいほう
+#org @NAME_LV200_FIRE_136
+こうねつバリア
+#org @NAME_LV200_FIRE_137
+だいもんじあらし
+#org @NAME_LV200_FIRE_138
+ほのおのバウンド
+#org @NAME_LV200_FIRE_139
+フレイムバインド
+#org @NAME_LV200_FIRE_140
+いかりのほのお
+#org @NAME_LV200_FIRE_141
+かえんスピード
+#org @NAME_LV200_FIRE_142
+ほのおのあしあと
+#org @NAME_LV200_FIRE_143
+ようがんのよろい
+#org @NAME_LV200_FIRE_144
+ほむらのかたな
+#org @NAME_LV200_FIRE_145
+ひのこのダンス
+#org @NAME_LV200_FIRE_146
+ヒートドライブ
+#org @NAME_LV200_FIRE_147
+ほのおのプレス
+#org @NAME_LV200_FIRE_148
+かざんのいかり
+#org @NAME_LV200_FIRE_149
+れつかのこぶし
+#org @NAME_LV200_FIRE_150
+ほのおのころも
+#org @NAME_LV200_FIRE_151
+ほむらのダンス
+#org @NAME_LV200_FIRE_152
+フレアストライク
+#org @NAME_LV200_FIRE_153
+きょうれつバーン
+#org @NAME_LV200_FIRE_154
+マグマクラッシュ
+#org @NAME_LV200_FIRE_155
+ネオンフレア
+#org @NAME_LV200_FIRE_156
+ほのおのたて
+#org @NAME_LV200_FIRE_157
+かえんのしたたり
+#org @NAME_LV200_FIRE_158
+てんかのほのお
+#org @NAME_LV200_FIRE_159
+ひっさつのひのこ
+#org @NAME_LV200_FIRE_160
+ひざしのいこい
+#org @NAME_LV200_FIRE_161
+ほのおのあらし
+#org @NAME_LV200_FIRE_162
+きょうあくフレア
+#org @NAME_LV200_FIRE_163
+ぐれんフィスト
+#org @NAME_LV200_FIRE_164
+たいようのいぶき
+#org @NAME_LV200_FIRE_165
+バーニングクロス
+#org @NAME_LV200_FIRE_166
+もえるいかり
+#org @NAME_LV200_FIRE_167
+ほのおのさけび
+#org @NAME_LV200_FIRE_168
+かえんのとびら
+#org @NAME_LV200_FIRE_169
+ほむらのこうしん
+#org @NAME_LV200_FIRE_170
+とけだしほのお
+#org @NAME_LV200_FIRE_171
+しゃくねつはどう
+#org @NAME_LV200_FIRE_172
+じごくのほのお
+#org @NAME_LV200_FIRE_173
+ブレイズバンカー
+#org @NAME_LV200_FIRE_174
+ひのこのしらべ
+#org @NAME_LV200_FIRE_175
+ふんかとっしん
+#org @NAME_LV200_FIRE_176
+フレアフォース
+#org @NAME_LV200_FIRE_177
+ようがんタックル
+#org @NAME_LV200_FIRE_178
+ブレイズバースト
+#org @NAME_LV200_FIRE_179
+かえんのつばさ
+#org @NAME_LV200_FIRE_180
+やきはらい
+#org @NAME_LV200_FIRE_181
+ほのおレクイエム
+#org @NAME_LV200_FIRE_182
+ごうかのうず
+#org @NAME_LV200_FIRE_183
+かがやくほむら
+#org @NAME_LV200_FIRE_184
+バーンワールド
+#org @NAME_LV200_FIRE_185
+ほむらのきわみ
+#org @NAME_LV200_FIRE_186
+ようがんあらし
+#org @NAME_LV200_FIRE_187
+かえんのてんし
+#org @NAME_LV200_FIRE_188
+ほのおのなごり
+#org @NAME_LV200_FIRE_189
+いにしえのひ
+#org @NAME_LV200_FIRE_190
+ブレイズフォーム
+#org @NAME_LV200_FIRE_191
+あかいほむら
+#org @NAME_LV200_FIRE_192
+ひのとりのいかり
+#org @NAME_LV200_FIRE_193
+えんげつけん
+#org @NAME_LV200_FIRE_194
+サンバースト
+#org @NAME_LV200_FIRE_195
+ラストフレア
+#org @NAME_LV200_FIRE_196
+かえんのおう
+#org @NAME_LV200_FIRE_197
+ほのおのしんぞう
+#org @NAME_LV200_FIRE_198
+ビッグバンフレア
+#org @NAME_LV200_FIRE_199
+たいようのかけら
+#org @NAME_LV200_FIRE_200
+サンライズフレア
+#org @NAME_LV200_WATER_101
+しおなりカノン
+#org @NAME_LV200_WATER_102
+ナミノリブレード
+#org @NAME_LV200_WATER_103
+うずしおダンス
+#org @NAME_LV200_WATER_104
+おおなみのいぶき
+#org @NAME_LV200_WATER_105
+あまやどり
+#org @NAME_LV200_WATER_106
+クリアドロップ
+#org @NAME_LV200_WATER_107
+しぶきラッシュ
+#org @NAME_LV200_WATER_108
+みなもリング
+#org @NAME_LV200_WATER_109
+みなぞこのうた
+#org @NAME_LV200_WATER_110
+みちしお
+#org @NAME_LV200_WATER_111
+ざぶんタックル
+#org @NAME_LV200_WATER_112
+ブルーカノン
+#org @NAME_LV200_WATER_113
+しぶきカッター
+#org @NAME_LV200_WATER_114
+ミストスクリュー
+#org @NAME_LV200_WATER_115
+うらなみターン
+#org @NAME_LV200_WATER_116
+スコールダッシュ
+#org @NAME_LV200_WATER_117
+あまごいのうた
+#org @NAME_LV200_WATER_118
+ふかみのいのり
+#org @NAME_LV200_WATER_119
+ゆらぎのかがみ
+#org @NAME_LV200_WATER_120
+うしおカウンタ
+#org @NAME_LV200_WATER_121
+ソーダシャワー
+#org @NAME_LV200_WATER_122
+タイダルクロー
+#org @NAME_LV200_WATER_123
+コバルトウェーブ
+#org @NAME_LV200_WATER_124
+ラグーンフォール
+#org @NAME_LV200_WATER_125
+せせらぎのゆめ
+#org @NAME_LV200_WATER_126
+トリトンやり
+#org @NAME_LV200_WATER_127
+しおみずのナイフ
+#org @NAME_LV200_WATER_128
+みなとのあらし
+#org @NAME_LV200_WATER_129
+マリンシャワー
+#org @NAME_LV200_WATER_130
+しんかいのきおく
+#org @NAME_LV200_WATER_131
+ふかなりのまもり
+#org @NAME_LV200_WATER_132
+ミズタマボンバー
+#org @NAME_LV200_WATER_133
+シーサイドキック
+#org @NAME_LV200_WATER_134
+ハイドロスパイク
+#org @NAME_LV200_WATER_135
+うずまきのたて
+#org @NAME_LV200_WATER_136
+セイレーンハープ
+#org @NAME_LV200_WATER_137
+あおいなみまくら
+#org @NAME_LV200_WATER_138
+あおつきジェット
+#org @NAME_LV200_WATER_139
+アクアマリナ
+#org @NAME_LV200_WATER_140
+ながれびなターン
+#org @NAME_LV200_WATER_141
+ゲイルタイド
+#org @NAME_LV200_WATER_142
+しらなみカット
+#org @NAME_LV200_WATER_143
+ナギサのかんむり
+#org @NAME_LV200_WATER_144
+クラーケン
+#org @NAME_LV200_WATER_145
+ふなぞこブレイク
+#org @NAME_LV200_WATER_146
+リーフウェーブ
+#org @NAME_LV200_WATER_147
+カスケード
+#org @NAME_LV200_WATER_148
+いそしぎのまい
+#org @NAME_LV200_WATER_149
+マーメイドソング
+#org @NAME_LV200_WATER_150
+おおうずしお
+#org @NAME_LV200_WATER_151
+グレートリップ
+#org @NAME_LV200_WATER_152
+あくあぼうそう
+#org @NAME_LV200_WATER_153
+みずうみのつるぎ
+#org @NAME_LV200_WATER_154
+うしおのこだま
+#org @NAME_LV200_WATER_155
+ひょうざんのみず
+#org @NAME_LV200_WATER_156
+ダイバーズハイ
+#org @NAME_LV200_WATER_157
+あらしのしお
+#org @NAME_LV200_WATER_158
+ポセイドンレイ
+#org @NAME_LV200_WATER_159
+カイゾクダンス
+#org @NAME_LV200_WATER_160
+しずくのさばき
+#org @NAME_LV200_WATER_161
+おぼろしおかぜ
+#org @NAME_LV200_WATER_162
+かげのさざなみ
+#org @NAME_LV200_WATER_163
+ホワイトキャップ
+#org @NAME_LV200_WATER_164
+ネプチューン
+#org @NAME_LV200_WATER_165
+しおまきのかぜ
+#org @NAME_LV200_WATER_166
+たいかいのうなり
+#org @NAME_LV200_WATER_167
+パールスコール
+#org @NAME_LV200_WATER_168
+アビスブレス
+#org @NAME_LV200_WATER_169
+ラピスフローズン
+#org @NAME_LV200_WATER_170
+しんかいのうた
+#org @NAME_LV200_WATER_171
+うみがめのこうら
+#org @NAME_LV200_WATER_172
+ブルーホール
+#org @NAME_LV200_WATER_173
+リヴァイアサン
+#org @NAME_LV200_WATER_174
+ルリイロのなみ
+#org @NAME_LV200_WATER_175
+あおぐろあらし
+#org @NAME_LV200_WATER_176
+しょうこうのかい
+#org @NAME_LV200_WATER_177
+カイドウのまいご
+#org @NAME_LV200_WATER_178
+ゆうなぎ
+#org @NAME_LV200_WATER_179
+トライデント
+#org @NAME_LV200_WATER_180
+うずしおのかがみ
+#org @NAME_LV200_WATER_181
+サンゴのいかり
+#org @NAME_LV200_WATER_182
+みずのみやこ
+#org @NAME_LV200_WATER_183
+うずしおゲート
+#org @NAME_LV200_WATER_184
+セイウンハンマー
+#org @NAME_LV200_WATER_185
+ミズチのさけび
+#org @NAME_LV200_WATER_186
+リバースタイド
+#org @NAME_LV200_WATER_187
+ふくよくのひかり
+#org @NAME_LV200_WATER_188
+アクアレクイエム
+#org @NAME_LV200_WATER_189
+とわのしおざい
+#org @NAME_LV200_WATER_190
+わだつみのうたげ
+#org @NAME_LV200_WATER_191
+スターウォッシュ
+#org @NAME_LV200_WATER_192
+ブレイクウェーブ
+#org @NAME_LV200_WATER_193
+タイダルバースト
+#org @NAME_LV200_WATER_194
+ハイドロアーク
+#org @NAME_LV200_WATER_195
+ナミダのしらべ
+#org @NAME_LV200_WATER_196
+うみなりのゆれ
+#org @NAME_LV200_WATER_197
+しおかぜのベール
+#org @NAME_LV200_WATER_198
+ボトムフィッシュ
+#org @NAME_LV200_WATER_199
+しおだまり
+#org @NAME_LV200_WATER_200
+アトランティス
+#org @NAME_LV200_GRASS_101
+ひだまりリーフ
+#org @NAME_LV200_GRASS_102
+みどりのやいば
+#org @NAME_LV200_GRASS_103
+もりのいましめ
+#org @NAME_LV200_GRASS_104
+たねバルカン
+#org @NAME_LV200_GRASS_105
+ねっこのいのり
+#org @NAME_LV200_GRASS_106
+もりのねむり
+#org @NAME_LV200_GRASS_107
+こもれびビーム
+#org @NAME_LV200_GRASS_108
+どくあざみ
+#org @NAME_LV200_GRASS_109
+あさつゆ
+#org @NAME_LV200_GRASS_110
+ねこそぎドレイン
+#org @NAME_LV200_GRASS_111
+ウッドクラッシュ
+#org @NAME_LV200_GRASS_112
+はなのうず
+#org @NAME_LV200_GRASS_113
+ひなたぼっこ
+#org @NAME_LV200_GRASS_114
+リーフワルツ
+#org @NAME_LV200_GRASS_115
+どんぐりボム
+#org @NAME_LV200_GRASS_116
+クロロドレイン
+#org @NAME_LV200_GRASS_117
+もりのたて
+#org @NAME_LV200_GRASS_118
+こはるびより
+#org @NAME_LV200_GRASS_119
+わらびダッシュ
+#org @NAME_LV200_GRASS_120
+まきつきのたね
+#org @NAME_LV200_GRASS_121
+わたげのふぶき
+#org @NAME_LV200_GRASS_122
+しばふのうた
+#org @NAME_LV200_GRASS_123
+タケノコドリル
+#org @NAME_LV200_GRASS_124
+フラワーカノン
+#org @NAME_LV200_GRASS_125
+こがらしリーフ
+#org @NAME_LV200_GRASS_126
+ミツバチワルツ
+#org @NAME_LV200_GRASS_127
+きこりのいかり
+#org @NAME_LV200_GRASS_128
+あおばのかべ
+#org @NAME_LV200_GRASS_129
+ヤドリギのしずく
+#org @NAME_LV200_GRASS_130
+ねだやしこうげき
+#org @NAME_LV200_GRASS_131
+モスバレット
+#org @NAME_LV200_GRASS_132
+くさはらラッシュ
+#org @NAME_LV200_GRASS_133
+ブルームレイ
+#org @NAME_LV200_GRASS_134
+ぬしのいぶき
+#org @NAME_LV200_GRASS_135
+みどりのあらし
+#org @NAME_LV200_GRASS_136
+ツタノクサリ
+#org @NAME_LV200_GRASS_137
+ハーブティー
+#org @NAME_LV200_GRASS_138
+ヒノキソード
+#org @NAME_LV200_GRASS_139
+よつばラッシュ
+#org @NAME_LV200_GRASS_140
+ぶんかつのいぶき
+#org @NAME_LV200_GRASS_141
+ひなたのまじない
+#org @NAME_LV200_GRASS_142
+ほうしのかおり
+#org @NAME_LV200_GRASS_143
+ドリアードソング
+#org @NAME_LV200_GRASS_144
+ジャングルダイブ
+#org @NAME_LV200_GRASS_145
+シダのハンマー
+#org @NAME_LV200_GRASS_146
+どくだみトラップ
+#org @NAME_LV200_GRASS_147
+かやぶきのまもり
+#org @NAME_LV200_GRASS_148
+ほんのりアロマ
+#org @NAME_LV200_GRASS_149
+じゅもくのよろい
+#org @NAME_LV200_GRASS_150
+やどりぎのレイン
+#org @NAME_LV200_GRASS_151
+ヒーリングリーフ
+#org @NAME_LV200_GRASS_152
+ローズウィップ
+#org @NAME_LV200_GRASS_153
+かふんのいぶき
+#org @NAME_LV200_GRASS_154
+そよかぜダッシュ
+#org @NAME_LV200_GRASS_155
+サクラふぶき
+#org @NAME_LV200_GRASS_156
+ミツロウのかべ
+#org @NAME_LV200_GRASS_157
+こだまのもり
+#org @NAME_LV200_GRASS_158
+ソーラーチャージ
+#org @NAME_LV200_GRASS_159
+ひいらぎのとげ
+#org @NAME_LV200_GRASS_160
+たいぼくのよろい
+#org @NAME_LV200_GRASS_161
+ゴムノキスラップ
+#org @NAME_LV200_GRASS_162
+せかいじゅのかげ
+#org @NAME_LV200_GRASS_163
+モリノしんどう
+#org @NAME_LV200_GRASS_164
+バジルシャワー
+#org @NAME_LV200_GRASS_165
+アマゾンスコール
+#org @NAME_LV200_GRASS_166
+ヤドリギのねむり
+#org @NAME_LV200_GRASS_167
+こけむすたて
+#org @NAME_LV200_GRASS_168
+しんりょくパワー
+#org @NAME_LV200_GRASS_169
+ハナビラストーム
+#org @NAME_LV200_GRASS_170
+フォトシンセ
+#org @NAME_LV200_GRASS_171
+くすのきパンチ
+#org @NAME_LV200_GRASS_172
+せかいじゅのうた
+#org @NAME_LV200_GRASS_173
+ガイアのいぶき
+#org @NAME_LV200_GRASS_174
+ハーブガーデン
+#org @NAME_LV200_GRASS_175
+ルートバインド
+#org @NAME_LV200_GRASS_176
+かるかやのまい
+#org @NAME_LV200_GRASS_177
+ひとひらのねがい
+#org @NAME_LV200_GRASS_178
+かずらのむち
+#org @NAME_LV200_GRASS_179
+エメラルドレイ
+#org @NAME_LV200_GRASS_180
+ゆうだちのもり
+#org @NAME_LV200_GRASS_181
+もりのレクイエム
+#org @NAME_LV200_GRASS_182
+アルラウネダンス
+#org @NAME_LV200_GRASS_183
+ブルームカノン
+#org @NAME_LV200_GRASS_184
+ウッドインパクト
+#org @NAME_LV200_GRASS_185
+リーフトルネード
+#org @NAME_LV200_GRASS_186
+こもれびのしらべ
+#org @NAME_LV200_GRASS_187
+つぼみのかがやき
+#org @NAME_LV200_GRASS_188
+ゴールデンリーフ
+#org @NAME_LV200_GRASS_189
+せんじゅのかぜ
+#org @NAME_LV200_GRASS_190
+じゅかいのひかり
+#org @NAME_LV200_GRASS_191
+テラフォレスト
+#org @NAME_LV200_GRASS_192
+みどりのほうこう
+#org @NAME_LV200_GRASS_193
+いっすいのねむり
+#org @NAME_LV200_GRASS_194
+ウッドハリケーン
+#org @NAME_LV200_GRASS_195
+せんぼんやり
+#org @NAME_LV200_GRASS_196
+ふかみどりのかげ
+#org @NAME_LV200_GRASS_197
+ほうかいのたね
+#org @NAME_LV200_GRASS_198
+みどりのおうこく
+#org @NAME_LV200_GRASS_199
+ラグナリーフ
+#org @NAME_LV200_GRASS_200
+じゅかいのさばき
+#org @NAME_LV200_ELECTRIC_101
+スパークカノン
+#org @NAME_LV200_ELECTRIC_102
+いなずまクロー
+#org @NAME_LV200_ELECTRIC_103
+ビリビリネット
+#org @NAME_LV200_ELECTRIC_104
+プラズマレイン
+#org @NAME_LV200_ELECTRIC_105
+じりょくのまく
+#org @NAME_LV200_ELECTRIC_106
+ほうでんダンス
+#org @NAME_LV200_ELECTRIC_107
+ピリピリウェーブ
+#org @NAME_LV200_ELECTRIC_108
+チャージアップ
+#org @NAME_LV200_ELECTRIC_109
+いなびかり
+#org @NAME_LV200_ELECTRIC_110
+ちくでんスパーク
+#org @NAME_LV200_ELECTRIC_111
+らいめいタックル
+#org @NAME_LV200_ELECTRIC_112
+ボルトナックル
+#org @NAME_LV200_ELECTRIC_113
+いかずちおとし
+#org @NAME_LV200_ELECTRIC_114
+スタンガン
+#org @NAME_LV200_ELECTRIC_115
+ターンアーク
+#org @NAME_LV200_ELECTRIC_116
+ネオンフィールド
+#org @NAME_LV200_ELECTRIC_117
+エレキダンス
+#org @NAME_LV200_ELECTRIC_118
+スロースパーク
+#org @NAME_LV200_ELECTRIC_119
+コイルガード
+#org @NAME_LV200_ELECTRIC_120
+エレキタックル
+#org @NAME_LV200_ELECTRIC_121
+せいでんきのかべ
+#org @NAME_LV200_ELECTRIC_122
+ゴムのかべ
+#org @NAME_LV200_ELECTRIC_123
+パワーチャージ
+#org @NAME_LV200_ELECTRIC_124
+かみなりぐも
+#org @NAME_LV200_ELECTRIC_125
+デュアルボルト
+#org @NAME_LV200_ELECTRIC_126
+ライジングアーク
+#org @NAME_LV200_ELECTRIC_127
+ボルトランス
+#org @NAME_LV200_ELECTRIC_128
+ちょくげきらい
+#org @NAME_LV200_ELECTRIC_129
+スパークシャワー
+#org @NAME_LV200_ELECTRIC_130
+ふうじのでんげき
+#org @NAME_LV200_ELECTRIC_131
+ていでんのよる
+#org @NAME_LV200_ELECTRIC_132
+ほしくずプラズマ
+#org @NAME_LV200_ELECTRIC_133
+コイルアップ
+#org @NAME_LV200_ELECTRIC_134
+ダイナモラッシュ
+#org @NAME_LV200_ELECTRIC_135
+トランスアーク
+#org @NAME_LV200_ELECTRIC_136
+イオンシャワー
+#org @NAME_LV200_ELECTRIC_137
+いなずまのわな
+#org @NAME_LV200_ELECTRIC_138
+らいじんパンチ
+#org @NAME_LV200_ELECTRIC_139
+スタンネット
+#org @NAME_LV200_ELECTRIC_140
+じばのむち
+#org @NAME_LV200_ELECTRIC_141
+ブレーカー
+#org @NAME_LV200_ELECTRIC_142
+ねむけパルス
+#org @NAME_LV200_ELECTRIC_143
+でんじパルス
+#org @NAME_LV200_ELECTRIC_144
+ジュールヒート
+#org @NAME_LV200_ELECTRIC_145
+テスラカノン
+#org @NAME_LV200_ELECTRIC_146
+アークライト
+#org @NAME_LV200_ELECTRIC_147
+ボルトスマッシュ
+#org @NAME_LV200_ELECTRIC_148
+トライスパーク
+#org @NAME_LV200_ELECTRIC_149
+ゼロボルト
+#org @NAME_LV200_ELECTRIC_150
+らいめいのひびき
+#org @NAME_LV200_ELECTRIC_151
+サンダードーム
+#org @NAME_LV200_ELECTRIC_152
+ガルバニック
+#org @NAME_LV200_ELECTRIC_153
+ほうでんダッシュ
+#org @NAME_LV200_ELECTRIC_154
+プラズマボール
+#org @NAME_LV200_ELECTRIC_155
+でんじバリア
+#org @NAME_LV200_ELECTRIC_156
+スパークフォール
+#org @NAME_LV200_ELECTRIC_157
+チェーンボルト
+#org @NAME_LV200_ELECTRIC_158
+ヘルツウェーブ
+#org @NAME_LV200_ELECTRIC_159
+スタティック
+#org @NAME_LV200_ELECTRIC_160
+ふゆうでんげき
+#org @NAME_LV200_ELECTRIC_161
+エレキブースト
+#org @NAME_LV200_ELECTRIC_162
+サージヒール
+#org @NAME_LV200_ELECTRIC_163
+コロナフレア
+#org @NAME_LV200_ELECTRIC_164
+サンダーホイール
+#org @NAME_LV200_ELECTRIC_165
+ボルテックス
+#org @NAME_LV200_ELECTRIC_166
+ギガボルト
+#org @NAME_LV200_ELECTRIC_167
+エナジーショット
+#org @NAME_LV200_ELECTRIC_168
+パルスカッター
+#org @NAME_LV200_ELECTRIC_169
+ふじいろいなずま
+#org @NAME_LV200_ELECTRIC_170
+でんじふぶき
+#org @NAME_LV200_ELECTRIC_171
+ボルトインパクト
+#org @NAME_LV200_ELECTRIC_172
+スカイボルト
+#org @NAME_LV200_ELECTRIC_173
+ゼータスパーク
+#org @NAME_LV200_ELECTRIC_174
+マイナスチャージ
+#org @NAME_LV200_ELECTRIC_175
+プラスチャージ
+#org @NAME_LV200_ELECTRIC_176
+ハイボルテージ
+#org @NAME_LV200_ELECTRIC_177
+いかずちのまい
+#org @NAME_LV200_ELECTRIC_178
+アンペアヘッド
+#org @NAME_LV200_ELECTRIC_179
+プロトンカノン
+#org @NAME_LV200_ELECTRIC_180
+マイクロウェーブ
+#org @NAME_LV200_ELECTRIC_181
+ジャミング
+#org @NAME_LV200_ELECTRIC_182
+サイクロトロン
+#org @NAME_LV200_ELECTRIC_183
+オームのほうそく
+#org @NAME_LV200_ELECTRIC_184
+ちょうでんどう
+#org @NAME_LV200_ELECTRIC_185
+クーロンフォース
+#org @NAME_LV200_ELECTRIC_186
+イオンストーム
+#org @NAME_LV200_ELECTRIC_187
+ナノリペア
+#org @NAME_LV200_ELECTRIC_188
+ストームセル
+#org @NAME_LV200_ELECTRIC_189
+らいこうのおり
+#org @NAME_LV200_ELECTRIC_190
+デッドヒート
+#org @NAME_LV200_ELECTRIC_191
+エレキトルク
+#org @NAME_LV200_ELECTRIC_192
+マクスウェル
+#org @NAME_LV200_ELECTRIC_193
+いなずまのくさり
+#org @NAME_LV200_ELECTRIC_194
+ファラデーケージ
+#org @NAME_LV200_ELECTRIC_195
+サンダーボウ
+#org @NAME_LV200_ELECTRIC_196
+ガンマレイ
+#org @NAME_LV200_ELECTRIC_197
+テスラコイル
+#org @NAME_LV200_ELECTRIC_198
+ジェットスパーク
+#org @NAME_LV200_ELECTRIC_199
+テラボルト
+#org @NAME_LV200_ELECTRIC_200
+テンペスト
+#org @NAME_LV200_PSYCHIC_101
+ねんりきカノン
+#org @NAME_LV200_PSYCHIC_102
+ねんのやいば
+#org @NAME_LV200_PSYCHIC_103
+ねんどうりょく
+#org @NAME_LV200_PSYCHIC_104
+しじまのうた
+#org @NAME_LV200_PSYCHIC_105
+ひらめきのひかり
+#org @NAME_LV200_PSYCHIC_106
+こころのまく
+#org @NAME_LV200_PSYCHIC_107
+ゆめうつつ
+#org @NAME_LV200_PSYCHIC_108
+てんねんのかがみ
+#org @NAME_LV200_PSYCHIC_109
+ヨガのせいしん
+#org @NAME_LV200_PSYCHIC_110
+ミラーミラー
+#org @NAME_LV200_PSYCHIC_111
+ねんりきダッシュ
+#org @NAME_LV200_PSYCHIC_112
+ねんじゅのこぶし
+#org @NAME_LV200_PSYCHIC_113
+サイコニードル
+#org @NAME_LV200_PSYCHIC_114
+ゼンのこころ
+#org @NAME_LV200_PSYCHIC_115
+ふしぎのとびら
+#org @NAME_LV200_PSYCHIC_116
+ほしうらない
+#org @NAME_LV200_PSYCHIC_117
+ひみつのきおく
+#org @NAME_LV200_PSYCHIC_118
+ミラクルまなこ
+#org @NAME_LV200_PSYCHIC_119
+ヒプノスパーク
+#org @NAME_LV200_PSYCHIC_120
+よちのしんぞう
+#org @NAME_LV200_PSYCHIC_121
+ねんりきショット
+#org @NAME_LV200_PSYCHIC_122
+ふしぎなほし
+#org @NAME_LV200_PSYCHIC_123
+サイコクラッシュ
+#org @NAME_LV200_PSYCHIC_124
+ざんぞうのまい
+#org @NAME_LV200_PSYCHIC_125
+ひかりのはり
+#org @NAME_LV200_PSYCHIC_126
+ねんわのしらべ
+#org @NAME_LV200_PSYCHIC_127
+おもいこみ
+#org @NAME_LV200_PSYCHIC_128
+サイキックレイ
+#org @NAME_LV200_PSYCHIC_129
+ぎんがのうず
+#org @NAME_LV200_PSYCHIC_130
+ミントのかべ
+#org @NAME_LV200_PSYCHIC_131
+こうしんのゆめ
+#org @NAME_LV200_PSYCHIC_132
+サイコフォース
+#org @NAME_LV200_PSYCHIC_133
+ふしぎのくにへ
+#org @NAME_LV200_PSYCHIC_134
+テレポリッパー
+#org @NAME_LV200_PSYCHIC_135
+ミストブレス
+#org @NAME_LV200_PSYCHIC_136
+ねんりきのとげ
+#org @NAME_LV200_PSYCHIC_137
+センシティブ
+#org @NAME_LV200_PSYCHIC_138
+ひとみのひかり
+#org @NAME_LV200_PSYCHIC_139
+カゲロウのまい
+#org @NAME_LV200_PSYCHIC_140
+こころのみぎわ
+#org @NAME_LV200_PSYCHIC_141
+ぎんいろのうねり
+#org @NAME_LV200_PSYCHIC_142
+ブレインショック
+#org @NAME_LV200_PSYCHIC_143
+ねんどうスピア
+#org @NAME_LV200_PSYCHIC_144
+ダークマター
+#org @NAME_LV200_PSYCHIC_145
+れいかんのかべ
+#org @NAME_LV200_PSYCHIC_146
+めいそうのまくら
+#org @NAME_LV200_PSYCHIC_147
+ゆらぎのなみ
+#org @NAME_LV200_PSYCHIC_148
+オーラのたて
+#org @NAME_LV200_PSYCHIC_149
+エスパーショック
+#org @NAME_LV200_PSYCHIC_150
+しんくうこうげき
+#org @NAME_LV200_PSYCHIC_151
+サイコトルネード
+#org @NAME_LV200_PSYCHIC_152
+こうげんのしらべ
+#org @NAME_LV200_PSYCHIC_153
+アストラルゲイズ
+#org @NAME_LV200_PSYCHIC_154
+サイコインパクト
+#org @NAME_LV200_PSYCHIC_155
+さとりのいちげき
+#org @NAME_LV200_PSYCHIC_156
+マインドヒール
+#org @NAME_LV200_PSYCHIC_157
+ふしぎなこうせん
+#org @NAME_LV200_PSYCHIC_158
+どくしんじゅつ
+#org @NAME_LV200_PSYCHIC_159
+サイキックゾーン
+#org @NAME_LV200_PSYCHIC_160
+ねんのわけあい
+#org @NAME_LV200_PSYCHIC_161
+かげぬいのひとみ
+#org @NAME_LV200_PSYCHIC_162
+ちょうのうりょく
+#org @NAME_LV200_PSYCHIC_163
+こころのゲート
+#org @NAME_LV200_PSYCHIC_164
+ペルソナシフト
+#org @NAME_LV200_PSYCHIC_165
+まぼろしのむれ
+#org @NAME_LV200_PSYCHIC_166
+ねんりきウォール
+#org @NAME_LV200_PSYCHIC_167
+ミラージュランス
+#org @NAME_LV200_PSYCHIC_168
+しんくうのこころ
+#org @NAME_LV200_PSYCHIC_169
+スプーンベンダー
+#org @NAME_LV200_PSYCHIC_170
+ミナモトのはどう
+#org @NAME_LV200_PSYCHIC_171
+ゆめのつづき
+#org @NAME_LV200_PSYCHIC_172
+とくせいのまね
+#org @NAME_LV200_PSYCHIC_173
+サイコダッシュ
+#org @NAME_LV200_PSYCHIC_174
+ゆうたいりだつ
+#org @NAME_LV200_PSYCHIC_175
+ふしぎなかげ
+#org @NAME_LV200_PSYCHIC_176
+リーディング
+#org @NAME_LV200_PSYCHIC_177
+ぎんがのひとみ
+#org @NAME_LV200_PSYCHIC_178
+ちょうのうづち
+#org @NAME_LV200_PSYCHIC_179
+ひかりのメス
+#org @NAME_LV200_PSYCHIC_180
+ブラックホール
+#org @NAME_LV200_PSYCHIC_181
+こころのうみ
+#org @NAME_LV200_PSYCHIC_182
+テレパスだん
+#org @NAME_LV200_PSYCHIC_183
+サイキックノヴァ
+#org @NAME_LV200_PSYCHIC_184
+スターゲイザー
+#org @NAME_LV200_PSYCHIC_185
+ミスティブルーム
+#org @NAME_LV200_PSYCHIC_186
+サイコしんどう
+#org @NAME_LV200_PSYCHIC_187
+トランセンド
+#org @NAME_LV200_PSYCHIC_188
+むげんのめいそう
+#org @NAME_LV200_PSYCHIC_189
+アルカナストーム
+#org @NAME_LV200_PSYCHIC_190
+ふしぎなねむり
+#org @NAME_LV200_PSYCHIC_191
+たましいのうた
+#org @NAME_LV200_PSYCHIC_192
+ねんしのひとみ
+#org @NAME_LV200_PSYCHIC_193
+きおくのうず
+#org @NAME_LV200_PSYCHIC_194
+ほしのうんめい
+#org @NAME_LV200_PSYCHIC_195
+とおみのまなこ
+#org @NAME_LV200_PSYCHIC_196
+ブレインバーン
+#org @NAME_LV200_PSYCHIC_197
+ミラクルパルス
+#org @NAME_LV200_PSYCHIC_198
+こころのめつぶし
+#org @NAME_LV200_PSYCHIC_199
+ゆめのおわり
+#org @NAME_LV200_PSYCHIC_200
+エスパーユニゾン
+#org @NAME_LV200_ICE_101
+ひょうがカノン
+#org @NAME_LV200_ICE_102
+つららのやいば
+#org @NAME_LV200_ICE_103
+しもばしら
+#org @NAME_LV200_ICE_104
+こごえるいき
+#org @NAME_LV200_ICE_105
+ゆきどけのみず
+#org @NAME_LV200_ICE_106
+ダイヤダスト
+#org @NAME_LV200_ICE_107
+ふぶきのまもり
+#org @NAME_LV200_ICE_108
+アイスピック
+#org @NAME_LV200_ICE_109
+こおりのかべ
+#org @NAME_LV200_ICE_110
+しもやけ
+#org @NAME_LV200_ICE_111
+スノーダッシュ
+#org @NAME_LV200_ICE_112
+こごえのうた
+#org @NAME_LV200_ICE_113
+フロストフォール
+#org @NAME_LV200_ICE_114
+れいきのまく
+#org @NAME_LV200_ICE_115
+ひょうてんか
+#org @NAME_LV200_ICE_116
+いてつくまなざし
+#org @NAME_LV200_ICE_117
+ポーラーブレス
+#org @NAME_LV200_ICE_118
+つららひとつき
+#org @NAME_LV200_ICE_119
+ぎんせかいのまい
+#org @NAME_LV200_ICE_120
+ふぶきのよろい
+#org @NAME_LV200_ICE_121
+アイスバーン
+#org @NAME_LV200_ICE_122
+せつげんのまもり
+#org @NAME_LV200_ICE_123
+ゆきおんなのうた
+#org @NAME_LV200_ICE_124
+ひょうせつのかげ
+#org @NAME_LV200_ICE_125
+クリスタルレイ
+#org @NAME_LV200_ICE_126
+ゆきだるま
+#org @NAME_LV200_ICE_127
+しんしんのゆめ
+#org @NAME_LV200_ICE_128
+ダイヤのハート
+#org @NAME_LV200_ICE_129
+ブリザードエッジ
+#org @NAME_LV200_ICE_130
+ひょうがのめざめ
+#org @NAME_LV200_ICE_131
+ホワイトアウト
+#org @NAME_LV200_ICE_132
+フロストネット
+#org @NAME_LV200_ICE_133
+こごえるつばさ
+#org @NAME_LV200_ICE_134
+アイシクルハープ
+#org @NAME_LV200_ICE_135
+きたかぜのたて
+#org @NAME_LV200_ICE_136
+ひょうりゅう
+#org @NAME_LV200_ICE_137
+ホーリーフロスト
+#org @NAME_LV200_ICE_138
+ふゆのたいよう
+#org @NAME_LV200_ICE_139
+こごえるいやし
+#org @NAME_LV200_ICE_140
+こごえるぬし
+#org @NAME_LV200_ICE_141
+ゼロケルビン
+#org @NAME_LV200_ICE_142
+ツンドラのしらべ
+#org @NAME_LV200_ICE_143
+ひょうけつのわな
+#org @NAME_LV200_ICE_144
+アイスブレード
+#org @NAME_LV200_ICE_145
+せっけいのあらし
+#org @NAME_LV200_ICE_146
+ひょうはのあめ
+#org @NAME_LV200_ICE_147
+スノーマン
+#org @NAME_LV200_ICE_148
+こおりのしらべ
+#org @NAME_LV200_ICE_149
+つららのまきびし
+#org @NAME_LV200_ICE_150
+こおりのうみ
+#org @NAME_LV200_ICE_151
+ひょうざんダイブ
+#org @NAME_LV200_ICE_152
+ゆきのけっしょう
+#org @NAME_LV200_ICE_153
+みぞれのダンス
+#org @NAME_LV200_ICE_154
+れいきのふぶき
+#org @NAME_LV200_ICE_155
+きょくちレイ
+#org @NAME_LV200_ICE_156
+しんしんとふる
+#org @NAME_LV200_ICE_157
+ひょうがのつるぎ
+#org @NAME_LV200_ICE_158
+しろいきりのまく
+#org @NAME_LV200_ICE_159
+こおるたいよう
+#org @NAME_LV200_ICE_160
+ひょうざんくだき
+#org @NAME_LV200_ICE_161
+ひょうがプレス
+#org @NAME_LV200_ICE_162
+こおりのろう
+#org @NAME_LV200_ICE_163
+アイスキャニオン
+#org @NAME_LV200_ICE_164
+れいとうこうせん
+#org @NAME_LV200_ICE_165
+いてつくたいじゅ
+#org @NAME_LV200_ICE_166
+こおりやり
+#org @NAME_LV200_ICE_167
+ダイヤリーフ
+#org @NAME_LV200_ICE_168
+ひょうがのはどう
+#org @NAME_LV200_ICE_169
+ルナフロスト
+#org @NAME_LV200_ICE_170
+ぜつえいのつらら
+#org @NAME_LV200_ICE_171
+スノーウォーカー
+#org @NAME_LV200_ICE_172
+ゆきうさぎのまい
+#org @NAME_LV200_ICE_173
+フロストバイト
+#org @NAME_LV200_ICE_174
+オーロラカーテン
+#org @NAME_LV200_ICE_175
+ふゆのおくりもの
+#org @NAME_LV200_ICE_176
+ペンギンスライド
+#org @NAME_LV200_ICE_177
+ふぶきのれんだ
+#org @NAME_LV200_ICE_178
+ひょうがのいのり
+#org @NAME_LV200_ICE_179
+きょくちのやみ
+#org @NAME_LV200_ICE_180
+れいたいのまなこ
+#org @NAME_LV200_ICE_181
+フリーズノヴァ
+#org @NAME_LV200_ICE_182
+アイスエイジ
+#org @NAME_LV200_ICE_183
+ブルーアイス
+#org @NAME_LV200_ICE_184
+ひとひらのゆき
+#org @NAME_LV200_ICE_185
+ゆきのめぐみ
+#org @NAME_LV200_ICE_186
+シベリアンダイブ
+#org @NAME_LV200_ICE_187
+ふぶきのまい
+#org @NAME_LV200_ICE_188
+ダイヤプレス
+#org @NAME_LV200_ICE_189
+ひょうしょうけん
+#org @NAME_LV200_ICE_190
+ひょうがじだい
+#org @NAME_LV200_ICE_191
+いてつくれいき
+#org @NAME_LV200_ICE_192
+フロストクエイク
+#org @NAME_LV200_ICE_193
+こごえるじゅもん
+#org @NAME_LV200_ICE_194
+せかいをこおらす
+#org @NAME_LV200_ICE_195
+アイスレクイエム
+#org @NAME_LV200_ICE_196
+パーマフロスト
+#org @NAME_LV200_ICE_197
+こおりのおもいで
+#org @NAME_LV200_ICE_198
+ゆきおろし
+#org @NAME_LV200_ICE_199
+ホワイトアウトZ
+#org @NAME_LV200_ICE_200
+アブソルートゼロ
+#org @NAME_LV200_DRAGON_101
+りゅうのこきゅう
+#org @NAME_LV200_DRAGON_102
+たつまきクロー
+#org @NAME_LV200_DRAGON_103
+ドラゴンスパイク
+#org @NAME_LV200_DRAGON_104
+りゅうおうダンス
+#org @NAME_LV200_DRAGON_105
+ドラゴンウィング
+#org @NAME_LV200_DRAGON_106
+ドレイクブレス
+#org @NAME_LV200_DRAGON_107
+りゅうせきカノン
+#org @NAME_LV200_DRAGON_108
+りゅうのたて
+#org @NAME_LV200_DRAGON_109
+りゅうにいのる
+#org @NAME_LV200_DRAGON_110
+りゅうのこころ
+#org @NAME_LV200_DRAGON_111
+りゅうのおたけび
+#org @NAME_LV200_DRAGON_112
+ワイバーン
+#org @NAME_LV200_DRAGON_113
+ウロコバリア
+#org @NAME_LV200_DRAGON_114
+りゅうおうのつめ
+#org @NAME_LV200_DRAGON_115
+ドラゴンヘッド
+#org @NAME_LV200_DRAGON_116
+ドラゴンファング
+#org @NAME_LV200_DRAGON_117
+えんりゅうダンス
+#org @NAME_LV200_DRAGON_118
+ブルードラゴン
+#org @NAME_LV200_DRAGON_119
+りゅうのうろこ
+#org @NAME_LV200_DRAGON_120
+りゅうぎゃくりん
+#org @NAME_LV200_DRAGON_121
+ひりゅうのかぜ
+#org @NAME_LV200_DRAGON_122
+りゅうこつパンチ
+#org @NAME_LV200_DRAGON_123
+たつのおとしご
+#org @NAME_LV200_DRAGON_124
+りゅうのげきど
+#org @NAME_LV200_DRAGON_125
+ドラゴンかじり
+#org @NAME_LV200_DRAGON_126
+りゅうのにらみ
+#org @NAME_LV200_DRAGON_127
+ドラゴンクエイク
+#org @NAME_LV200_DRAGON_128
+りゅうのけっかい
+#org @NAME_LV200_DRAGON_129
+ドラコウェーブ
+#org @NAME_LV200_DRAGON_130
+ラスト・ドラゴン
+#org @NAME_LV200_DRAGON_131
+りゅうのさけび
+#org @NAME_LV200_DRAGON_132
+りゅうのしっぽ
+#org @NAME_LV200_DRAGON_133
+リンドヴルム
+#org @NAME_LV200_DRAGON_134
+ブラストブレス
+#org @NAME_LV200_DRAGON_135
+せいりゅうのけん
+#org @NAME_LV200_DRAGON_136
+ワームホール
+#org @NAME_LV200_DRAGON_137
+りゅうじんのゆめ
+#org @NAME_LV200_DRAGON_138
+カイザーフレア
+#org @NAME_LV200_DRAGON_139
+ドラゴニックレイ
+#org @NAME_LV200_DRAGON_140
+りゅうのみや
+#org @NAME_LV200_DRAGON_141
+りゅうせいワルツ
+#org @NAME_LV200_DRAGON_142
+りゅうぼうそう
+#org @NAME_LV200_DRAGON_143
+ようりゅうのめ
+#org @NAME_LV200_DRAGON_144
+かいりゅうけん
+#org @NAME_LV200_DRAGON_145
+バハムートハウル
+#org @NAME_LV200_DRAGON_146
+りゅうのしんぞう
+#org @NAME_LV200_DRAGON_147
+そうりゅうのたて
+#org @NAME_LV200_DRAGON_148
+ドラゴンブレード
+#org @NAME_LV200_DRAGON_149
+ドラゴンジャンプ
+#org @NAME_LV200_DRAGON_150
+ドラゴンカース
+#org @NAME_LV200_DRAGON_151
+こくりゅうブレス
+#org @NAME_LV200_DRAGON_152
+ゴールドスケイル
+#org @NAME_LV200_DRAGON_153
+りゅうのてっつい
+#org @NAME_LV200_DRAGON_154
+りゅうのかいろう
+#org @NAME_LV200_DRAGON_155
+ドレイクバーン
+#org @NAME_LV200_DRAGON_156
+ふんかりゅう
+#org @NAME_LV200_DRAGON_157
+りゅうのまどろみ
+#org @NAME_LV200_DRAGON_158
+ドラゴンバスター
+#org @NAME_LV200_DRAGON_159
+アースドラゴン
+#org @NAME_LV200_DRAGON_160
+ときのタイラント
+#org @NAME_LV200_DRAGON_161
+スカイドラゴン
+#org @NAME_LV200_DRAGON_162
+ドラゴンプライド
+#org @NAME_LV200_DRAGON_163
+じゃりゅうのうた
+#org @NAME_LV200_DRAGON_164
+クロスドラゴン
+#org @NAME_LV200_DRAGON_165
+ドラゴンおうえん
+#org @NAME_LV200_DRAGON_166
+ミドガルズオルム
+#org @NAME_LV200_DRAGON_167
+アジダハーカ
+#org @NAME_LV200_DRAGON_168
+ヨルムンガンド
+#org @NAME_LV200_DRAGON_169
+りゅうのこうら
+#org @NAME_LV200_DRAGON_170
+ツインドラクロー
+#org @NAME_LV200_DRAGON_171
+フェイロン
+#org @NAME_LV200_DRAGON_172
+ウロボロス
+#org @NAME_LV200_DRAGON_173
+りゅうのいっせん
+#org @NAME_LV200_DRAGON_174
+りゅうじんは
+#org @NAME_LV200_DRAGON_175
+ファーヴニル
+#org @NAME_LV200_DRAGON_176
+ほうおうのひかり
+#org @NAME_LV200_DRAGON_177
+りゅうのさだめ
+#org @NAME_LV200_DRAGON_178
+たつまきのしらべ
+#org @NAME_LV200_DRAGON_179
+ドラゴンロア
+#org @NAME_LV200_DRAGON_180
+りゅうのしらべ
+#org @NAME_LV200_DRAGON_181
+ドラコビート
+#org @NAME_LV200_DRAGON_182
+りゅうせいのかげ
+#org @NAME_LV200_DRAGON_183
+こだいのブレス
+#org @NAME_LV200_DRAGON_184
+ドラゴンジャッジ
+#org @NAME_LV200_DRAGON_185
+りゅうのまなざし
+#org @NAME_LV200_DRAGON_186
+りゅうのたすけ
+#org @NAME_LV200_DRAGON_187
+ふじのりゅうおう
+#org @NAME_LV200_DRAGON_188
+かみのうろこ
+#org @NAME_LV200_DRAGON_189
+バハムートコール
+#org @NAME_LV200_DRAGON_190
+りゅうのゆうわく
+#org @NAME_LV200_DRAGON_191
+りゅうレクイエム
+#org @NAME_LV200_DRAGON_192
+りゅうへのみち
+#org @NAME_LV200_DRAGON_193
+ドラゴンフォース
+#org @NAME_LV200_DRAGON_194
+しんりゅうのきば
+#org @NAME_LV200_DRAGON_195
+ドラゴンハート
+#org @NAME_LV200_DRAGON_196
+りゅうのおもみ
+#org @NAME_LV200_DRAGON_197
+りゅうかのあらし
+#org @NAME_LV200_DRAGON_198
+ドラゴンラスト
+#org @NAME_LV200_DRAGON_199
+りゅうのおうさま
+#org @NAME_LV200_DRAGON_200
+りゅうのだんまく
+#org @NAME_LV200_DARK_101
+やみのつめ
+#org @NAME_LV200_DARK_102
+くろいカノン
+#org @NAME_LV200_DARK_103
+かげのやいば
+#org @NAME_LV200_DARK_104
+ふいうちのやみ
+#org @NAME_LV200_DARK_105
+ひきょうなわな
+#org @NAME_LV200_DARK_106
+くらやみのうた
+#org @NAME_LV200_DARK_107
+いじわるカット
+#org @NAME_LV200_DARK_108
+あやしいめ
+#org @NAME_LV200_DARK_109
+うらぎりのこぶし
+#org @NAME_LV200_DARK_110
+ぬすみみる
+#org @NAME_LV200_DARK_111
+ドロボウねこ
+#org @NAME_LV200_DARK_112
+よどみのいき
+#org @NAME_LV200_DARK_113
+ブラックホイップ
+#org @NAME_LV200_DARK_114
+かげのいぶき
+#org @NAME_LV200_DARK_115
+まやかしのまく
+#org @NAME_LV200_DARK_116
+あおりのダンス
+#org @NAME_LV200_DARK_117
+くろいささやき
+#org @NAME_LV200_DARK_118
+やみのはやて
+#org @NAME_LV200_DARK_119
+やみうちダイブ
+#org @NAME_LV200_DARK_120
+こころのひきょう
+#org @NAME_LV200_DARK_121
+ブラックアウトZ
+#org @NAME_LV200_DARK_122
+やみよのカラス
+#org @NAME_LV200_DARK_123
+くろねこのまい
+#org @NAME_LV200_DARK_124
+ナイトメアハウス
+#org @NAME_LV200_DARK_125
+いんぼうのしらべ
+#org @NAME_LV200_DARK_126
+ひとでなしのめ
+#org @NAME_LV200_DARK_127
+バッドマナー
+#org @NAME_LV200_DARK_128
+やばんタックル
+#org @NAME_LV200_DARK_129
+ほんしょうのかげ
+#org @NAME_LV200_DARK_130
+やみうちいちげき
+#org @NAME_LV200_DARK_131
+ふくしゅうやいば
+#org @NAME_LV200_DARK_132
+うらみのこぶし
+#org @NAME_LV200_DARK_133
+ぬすっとのよる
+#org @NAME_LV200_DARK_134
+いたずらのきもち
+#org @NAME_LV200_DARK_135
+やみのたて
+#org @NAME_LV200_DARK_136
+やみのきりあらし
+#org @NAME_LV200_DARK_137
+じゃあくなえがお
+#org @NAME_LV200_DARK_138
+ブラックバイト
+#org @NAME_LV200_DARK_139
+まよなかのカラス
+#org @NAME_LV200_DARK_140
+ひろがるやみ
+#org @NAME_LV200_DARK_141
+やみにまぎれる
+#org @NAME_LV200_DARK_142
+いかりのげんこつ
+#org @NAME_LV200_DARK_143
+かげぬいのめ
+#org @NAME_LV200_DARK_144
+わるぢえ
+#org @NAME_LV200_DARK_145
+ダークシャワー
+#org @NAME_LV200_DARK_146
+しっこくのかべ
+#org @NAME_LV200_DARK_147
+あくまのささやき
+#org @NAME_LV200_DARK_148
+ひとだまのひかり
+#org @NAME_LV200_DARK_149
+こうかつなえみ
+#org @NAME_LV200_DARK_150
+くずれるさかい
+#org @NAME_LV200_DARK_151
+くろいかぜ
+#org @NAME_LV200_DARK_152
+ダストストーム
+#org @NAME_LV200_DARK_153
+ネガウェーブ
+#org @NAME_LV200_DARK_154
+よなきのうた
+#org @NAME_LV200_DARK_155
+ルナティック
+#org @NAME_LV200_DARK_156
+バッドエンド
+#org @NAME_LV200_DARK_157
+アビスクロー
+#org @NAME_LV200_DARK_158
+やみのしじま
+#org @NAME_LV200_DARK_159
+ブラックマター
+#org @NAME_LV200_DARK_160
+ウラギリのウタ
+#org @NAME_LV200_DARK_161
+くろいたつまき
+#org @NAME_LV200_DARK_162
+あくじきのはて
+#org @NAME_LV200_DARK_163
+おだてのわな
+#org @NAME_LV200_DARK_164
+かくれみのじゅつ
+#org @NAME_LV200_DARK_165
+ふいうちのかげ
+#org @NAME_LV200_DARK_166
+ギルティクロス
+#org @NAME_LV200_DARK_167
+あんこくウェザー
+#org @NAME_LV200_DARK_168
+せいぎうらがえし
+#org @NAME_LV200_DARK_169
+うらみのいちげき
+#org @NAME_LV200_DARK_170
+ソウルイーター
+#org @NAME_LV200_DARK_171
+パンデモニウム
+#org @NAME_LV200_DARK_172
+おとしあなのよる
+#org @NAME_LV200_DARK_173
+やみのどうけし
+#org @NAME_LV200_DARK_174
+ふくしゅうのひ
+#org @NAME_LV200_DARK_175
+いまわのきわ
+#org @NAME_LV200_DARK_176
+くろいレクイエム
+#org @NAME_LV200_DARK_177
+うらぎりのきば
+#org @NAME_LV200_DARK_178
+ネゴシエイター
+#org @NAME_LV200_DARK_179
+ニヒルウェーブ
+#org @NAME_LV200_DARK_180
+やみのせかい
+#org @NAME_LV200_DARK_181
+やみのほうよう
+#org @NAME_LV200_DARK_182
+ふげんのやみ
+#org @NAME_LV200_DARK_183
+ぎゃくこうやいば
+#org @NAME_LV200_DARK_184
+くろいきょうえん
+#org @NAME_LV200_DARK_185
+グレイブヤード
+#org @NAME_LV200_DARK_186
+かげのしんぱん
+#org @NAME_LV200_DARK_187
+ふくしゅうげき
+#org @NAME_LV200_DARK_188
+あくのだいかんぱ
+#org @NAME_LV200_DARK_189
+ブラッディナイト
+#org @NAME_LV200_DARK_190
+よるのおうさま
+#org @NAME_LV200_DARK_191
+ダークキャニオン
+#org @NAME_LV200_DARK_192
+パープルヘイズ
+#org @NAME_LV200_DARK_193
+ぞうおのうた
+#org @NAME_LV200_DARK_194
+へいおんなるやみ
+#org @NAME_LV200_DARK_195
+やみのていおう
+#org @NAME_LV200_DARK_196
+かげのくに
+#org @NAME_LV200_DARK_197
+くろいてぶくろ
+#org @NAME_LV200_DARK_198
+やみのひとみ
+#org @NAME_LV200_DARK_199
+ダークカーテン
+#org @NAME_LV200_DARK_200
+ダークネスホール
+#org @NAME_LV200_FAIRY_101
+ほしくずカノン
+#org @NAME_LV200_FAIRY_102
+ひかりのリボン
+#org @NAME_LV200_FAIRY_103
+スパンコール
+#org @NAME_LV200_FAIRY_104
+きらめきダンス
+#org @NAME_LV200_FAIRY_105
+ミルキーシャワー
+#org @NAME_LV200_FAIRY_106
+まほうのつえ
+#org @NAME_LV200_FAIRY_107
+ハートのたて
+#org @NAME_LV200_FAIRY_108
+ゆめみるひとみ
+#org @NAME_LV200_FAIRY_109
+ようせいダッシュ
+#org @NAME_LV200_FAIRY_110
+ときめきスパーク
+#org @NAME_LV200_FAIRY_111
+ルミナスキック
+#org @NAME_LV200_FAIRY_112
+ちいさなキス
+#org @NAME_LV200_FAIRY_113
+ときめきパンチ
+#org @NAME_LV200_FAIRY_114
+スイーツラッシュ
+#org @NAME_LV200_FAIRY_115
+おはなのまもり
+#org @NAME_LV200_FAIRY_116
+まぶしいほし
+#org @NAME_LV200_FAIRY_117
+ささやきのかぜ
+#org @NAME_LV200_FAIRY_118
+ココロのいやし
+#org @NAME_LV200_FAIRY_119
+きまぐれスパーク
+#org @NAME_LV200_FAIRY_120
+ハートのまもり
+#org @NAME_LV200_FAIRY_121
+たんぽぽのわた
+#org @NAME_LV200_FAIRY_122
+ほしのカーテン
+#org @NAME_LV200_FAIRY_123
+パステルクロー
+#org @NAME_LV200_FAIRY_124
+ミルクのシャワー
+#org @NAME_LV200_FAIRY_125
+フェアリーテイル
+#org @NAME_LV200_FAIRY_126
+ふわふわのゆめ
+#org @NAME_LV200_FAIRY_127
+こもりうたのかぜ
+#org @NAME_LV200_FAIRY_128
+ミラクルハート
+#org @NAME_LV200_FAIRY_129
+おとぎのまど
+#org @NAME_LV200_FAIRY_130
+マジカルシュガー
+#org @NAME_LV200_FAIRY_131
+ひみつのリボン
+#org @NAME_LV200_FAIRY_132
+あめだまあらし
+#org @NAME_LV200_FAIRY_133
+ときのまほう
+#org @NAME_LV200_FAIRY_134
+マジカルステップ
+#org @NAME_LV200_FAIRY_135
+パールダスト
+#org @NAME_LV200_FAIRY_136
+プリズムミスト
+#org @NAME_LV200_FAIRY_137
+きらめきのつばさ
+#org @NAME_LV200_FAIRY_138
+ほしのしらべ
+#org @NAME_LV200_FAIRY_139
+おはじきボンバー
+#org @NAME_LV200_FAIRY_140
+ラブライト
+#org @NAME_LV200_FAIRY_141
+ドリームキャッチ
+#org @NAME_LV200_FAIRY_142
+ファンタジア
+#org @NAME_LV200_FAIRY_143
+ふしぎのくに
+#org @NAME_LV200_FAIRY_144
+ミスティックレイ
+#org @NAME_LV200_FAIRY_145
+ぴかぴかひかり
+#org @NAME_LV200_FAIRY_146
+ココアのまほう
+#org @NAME_LV200_FAIRY_147
+ぬいぐるみドン
+#org @NAME_LV200_FAIRY_148
+あまいささやき
+#org @NAME_LV200_FAIRY_149
+ハートビート
+#org @NAME_LV200_FAIRY_150
+ようせいのわ
+#org @NAME_LV200_FAIRY_151
+ティアラのひかり
+#org @NAME_LV200_FAIRY_152
+にじいろのうず
+#org @NAME_LV200_FAIRY_153
+パッションノヴァ
+#org @NAME_LV200_FAIRY_154
+ときめきアタック
+#org @NAME_LV200_FAIRY_155
+ようせいのまほう
+#org @NAME_LV200_FAIRY_156
+ひめごとのはな
+#org @NAME_LV200_FAIRY_157
+ほしあかりベール
+#org @NAME_LV200_FAIRY_158
+ほしくずダンス
+#org @NAME_LV200_FAIRY_159
+おとめのいかり
+#org @NAME_LV200_FAIRY_160
+ぬいぐるみのかげ
+#org @NAME_LV200_FAIRY_161
+プリンセスブレス
+#org @NAME_LV200_FAIRY_162
+やさしさのはもん
+#org @NAME_LV200_FAIRY_163
+キュートカット
+#org @NAME_LV200_FAIRY_164
+メルヘンキャノン
+#org @NAME_LV200_FAIRY_165
+きみのためのうた
+#org @NAME_LV200_FAIRY_166
+ムーンダスト
+#org @NAME_LV200_FAIRY_167
+ほしぞらのちかい
+#org @NAME_LV200_FAIRY_168
+ユメミクリスタル
+#org @NAME_LV200_FAIRY_169
+ラブリーパンチ
+#org @NAME_LV200_FAIRY_170
+ゆめのおひめさま
+#org @NAME_LV200_FAIRY_171
+フェアリーグロウ
+#org @NAME_LV200_FAIRY_172
+まじょのほうき
+#org @NAME_LV200_FAIRY_173
+ベリーベリーボム
+#org @NAME_LV200_FAIRY_174
+ふしぎなふしぎ
+#org @NAME_LV200_FAIRY_175
+ひなげしのうた
+#org @NAME_LV200_FAIRY_176
+パジャマパーティ
+#org @NAME_LV200_FAIRY_177
+ミラクルティア
+#org @NAME_LV200_FAIRY_178
+シュガーメテオ
+#org @NAME_LV200_FAIRY_179
+ハニーバニー
+#org @NAME_LV200_FAIRY_180
+ちいさなきせき
+#org @NAME_LV200_FAIRY_181
+ララバイムーン
+#org @NAME_LV200_FAIRY_182
+きらめくドレス
+#org @NAME_LV200_FAIRY_183
+わたあめストーム
+#org @NAME_LV200_FAIRY_184
+ローズガーデン
+#org @NAME_LV200_FAIRY_185
+ハッピーダンス
+#org @NAME_LV200_FAIRY_186
+ドリームスマイル
+#org @NAME_LV200_FAIRY_187
+スウィートハグ
+#org @NAME_LV200_FAIRY_188
+フェアリーエンド
+#org @NAME_LV200_FAIRY_189
+ほしのメロディ
+#org @NAME_LV200_FAIRY_190
+ミルクのとびら
+#org @NAME_LV200_FAIRY_191
+ミルキーウェイ
+#org @NAME_LV200_FAIRY_192
+ユニコーンホーン
+#org @NAME_LV200_FAIRY_193
+こころのかがやき
+#org @NAME_LV200_FAIRY_194
+フェアリーゲート
+#org @NAME_LV200_FAIRY_195
+きせきのかがやき
+#org @NAME_LV200_FAIRY_196
+プリズマティック
+#org @NAME_LV200_FAIRY_197
+ねがいごとのほし
+#org @NAME_LV200_FAIRY_198
+ほしぞらおうじょ
+#org @NAME_LV200_FAIRY_199
+ハッピーエンド
+#org @NAME_LV200_FAIRY_200
+ハッピーブレス
+#org @NAME_LV200_RIL_101
+つきあかり
+#org @NAME_LV200_RIL_102
+ひとりぼっち
+#org @NAME_LV200_RIL_103
+なみだのしずく
+#org @NAME_LV200_RIL_104
+おもいでばなし
+#org @NAME_LV200_RIL_105
+ふるいおもちゃ
+#org @NAME_LV200_RIL_106
+さびしさのこえ
+#org @NAME_LV200_RIL_107
+よいやみのうた
+#org @NAME_LV200_RIL_108
+ゆうづきよ
+#org @NAME_LV200_RIL_109
+ひとりごと
+#org @NAME_LV200_RIL_110
+おもいでしまい
+#org @NAME_LV200_RIL_111
+おぼろづき
+#org @NAME_LV200_RIL_112
+きおくのかけら
+#org @NAME_LV200_RIL_113
+いたみのあと
+#org @NAME_LV200_RIL_114
+おわかれのてがみ
+#org @NAME_LV200_RIL_115
+もどれないみち
+#org @NAME_LV200_RIL_116
+ぼんやりしたかげ
+#org @NAME_LV200_RIL_117
+せつなのきらめき
+#org @NAME_LV200_RIL_118
+かなしみのつめ
+#org @NAME_LV200_RIL_119
+ねむれないよる
+#org @NAME_LV200_RIL_120
+まぼろしのきおく
+#org @NAME_LV200_RIL_121
+ゆめのなごり
+#org @NAME_LV200_RIL_122
+しろいためいき
+#org @NAME_LV200_RIL_123
+すれちがいざま
+#org @NAME_LV200_RIL_124
+おいてけぼり
+#org @NAME_LV200_RIL_125
+くもりぞらのつき
+#org @NAME_LV200_RIL_126
+うつろなひとみ
+#org @NAME_LV200_RIL_127
+いなくなったあと
+#org @NAME_LV200_RIL_128
+わすれなぐさ
+#org @NAME_LV200_RIL_129
+まよいごのうた
+#org @NAME_LV200_RIL_130
+リルのまなざし
+#org @NAME_LV200_RIL_131
+こぼれたナミダ
+#org @NAME_LV200_RIL_132
+ふゆのよぞら
+#org @NAME_LV200_RIL_133
+さよならのまえに
+#org @NAME_LV200_RIL_134
+ひなたのあとに
+#org @NAME_LV200_RIL_135
+なつかしいにおい
+#org @NAME_LV200_RIL_136
+つめたいてのひら
+#org @NAME_LV200_RIL_137
+ふたりのやくそく
+#org @NAME_LV200_RIL_138
+かえりみち
+#org @NAME_LV200_RIL_139
+なつのおもいで
+#org @NAME_LV200_RIL_140
+ひとりのいのり
+#org @NAME_LV200_RIL_141
+きえかけのひ
+#org @NAME_LV200_RIL_142
+さびれたえき
+#org @NAME_LV200_RIL_143
+ガラスのゆめ
+#org @NAME_LV200_RIL_144
+すきまかぜ
+#org @NAME_LV200_RIL_145
+ゆうやけこやけ
+#org @NAME_LV200_RIL_146
+ひとりかくれんぼ
+#org @NAME_LV200_RIL_147
+あしたのわたし
+#org @NAME_LV200_RIL_148
+つきのみちしるべ
+#org @NAME_LV200_RIL_149
+ふりむかないで
+#org @NAME_LV200_RIL_150
+なみだのつき
+#org @NAME_LV200_RIL_151
+ざんぞうのおと
+#org @NAME_LV200_RIL_152
+とりのこされて
+#org @NAME_LV200_RIL_153
+おもいでぼうき
+#org @NAME_LV200_RIL_154
+ぽつんとつき
+#org @NAME_LV200_RIL_155
+とおいひのうた
+#org @NAME_LV200_RIL_156
+はなれたてのひら
+#org @NAME_LV200_RIL_157
+ぬくもりのあと
+#org @NAME_LV200_RIL_158
+てがみのゆくえ
+#org @NAME_LV200_RIL_159
+しおれたはな
+#org @NAME_LV200_RIL_160
+さびしさのかげ
+#org @NAME_LV200_RIL_161
+かげおくり
+#org @NAME_LV200_RIL_162
+こころのすきま
+#org @NAME_LV200_RIL_163
+さいごのひとこと
+#org @NAME_LV200_RIL_164
+さがしもの
+#org @NAME_LV200_RIL_165
+なきむしカラス
+#org @NAME_LV200_RIL_166
+ひとりぶんのせき
+#org @NAME_LV200_RIL_167
+まだおぼえてる
+#org @NAME_LV200_RIL_168
+よるのどうぶつ
+#org @NAME_LV200_RIL_169
+わすれものカット
+#org @NAME_LV200_RIL_170
+ツキノコトワリ
+#org @NAME_LV200_RIL_171
+ひとしずくのつき
+#org @NAME_LV200_RIL_172
+さよならバイバイ
+#org @NAME_LV200_RIL_173
+かたおもい
+#org @NAME_LV200_RIL_174
+ともだちのかげ
+#org @NAME_LV200_RIL_175
+つきのうさぎ
+#org @NAME_LV200_RIL_176
+うらがえしのよる
+#org @NAME_LV200_RIL_177
+まっくらなへや
+#org @NAME_LV200_RIL_178
+しずかなゆうべ
+#org @NAME_LV200_RIL_179
+つきがおちる
+#org @NAME_LV200_RIL_180
+わすれがたみ
+#org @NAME_LV200_RIL_181
+おぼえていてね
+#org @NAME_LV200_RIL_182
+ながれぼしのあと
+#org @NAME_LV200_RIL_183
+ひとりのあさ
+#org @NAME_LV200_RIL_184
+ねがいのゆくえ
+#org @NAME_LV200_RIL_185
+さよならライブ
+#org @NAME_LV200_RIL_186
+ひなたのゆめ
+#org @NAME_LV200_RIL_187
+かがみのぼく
+#org @NAME_LV200_RIL_188
+かえらぬひびの
+#org @NAME_LV200_RIL_189
+あおいよるのおと
+#org @NAME_LV200_RIL_190
+さよならまで
+#org @NAME_LV200_RIL_191
+ためらいのひかり
+#org @NAME_LV200_RIL_192
+ぬけがらのうた
+#org @NAME_LV200_RIL_193
+ゆびきりげんまん
+#org @NAME_LV200_RIL_194
+せかいにひとり
+#org @NAME_LV200_RIL_195
+おもいでのつきよ
+#org @NAME_LV200_RIL_196
+ひとりぶんの
+#org @NAME_LV200_RIL_197
+つきなみだ
+#org @NAME_LV200_RIL_198
+ひかりのつぶ
+#org @NAME_LV200_RIL_199
+さびしいかぜ
+#org @NAME_LV200_RIL_200
+よるにおかえり
+#org @LV200_NAMES_0593_END
+#org @LV100_NAMES_0600_BEGIN
+#org @NAME_LV100_NORMAL_1
+とっしんパンチ
+#org @NAME_LV100_NORMAL_2
+ちいさなほえ
+#org @NAME_LV100_NORMAL_3
+ポコポコたたき
+#org @NAME_LV100_NORMAL_4
+かるいタックル
+#org @NAME_LV100_NORMAL_5
+まるまりガード
+#org @NAME_LV100_NORMAL_6
+ぱたぱたビンタ
+#org @NAME_LV100_NORMAL_7
+ひとりごとだけ
+#org @NAME_LV100_NORMAL_8
+ダッシュアタック
+#org @NAME_LV100_NORMAL_9
+ひとにらみ
+#org @NAME_LV100_NORMAL_10
+おうえんコール
+#org @NAME_LV100_NORMAL_11
+ふんばりブロー
+#org @NAME_LV100_NORMAL_12
+まんまるアタック
+#org @NAME_LV100_NORMAL_13
+ねむけのうた
+#org @NAME_LV100_NORMAL_14
+てかげんパンチ
+#org @NAME_LV100_NORMAL_15
+ひらひらステップ
+#org @NAME_LV100_NORMAL_16
+ぐるぐるウェーブ
+#org @NAME_LV100_NORMAL_17
+ずっしりプレス
+#org @NAME_LV100_NORMAL_18
+ねっこのひといき
+#org @NAME_LV100_NORMAL_19
+ささやきボイス
+#org @NAME_LV100_NORMAL_20
+きりかえしのツメ
+#org @NAME_LV100_NORMAL_21
+あまえんぼタック
+#org @NAME_LV100_NORMAL_22
+まもりのかまえ
+#org @NAME_LV100_NORMAL_23
+こころのどなり
+#org @NAME_LV100_NORMAL_24
+いっぱつビンタ
+#org @NAME_LV100_NORMAL_25
+がむしゃらパンチ
+#org @NAME_LV100_NORMAL_26
+はずむしっぽ
+#org @NAME_LV100_NORMAL_27
+のんびりタイム
+#org @NAME_LV100_NORMAL_28
+ひびけやまびこ
+#org @NAME_LV100_NORMAL_29
+つよがりアタック
+#org @NAME_LV100_NORMAL_30
+ふくれっつら
+#org @NAME_LV100_NORMAL_31
+ぜんそくリード
+#org @NAME_LV100_NORMAL_32
+じゅうたんボム
+#org @NAME_LV100_NORMAL_33
+ふわふわバリア
+#org @NAME_LV100_NORMAL_34
+はりきりダッシュ
+#org @NAME_LV100_NORMAL_35
+やるきのおたけび
+#org @NAME_LV100_NORMAL_36
+きまぐれパンチ
+#org @NAME_LV100_NORMAL_37
+すてみのやりなげ
+#org @NAME_LV100_NORMAL_38
+じたばたラッシュ
+#org @NAME_LV100_NORMAL_39
+ひけつのささやき
+#org @NAME_LV100_NORMAL_40
+どっしりかまえ
+#org @NAME_LV100_NORMAL_41
+せなかあわせ
+#org @NAME_LV100_NORMAL_42
+ブンブンまわし
+#org @NAME_LV100_NORMAL_43
+ふるいたつさけび
+#org @NAME_LV100_NORMAL_44
+かぜのまくら
+#org @NAME_LV100_NORMAL_45
+つかみかかり
+#org @NAME_LV100_NORMAL_46
+ほえるメロディ
+#org @NAME_LV100_NORMAL_47
+ぶちかまスタンプ
+#org @NAME_LV100_NORMAL_48
+やすらぎのしらべ
+#org @NAME_LV100_NORMAL_49
+あばれゆめ
+#org @NAME_LV100_NORMAL_50
+かまいたちのひれ
+#org @NAME_LV100_NORMAL_51
+どんぐりドーン
+#org @NAME_LV100_NORMAL_52
+やくそくのキス
+#org @NAME_LV100_NORMAL_53
+おおあばれ
+#org @NAME_LV100_NORMAL_54
+いっせいスパーク
+#org @NAME_LV100_NORMAL_55
+うちあげロケット
+#org @NAME_LV100_NORMAL_56
+もてなしのエール
+#org @NAME_LV100_NORMAL_57
+ねんりきぬき
+#org @NAME_LV100_NORMAL_58
+ふんぬのげんこつ
+#org @NAME_LV100_NORMAL_59
+ふしぎタックル
+#org @NAME_LV100_NORMAL_60
+こころのバリア
+#org @NAME_LV100_NORMAL_61
+とんぼチャージ
+#org @NAME_LV100_NORMAL_62
+さわがしいとびら
+#org @NAME_LV100_NORMAL_63
+かみつきホーム
+#org @NAME_LV100_NORMAL_64
+ひびかせるうた
+#org @NAME_LV100_NORMAL_65
+どよめきのかおり
+#org @NAME_LV100_NORMAL_66
+ゆうきのほこ
+#org @NAME_LV100_NORMAL_67
+ぐらぐらハンマー
+#org @NAME_LV100_NORMAL_68
+じりじりつめより
+#org @NAME_LV100_NORMAL_69
+パーフェクト
+#org @NAME_LV100_NORMAL_70
+ぐっすりねんね
+#org @NAME_LV100_NORMAL_71
+かくしだま
+#org @NAME_LV100_NORMAL_72
+ほしにねがいを
+#org @NAME_LV100_NORMAL_73
+たましいタックル
+#org @NAME_LV100_NORMAL_74
+ぐるりスイング
+#org @NAME_LV100_NORMAL_75
+たたみかけ
+#org @NAME_LV100_NORMAL_76
+いつくしみのかぜ
+#org @NAME_LV100_NORMAL_77
+もうれつフィナ
+#org @NAME_LV100_NORMAL_78
+おなじみのうた
+#org @NAME_LV100_NORMAL_79
+ぜんしんぜんれい
+#org @NAME_LV100_NORMAL_80
+ダイナマイト
+#org @NAME_LV100_NORMAL_81
+ひそかなじゅもん
+#org @NAME_LV100_NORMAL_82
+こんじょうパンチ
+#org @NAME_LV100_NORMAL_83
+どうどうのほえ
+#org @NAME_LV100_NORMAL_84
+はなやかなオーラ
+#org @NAME_LV100_NORMAL_85
+てんしのいちげき
+#org @NAME_LV100_NORMAL_86
+おどりくるい
+#org @NAME_LV100_NORMAL_87
+ありったけパワー
+#org @NAME_LV100_NORMAL_88
+ちょうぜつテール
+#org @NAME_LV100_NORMAL_89
+せかいをゆるがす
+#org @NAME_LV100_NORMAL_90
+さいごのいっこえ
+#org @NAME_LV100_NORMAL_91
+がっちりスクラム
+#org @NAME_LV100_NORMAL_92
+きらめくビーム
+#org @NAME_LV100_NORMAL_93
+ゆびきりタッチ
+#org @NAME_LV100_NORMAL_94
+のびのびアーチ
+#org @NAME_LV100_NORMAL_95
+たいりくをこえて
+#org @NAME_LV100_NORMAL_96
+ひっさつボイス
+#org @NAME_LV100_NORMAL_97
+ぜんぶかけだ
+#org @NAME_LV100_NORMAL_98
+つきぬけるしらべ
+#org @NAME_LV100_NORMAL_99
+まっすぐのいのり
+#org @NAME_LV100_NORMAL_100
+さいごのとっしん
+#org @NAME_LV100_FIGHTING_1
+ぶんなぐり
+#org @NAME_LV100_FIGHTING_2
+うでまくり
+#org @NAME_LV100_FIGHTING_3
+ひじうちロー
+#org @NAME_LV100_FIGHTING_4
+あしばらい
+#org @NAME_LV100_FIGHTING_5
+ふんばりポーズ
+#org @NAME_LV100_FIGHTING_6
+ばたばたパンチ
+#org @NAME_LV100_FIGHTING_7
+かたならし
+#org @NAME_LV100_FIGHTING_8
+すばやいジャブ
+#org @NAME_LV100_FIGHTING_9
+ハイキック
+#org @NAME_LV100_FIGHTING_10
+じっくりにらみ
+#org @NAME_LV100_FIGHTING_11
+とびげりアタック
+#org @NAME_LV100_FIGHTING_12
+きあいのスパーク
+#org @NAME_LV100_FIGHTING_13
+おうぎのかまえ
+#org @NAME_LV100_FIGHTING_14
+なげとばし
+#org @NAME_LV100_FIGHTING_15
+こぶしのゆうき
+#org @NAME_LV100_FIGHTING_16
+ほどよいチョップ
+#org @NAME_LV100_FIGHTING_17
+せいしんいっとう
+#org @NAME_LV100_FIGHTING_18
+きりもみパンチ
+#org @NAME_LV100_FIGHTING_19
+はどうのささやき
+#org @NAME_LV100_FIGHTING_20
+かえしステップ
+#org @NAME_LV100_FIGHTING_21
+たたかいのこえ
+#org @NAME_LV100_FIGHTING_22
+ソバットロール
+#org @NAME_LV100_FIGHTING_23
+ふんばりかえし
+#org @NAME_LV100_FIGHTING_24
+みやぶりチョップ
+#org @NAME_LV100_FIGHTING_25
+くいしばるいき
+#org @NAME_LV100_FIGHTING_26
+ねっけつパンチ
+#org @NAME_LV100_FIGHTING_27
+たまぬきパンチ
+#org @NAME_LV100_FIGHTING_28
+ゴリラドラミング
+#org @NAME_LV100_FIGHTING_29
+やっつけだん
+#org @NAME_LV100_FIGHTING_30
+けりあげコンボ
+#org @NAME_LV100_FIGHTING_31
+しゅぎょうのひび
+#org @NAME_LV100_FIGHTING_32
+ぶちぬきフック
+#org @NAME_LV100_FIGHTING_33
+れんだパンチ
+#org @NAME_LV100_FIGHTING_34
+ちからくらべ
+#org @NAME_LV100_FIGHTING_35
+きあいのバリア
+#org @NAME_LV100_FIGHTING_36
+いきをととのえ
+#org @NAME_LV100_FIGHTING_37
+こころのこぶし
+#org @NAME_LV100_FIGHTING_38
+ストーンパンチ
+#org @NAME_LV100_FIGHTING_39
+ひらてうち
+#org @NAME_LV100_FIGHTING_40
+はげしいけんか
+#org @NAME_LV100_FIGHTING_41
+うけながし
+#org @NAME_LV100_FIGHTING_42
+おんがえしのわざ
+#org @NAME_LV100_FIGHTING_43
+かくとうごっこ
+#org @NAME_LV100_FIGHTING_44
+なみだのクロス
+#org @NAME_LV100_FIGHTING_45
+どとうのラッシュ
+#org @NAME_LV100_FIGHTING_46
+おおきなてのひら
+#org @NAME_LV100_FIGHTING_47
+ひっさつのはどう
+#org @NAME_LV100_FIGHTING_48
+かまえなおし
+#org @NAME_LV100_FIGHTING_49
+いのちがけキック
+#org @NAME_LV100_FIGHTING_50
+ながれるかた
+#org @NAME_LV100_FIGHTING_51
+さんだんづき
+#org @NAME_LV100_FIGHTING_52
+しんくうなげ
+#org @NAME_LV100_FIGHTING_53
+むねをかりる
+#org @NAME_LV100_FIGHTING_54
+みだれうち
+#org @NAME_LV100_FIGHTING_55
+ふっきれパンチ
+#org @NAME_LV100_FIGHTING_56
+だいちのこぶし
+#org @NAME_LV100_FIGHTING_57
+やぶれかぶれ
+#org @NAME_LV100_FIGHTING_58
+ゆうだちのひじ
+#org @NAME_LV100_FIGHTING_59
+せいけんづき
+#org @NAME_LV100_FIGHTING_60
+きあいのうず
+#org @NAME_LV100_FIGHTING_61
+ぜんりょくフック
+#org @NAME_LV100_FIGHTING_62
+ひらめきのさけび
+#org @NAME_LV100_FIGHTING_63
+ふりぬくこぶし
+#org @NAME_LV100_FIGHTING_64
+どうぎのえり
+#org @NAME_LV100_FIGHTING_65
+じごくまわし
+#org @NAME_LV100_FIGHTING_66
+たましいパンチ
+#org @NAME_LV100_FIGHTING_67
+ばくれつフック
+#org @NAME_LV100_FIGHTING_68
+いちげきひっさつ
+#org @NAME_LV100_FIGHTING_69
+ゆうかんなさけび
+#org @NAME_LV100_FIGHTING_70
+かちあげアッパー
+#org @NAME_LV100_FIGHTING_71
+かんぜんなこぶし
+#org @NAME_LV100_FIGHTING_72
+ヘビーボディ
+#org @NAME_LV100_FIGHTING_73
+こうそくのこぶし
+#org @NAME_LV100_FIGHTING_74
+さいごのきあい
+#org @NAME_LV100_FIGHTING_75
+ぼうふうのキック
+#org @NAME_LV100_FIGHTING_76
+ぎりぎりかえし
+#org @NAME_LV100_FIGHTING_77
+じんつうパンチ
+#org @NAME_LV100_FIGHTING_78
+ぼくしんパンチ
+#org @NAME_LV100_FIGHTING_79
+ゆるぎないしるし
+#org @NAME_LV100_FIGHTING_80
+めいじんのわざ
+#org @NAME_LV100_FIGHTING_81
+しなやかなポーズ
+#org @NAME_LV100_FIGHTING_82
+きょうじんのまい
+#org @NAME_LV100_FIGHTING_83
+ばくはつフィスト
+#org @NAME_LV100_FIGHTING_84
+はげしいつき
+#org @NAME_LV100_FIGHTING_85
+ゆうしゃのこぶし
+#org @NAME_LV100_FIGHTING_86
+ふかのうをこえて
+#org @NAME_LV100_FIGHTING_87
+たたかいのきずな
+#org @NAME_LV100_FIGHTING_88
+どうじょうのかべ
+#org @NAME_LV100_FIGHTING_89
+まけないハート
+#org @NAME_LV100_FIGHTING_90
+しんしょうのつき
+#org @NAME_LV100_FIGHTING_91
+くだきのドリル
+#org @NAME_LV100_FIGHTING_92
+めいじんのほこり
+#org @NAME_LV100_FIGHTING_93
+ちからのかぎり
+#org @NAME_LV100_FIGHTING_94
+かんぺきなかた
+#org @NAME_LV100_FIGHTING_95
+ねっけつだんがん
+#org @NAME_LV100_FIGHTING_96
+いきぬくこぶし
+#org @NAME_LV100_FIGHTING_97
+ゆうゆうアッパー
+#org @NAME_LV100_FIGHTING_98
+どうじょうルール
+#org @NAME_LV100_FIGHTING_99
+きわめしこぶし
+#org @NAME_LV100_FIGHTING_100
+でんせつのわざ
+#org @NAME_LV100_FLYING_1
+はばたきつつき
+#org @NAME_LV100_FLYING_2
+そよかぜのうた
+#org @NAME_LV100_FLYING_3
+つばさビンタ
+#org @NAME_LV100_FLYING_4
+きりもみダイブ
+#org @NAME_LV100_FLYING_5
+すなけむりばね
+#org @NAME_LV100_FLYING_6
+かぜのひそひそ
+#org @NAME_LV100_FLYING_7
+とびたつじゅんび
+#org @NAME_LV100_FLYING_8
+ひなどりのいのり
+#org @NAME_LV100_FLYING_9
+さえずりアタック
+#org @NAME_LV100_FLYING_10
+こかぜランス
+#org @NAME_LV100_FLYING_11
+ふわりとかわす
+#org @NAME_LV100_FLYING_12
+ちいさなつむじ
+#org @NAME_LV100_FLYING_13
+くちばしラッシュ
+#org @NAME_LV100_FLYING_14
+つばさのたて
+#org @NAME_LV100_FLYING_15
+そらのさんぽ
+#org @NAME_LV100_FLYING_16
+つばめのはやて
+#org @NAME_LV100_FLYING_17
+ふきぬけるかぜ
+#org @NAME_LV100_FLYING_18
+とまりぎのねむり
+#org @NAME_LV100_FLYING_19
+いなびかりダイブ
+#org @NAME_LV100_FLYING_20
+つばめおとし
+#org @NAME_LV100_FLYING_21
+あおぞらのしらべ
+#org @NAME_LV100_FLYING_22
+おいかぜのうた
+#org @NAME_LV100_FLYING_23
+ばさばさビンタ
+#org @NAME_LV100_FLYING_24
+とりもちのしっぽ
+#org @NAME_LV100_FLYING_25
+かぜまかせ
+#org @NAME_LV100_FLYING_26
+ふうせんアタック
+#org @NAME_LV100_FLYING_27
+ブランコダイブ
+#org @NAME_LV100_FLYING_28
+ぐんぐんのぼる
+#org @NAME_LV100_FLYING_29
+はなびらかぜ
+#org @NAME_LV100_FLYING_30
+かぜのたかぶり
+#org @NAME_LV100_FLYING_31
+スカイステップ
+#org @NAME_LV100_FLYING_32
+かぜきりのふえ
+#org @NAME_LV100_FLYING_33
+あさやけのひかり
+#org @NAME_LV100_FLYING_34
+そらとぶいちげき
+#org @NAME_LV100_FLYING_35
+ささらのつばさ
+#org @NAME_LV100_FLYING_36
+うずまくそよかぜ
+#org @NAME_LV100_FLYING_37
+ひこうとびつき
+#org @NAME_LV100_FLYING_38
+めまいのうず
+#org @NAME_LV100_FLYING_39
+くものうえのうた
+#org @NAME_LV100_FLYING_40
+きりさきフェザー
+#org @NAME_LV100_FLYING_41
+じゅんぷうバレー
+#org @NAME_LV100_FLYING_42
+こうくうせんこう
+#org @NAME_LV100_FLYING_43
+はねのダンス
+#org @NAME_LV100_FLYING_44
+たかのかぎづめ
+#org @NAME_LV100_FLYING_45
+よかぜのさそい
+#org @NAME_LV100_FLYING_46
+とんぼのかえし
+#org @NAME_LV100_FLYING_47
+あまかぜパンチ
+#org @NAME_LV100_FLYING_48
+きょうふうカット
+#org @NAME_LV100_FLYING_49
+つばさのかべ
+#org @NAME_LV100_FLYING_50
+ひこうしのいのり
+#org @NAME_LV100_FLYING_51
+いそぎのダイブ
+#org @NAME_LV100_FLYING_52
+かぜよみ
+#org @NAME_LV100_FLYING_53
+しんぷうのうず
+#org @NAME_LV100_FLYING_54
+ふうじんのホーン
+#org @NAME_LV100_FLYING_55
+そらをきるツメ
+#org @NAME_LV100_FLYING_56
+はるかぜのいき
+#org @NAME_LV100_FLYING_57
+ぎんいろのつばさ
+#org @NAME_LV100_FLYING_58
+たかくとぶ
+#org @NAME_LV100_FLYING_59
+れんぞくダイブ
+#org @NAME_LV100_FLYING_60
+つむじブレード
+#org @NAME_LV100_FLYING_61
+おおぞらのこえ
+#org @NAME_LV100_FLYING_62
+たいくうせん
+#org @NAME_LV100_FLYING_63
+ハヤブサダイブ
+#org @NAME_LV100_FLYING_64
+ぎりぎりのつばさ
+#org @NAME_LV100_FLYING_65
+きりひらくつばさ
+#org @NAME_LV100_FLYING_66
+てんくうのうた
+#org @NAME_LV100_FLYING_67
+さいせんたん
+#org @NAME_LV100_FLYING_68
+つばさのかいほう
+#org @NAME_LV100_FLYING_69
+こうろんのつばさ
+#org @NAME_LV100_FLYING_70
+うらないのかぜ
+#org @NAME_LV100_FLYING_71
+てんくうはばたき
+#org @NAME_LV100_FLYING_72
+つばさのねっこ
+#org @NAME_LV100_FLYING_73
+ぼうふうライズ
+#org @NAME_LV100_FLYING_74
+バックドロップ
+#org @NAME_LV100_FLYING_75
+きょくげんダイブ
+#org @NAME_LV100_FLYING_76
+かぜのこころ
+#org @NAME_LV100_FLYING_77
+そらのことば
+#org @NAME_LV100_FLYING_78
+くものよろい
+#org @NAME_LV100_FLYING_79
+いちじんのかぜ
+#org @NAME_LV100_FLYING_80
+カタパルト
+#org @NAME_LV100_FLYING_81
+ロングフライト
+#org @NAME_LV100_FLYING_82
+おおぞらカッター
+#org @NAME_LV100_FLYING_83
+うるおうつばさ
+#org @NAME_LV100_FLYING_84
+ほしぞらのかぜ
+#org @NAME_LV100_FLYING_85
+そらのまもり
+#org @NAME_LV100_FLYING_86
+てんくうこうせん
+#org @NAME_LV100_FLYING_87
+ひとすじのつばさ
+#org @NAME_LV100_FLYING_88
+せかいをこえる
+#org @NAME_LV100_FLYING_89
+ぜんそくスカイ
+#org @NAME_LV100_FLYING_90
+とりのうたげ
+#org @NAME_LV100_FLYING_91
+てんへのぼる
+#org @NAME_LV100_FLYING_92
+いきおいのままに
+#org @NAME_LV100_FLYING_93
+しゅんこうつばさ
+#org @NAME_LV100_FLYING_94
+かがやくそらへ
+#org @NAME_LV100_FLYING_95
+げんかいとっぱ
+#org @NAME_LV100_FLYING_96
+そらのたび
+#org @NAME_LV100_FLYING_97
+ぬけるようなそら
+#org @NAME_LV100_FLYING_98
+つばさよひらけ
+#org @NAME_LV100_FLYING_99
+あらしまえのこえ
+#org @NAME_LV100_FLYING_100
+そらをわるつばさ
+#org @NAME_LV100_POISON_1
+どくばりつつき
+#org @NAME_LV100_POISON_2
+ねばねばしぶき
+#org @NAME_LV100_POISON_3
+どくけむり
+#org @NAME_LV100_POISON_4
+ちいさなどくだん
+#org @NAME_LV100_POISON_5
+しびれのこな
+#org @NAME_LV100_POISON_6
+ヘドロのひとなめ
+#org @NAME_LV100_POISON_7
+ようかいのよだれ
+#org @NAME_LV100_POISON_8
+ふゆかいなおと
+#org @NAME_LV100_POISON_9
+どくのしずく
+#org @NAME_LV100_POISON_10
+どくどくステップ
+#org @NAME_LV100_POISON_11
+ヘドロしぶき
+#org @NAME_LV100_POISON_12
+きばのどくえき
+#org @NAME_LV100_POISON_13
+あやしいにおい
+#org @NAME_LV100_POISON_14
+もうどくのしずく
+#org @NAME_LV100_POISON_15
+どくづきアタック
+#org @NAME_LV100_POISON_16
+ガスタンクどん
+#org @NAME_LV100_POISON_17
+どくのはり
+#org @NAME_LV100_POISON_18
+しびれるきり
+#org @NAME_LV100_POISON_19
+よどんだなみだ
+#org @NAME_LV100_POISON_20
+ヘドロアッパー
+#org @NAME_LV100_POISON_21
+ヘドロのうねり
+#org @NAME_LV100_POISON_22
+くすりのじっけん
+#org @NAME_LV100_POISON_23
+ちくりのはり
+#org @NAME_LV100_POISON_24
+たまのどくえき
+#org @NAME_LV100_POISON_25
+どくやくをなげる
+#org @NAME_LV100_POISON_26
+どくぶくろ
+#org @NAME_LV100_POISON_27
+ひそかなどくばり
+#org @NAME_LV100_POISON_28
+ヘドロボール
+#org @NAME_LV100_POISON_29
+どくぼうきゃく
+#org @NAME_LV100_POISON_30
+くすりさまし
+#org @NAME_LV100_POISON_31
+びりびりスモッグ
+#org @NAME_LV100_POISON_32
+あしからみ
+#org @NAME_LV100_POISON_33
+さびついたキバ
+#org @NAME_LV100_POISON_34
+ひかげのどく
+#org @NAME_LV100_POISON_35
+どくまみれ
+#org @NAME_LV100_POISON_36
+どくのゆきげしき
+#org @NAME_LV100_POISON_37
+フルーツポイズン
+#org @NAME_LV100_POISON_38
+ヘドロソード
+#org @NAME_LV100_POISON_39
+じわじわのうた
+#org @NAME_LV100_POISON_40
+ガスばくはつ
+#org @NAME_LV100_POISON_41
+かいどくのいき
+#org @NAME_LV100_POISON_42
+ダストシャワー
+#org @NAME_LV100_POISON_43
+ヘドロカッター
+#org @NAME_LV100_POISON_44
+どくどくカーテン
+#org @NAME_LV100_POISON_45
+ふきだすどく
+#org @NAME_LV100_POISON_46
+ちからのどくばり
+#org @NAME_LV100_POISON_47
+むらさきのまくら
+#org @NAME_LV100_POISON_48
+ダークポイズン
+#org @NAME_LV100_POISON_49
+ヘドロクラッシュ
+#org @NAME_LV100_POISON_50
+ひびわれのどく
+#org @NAME_LV100_POISON_51
+どくのむち
+#org @NAME_LV100_POISON_52
+あまいわな
+#org @NAME_LV100_POISON_53
+まっさかさま
+#org @NAME_LV100_POISON_54
+どくのいかり
+#org @NAME_LV100_POISON_55
+ポイズンバックル
+#org @NAME_LV100_POISON_56
+ふぶきのどく
+#org @NAME_LV100_POISON_57
+ヘドロのまもり
+#org @NAME_LV100_POISON_58
+どくがまわる
+#org @NAME_LV100_POISON_59
+はなやかなどく
+#org @NAME_LV100_POISON_60
+どくけしのしらべ
+#org @NAME_LV100_POISON_61
+ヘドロストーム
+#org @NAME_LV100_POISON_62
+おくびょうのどく
+#org @NAME_LV100_POISON_63
+どくアッパー
+#org @NAME_LV100_POISON_64
+ぞくぞくダイブ
+#org @NAME_LV100_POISON_65
+くちはてるまで
+#org @NAME_LV100_POISON_66
+ヘドロばいがえし
+#org @NAME_LV100_POISON_67
+ひかりをうばう
+#org @NAME_LV100_POISON_68
+どくのほのお
+#org @NAME_LV100_POISON_69
+ガスあらし
+#org @NAME_LV100_POISON_70
+アシッドシャワー
+#org @NAME_LV100_POISON_71
+ながれるどく
+#org @NAME_LV100_POISON_72
+じごくのどくばり
+#org @NAME_LV100_POISON_73
+どくどくのめぐみ
+#org @NAME_LV100_POISON_74
+ふかいどくだま
+#org @NAME_LV100_POISON_75
+しびれのうたごえ
+#org @NAME_LV100_POISON_76
+どろどろしぶき
+#org @NAME_LV100_POISON_77
+どくのこうずい
+#org @NAME_LV100_POISON_78
+わざわいのヘドロ
+#org @NAME_LV100_POISON_79
+さそりのひとさし
+#org @NAME_LV100_POISON_80
+デッドリーキス
+#org @NAME_LV100_POISON_81
+ざんこくのどく
+#org @NAME_LV100_POISON_82
+どくのかべ
+#org @NAME_LV100_POISON_83
+どくやくしっぱい
+#org @NAME_LV100_POISON_84
+ゆるせないにおい
+#org @NAME_LV100_POISON_85
+どくのおうのあご
+#org @NAME_LV100_POISON_86
+ヘドロテンペスト
+#org @NAME_LV100_POISON_87
+めいどのあまみず
+#org @NAME_LV100_POISON_88
+どくばくはつ
+#org @NAME_LV100_POISON_89
+カラカラどく
+#org @NAME_LV100_POISON_90
+あくじょのうた
+#org @NAME_LV100_POISON_91
+さそりテール
+#org @NAME_LV100_POISON_92
+いまわのどく
+#org @NAME_LV100_POISON_93
+ぜんぶどくにする
+#org @NAME_LV100_POISON_94
+じゅうどくあらし
+#org @NAME_LV100_POISON_95
+どくのきわみ
+#org @NAME_LV100_POISON_96
+ひだまりのどく
+#org @NAME_LV100_POISON_97
+やまいのしずく
+#org @NAME_LV100_POISON_98
+ゆっくりのどく
+#org @NAME_LV100_POISON_99
+むげんのヘドロ
+#org @NAME_LV100_POISON_100
+さいごのどくばり
+#org @NAME_LV100_GROUND_1
+つちかけ
+#org @NAME_LV100_GROUND_2
+どろんこパーティ
+#org @NAME_LV100_GROUND_3
+ほりほりアタック
+#org @NAME_LV100_GROUND_4
+すなぼこり
+#org @NAME_LV100_GROUND_5
+どろだんご
+#org @NAME_LV100_GROUND_6
+ましろのすな
+#org @NAME_LV100_GROUND_7
+あしもとゆれ
+#org @NAME_LV100_GROUND_8
+つちのうたごえ
+#org @NAME_LV100_GROUND_9
+ぬかるみのわな
+#org @NAME_LV100_GROUND_10
+じめんにもぐる
+#org @NAME_LV100_GROUND_11
+すなけむり
+#org @NAME_LV100_GROUND_12
+ぺたぺたどろ
+#org @NAME_LV100_GROUND_13
+どすどすあるき
+#org @NAME_LV100_GROUND_14
+どろんこアピール
+#org @NAME_LV100_GROUND_15
+あなほりダッシュ
+#org @NAME_LV100_GROUND_16
+じならしパンチ
+#org @NAME_LV100_GROUND_17
+ほこりのかぜ
+#org @NAME_LV100_GROUND_18
+がれきなげ
+#org @NAME_LV100_GROUND_19
+つちぼこりのかべ
+#org @NAME_LV100_GROUND_20
+ひっこぬき
+#org @NAME_LV100_GROUND_21
+ぐらぐらスタンプ
+#org @NAME_LV100_GROUND_22
+ほねのつえ
+#org @NAME_LV100_GROUND_23
+すなのうずまき
+#org @NAME_LV100_GROUND_24
+つちのバリア
+#org @NAME_LV100_GROUND_25
+じめんがえし
+#org @NAME_LV100_GROUND_26
+つちのひめい
+#org @NAME_LV100_GROUND_27
+だいちのおたけび
+#org @NAME_LV100_GROUND_28
+おもたいこぶし
+#org @NAME_LV100_GROUND_29
+ふみしめアタック
+#org @NAME_LV100_GROUND_30
+どろのまもり
+#org @NAME_LV100_GROUND_31
+じゃりドリル
+#org @NAME_LV100_GROUND_32
+さばくのかぜ
+#org @NAME_LV100_GROUND_33
+ぬかるみジャンプ
+#org @NAME_LV100_GROUND_34
+だいちにいのる
+#org @NAME_LV100_GROUND_35
+ひびわれアース
+#org @NAME_LV100_GROUND_36
+どろしぶき
+#org @NAME_LV100_GROUND_37
+ぐらつくだいち
+#org @NAME_LV100_GROUND_38
+じならしのうた
+#org @NAME_LV100_GROUND_39
+あなぐらのいびき
+#org @NAME_LV100_GROUND_40
+ほりまくり
+#org @NAME_LV100_GROUND_41
+じしんのまえぶれ
+#org @NAME_LV100_GROUND_42
+つちほこりのまい
+#org @NAME_LV100_GROUND_43
+がんばりスコップ
+#org @NAME_LV100_GROUND_44
+どろのどく
+#org @NAME_LV100_GROUND_45
+ぬまのいざない
+#org @NAME_LV100_GROUND_46
+どすこいストンプ
+#org @NAME_LV100_GROUND_47
+だいちのささやき
+#org @NAME_LV100_GROUND_48
+ずぶずぶそこなし
+#org @NAME_LV100_GROUND_49
+ぐんぐんもぐる
+#org @NAME_LV100_GROUND_50
+まんげつのだいち
+#org @NAME_LV100_GROUND_51
+じならしロール
+#org @NAME_LV100_GROUND_52
+あなぐらにこもる
+#org @NAME_LV100_GROUND_53
+じめんくだき
+#org @NAME_LV100_GROUND_54
+つちのよろい
+#org @NAME_LV100_GROUND_55
+どんぞこホール
+#org @NAME_LV100_GROUND_56
+かわいたかぜ
+#org @NAME_LV100_GROUND_57
+じめんのいかり
+#org @NAME_LV100_GROUND_58
+ざらつくあらし
+#org @NAME_LV100_GROUND_59
+ねっさのかぜ
+#org @NAME_LV100_GROUND_60
+つちのいのり
+#org @NAME_LV100_GROUND_61
+どろどろパンチ
+#org @NAME_LV100_GROUND_62
+じひびきアタック
+#org @NAME_LV100_GROUND_63
+おおあなほり
+#org @NAME_LV100_GROUND_64
+だいちのほこ
+#org @NAME_LV100_GROUND_65
+つちくれのやり
+#org @NAME_LV100_GROUND_66
+ざらつくじめん
+#org @NAME_LV100_GROUND_67
+ぬまのほこり
+#org @NAME_LV100_GROUND_68
+じんめんじしん
+#org @NAME_LV100_GROUND_69
+あしとりワナ
+#org @NAME_LV100_GROUND_70
+ぬまのさそい
+#org @NAME_LV100_GROUND_71
+だいちのみのり
+#org @NAME_LV100_GROUND_72
+ずしんといちげき
+#org @NAME_LV100_GROUND_73
+さばくのおうじ
+#org @NAME_LV100_GROUND_74
+つちのぬし
+#org @NAME_LV100_GROUND_75
+かためたつち
+#org @NAME_LV100_GROUND_76
+ぬまちのさけび
+#org @NAME_LV100_GROUND_77
+じごくのあなほり
+#org @NAME_LV100_GROUND_78
+つちのいぶき
+#org @NAME_LV100_GROUND_79
+どろのまんまく
+#org @NAME_LV100_GROUND_80
+そこなしぬま
+#org @NAME_LV100_GROUND_81
+ずんぐりチャージ
+#org @NAME_LV100_GROUND_82
+だいちのためいき
+#org @NAME_LV100_GROUND_83
+ごうごうくずれ
+#org @NAME_LV100_GROUND_84
+どろんこパニック
+#org @NAME_LV100_GROUND_85
+うまのたいあたり
+#org @NAME_LV100_GROUND_86
+じめんのほこり
+#org @NAME_LV100_GROUND_87
+かんそうしたいち
+#org @NAME_LV100_GROUND_88
+じしんのよかん
+#org @NAME_LV100_GROUND_89
+ほりつくす
+#org @NAME_LV100_GROUND_90
+きたいのドリル
+#org @NAME_LV100_GROUND_91
+だいちがわれる
+#org @NAME_LV100_GROUND_92
+すなのむれ
+#org @NAME_LV100_GROUND_93
+だいちのかたまり
+#org @NAME_LV100_GROUND_94
+どろのつなみ
+#org @NAME_LV100_GROUND_95
+あなのそこから
+#org @NAME_LV100_GROUND_96
+すなぼこりのおう
+#org @NAME_LV100_GROUND_97
+ぐらぐらエンド
+#org @NAME_LV100_GROUND_98
+まだらのだいち
+#org @NAME_LV100_GROUND_99
+げんしのだいち
+#org @NAME_LV100_GROUND_100
+さいごのじしん
+#org @NAME_LV100_ROCK_1
+こいしなげ
+#org @NAME_LV100_ROCK_2
+ごろごろいしころ
+#org @NAME_LV100_ROCK_3
+かたいからだ
+#org @NAME_LV100_ROCK_4
+ごつごつつぶて
+#org @NAME_LV100_ROCK_5
+いわのつぶやき
+#org @NAME_LV100_ROCK_6
+ごつごつタックル
+#org @NAME_LV100_ROCK_7
+すなぼこりのいわ
+#org @NAME_LV100_ROCK_8
+ひびわれのいし
+#org @NAME_LV100_ROCK_9
+いわばだのよろい
+#org @NAME_LV100_ROCK_10
+いわのよろい
+#org @NAME_LV100_ROCK_11
+なだれがけ
+#org @NAME_LV100_ROCK_12
+ころころいわ
+#org @NAME_LV100_ROCK_13
+いわのかべ
+#org @NAME_LV100_ROCK_14
+きらめくいしころ
+#org @NAME_LV100_ROCK_15
+いしだたみのわな
+#org @NAME_LV100_ROCK_16
+いわやすみ
+#org @NAME_LV100_ROCK_17
+がんせきなだれ
+#org @NAME_LV100_ROCK_18
+ごうがんのかまえ
+#org @NAME_LV100_ROCK_19
+いわのこぶし
+#org @NAME_LV100_ROCK_20
+かけらほうせき
+#org @NAME_LV100_ROCK_21
+かんこつだっぱ
+#org @NAME_LV100_ROCK_22
+いわのなみだ
+#org @NAME_LV100_ROCK_23
+ながれいしのはげ
+#org @NAME_LV100_ROCK_24
+じゃりダッシュ
+#org @NAME_LV100_ROCK_25
+ごりごりかじり
+#org @NAME_LV100_ROCK_26
+てつのいしぶみ
+#org @NAME_LV100_ROCK_27
+たまのいし
+#org @NAME_LV100_ROCK_28
+いわのきずな
+#org @NAME_LV100_ROCK_29
+いわあなのねむり
+#org @NAME_LV100_ROCK_30
+ざんがんソード
+#org @NAME_LV100_ROCK_31
+いしのささやき
+#org @NAME_LV100_ROCK_32
+いわのドリル
+#org @NAME_LV100_ROCK_33
+かこうがんのかた
+#org @NAME_LV100_ROCK_34
+どしゃくずれ
+#org @NAME_LV100_ROCK_35
+せきえいのひかり
+#org @NAME_LV100_ROCK_36
+つぶてのわな
+#org @NAME_LV100_ROCK_37
+いしのたいふう
+#org @NAME_LV100_ROCK_38
+いわおのさけび
+#org @NAME_LV100_ROCK_39
+ばくだんいわ
+#org @NAME_LV100_ROCK_40
+いんせきのかけら
+#org @NAME_LV100_ROCK_41
+ごつごつバンカー
+#org @NAME_LV100_ROCK_42
+じゃりテンポ
+#org @NAME_LV100_ROCK_43
+せきばんのやり
+#org @NAME_LV100_ROCK_44
+いわのきおく
+#org @NAME_LV100_ROCK_45
+うごかざること
+#org @NAME_LV100_ROCK_46
+いしのたまご
+#org @NAME_LV100_ROCK_47
+げんせきのいかり
+#org @NAME_LV100_ROCK_48
+ごうがんヘッド
+#org @NAME_LV100_ROCK_49
+いしのまきひげ
+#org @NAME_LV100_ROCK_50
+ざらざらのいわ
+#org @NAME_LV100_ROCK_51
+ほうせきえいこう
+#org @NAME_LV100_ROCK_52
+だんがいぜっぺき
+#org @NAME_LV100_ROCK_53
+ごろごろプレス
+#org @NAME_LV100_ROCK_54
+ごりごりまもり
+#org @NAME_LV100_ROCK_55
+ばんにんのかべ
+#org @NAME_LV100_ROCK_56
+がんせきわり
+#org @NAME_LV100_ROCK_57
+どうくつのこえ
+#org @NAME_LV100_ROCK_58
+いしだらけのやま
+#org @NAME_LV100_ROCK_59
+きょがんアタック
+#org @NAME_LV100_ROCK_60
+りゅうかくのいし
+#org @NAME_LV100_ROCK_61
+ほうせきのまもり
+#org @NAME_LV100_ROCK_62
+はんがんのやいば
+#org @NAME_LV100_ROCK_63
+しゃりしゃりだん
+#org @NAME_LV100_ROCK_64
+がんせきのかべ
+#org @NAME_LV100_ROCK_65
+ガレキラッシュ
+#org @NAME_LV100_ROCK_66
+かせきのしらべ
+#org @NAME_LV100_ROCK_67
+いわのおおごえ
+#org @NAME_LV100_ROCK_68
+ぐらぐらかいがん
+#org @NAME_LV100_ROCK_69
+すいしょうのとげ
+#org @NAME_LV100_ROCK_70
+いわのぼうし
+#org @NAME_LV100_ROCK_71
+ジャンボいわ
+#org @NAME_LV100_ROCK_72
+げんせいかたまり
+#org @NAME_LV100_ROCK_73
+ごうがんフォール
+#org @NAME_LV100_ROCK_74
+だいがんタックル
+#org @NAME_LV100_ROCK_75
+いわのていおう
+#org @NAME_LV100_ROCK_76
+いわのこだま
+#org @NAME_LV100_ROCK_77
+ふるいうたごえ
+#org @NAME_LV100_ROCK_78
+いわのてっぺん
+#org @NAME_LV100_ROCK_79
+がんじょうさいご
+#org @NAME_LV100_ROCK_80
+ごうせきのあらし
+#org @NAME_LV100_ROCK_81
+せいせきのひかり
+#org @NAME_LV100_ROCK_82
+ごつごつばくは
+#org @NAME_LV100_ROCK_83
+いわのきばげり
+#org @NAME_LV100_ROCK_84
+いわのじんえい
+#org @NAME_LV100_ROCK_85
+ちかのうみ
+#org @NAME_LV100_ROCK_86
+いわぎしのかた
+#org @NAME_LV100_ROCK_87
+ごうおんのいわ
+#org @NAME_LV100_ROCK_88
+いわのかけぬけ
+#org @NAME_LV100_ROCK_89
+すいしょうレイ
+#org @NAME_LV100_ROCK_90
+せんねんのいし
+#org @NAME_LV100_ROCK_91
+いわのこころ
+#org @NAME_LV100_ROCK_92
+ごうがんてっぺき
+#org @NAME_LV100_ROCK_93
+ばんじゃくのつえ
+#org @NAME_LV100_ROCK_94
+いしのきんぐ
+#org @NAME_LV100_ROCK_95
+いわのさいご
+#org @NAME_LV100_ROCK_96
+せんしのいし
+#org @NAME_LV100_ROCK_97
+くだけちるいわ
+#org @NAME_LV100_ROCK_98
+じめんのそこから
+#org @NAME_LV100_ROCK_99
+ふりそそぐいわ
+#org @NAME_LV100_ROCK_100
+いわのフィナーレ
+#org @NAME_LV100_BUG_1
+むしのかじり
+#org @NAME_LV100_BUG_2
+いとのひとすじ
+#org @NAME_LV100_BUG_3
+ちくりばり
+#org @NAME_LV100_BUG_4
+はねのりんぷん
+#org @NAME_LV100_BUG_5
+かぶとあたり
+#org @NAME_LV100_BUG_6
+くさむらのみの
+#org @NAME_LV100_BUG_7
+きらきらりんぷん
+#org @NAME_LV100_BUG_8
+ちいさなはさみ
+#org @NAME_LV100_BUG_9
+はちのはり
+#org @NAME_LV100_BUG_10
+はねおとアタック
+#org @NAME_LV100_BUG_11
+いもむしロール
+#org @NAME_LV100_BUG_12
+ふんわりまゆ
+#org @NAME_LV100_BUG_13
+ぎざぎざカッター
+#org @NAME_LV100_BUG_14
+うすばのたて
+#org @NAME_LV100_BUG_15
+ふしぎなふんまつ
+#org @NAME_LV100_BUG_16
+ひらひらアタック
+#org @NAME_LV100_BUG_17
+たまごのいのり
+#org @NAME_LV100_BUG_18
+ぷちぷちスプレー
+#org @NAME_LV100_BUG_19
+ちいさなはね
+#org @NAME_LV100_BUG_20
+はねまわりロール
+#org @NAME_LV100_BUG_21
+つのでひとつき
+#org @NAME_LV100_BUG_22
+どくがのはね
+#org @NAME_LV100_BUG_23
+いとまきつけ
+#org @NAME_LV100_BUG_24
+むしのいのり
+#org @NAME_LV100_BUG_25
+むしのよかん
+#org @NAME_LV100_BUG_26
+はねのひかり
+#org @NAME_LV100_BUG_27
+かまきりシザー
+#org @NAME_LV100_BUG_28
+ひとあおぎ
+#org @NAME_LV100_BUG_29
+かたいからのたて
+#org @NAME_LV100_BUG_30
+くるくるつむぎ
+#org @NAME_LV100_BUG_31
+せみのこえ
+#org @NAME_LV100_BUG_32
+むらがるむし
+#org @NAME_LV100_BUG_33
+ひかりのいと
+#org @NAME_LV100_BUG_34
+はねのあそび
+#org @NAME_LV100_BUG_35
+ぎゅっとハサミ
+#org @NAME_LV100_BUG_36
+みつのにおい
+#org @NAME_LV100_BUG_37
+かぶとむしのつの
+#org @NAME_LV100_BUG_38
+ふんわりのまゆ
+#org @NAME_LV100_BUG_39
+ぶんぶんブレード
+#org @NAME_LV100_BUG_40
+はねのたいふう
+#org @NAME_LV100_BUG_41
+むしのおんがえし
+#org @NAME_LV100_BUG_42
+ばらばらのはね
+#org @NAME_LV100_BUG_43
+きのこのたね
+#org @NAME_LV100_BUG_44
+ちいさなさけび
+#org @NAME_LV100_BUG_45
+スズメバチのはり
+#org @NAME_LV100_BUG_46
+すいとりストロー
+#org @NAME_LV100_BUG_47
+とんぼステップ
+#org @NAME_LV100_BUG_48
+かぶとくだき
+#org @NAME_LV100_BUG_49
+どんどんふえる
+#org @NAME_LV100_BUG_50
+かるいはね
+#org @NAME_LV100_BUG_51
+ほたるのあかり
+#org @NAME_LV100_BUG_52
+ひらひらワルツ
+#org @NAME_LV100_BUG_53
+くものすばり
+#org @NAME_LV100_BUG_54
+ぐるぐるいと
+#org @NAME_LV100_BUG_55
+むしのたいぐん
+#org @NAME_LV100_BUG_56
+はさみうち
+#org @NAME_LV100_BUG_57
+やみよのはね
+#org @NAME_LV100_BUG_58
+くものぼうへき
+#org @NAME_LV100_BUG_59
+かたくなのからだ
+#org @NAME_LV100_BUG_60
+おおあごアタック
+#org @NAME_LV100_BUG_61
+きばのぼうけん
+#org @NAME_LV100_BUG_62
+ヒメヒカリ
+#org @NAME_LV100_BUG_63
+ぎりぎりのはり
+#org @NAME_LV100_BUG_64
+むしのためいき
+#org @NAME_LV100_BUG_65
+ぶんどりナイフ
+#org @NAME_LV100_BUG_66
+つのどりょう
+#org @NAME_LV100_BUG_67
+むしのこうしん
+#org @NAME_LV100_BUG_68
+むしのやすらぎ
+#org @NAME_LV100_BUG_69
+きゅうけつバイト
+#org @NAME_LV100_BUG_70
+かぶとのこうら
+#org @NAME_LV100_BUG_71
+むしのがっしょう
+#org @NAME_LV100_BUG_72
+ひとのみこむ
+#org @NAME_LV100_BUG_73
+さなぎのいかり
+#org @NAME_LV100_BUG_74
+きばのかいてん
+#org @NAME_LV100_BUG_75
+いなごのむれ
+#org @NAME_LV100_BUG_76
+はたはたのうた
+#org @NAME_LV100_BUG_77
+そよぐはね
+#org @NAME_LV100_BUG_78
+ろうそくのしびれ
+#org @NAME_LV100_BUG_79
+かたつむりロール
+#org @NAME_LV100_BUG_80
+はなしべのみつ
+#org @NAME_LV100_BUG_81
+つのぼうずロール
+#org @NAME_LV100_BUG_82
+はねのバリア
+#org @NAME_LV100_BUG_83
+つのだしバンプ
+#org @NAME_LV100_BUG_84
+かぜになるはね
+#org @NAME_LV100_BUG_85
+ごうぜんたるはね
+#org @NAME_LV100_BUG_86
+かぶとのいかり
+#org @NAME_LV100_BUG_87
+ちいさなぐんだん
+#org @NAME_LV100_BUG_88
+ぼうぎゃくはさみ
+#org @NAME_LV100_BUG_89
+てんてんとまう
+#org @NAME_LV100_BUG_90
+むしのゆうしゃ
+#org @NAME_LV100_BUG_91
+やまびこのはね
+#org @NAME_LV100_BUG_92
+きらめくりんぷん
+#org @NAME_LV100_BUG_93
+むしのさけび
+#org @NAME_LV100_BUG_94
+ずっしりカブト
+#org @NAME_LV100_BUG_95
+ぜんりょくはさみ
+#org @NAME_LV100_BUG_96
+うたかたのはね
+#org @NAME_LV100_BUG_97
+しんかのはて
+#org @NAME_LV100_BUG_98
+むれのおおあらし
+#org @NAME_LV100_BUG_99
+かがやくカブト
+#org @NAME_LV100_BUG_100
+むしフィナーレ
+#org @NAME_LV100_GHOST_1
+おどかしのかげ
+#org @NAME_LV100_GHOST_2
+ぺろりとなめる
+#org @NAME_LV100_GHOST_3
+ゆらゆらかげ
+#org @NAME_LV100_GHOST_4
+ひそひそばなし
+#org @NAME_LV100_GHOST_5
+いたずらパンチ
+#org @NAME_LV100_GHOST_6
+ぞくぞくしたいき
+#org @NAME_LV100_GHOST_7
+おばけのしっぽ
+#org @NAME_LV100_GHOST_8
+うらめしやのうた
+#org @NAME_LV100_GHOST_9
+かげかくれ
+#org @NAME_LV100_GHOST_10
+やみのぬけがら
+#org @NAME_LV100_GHOST_11
+おばけのかお
+#org @NAME_LV100_GHOST_12
+ゆうれいのてまね
+#org @NAME_LV100_GHOST_13
+ささやきのおばけ
+#org @NAME_LV100_GHOST_14
+かげにまぎれる
+#org @NAME_LV100_GHOST_15
+とりつきパンチ
+#org @NAME_LV100_GHOST_16
+うすぐらいうた
+#org @NAME_LV100_GHOST_17
+かげのあしあと
+#org @NAME_LV100_GHOST_18
+じゃれつくおばけ
+#org @NAME_LV100_GHOST_19
+ゴーストジャンプ
+#org @NAME_LV100_GHOST_20
+おびえるひとみ
+#org @NAME_LV100_GHOST_21
+ふゆうれい
+#org @NAME_LV100_GHOST_22
+くらがりのつめ
+#org @NAME_LV100_GHOST_23
+ほのぐらいひかり
+#org @NAME_LV100_GHOST_24
+よなよなさんぽ
+#org @NAME_LV100_GHOST_25
+ゴーストボイス
+#org @NAME_LV100_GHOST_26
+ぬるりとすりぬけ
+#org @NAME_LV100_GHOST_27
+むねさわぎ
+#org @NAME_LV100_GHOST_28
+しのびよるやみ
+#org @NAME_LV100_GHOST_29
+はらはらのかさね
+#org @NAME_LV100_GHOST_30
+ちぎれたカーテン
+#org @NAME_LV100_GHOST_31
+ゆめのおばけ
+#org @NAME_LV100_GHOST_32
+おいかけるかげ
+#org @NAME_LV100_GHOST_33
+うつろなまなこ
+#org @NAME_LV100_GHOST_34
+ガタガタラップ
+#org @NAME_LV100_GHOST_35
+みちづれまじない
+#org @NAME_LV100_GHOST_36
+こんぱくダイブ
+#org @NAME_LV100_GHOST_37
+うらみのしらべ
+#org @NAME_LV100_GHOST_38
+ほうむりのうた
+#org @NAME_LV100_GHOST_39
+かげのひとなめ
+#org @NAME_LV100_GHOST_40
+おばけのて
+#org @NAME_LV100_GHOST_41
+おばけのおどり
+#org @NAME_LV100_GHOST_42
+かげのつぶやき
+#org @NAME_LV100_GHOST_43
+くびなしのはな
+#org @NAME_LV100_GHOST_44
+ゆうれいこうかん
+#org @NAME_LV100_GHOST_45
+かげわかれ
+#org @NAME_LV100_GHOST_46
+ぜつぼうのかげ
+#org @NAME_LV100_GHOST_47
+たましいのさけび
+#org @NAME_LV100_GHOST_48
+ひとだまのうた
+#org @NAME_LV100_GHOST_49
+よるのしずけさ
+#org @NAME_LV100_GHOST_50
+ゾンビスラッシュ
+#org @NAME_LV100_GHOST_51
+おくりおばけ
+#org @NAME_LV100_GHOST_52
+ゴーストフォルテ
+#org @NAME_LV100_GHOST_53
+やみのだんまり
+#org @NAME_LV100_GHOST_54
+のろいのくぎ
+#org @NAME_LV100_GHOST_55
+たたりのかげ
+#org @NAME_LV100_GHOST_56
+おくりかげ
+#org @NAME_LV100_GHOST_57
+ぬけがらかなしみ
+#org @NAME_LV100_GHOST_58
+さみしがりや
+#org @NAME_LV100_GHOST_59
+かたりかける
+#org @NAME_LV100_GHOST_60
+かげぬいのはり
+#org @NAME_LV100_GHOST_61
+おかえしのおばけ
+#org @NAME_LV100_GHOST_62
+かたみのうた
+#org @NAME_LV100_GHOST_63
+おもいかげ
+#org @NAME_LV100_GHOST_64
+しれんのかげ
+#org @NAME_LV100_GHOST_65
+ゆうめいなおばけ
+#org @NAME_LV100_GHOST_66
+ゴーストのひ
+#org @NAME_LV100_GHOST_67
+やみのおつかい
+#org @NAME_LV100_GHOST_68
+かすみのなかのて
+#org @NAME_LV100_GHOST_69
+みがわりのかわ
+#org @NAME_LV100_GHOST_70
+いちやのしじま
+#org @NAME_LV100_GHOST_71
+れいかんソング
+#org @NAME_LV100_GHOST_72
+おちゃめゆうれい
+#org @NAME_LV100_GHOST_73
+ふくろうのうた
+#org @NAME_LV100_GHOST_74
+かげのまもり
+#org @NAME_LV100_GHOST_75
+ぱっときえるかげ
+#org @NAME_LV100_GHOST_76
+おばけやしき
+#org @NAME_LV100_GHOST_77
+ふぶきのおばけ
+#org @NAME_LV100_GHOST_78
+やみにとけて
+#org @NAME_LV100_GHOST_79
+ゆうれいのなみだ
+#org @NAME_LV100_GHOST_80
+ひるよるかげ
+#org @NAME_LV100_GHOST_81
+ひとこえでうなる
+#org @NAME_LV100_GHOST_82
+みえないうで
+#org @NAME_LV100_GHOST_83
+おろかなゆうれい
+#org @NAME_LV100_GHOST_84
+こわいうわさ
+#org @NAME_LV100_GHOST_85
+にじむかげ
+#org @NAME_LV100_GHOST_86
+ゆうれいぶね
+#org @NAME_LV100_GHOST_87
+ゴーストタイマー
+#org @NAME_LV100_GHOST_88
+よふけのうたげ
+#org @NAME_LV100_GHOST_89
+だんまりのやみ
+#org @NAME_LV100_GHOST_90
+ゴーストフェイス
+#org @NAME_LV100_GHOST_91
+しれいのひとみ
+#org @NAME_LV100_GHOST_92
+かんぜんなかげ
+#org @NAME_LV100_GHOST_93
+ゴーストのよる
+#org @NAME_LV100_GHOST_94
+まよなかのしらべ
+#org @NAME_LV100_GHOST_95
+ゆうやみのかげ
+#org @NAME_LV100_GHOST_96
+おぼろのはな
+#org @NAME_LV100_GHOST_97
+かなしきおばけ
+#org @NAME_LV100_GHOST_98
+かげのおうこく
+#org @NAME_LV100_GHOST_99
+ひとだまのうらみ
+#org @NAME_LV100_GHOST_100
+さいごのやみ
+#org @NAME_LV100_STEEL_1
+てっこつパンチ
+#org @NAME_LV100_STEEL_2
+ねじまわし
+#org @NAME_LV100_STEEL_3
+てつのつめ
+#org @NAME_LV100_STEEL_4
+きんぞくのひびき
+#org @NAME_LV100_STEEL_5
+はがねのからだ
+#org @NAME_LV100_STEEL_6
+くぎうち
+#org @NAME_LV100_STEEL_7
+ぴかぴかボディ
+#org @NAME_LV100_STEEL_8
+きんぞくをみがく
+#org @NAME_LV100_STEEL_9
+ばねジャンプ
+#org @NAME_LV100_STEEL_10
+くろがねヘッド
+#org @NAME_LV100_STEEL_11
+ひかるボルト
+#org @NAME_LV100_STEEL_12
+こうてつのうで
+#org @NAME_LV100_STEEL_13
+てっぺきのたて
+#org @NAME_LV100_STEEL_14
+さびどめスプレー
+#org @NAME_LV100_STEEL_15
+てつハンマー
+#org @NAME_LV100_STEEL_16
+てつのとばり
+#org @NAME_LV100_STEEL_17
+ぎんのきらめき
+#org @NAME_LV100_STEEL_18
+てつぼうなぐり
+#org @NAME_LV100_STEEL_19
+ちからのボルト
+#org @NAME_LV100_STEEL_20
+ネジのうた
+#org @NAME_LV100_STEEL_21
+はがねのはね
+#org @NAME_LV100_STEEL_22
+しろがねのやいば
+#org @NAME_LV100_STEEL_23
+つなぎめのひかり
+#org @NAME_LV100_STEEL_24
+くろがねのかべ
+#org @NAME_LV100_STEEL_25
+メタルチャージ
+#org @NAME_LV100_STEEL_26
+はがねのかまえ
+#org @NAME_LV100_STEEL_27
+かたまりのうなり
+#org @NAME_LV100_STEEL_28
+カッターブレード
+#org @NAME_LV100_STEEL_29
+ハリガネあみ
+#org @NAME_LV100_STEEL_30
+どうのつるぎ
+#org @NAME_LV100_STEEL_31
+つよいおもみ
+#org @NAME_LV100_STEEL_32
+かたいきんぞく
+#org @NAME_LV100_STEEL_33
+ばねパンチ
+#org @NAME_LV100_STEEL_34
+ぎんぱくのひかり
+#org @NAME_LV100_STEEL_35
+てつのしっぽ
+#org @NAME_LV100_STEEL_36
+こおりつくはがね
+#org @NAME_LV100_STEEL_37
+ギアアップ
+#org @NAME_LV100_STEEL_38
+じわじわおもみ
+#org @NAME_LV100_STEEL_39
+どうりょくパンチ
+#org @NAME_LV100_STEEL_40
+くろがねほう
+#org @NAME_LV100_STEEL_41
+ナイフジャグル
+#org @NAME_LV100_STEEL_42
+はがねのこころ
+#org @NAME_LV100_STEEL_43
+バンカーバスター
+#org @NAME_LV100_STEEL_44
+きんぞくのさけび
+#org @NAME_LV100_STEEL_45
+ブーストギア
+#org @NAME_LV100_STEEL_46
+てつのいのり
+#org @NAME_LV100_STEEL_47
+てつのクロス
+#org @NAME_LV100_STEEL_48
+はがねのいかり
+#org @NAME_LV100_STEEL_49
+ゴツゴツなげ
+#org @NAME_LV100_STEEL_50
+はがねのファング
+#org @NAME_LV100_STEEL_51
+さいぼうのよろい
+#org @NAME_LV100_STEEL_52
+ガンメタルビーム
+#org @NAME_LV100_STEEL_53
+こうてつのはね
+#org @NAME_LV100_STEEL_54
+てつくずなげ
+#org @NAME_LV100_STEEL_55
+ぎしぎしバネ
+#org @NAME_LV100_STEEL_56
+ブリキのたて
+#org @NAME_LV100_STEEL_57
+どうたいびょうぶ
+#org @NAME_LV100_STEEL_58
+ひかりのレーザー
+#org @NAME_LV100_STEEL_59
+じめんをつらぬく
+#org @NAME_LV100_STEEL_60
+かたいせいしん
+#org @NAME_LV100_STEEL_61
+はがねのドリル
+#org @NAME_LV100_STEEL_62
+てつのおおあらし
+#org @NAME_LV100_STEEL_63
+ホイールターン
+#org @NAME_LV100_STEEL_64
+こうそくラム
+#org @NAME_LV100_STEEL_65
+バランスメタル
+#org @NAME_LV100_STEEL_66
+ぎんいろほうだん
+#org @NAME_LV100_STEEL_67
+こうてつのフック
+#org @NAME_LV100_STEEL_68
+ミサイルダンス
+#org @NAME_LV100_STEEL_69
+てつのいちげき
+#org @NAME_LV100_STEEL_70
+きんぞくまじない
+#org @NAME_LV100_STEEL_71
+はがねのやいば
+#org @NAME_LV100_STEEL_72
+くろがねゾーン
+#org @NAME_LV100_STEEL_73
+こうてつのたまご
+#org @NAME_LV100_STEEL_74
+きんぞくのはだ
+#org @NAME_LV100_STEEL_75
+どっしりこうてつ
+#org @NAME_LV100_STEEL_76
+うごくはがね
+#org @NAME_LV100_STEEL_77
+てつくだき
+#org @NAME_LV100_STEEL_78
+はがねのバリア
+#org @NAME_LV100_STEEL_79
+はがねのミサイル
+#org @NAME_LV100_STEEL_80
+もとめるはがね
+#org @NAME_LV100_STEEL_81
+はがねのおうこく
+#org @NAME_LV100_STEEL_82
+さびないこころ
+#org @NAME_LV100_STEEL_83
+こうてつソウル
+#org @NAME_LV100_STEEL_84
+つるぎのやま
+#org @NAME_LV100_STEEL_85
+メタルリターン
+#org @NAME_LV100_STEEL_86
+てつのまいご
+#org @NAME_LV100_STEEL_87
+きんぞくばくはつ
+#org @NAME_LV100_STEEL_88
+かたいちかい
+#org @NAME_LV100_STEEL_89
+はがねフィナーレ
+#org @NAME_LV100_STEEL_90
+とりかえせない
+#org @NAME_LV100_STEEL_91
+くろがねらいめい
+#org @NAME_LV100_STEEL_92
+こうてつのとびら
+#org @NAME_LV100_STEEL_93
+てつのしっこく
+#org @NAME_LV100_STEEL_94
+はがねのしめつけ
+#org @NAME_LV100_STEEL_95
+てつのかたまり
+#org @NAME_LV100_STEEL_96
+ぎんのひかり
+#org @NAME_LV100_STEEL_97
+こうてつれっしゃ
+#org @NAME_LV100_STEEL_98
+はがねのしんてん
+#org @NAME_LV100_STEEL_99
+せんこくのはがね
+#org @NAME_LV100_STEEL_100
+かくごのはがね
+#org @NAME_LV100_FIRE_1
+ちいさなひだね
+#org @NAME_LV100_FIRE_2
+ほのおのひとなめ
+#org @NAME_LV100_FIRE_3
+ぽっとひのこ
+#org @NAME_LV100_FIRE_4
+ひのこパンチ
+#org @NAME_LV100_FIRE_5
+あつあつのいき
+#org @NAME_LV100_FIRE_6
+かえんのしっぽ
+#org @NAME_LV100_FIRE_7
+もえるまなざし
+#org @NAME_LV100_FIRE_8
+ほのおのつめ
+#org @NAME_LV100_FIRE_9
+ひのこダッシュ
+#org @NAME_LV100_FIRE_10
+もやしのけむり
+#org @NAME_LV100_FIRE_11
+ひだるまアタック
+#org @NAME_LV100_FIRE_12
+かがりびのうた
+#org @NAME_LV100_FIRE_13
+もうもうけむり
+#org @NAME_LV100_FIRE_14
+ねつをためる
+#org @NAME_LV100_FIRE_15
+もえあがるひ
+#org @NAME_LV100_FIRE_16
+ひばしらのかべ
+#org @NAME_LV100_FIRE_17
+やけつくねっぷう
+#org @NAME_LV100_FIRE_18
+まっかなこぶし
+#org @NAME_LV100_FIRE_19
+ひなたぼこ
+#org @NAME_LV100_FIRE_20
+ほのおのやくそく
+#org @NAME_LV100_FIRE_21
+ほむらのキバ
+#org @NAME_LV100_FIRE_22
+ほのおのずつき
+#org @NAME_LV100_FIRE_23
+かえんダッシュ
+#org @NAME_LV100_FIRE_24
+たいまつなげ
+#org @NAME_LV100_FIRE_25
+あかいひのこ
+#org @NAME_LV100_FIRE_26
+ぼうえんのやり
+#org @NAME_LV100_FIRE_27
+ひのほうだん
+#org @NAME_LV100_FIRE_28
+ちいさなかえん
+#org @NAME_LV100_FIRE_29
+ひのまわりこみ
+#org @NAME_LV100_FIRE_30
+ほむらのステップ
+#org @NAME_LV100_FIRE_31
+ねっぷうのうず
+#org @NAME_LV100_FIRE_32
+ほのおのバリア
+#org @NAME_LV100_FIRE_33
+こげつくカーテン
+#org @NAME_LV100_FIRE_34
+ほのおのめざめ
+#org @NAME_LV100_FIRE_35
+ほむらのやり
+#org @NAME_LV100_FIRE_36
+ほむらのいっぱつ
+#org @NAME_LV100_FIRE_37
+ひのたまなげ
+#org @NAME_LV100_FIRE_38
+ゆらめくともしび
+#org @NAME_LV100_FIRE_39
+あかいかげろう
+#org @NAME_LV100_FIRE_40
+ぬくもりのひ
+#org @NAME_LV100_FIRE_41
+ほむらのつばさ
+#org @NAME_LV100_FIRE_42
+もえさかるこぶし
+#org @NAME_LV100_FIRE_43
+ひのこのあめ
+#org @NAME_LV100_FIRE_44
+かんかんひざし
+#org @NAME_LV100_FIRE_45
+ふんかのしるし
+#org @NAME_LV100_FIRE_46
+やけどあと
+#org @NAME_LV100_FIRE_47
+ほむらのよろい
+#org @NAME_LV100_FIRE_48
+カーニバルフレア
+#org @NAME_LV100_FIRE_49
+ほのおのいなずま
+#org @NAME_LV100_FIRE_50
+ごうかタックル
+#org @NAME_LV100_FIRE_51
+ひのこカッター
+#org @NAME_LV100_FIRE_52
+ひだねのいのり
+#org @NAME_LV100_FIRE_53
+ほのおのけだもの
+#org @NAME_LV100_FIRE_54
+ひのいきおい
+#org @NAME_LV100_FIRE_55
+かえんのうた
+#org @NAME_LV100_FIRE_56
+ひのよろい
+#org @NAME_LV100_FIRE_57
+ほむらのまじない
+#org @NAME_LV100_FIRE_58
+のろしのひ
+#org @NAME_LV100_FIRE_59
+めらめらパンチ
+#org @NAME_LV100_FIRE_60
+もえるけっしん
+#org @NAME_LV100_FIRE_61
+ごうえんのつるぎ
+#org @NAME_LV100_FIRE_62
+かんろのひ
+#org @NAME_LV100_FIRE_63
+ようがんのとびら
+#org @NAME_LV100_FIRE_64
+さかるほのお
+#org @NAME_LV100_FIRE_65
+ひかりのほむら
+#org @NAME_LV100_FIRE_66
+あかあかとキック
+#org @NAME_LV100_FIRE_67
+ほのおのかぎ
+#org @NAME_LV100_FIRE_68
+ひのとりのまい
+#org @NAME_LV100_FIRE_69
+やきつくすひびき
+#org @NAME_LV100_FIRE_70
+ふんかダイブ
+#org @NAME_LV100_FIRE_71
+ほむらのうなり
+#org @NAME_LV100_FIRE_72
+ひとりかえんびん
+#org @NAME_LV100_FIRE_73
+ほむらのやいば
+#org @NAME_LV100_FIRE_74
+たいようのこえ
+#org @NAME_LV100_FIRE_75
+やけどのあと
+#org @NAME_LV100_FIRE_76
+ひのこのうずまき
+#org @NAME_LV100_FIRE_77
+まっかなたいよう
+#org @NAME_LV100_FIRE_78
+ひのこハリケーン
+#org @NAME_LV100_FIRE_79
+ほのおうずしお
+#org @NAME_LV100_FIRE_80
+ひのこのたて
+#org @NAME_LV100_FIRE_81
+ほのおのだいだま
+#org @NAME_LV100_FIRE_82
+ほむらのカーテン
+#org @NAME_LV100_FIRE_83
+やけつくさけび
+#org @NAME_LV100_FIRE_84
+ごうかのひ
+#org @NAME_LV100_FIRE_85
+ほむらしぶき
+#org @NAME_LV100_FIRE_86
+ほのおのわっか
+#org @NAME_LV100_FIRE_87
+ひのたまヒット
+#org @NAME_LV100_FIRE_88
+ほのおのほえごえ
+#org @NAME_LV100_FIRE_89
+まっかなやいば
+#org @NAME_LV100_FIRE_90
+ごうえんのたま
+#org @NAME_LV100_FIRE_91
+ひのくにのおう
+#org @NAME_LV100_FIRE_92
+ほむらのねがい
+#org @NAME_LV100_FIRE_93
+さいごまでもえる
+#org @NAME_LV100_FIRE_94
+ひのなみ
+#org @NAME_LV100_FIRE_95
+せんこうのほむら
+#org @NAME_LV100_FIRE_96
+ほのおのれっしゃ
+#org @NAME_LV100_FIRE_97
+だいもんじかけら
+#org @NAME_LV100_FIRE_98
+もえたつだいち
+#org @NAME_LV100_FIRE_99
+ひのたまのおわり
+#org @NAME_LV100_FIRE_100
+ほむらのさいご
+#org @NAME_LV100_WATER_1
+しずくのつぶて
+#org @NAME_LV100_WATER_2
+あぶくまくら
+#org @NAME_LV100_WATER_3
+みなもたたき
+#org @NAME_LV100_WATER_4
+しろいしぶき
+#org @NAME_LV100_WATER_5
+ぬれつばめ
+#org @NAME_LV100_WATER_6
+さざなみ
+#org @NAME_LV100_WATER_7
+ひしゃくがえし
+#org @NAME_LV100_WATER_8
+なみまくら
+#org @NAME_LV100_WATER_9
+てんすいのこえ
+#org @NAME_LV100_WATER_10
+みずたまジャンプ
+#org @NAME_LV100_WATER_11
+かわせみダイブ
+#org @NAME_LV100_WATER_12
+こもりうたのなみ
+#org @NAME_LV100_WATER_13
+ぬかるみしぶき
+#org @NAME_LV100_WATER_14
+いずみのめぐみ
+#org @NAME_LV100_WATER_15
+うしおのつめ
+#org @NAME_LV100_WATER_16
+ほしがたしぶき
+#org @NAME_LV100_WATER_17
+ながれぼし
+#org @NAME_LV100_WATER_18
+せせらぎのうた
+#org @NAME_LV100_WATER_19
+すいちゅうのかげ
+#org @NAME_LV100_WATER_20
+あわだてスプレー
+#org @NAME_LV100_WATER_21
+しおかぜのゆび
+#org @NAME_LV100_WATER_22
+あめあがりのにじ
+#org @NAME_LV100_WATER_23
+ふかみのさそい
+#org @NAME_LV100_WATER_24
+みずくさたたき
+#org @NAME_LV100_WATER_25
+かわのぬし
+#org @NAME_LV100_WATER_26
+ずぶぬれ
+#org @NAME_LV100_WATER_27
+あまがさのまもり
+#org @NAME_LV100_WATER_28
+まきなみ
+#org @NAME_LV100_WATER_29
+しずくのくすり
+#org @NAME_LV100_WATER_30
+つりぼりのわな
+#org @NAME_LV100_WATER_31
+きりさめのまい
+#org @NAME_LV100_WATER_32
+さんごのいぶき
+#org @NAME_LV100_WATER_33
+かいがらくずし
+#org @NAME_LV100_WATER_34
+うみねこのこえ
+#org @NAME_LV100_WATER_35
+ひたひたのあし
+#org @NAME_LV100_WATER_36
+とびうおのつばさ
+#org @NAME_LV100_WATER_37
+しおまねきばさみ
+#org @NAME_LV100_WATER_38
+せびれカッター
+#org @NAME_LV100_WATER_39
+うずまきのとびら
+#org @NAME_LV100_WATER_40
+くじらのうた
+#org @NAME_LV100_WATER_41
+しおひがり
+#org @NAME_LV100_WATER_42
+みちしおのうた
+#org @NAME_LV100_WATER_43
+せんすいかん
+#org @NAME_LV100_WATER_44
+かっぱのいたずら
+#org @NAME_LV100_WATER_45
+つきのみなも
+#org @NAME_LV100_WATER_46
+はまべのしらべ
+#org @NAME_LV100_WATER_47
+たまりみず
+#org @NAME_LV100_WATER_48
+あらいぐまのて
+#org @NAME_LV100_WATER_49
+おおしおのいかり
+#org @NAME_LV100_WATER_50
+ふぶきなみ
+#org @NAME_LV100_WATER_51
+こころのみず
+#org @NAME_LV100_WATER_52
+たきつぼ
+#org @NAME_LV100_WATER_53
+おおあめのひ
+#org @NAME_LV100_WATER_54
+ひきしおのあと
+#org @NAME_LV100_WATER_55
+くらげのやかた
+#org @NAME_LV100_WATER_56
+ふかいうみ
+#org @NAME_LV100_WATER_57
+みずうみのやいば
+#org @NAME_LV100_WATER_58
+かがみのみなも
+#org @NAME_LV100_WATER_59
+こうずいのきざし
+#org @NAME_LV100_WATER_60
+とうとうのながれ
+#org @NAME_LV100_WATER_61
+ながしそうめん
+#org @NAME_LV100_WATER_62
+うずしおのわな
+#org @NAME_LV100_WATER_63
+ぬまちのしぶき
+#org @NAME_LV100_WATER_64
+とびこみアタック
+#org @NAME_LV100_WATER_65
+みずをさすもの
+#org @NAME_LV100_WATER_66
+あおのかげろう
+#org @NAME_LV100_WATER_67
+しおけむり
+#org @NAME_LV100_WATER_68
+さざれいし
+#org @NAME_LV100_WATER_69
+やまびこのたき
+#org @NAME_LV100_WATER_70
+すいぞくのさけび
+#org @NAME_LV100_WATER_71
+いきのこりのあわ
+#org @NAME_LV100_WATER_72
+かいりゅうダンス
+#org @NAME_LV100_WATER_73
+うなばらのいかり
+#org @NAME_LV100_WATER_74
+くらげのかざり
+#org @NAME_LV100_WATER_75
+みなわ
+#org @NAME_LV100_WATER_76
+せんとうのかぜ
+#org @NAME_LV100_WATER_77
+たいかいのたより
+#org @NAME_LV100_WATER_78
+ぎょぐんのしらせ
+#org @NAME_LV100_WATER_79
+ふなうたのなみ
+#org @NAME_LV100_WATER_80
+うみのいかり
+#org @NAME_LV100_WATER_81
+おおしお
+#org @NAME_LV100_WATER_82
+どろんこみず
+#org @NAME_LV100_WATER_83
+まんちょうのつき
+#org @NAME_LV100_WATER_84
+ふなぞこのさけび
+#org @NAME_LV100_WATER_85
+うおざのひかり
+#org @NAME_LV100_WATER_86
+せんすいのやいば
+#org @NAME_LV100_WATER_87
+みなもわたり
+#org @NAME_LV100_WATER_88
+かいじゅうのいき
+#org @NAME_LV100_WATER_89
+りゅうぐうのうた
+#org @NAME_LV100_WATER_90
+てっぽうだま
+#org @NAME_LV100_WATER_91
+あおのなみだ
+#org @NAME_LV100_WATER_92
+ほしくずのうしお
+#org @NAME_LV100_WATER_93
+すいしんのほこ
+#org @NAME_LV100_WATER_94
+つなみのはじまり
+#org @NAME_LV100_WATER_95
+わだつみのいかり
+#org @NAME_LV100_WATER_96
+かめのこうら
+#org @NAME_LV100_WATER_97
+まなつのしおさい
+#org @NAME_LV100_WATER_98
+おおうなばら
+#org @NAME_LV100_WATER_99
+うおのぼりのたき
+#org @NAME_LV100_WATER_100
+なみのせいれい
+#org @NAME_LV100_GRASS_1
+こはっぱのつぶて
+#org @NAME_LV100_GRASS_2
+たねをまく
+#org @NAME_LV100_GRASS_3
+つるのささやき
+#org @NAME_LV100_GRASS_4
+くさぶえのしらべ
+#org @NAME_LV100_GRASS_5
+つゆのしずく
+#org @NAME_LV100_GRASS_6
+はなびらのかおり
+#org @NAME_LV100_GRASS_7
+ひなたのまどろみ
+#org @NAME_LV100_GRASS_8
+わたげとばし
+#org @NAME_LV100_GRASS_9
+ねっこしばり
+#org @NAME_LV100_GRASS_10
+みどりのためいき
+#org @NAME_LV100_GRASS_11
+とげのまい
+#org @NAME_LV100_GRASS_12
+しびれほうし
+#org @NAME_LV100_GRASS_13
+たけのこアタック
+#org @NAME_LV100_GRASS_14
+ようぶんほきゅう
+#org @NAME_LV100_GRASS_15
+かさのたいあたり
+#org @NAME_LV100_GRASS_16
+まつぼっくり
+#org @NAME_LV100_GRASS_17
+どくのつぼみ
+#org @NAME_LV100_GRASS_18
+いばらのわな
+#org @NAME_LV100_GRASS_19
+しげみがくれ
+#org @NAME_LV100_GRASS_20
+はなびらのふぶき
+#org @NAME_LV100_GRASS_21
+くさわけダッシュ
+#org @NAME_LV100_GRASS_22
+こもれびのひかり
+#org @NAME_LV100_GRASS_23
+もりのささやき
+#org @NAME_LV100_GRASS_24
+おおばこのたたき
+#org @NAME_LV100_GRASS_25
+ねむりのこけ
+#org @NAME_LV100_GRASS_26
+どんぐりころころ
+#org @NAME_LV100_GRASS_27
+やどりぎアタック
+#org @NAME_LV100_GRASS_28
+はっぱのうたげ
+#org @NAME_LV100_GRASS_29
+きりかぶのまもり
+#org @NAME_LV100_GRASS_30
+みずやりのあと
+#org @NAME_LV100_GRASS_31
+ひだまりのまい
+#org @NAME_LV100_GRASS_32
+つるのからみつき
+#org @NAME_LV100_GRASS_33
+はなのきおく
+#org @NAME_LV100_GRASS_34
+ふきのとう
+#org @NAME_LV100_GRASS_35
+きのこのかさぶた
+#org @NAME_LV100_GRASS_36
+めぶきのちから
+#org @NAME_LV100_GRASS_37
+しげるもり
+#org @NAME_LV100_GRASS_38
+たけやりのさき
+#org @NAME_LV100_GRASS_39
+くさのいぶき
+#org @NAME_LV100_GRASS_40
+もりのかみさま
+#org @NAME_LV100_GRASS_41
+はなかざりのまい
+#org @NAME_LV100_GRASS_42
+ホルモンざい
+#org @NAME_LV100_GRASS_43
+ふゆごもり
+#org @NAME_LV100_GRASS_44
+かやのはなびら
+#org @NAME_LV100_GRASS_45
+くさはらのかげ
+#org @NAME_LV100_GRASS_46
+きばりのつる
+#org @NAME_LV100_GRASS_47
+ひかりのうた
+#org @NAME_LV100_GRASS_48
+ちいさなもり
+#org @NAME_LV100_GRASS_49
+あさつゆのけむり
+#org @NAME_LV100_GRASS_50
+ひまわりばくだん
+#org @NAME_LV100_GRASS_51
+ほうしのきり
+#org @NAME_LV100_GRASS_52
+はなびらだいかい
+#org @NAME_LV100_GRASS_53
+やどりぎドリーム
+#org @NAME_LV100_GRASS_54
+こけむすいわ
+#org @NAME_LV100_GRASS_55
+ばっさりのこ
+#org @NAME_LV100_GRASS_56
+せいなるはっぱ
+#org @NAME_LV100_GRASS_57
+くさのおきて
+#org @NAME_LV100_GRASS_58
+いろどりのはな
+#org @NAME_LV100_GRASS_59
+ぎんいろビーム
+#org @NAME_LV100_GRASS_60
+たいぼくのうらみ
+#org @NAME_LV100_GRASS_61
+こもりうたのはな
+#org @NAME_LV100_GRASS_62
+ゆりかごのつる
+#org @NAME_LV100_GRASS_63
+とうめいなはっぱ
+#org @NAME_LV100_GRASS_64
+やぶのなか
+#org @NAME_LV100_GRASS_65
+かれえだのやいば
+#org @NAME_LV100_GRASS_66
+みどりのかぜ
+#org @NAME_LV100_GRASS_67
+つるくさのあらし
+#org @NAME_LV100_GRASS_68
+ふきだすほうし
+#org @NAME_LV100_GRASS_69
+めいぼくのつえ
+#org @NAME_LV100_GRASS_70
+はるのしらせ
+#org @NAME_LV100_GRASS_71
+からのもり
+#org @NAME_LV100_GRASS_72
+はなちるさと
+#org @NAME_LV100_GRASS_73
+そうげんのまもり
+#org @NAME_LV100_GRASS_74
+とげとげのたね
+#org @NAME_LV100_GRASS_75
+くさかげのわな
+#org @NAME_LV100_GRASS_76
+ねこじゃらし
+#org @NAME_LV100_GRASS_77
+わたぼうしぐも
+#org @NAME_LV100_GRASS_78
+しんりょくやいば
+#org @NAME_LV100_GRASS_79
+かんなぎのつる
+#org @NAME_LV100_GRASS_80
+みちくさ
+#org @NAME_LV100_GRASS_81
+はなびらのきおく
+#org @NAME_LV100_GRASS_82
+そうじゅタックル
+#org @NAME_LV100_GRASS_83
+みのりのふぶき
+#org @NAME_LV100_GRASS_84
+やまのかみさま
+#org @NAME_LV100_GRASS_85
+せかいじゅいぶき
+#org @NAME_LV100_GRASS_86
+こもりうたのもり
+#org @NAME_LV100_GRASS_87
+くすりのはな
+#org @NAME_LV100_GRASS_88
+はびこるつる
+#org @NAME_LV100_GRASS_89
+みどりのさけび
+#org @NAME_LV100_GRASS_90
+きんもくせい
+#org @NAME_LV100_GRASS_91
+ひだまりのいのり
+#org @NAME_LV100_GRASS_92
+じゅかいのうねり
+#org @NAME_LV100_GRASS_93
+こもれびのつるぎ
+#org @NAME_LV100_GRASS_94
+はなのいかり
+#org @NAME_LV100_GRASS_95
+しんりょくあらし
+#org @NAME_LV100_GRASS_96
+たいぼくのやどり
+#org @NAME_LV100_GRASS_97
+なつくさのうた
+#org @NAME_LV100_GRASS_98
+せかいをおおう
+#org @NAME_LV100_GRASS_99
+ひらけごま
+#org @NAME_LV100_GRASS_100
+むげんのしげみ
+#org @NAME_LV100_ELECTRIC_1
+ぱちぱちショック
+#org @NAME_LV100_ELECTRIC_2
+せいでんきのたば
+#org @NAME_LV100_ELECTRIC_3
+ピリピリタッチ
+#org @NAME_LV100_ELECTRIC_4
+でんきのまくら
+#org @NAME_LV100_ELECTRIC_5
+ほたるびスパーク
+#org @NAME_LV100_ELECTRIC_6
+こうでんしのうた
+#org @NAME_LV100_ELECTRIC_7
+ビリビリはじき
+#org @NAME_LV100_ELECTRIC_8
+プラスのしずく
+#org @NAME_LV100_ELECTRIC_9
+たまりでんき
+#org @NAME_LV100_ELECTRIC_10
+いなずまのたね
+#org @NAME_LV100_ELECTRIC_11
+ライトニング
+#org @NAME_LV100_ELECTRIC_12
+ぴかりのひとみ
+#org @NAME_LV100_ELECTRIC_13
+でんじのさざなみ
+#org @NAME_LV100_ELECTRIC_14
+かみなりこぞう
+#org @NAME_LV100_ELECTRIC_15
+スパークのうた
+#org @NAME_LV100_ELECTRIC_16
+ほうでんまえぶれ
+#org @NAME_LV100_ELECTRIC_17
+じばのこえ
+#org @NAME_LV100_ELECTRIC_18
+でんせんのわな
+#org @NAME_LV100_ELECTRIC_19
+サンダーキック
+#org @NAME_LV100_ELECTRIC_20
+ちいさなかみなり
+#org @NAME_LV100_ELECTRIC_21
+ツインパルス
+#org @NAME_LV100_ELECTRIC_22
+でんぱのいたずら
+#org @NAME_LV100_ELECTRIC_23
+かみなりぐもの
+#org @NAME_LV100_ELECTRIC_24
+うなぎのでんげき
+#org @NAME_LV100_ELECTRIC_25
+すずめばち
+#org @NAME_LV100_ELECTRIC_26
+まひのしらべ
+#org @NAME_LV100_ELECTRIC_27
+しびれひげ
+#org @NAME_LV100_ELECTRIC_28
+プラズマのつぶ
+#org @NAME_LV100_ELECTRIC_29
+いかずちのよろい
+#org @NAME_LV100_ELECTRIC_30
+とうめいなでんき
+#org @NAME_LV100_ELECTRIC_31
+ひかりのアロー
+#org @NAME_LV100_ELECTRIC_32
+らいめいロア
+#org @NAME_LV100_ELECTRIC_33
+でんじのつばさ
+#org @NAME_LV100_ELECTRIC_34
+バチバチあらし
+#org @NAME_LV100_ELECTRIC_35
+クリップスパーク
+#org @NAME_LV100_ELECTRIC_36
+じばりょくのかべ
+#org @NAME_LV100_ELECTRIC_37
+かみなりクロー
+#org @NAME_LV100_ELECTRIC_38
+ライトニングボ
+#org @NAME_LV100_ELECTRIC_39
+おおきなイナズマ
+#org @NAME_LV100_ELECTRIC_40
+ほうでんだいち
+#org @NAME_LV100_ELECTRIC_41
+ボルトターン
+#org @NAME_LV100_ELECTRIC_42
+ぎんいろでんじは
+#org @NAME_LV100_ELECTRIC_43
+かみなりのひとみ
+#org @NAME_LV100_ELECTRIC_44
+やみよのいなずま
+#org @NAME_LV100_ELECTRIC_45
+でんじのだいほう
+#org @NAME_LV100_ELECTRIC_46
+でんじのつめ
+#org @NAME_LV100_ELECTRIC_47
+トランスミッター
+#org @NAME_LV100_ELECTRIC_48
+でんきのくもあみ
+#org @NAME_LV100_ELECTRIC_49
+ナノサンダー
+#org @NAME_LV100_ELECTRIC_50
+じゅうでんかいし
+#org @NAME_LV100_ELECTRIC_51
+せんこうのうた
+#org @NAME_LV100_ELECTRIC_52
+いかずちくだき
+#org @NAME_LV100_ELECTRIC_53
+でんきあしのまい
+#org @NAME_LV100_ELECTRIC_54
+サンダーテール
+#org @NAME_LV100_ELECTRIC_55
+スパークラッシュ
+#org @NAME_LV100_ELECTRIC_56
+ランプのまじない
+#org @NAME_LV100_ELECTRIC_57
+ちょうでんあつ
+#org @NAME_LV100_ELECTRIC_58
+いかずちのたづな
+#org @NAME_LV100_ELECTRIC_59
+つかのまのひかり
+#org @NAME_LV100_ELECTRIC_60
+かみなりまゆげ
+#org @NAME_LV100_ELECTRIC_61
+せいでんファング
+#org @NAME_LV100_ELECTRIC_62
+ほしのいかずち
+#org @NAME_LV100_ELECTRIC_63
+ボルテージ
+#org @NAME_LV100_ELECTRIC_64
+でんきのうみ
+#org @NAME_LV100_ELECTRIC_65
+じゅうでんのこえ
+#org @NAME_LV100_ELECTRIC_66
+チャージアタック
+#org @NAME_LV100_ELECTRIC_67
+ひかりのわ
+#org @NAME_LV100_ELECTRIC_68
+みなぎるでんりゅ
+#org @NAME_LV100_ELECTRIC_69
+ぴりりのまもり
+#org @NAME_LV100_ELECTRIC_70
+スパイクボルト
+#org @NAME_LV100_ELECTRIC_71
+いかずちのこだま
+#org @NAME_LV100_ELECTRIC_72
+サージのいかり
+#org @NAME_LV100_ELECTRIC_73
+かみなりおたけび
+#org @NAME_LV100_ELECTRIC_74
+プラズマのやいば
+#org @NAME_LV100_ELECTRIC_75
+フルチャージ
+#org @NAME_LV100_ELECTRIC_76
+でんじのあみ
+#org @NAME_LV100_ELECTRIC_77
+いなずまダッシュ
+#org @NAME_LV100_ELECTRIC_78
+じりょくのうず
+#org @NAME_LV100_ELECTRIC_79
+ぴかぴかフラッ
+#org @NAME_LV100_ELECTRIC_80
+ほうでんのまい
+#org @NAME_LV100_ELECTRIC_81
+ちょうでんじほう
+#org @NAME_LV100_ELECTRIC_82
+らいてんのいかり
+#org @NAME_LV100_ELECTRIC_83
+バチバチクラッシ
+#org @NAME_LV100_ELECTRIC_84
+スパーキング
+#org @NAME_LV100_ELECTRIC_85
+ゴロゴロぐもり
+#org @NAME_LV100_ELECTRIC_86
+でんげきのうた
+#org @NAME_LV100_ELECTRIC_87
+いなずまのうず
+#org @NAME_LV100_ELECTRIC_88
+ぱちぱちのよろい
+#org @NAME_LV100_ELECTRIC_89
+いかずちのみやこ
+#org @NAME_LV100_ELECTRIC_90
+らいめいバースト
+#org @NAME_LV100_ELECTRIC_91
+スパークのあらし
+#org @NAME_LV100_ELECTRIC_92
+いなずまのきば
+#org @NAME_LV100_ELECTRIC_93
+いなずまのつるぎ
+#org @NAME_LV100_ELECTRIC_94
+ライジング
+#org @NAME_LV100_ELECTRIC_95
+ほしくだき
+#org @NAME_LV100_ELECTRIC_96
+でんきのきおく
+#org @NAME_LV100_ELECTRIC_97
+ライトニングスコ
+#org @NAME_LV100_ELECTRIC_98
+てんちのいかり
+#org @NAME_LV100_ELECTRIC_99
+ほうらいのでんこ
+#org @NAME_LV100_ELECTRIC_100
+かみなりさま
+#org @NAME_LV100_PSYCHIC_1
+ねんりきのつぶて
+#org @NAME_LV100_PSYCHIC_2
+ちいさなひらめき
+#org @NAME_LV100_PSYCHIC_3
+こころのまなざし
+#org @NAME_LV100_PSYCHIC_4
+ふしぎなまじない
+#org @NAME_LV100_PSYCHIC_5
+ゆめのかけら
+#org @NAME_LV100_PSYCHIC_6
+うつろなまなざし
+#org @NAME_LV100_PSYCHIC_7
+しろいまぼろし
+#org @NAME_LV100_PSYCHIC_8
+おもいでぶくろ
+#org @NAME_LV100_PSYCHIC_9
+きまぐれテレポ
+#org @NAME_LV100_PSYCHIC_10
+サイコタッチ
+#org @NAME_LV100_PSYCHIC_11
+まよいごのこえ
+#org @NAME_LV100_PSYCHIC_12
+よみとりのひとみ
+#org @NAME_LV100_PSYCHIC_13
+ねんのちから
+#org @NAME_LV100_PSYCHIC_14
+ひらめきのかげ
+#org @NAME_LV100_PSYCHIC_15
+こもりうたのゆめ
+#org @NAME_LV100_PSYCHIC_16
+ふしぎなひかり
+#org @NAME_LV100_PSYCHIC_17
+ゆうれいのうた
+#org @NAME_LV100_PSYCHIC_18
+おくびょうのつえ
+#org @NAME_LV100_PSYCHIC_19
+ひとだまテレパス
+#org @NAME_LV100_PSYCHIC_20
+かなしばりのすず
+#org @NAME_LV100_PSYCHIC_21
+ゆめうつつのなみ
+#org @NAME_LV100_PSYCHIC_22
+きおくのかなた
+#org @NAME_LV100_PSYCHIC_23
+ねんりきアロー
+#org @NAME_LV100_PSYCHIC_24
+うつしかがみ
+#org @NAME_LV100_PSYCHIC_25
+まどろみのしずく
+#org @NAME_LV100_PSYCHIC_26
+ふしぎなちから
+#org @NAME_LV100_PSYCHIC_27
+こころのつえ
+#org @NAME_LV100_PSYCHIC_28
+やさしいひだまり
+#org @NAME_LV100_PSYCHIC_29
+いたずらテレキネ
+#org @NAME_LV100_PSYCHIC_30
+しんぴのきらめき
+#org @NAME_LV100_PSYCHIC_31
+ふしぎなヴェール
+#org @NAME_LV100_PSYCHIC_32
+ひたいのチャクラ
+#org @NAME_LV100_PSYCHIC_33
+せいしんいたずら
+#org @NAME_LV100_PSYCHIC_34
+あしたのゆめ
+#org @NAME_LV100_PSYCHIC_35
+ゆらめくひとみ
+#org @NAME_LV100_PSYCHIC_36
+サイコステップ
+#org @NAME_LV100_PSYCHIC_37
+ねんりきのうず
+#org @NAME_LV100_PSYCHIC_38
+こころのとびら
+#org @NAME_LV100_PSYCHIC_39
+ふしぎなふんいき
+#org @NAME_LV100_PSYCHIC_40
+ゆめみのかけら
+#org @NAME_LV100_PSYCHIC_41
+くうそうのつるぎ
+#org @NAME_LV100_PSYCHIC_42
+しんくうテレポ
+#org @NAME_LV100_PSYCHIC_43
+ねんりきのはどう
+#org @NAME_LV100_PSYCHIC_44
+あやつりいと
+#org @NAME_LV100_PSYCHIC_45
+こころのばくだん
+#org @NAME_LV100_PSYCHIC_46
+ちょうのうりき
+#org @NAME_LV100_PSYCHIC_47
+サイコスマッシュ
+#org @NAME_LV100_PSYCHIC_48
+ふしぎなゆめ
+#org @NAME_LV100_PSYCHIC_49
+きえるまぼろし
+#org @NAME_LV100_PSYCHIC_50
+ねがいのほし
+#org @NAME_LV100_PSYCHIC_51
+ゆめくいのしらべ
+#org @NAME_LV100_PSYCHIC_52
+こうそくのひとみ
+#org @NAME_LV100_PSYCHIC_53
+ひとやすみのゆめ
+#org @NAME_LV100_PSYCHIC_54
+きおくのしずく
+#org @NAME_LV100_PSYCHIC_55
+サイコのにわ
+#org @NAME_LV100_PSYCHIC_56
+ふしぎなせかいへ
+#org @NAME_LV100_PSYCHIC_57
+おもいだしのうた
+#org @NAME_LV100_PSYCHIC_58
+ねんりきのさけび
+#org @NAME_LV100_PSYCHIC_59
+こころのやいば
+#org @NAME_LV100_PSYCHIC_60
+さいみんのうた
+#org @NAME_LV100_PSYCHIC_61
+まなざしのちから
+#org @NAME_LV100_PSYCHIC_62
+ゆめうらない
+#org @NAME_LV100_PSYCHIC_63
+サイコエッジ
+#org @NAME_LV100_PSYCHIC_64
+ふしぎなだいち
+#org @NAME_LV100_PSYCHIC_65
+こころのおもし
+#org @NAME_LV100_PSYCHIC_66
+サイコダイブ
+#org @NAME_LV100_PSYCHIC_67
+ねんりきのかべ
+#org @NAME_LV100_PSYCHIC_68
+きえるきおく
+#org @NAME_LV100_PSYCHIC_69
+ひとみのきらめき
+#org @NAME_LV100_PSYCHIC_70
+サイコスプレッド
+#org @NAME_LV100_PSYCHIC_71
+うつろいのかがみ
+#org @NAME_LV100_PSYCHIC_72
+ねんりきのあらし
+#org @NAME_LV100_PSYCHIC_73
+ゆめのくに
+#org @NAME_LV100_PSYCHIC_74
+サイキックやいば
+#org @NAME_LV100_PSYCHIC_75
+ふしぎのパワー
+#org @NAME_LV100_PSYCHIC_76
+ほしのきおく
+#org @NAME_LV100_PSYCHIC_77
+サイコストーム
+#org @NAME_LV100_PSYCHIC_78
+ゆめのさざなみ
+#org @NAME_LV100_PSYCHIC_79
+ひとみのそら
+#org @NAME_LV100_PSYCHIC_80
+ねんりきウェーブ
+#org @NAME_LV100_PSYCHIC_81
+サイコのひらめき
+#org @NAME_LV100_PSYCHIC_82
+こころのみずうみ
+#org @NAME_LV100_PSYCHIC_83
+ねんりきのつばさ
+#org @NAME_LV100_PSYCHIC_84
+ゆめのたそがれ
+#org @NAME_LV100_PSYCHIC_85
+むげんのひらめき
+#org @NAME_LV100_PSYCHIC_86
+ねんじゅのひとみ
+#org @NAME_LV100_PSYCHIC_87
+サイコバンプ
+#org @NAME_LV100_PSYCHIC_88
+ひとりごとのうた
+#org @NAME_LV100_PSYCHIC_89
+ふしぎなほうせき
+#org @NAME_LV100_PSYCHIC_90
+ゆめのかなたへ
+#org @NAME_LV100_PSYCHIC_91
+ふしぎなほしぞら
+#org @NAME_LV100_PSYCHIC_92
+ねんりきほう
+#org @NAME_LV100_PSYCHIC_93
+こころのつるぎ
+#org @NAME_LV100_PSYCHIC_94
+サイコスター
+#org @NAME_LV100_PSYCHIC_95
+ゆめのはて
+#org @NAME_LV100_PSYCHIC_96
+ひらめきひとすじ
+#org @NAME_LV100_PSYCHIC_97
+ねんりきのうねり
+#org @NAME_LV100_PSYCHIC_98
+むげんのまぼろし
+#org @NAME_LV100_PSYCHIC_99
+サイコリープ
+#org @NAME_LV100_PSYCHIC_100
+ふしぎなせかい
+#org @NAME_LV100_ICE_1
+こごえるつぶて
+#org @NAME_LV100_ICE_2
+つららのさきっぽ
+#org @NAME_LV100_ICE_3
+しものはしら
+#org @NAME_LV100_ICE_4
+ふゆのかぜ
+#org @NAME_LV100_ICE_5
+ゆきだまなげ
+#org @NAME_LV100_ICE_6
+ひょうてんのいき
+#org @NAME_LV100_ICE_7
+こおりのまくら
+#org @NAME_LV100_ICE_8
+こゆきまじり
+#org @NAME_LV100_ICE_9
+ふぶきのたね
+#org @NAME_LV100_ICE_10
+ひやっこいて
+#org @NAME_LV100_ICE_11
+しもやけのいき
+#org @NAME_LV100_ICE_12
+こおりのかけら
+#org @NAME_LV100_ICE_13
+あられのまえぶれ
+#org @NAME_LV100_ICE_14
+つららころがし
+#org @NAME_LV100_ICE_15
+ゆきんこのわな
+#org @NAME_LV100_ICE_16
+ひえびえのこえ
+#org @NAME_LV100_ICE_17
+こおりのつめ
+#org @NAME_LV100_ICE_18
+しろいきりごおり
+#org @NAME_LV100_ICE_19
+ゆきうさぎキック
+#org @NAME_LV100_ICE_20
+きりごおり
+#org @NAME_LV100_ICE_21
+こごえるひとみ
+#org @NAME_LV100_ICE_22
+とうけつのうた
+#org @NAME_LV100_ICE_23
+ふぶきのダンス
+#org @NAME_LV100_ICE_24
+ゆきおんなのいき
+#org @NAME_LV100_ICE_25
+ひょうがのきば
+#org @NAME_LV100_ICE_26
+しもふりのつえ
+#org @NAME_LV100_ICE_27
+あられのまじない
+#org @NAME_LV100_ICE_28
+こおりのたてがみ
+#org @NAME_LV100_ICE_29
+ゆきどけのしずく
+#org @NAME_LV100_ICE_30
+ダイヤのしも
+#org @NAME_LV100_ICE_31
+ふぶきのかべ
+#org @NAME_LV100_ICE_32
+オーロラのひかり
+#org @NAME_LV100_ICE_33
+つららのやり
+#org @NAME_LV100_ICE_34
+かちこちのわな
+#org @NAME_LV100_ICE_35
+ひょうせつのいき
+#org @NAME_LV100_ICE_36
+とうしのつばさ
+#org @NAME_LV100_ICE_37
+さむけのまなざし
+#org @NAME_LV100_ICE_38
+じょおうのダンス
+#org @NAME_LV100_ICE_39
+こごえぬほし
+#org @NAME_LV100_ICE_40
+つららのニードル
+#org @NAME_LV100_ICE_41
+こおりのエッジ
+#org @NAME_LV100_ICE_42
+せつげんのかぜ
+#org @NAME_LV100_ICE_43
+アイスクラッシュ
+#org @NAME_LV100_ICE_44
+かんぱのおたけび
+#org @NAME_LV100_ICE_45
+ひょうざんわり
+#org @NAME_LV100_ICE_46
+こごえるうらみ
+#org @NAME_LV100_ICE_47
+しんしんふぶき
+#org @NAME_LV100_ICE_48
+れいきのたば
+#org @NAME_LV100_ICE_49
+ゆきやまのしじま
+#org @NAME_LV100_ICE_50
+さむざむのかぜ
+#org @NAME_LV100_ICE_51
+つららのあめ
+#org @NAME_LV100_ICE_52
+ふぶきのさけび
+#org @NAME_LV100_ICE_53
+こおりのけっかい
+#org @NAME_LV100_ICE_54
+ゆきくずし
+#org @NAME_LV100_ICE_55
+きびしいさむさ
+#org @NAME_LV100_ICE_56
+はくぎんのつき
+#org @NAME_LV100_ICE_57
+しもがれのうた
+#org @NAME_LV100_ICE_58
+ひょうかのいき
+#org @NAME_LV100_ICE_59
+つめたいパンチ
+#org @NAME_LV100_ICE_60
+こおりのまもり
+#org @NAME_LV100_ICE_61
+たいせつなゆき
+#org @NAME_LV100_ICE_62
+ふかゆきのわな
+#org @NAME_LV100_ICE_63
+ゆきのせいれい
+#org @NAME_LV100_ICE_64
+つららのいかり
+#org @NAME_LV100_ICE_65
+ぎんせかいやいば
+#org @NAME_LV100_ICE_66
+ふぶきこごえ
+#org @NAME_LV100_ICE_67
+こおりのとびら
+#org @NAME_LV100_ICE_68
+はくぎんのかげ
+#org @NAME_LV100_ICE_69
+きびしいふぶき
+#org @NAME_LV100_ICE_70
+れいきのかたまり
+#org @NAME_LV100_ICE_71
+ひょうがのねがい
+#org @NAME_LV100_ICE_72
+とうけつのひかり
+#org @NAME_LV100_ICE_73
+ぜっかのまもり
+#org @NAME_LV100_ICE_74
+こごえるゆめ
+#org @NAME_LV100_ICE_75
+こおりのブレード
+#org @NAME_LV100_ICE_76
+せつえいのまい
+#org @NAME_LV100_ICE_77
+ゆきだるまだま
+#org @NAME_LV100_ICE_78
+しもばしらのたて
+#org @NAME_LV100_ICE_79
+ホワイトワールド
+#org @NAME_LV100_ICE_80
+こおりのくに
+#org @NAME_LV100_ICE_81
+ぜったいのこおり
+#org @NAME_LV100_ICE_82
+ひょうざんのつき
+#org @NAME_LV100_ICE_83
+ふぶきのナックル
+#org @NAME_LV100_ICE_84
+こおりのはて
+#org @NAME_LV100_ICE_85
+つららのだいほう
+#org @NAME_LV100_ICE_86
+れいきのうた
+#org @NAME_LV100_ICE_87
+ひょうがのじだい
+#org @NAME_LV100_ICE_88
+しろくまのいぶき
+#org @NAME_LV100_ICE_89
+こごえるかみなり
+#org @NAME_LV100_ICE_90
+ふぶきのあと
+#org @NAME_LV100_ICE_91
+ぎんかのきおく
+#org @NAME_LV100_ICE_92
+ひょうがのさけび
+#org @NAME_LV100_ICE_93
+ひょうけつソード
+#org @NAME_LV100_ICE_94
+つららのてんし
+#org @NAME_LV100_ICE_95
+はくぎんのあらし
+#org @NAME_LV100_ICE_96
+れいとうのひとみ
+#org @NAME_LV100_ICE_97
+ゆきおくりのうた
+#org @NAME_LV100_ICE_98
+ぜんぶこおらせる
+#org @NAME_LV100_ICE_99
+ダイヤスノー
+#org @NAME_LV100_ICE_100
+こおりのかみさま
+#org @NAME_LV100_DRAGON_1
+こりゅうのつめ
+#org @NAME_LV100_DRAGON_2
+ドラゴンスケイル
+#org @NAME_LV100_DRAGON_3
+ちびりゅうブレス
+#org @NAME_LV100_DRAGON_4
+ドラゴンステップ
+#org @NAME_LV100_DRAGON_5
+こりゅうのなき
+#org @NAME_LV100_DRAGON_6
+たつのこ
+#org @NAME_LV100_DRAGON_7
+りゅうのひとみ
+#org @NAME_LV100_DRAGON_8
+つばさのはばたき
+#org @NAME_LV100_DRAGON_9
+りゅうまじない
+#org @NAME_LV100_DRAGON_10
+こりゅうのしっぽ
+#org @NAME_LV100_DRAGON_11
+たつまきのたね
+#org @NAME_LV100_DRAGON_12
+りゅうがにらむ
+#org @NAME_LV100_DRAGON_13
+ドラゴンスパーク
+#org @NAME_LV100_DRAGON_14
+ドラゴンいびき
+#org @NAME_LV100_DRAGON_15
+やまのぬし
+#org @NAME_LV100_DRAGON_16
+りゅうのつめとぎ
+#org @NAME_LV100_DRAGON_17
+ほむらのうろこ
+#org @NAME_LV100_DRAGON_18
+りゅうのおはやし
+#org @NAME_LV100_DRAGON_19
+せきりゅうだん
+#org @NAME_LV100_DRAGON_20
+りゅうせいかけら
+#org @NAME_LV100_DRAGON_21
+りゅうじんダンス
+#org @NAME_LV100_DRAGON_22
+りゅうのおおあご
+#org @NAME_LV100_DRAGON_23
+りゅうのなみ
+#org @NAME_LV100_DRAGON_24
+うろこのよろい
+#org @NAME_LV100_DRAGON_25
+りゅうのとびこみ
+#org @NAME_LV100_DRAGON_26
+りゅうのふえ
+#org @NAME_LV100_DRAGON_27
+さんぷくのまもり
+#org @NAME_LV100_DRAGON_28
+しろりゅうブレス
+#org @NAME_LV100_DRAGON_29
+つるぎのさかな
+#org @NAME_LV100_DRAGON_30
+りゅうのあくび
+#org @NAME_LV100_DRAGON_31
+りゅうのちしお
+#org @NAME_LV100_DRAGON_32
+テイルスマッシュ
+#org @NAME_LV100_DRAGON_33
+ひりゅうのつばさ
+#org @NAME_LV100_DRAGON_34
+りゅうのこみち
+#org @NAME_LV100_DRAGON_35
+こうりゅうのつめ
+#org @NAME_LV100_DRAGON_36
+ぎんりゅうワルツ
+#org @NAME_LV100_DRAGON_37
+りゅうごろし
+#org @NAME_LV100_DRAGON_38
+たつのかくれが
+#org @NAME_LV100_DRAGON_39
+りゅうめいのうた
+#org @NAME_LV100_DRAGON_40
+いかりタックル
+#org @NAME_LV100_DRAGON_41
+ドラゴンストーム
+#org @NAME_LV100_DRAGON_42
+ひりゅうのひとみ
+#org @NAME_LV100_DRAGON_43
+りゅうのうたげ
+#org @NAME_LV100_DRAGON_44
+りゅうこつくだき
+#org @NAME_LV100_DRAGON_45
+かみなりりゅう
+#org @NAME_LV100_DRAGON_46
+りゅうのバリア
+#org @NAME_LV100_DRAGON_47
+ドラゴンナックル
+#org @NAME_LV100_DRAGON_48
+せいりゅうのたて
+#org @NAME_LV100_DRAGON_49
+りゅうのかくれが
+#org @NAME_LV100_DRAGON_50
+りゅうじんのげき
+#org @NAME_LV100_DRAGON_51
+ドラゴンバッシュ
+#org @NAME_LV100_DRAGON_52
+りゅうのほこら
+#org @NAME_LV100_DRAGON_53
+ひりゅうらいめい
+#org @NAME_LV100_DRAGON_54
+かいりゅうのかげ
+#org @NAME_LV100_DRAGON_55
+りゅうのめ
+#org @NAME_LV100_DRAGON_56
+ドラゴンシュート
+#org @NAME_LV100_DRAGON_57
+りゅうのおまつり
+#org @NAME_LV100_DRAGON_58
+ドラゴンのすみか
+#org @NAME_LV100_DRAGON_59
+りゅうきゅうけん
+#org @NAME_LV100_DRAGON_60
+じゅりゅうぶち
+#org @NAME_LV100_DRAGON_61
+ドラゴンフレア
+#org @NAME_LV100_DRAGON_62
+りゅうのほうこう
+#org @NAME_LV100_DRAGON_63
+りゅうのダッシュ
+#org @NAME_LV100_DRAGON_64
+せんりゅうのうた
+#org @NAME_LV100_DRAGON_65
+りゅうのうずまき
+#org @NAME_LV100_DRAGON_66
+りゅうのかぜのり
+#org @NAME_LV100_DRAGON_67
+りゅうこうのきば
+#org @NAME_LV100_DRAGON_68
+ひりゅうのあらし
+#org @NAME_LV100_DRAGON_69
+うろこおとし
+#org @NAME_LV100_DRAGON_70
+らいりゅうのつめ
+#org @NAME_LV100_DRAGON_71
+りゅうおうのこえ
+#org @NAME_LV100_DRAGON_72
+りゅうせいのむれ
+#org @NAME_LV100_DRAGON_73
+ドラゴンパニック
+#org @NAME_LV100_DRAGON_74
+りゅうのこごえ
+#org @NAME_LV100_DRAGON_75
+りゅうのひづめ
+#org @NAME_LV100_DRAGON_76
+りゅうじんまもり
+#org @NAME_LV100_DRAGON_77
+りゅうせいさいご
+#org @NAME_LV100_DRAGON_78
+りゅうへのねがい
+#org @NAME_LV100_DRAGON_79
+りゅうのつばさ
+#org @NAME_LV100_DRAGON_80
+りゅうけつだん
+#org @NAME_LV100_DRAGON_81
+おうのいかり
+#org @NAME_LV100_DRAGON_82
+ひりゅうほう
+#org @NAME_LV100_DRAGON_83
+りゅうのきおく
+#org @NAME_LV100_DRAGON_84
+ギガドラゴン
+#org @NAME_LV100_DRAGON_85
+ひりゅうのやいば
+#org @NAME_LV100_DRAGON_86
+りゅうのつるぎ
+#org @NAME_LV100_DRAGON_87
+りゅうしんのうた
+#org @NAME_LV100_DRAGON_88
+りゅうさばき
+#org @NAME_LV100_DRAGON_89
+りゅうのはてまで
+#org @NAME_LV100_DRAGON_90
+りゅうおうのかげ
+#org @NAME_LV100_DRAGON_91
+りゅうのきりこ
+#org @NAME_LV100_DRAGON_92
+りゅうのほえごえ
+#org @NAME_LV100_DRAGON_93
+りゅうじんクロー
+#org @NAME_LV100_DRAGON_94
+ひりゅうのはね
+#org @NAME_LV100_DRAGON_95
+りゅうせいのげき
+#org @NAME_LV100_DRAGON_96
+りゅうおうけん
+#org @NAME_LV100_DRAGON_97
+りゅうのおおうみ
+#org @NAME_LV100_DRAGON_98
+りゅうのさいなん
+#org @NAME_LV100_DRAGON_99
+りゅうじんのかげ
+#org @NAME_LV100_DRAGON_100
+りゅうのおうこく
+#org @NAME_LV100_DARK_1
+こそどろのゆび
+#org @NAME_LV100_DARK_2
+いじわるささやき
+#org @NAME_LV100_DARK_3
+くらやみのつぶて
+#org @NAME_LV100_DARK_4
+やみうち
+#org @NAME_LV100_DARK_5
+うらぎりのひとみ
+#org @NAME_LV100_DARK_6
+かげのいたずら
+#org @NAME_LV100_DARK_7
+ふいうちのキック
+#org @NAME_LV100_DARK_8
+かたすかし
+#org @NAME_LV100_DARK_9
+おそろしいかお
+#org @NAME_LV100_DARK_10
+くろいゆび
+#org @NAME_LV100_DARK_11
+ぬすみぐい
+#org @NAME_LV100_DARK_12
+わるだくみのたね
+#org @NAME_LV100_DARK_13
+よるのひそひそ
+#org @NAME_LV100_DARK_14
+きたないて
+#org @NAME_LV100_DARK_15
+うらみのいっぱつ
+#org @NAME_LV100_DARK_16
+ひきょうなやり
+#org @NAME_LV100_DARK_17
+いたずらこぞう
+#org @NAME_LV100_DARK_18
+おどしのこえ
+#org @NAME_LV100_DARK_19
+だましわざ
+#org @NAME_LV100_DARK_20
+かげわけ
+#org @NAME_LV100_DARK_21
+ふいうちパンチ
+#org @NAME_LV100_DARK_22
+よみちのこえ
+#org @NAME_LV100_DARK_23
+ブラックスパイク
+#org @NAME_LV100_DARK_24
+やみのそよかぜ
+#org @NAME_LV100_DARK_25
+こうかつなわな
+#org @NAME_LV100_DARK_26
+みちづれのうた
+#org @NAME_LV100_DARK_27
+やみのはどう
+#org @NAME_LV100_DARK_28
+かみつきまくり
+#org @NAME_LV100_DARK_29
+かたなしのかげ
+#org @NAME_LV100_DARK_30
+おもいあがり
+#org @NAME_LV100_DARK_31
+ちょうはつダンス
+#org @NAME_LV100_DARK_32
+しっぽをつかむ
+#org @NAME_LV100_DARK_33
+くらやみのきば
+#org @NAME_LV100_DARK_34
+こすいかげ
+#org @NAME_LV100_DARK_35
+ひとりごとのやみ
+#org @NAME_LV100_DARK_36
+よみちのわな
+#org @NAME_LV100_DARK_37
+うらみのうた
+#org @NAME_LV100_DARK_38
+ぬすっとのかたな
+#org @NAME_LV100_DARK_39
+かげうちラッシュ
+#org @NAME_LV100_DARK_40
+くろいひばな
+#org @NAME_LV100_DARK_41
+かたすかしのまい
+#org @NAME_LV100_DARK_42
+きたないやりかた
+#org @NAME_LV100_DARK_43
+ゆうやみのとばり
+#org @NAME_LV100_DARK_44
+やみよのいかり
+#org @NAME_LV100_DARK_45
+うらぎりのつるぎ
+#org @NAME_LV100_DARK_46
+くらやみのこえ
+#org @NAME_LV100_DARK_47
+ブラックアウト
+#org @NAME_LV100_DARK_48
+かげぬいのほこ
+#org @NAME_LV100_DARK_49
+ひきょうなてぐち
+#org @NAME_LV100_DARK_50
+ふくしゅうのうた
+#org @NAME_LV100_DARK_51
+ダークネスアロー
+#org @NAME_LV100_DARK_52
+わるいゆめ
+#org @NAME_LV100_DARK_53
+やみにとけこむ
+#org @NAME_LV100_DARK_54
+どくぎりのよる
+#org @NAME_LV100_DARK_55
+かげのからだ
+#org @NAME_LV100_DARK_56
+ブラックパンチ
+#org @NAME_LV100_DARK_57
+うらぎりのこえ
+#org @NAME_LV100_DARK_58
+やみのぬかるみ
+#org @NAME_LV100_DARK_59
+こしぬけのうた
+#org @NAME_LV100_DARK_60
+ぎゃくしゅうづめ
+#org @NAME_LV100_DARK_61
+よるのとばり
+#org @NAME_LV100_DARK_62
+ひとりきりのかげ
+#org @NAME_LV100_DARK_63
+わるだくみのかげ
+#org @NAME_LV100_DARK_64
+ぬすびとのまい
+#org @NAME_LV100_DARK_65
+くろいかみなり
+#org @NAME_LV100_DARK_66
+あくじのむくい
+#org @NAME_LV100_DARK_67
+よるのいかり
+#org @NAME_LV100_DARK_68
+やみのつばさ
+#org @NAME_LV100_DARK_69
+ダークスパイク
+#org @NAME_LV100_DARK_70
+くらやみごうもん
+#org @NAME_LV100_DARK_71
+かげのだましうち
+#org @NAME_LV100_DARK_72
+ぎゃくてんのうた
+#org @NAME_LV100_DARK_73
+ブラックフェイス
+#org @NAME_LV100_DARK_74
+うらみのつるぎ
+#org @NAME_LV100_DARK_75
+よるのしじま
+#org @NAME_LV100_DARK_76
+しっこくのやみ
+#org @NAME_LV100_DARK_77
+わるいいたずら
+#org @NAME_LV100_DARK_78
+とりつくやみ
+#org @NAME_LV100_DARK_79
+どくあくファング
+#org @NAME_LV100_DARK_80
+くろいほのお
+#org @NAME_LV100_DARK_81
+やみのだいほう
+#org @NAME_LV100_DARK_82
+ブラックラッシュ
+#org @NAME_LV100_DARK_83
+しっこくのやいば
+#org @NAME_LV100_DARK_84
+くらやみのかなた
+#org @NAME_LV100_DARK_85
+よごれたたましい
+#org @NAME_LV100_DARK_86
+あくむのうた
+#org @NAME_LV100_DARK_87
+かげのいかり
+#org @NAME_LV100_DARK_88
+ダークフォース
+#org @NAME_LV100_DARK_89
+ぬすっとのいのり
+#org @NAME_LV100_DARK_90
+わるだくみのはて
+#org @NAME_LV100_DARK_91
+やみのきおく
+#org @NAME_LV100_DARK_92
+やみのとうぞく
+#org @NAME_LV100_DARK_93
+くろいながれぼし
+#org @NAME_LV100_DARK_94
+よるのつるぎ
+#org @NAME_LV100_DARK_95
+やみのみやこ
+#org @NAME_LV100_DARK_96
+かげのかみさま
+#org @NAME_LV100_DARK_97
+くろいつばさ
+#org @NAME_LV100_DARK_98
+やみのしゅうえん
+#org @NAME_LV100_DARK_99
+ダークスマッシュ
+#org @NAME_LV100_DARK_100
+よるのおうこく
+#org @NAME_LV100_FAIRY_1
+ほしのかけら
+#org @NAME_LV100_FAIRY_2
+ふわふわいたずら
+#org @NAME_LV100_FAIRY_3
+きらきらのつぶ
+#org @NAME_LV100_FAIRY_4
+ゆびきりまじない
+#org @NAME_LV100_FAIRY_5
+はなかんむり
+#org @NAME_LV100_FAIRY_6
+よいこのキス
+#org @NAME_LV100_FAIRY_7
+ほわほわタッチ
+#org @NAME_LV100_FAIRY_8
+こもりうたのほし
+#org @NAME_LV100_FAIRY_9
+ようせいのわらい
+#org @NAME_LV100_FAIRY_10
+ちいさなまほう
+#org @NAME_LV100_FAIRY_11
+ゆめのつぶ
+#org @NAME_LV100_FAIRY_12
+ひかりのこびと
+#org @NAME_LV100_FAIRY_13
+ミルクのベール
+#org @NAME_LV100_FAIRY_14
+まぼろしのはね
+#org @NAME_LV100_FAIRY_15
+ほしくずのまほう
+#org @NAME_LV100_FAIRY_16
+あまいひそひそ
+#org @NAME_LV100_FAIRY_17
+わたあめアタック
+#org @NAME_LV100_FAIRY_18
+きらめきのつえ
+#org @NAME_LV100_FAIRY_19
+どろんこようせい
+#org @NAME_LV100_FAIRY_20
+チャームウィンク
+#org @NAME_LV100_FAIRY_21
+ようせいのダンス
+#org @NAME_LV100_FAIRY_22
+ふしぎのいたずら
+#org @NAME_LV100_FAIRY_23
+ハートのしるし
+#org @NAME_LV100_FAIRY_24
+ひとみのまたたき
+#org @NAME_LV100_FAIRY_25
+ミストのにわ
+#org @NAME_LV100_FAIRY_26
+ゆめみのパレード
+#org @NAME_LV100_FAIRY_27
+ほしぞらのしらべ
+#org @NAME_LV100_FAIRY_28
+やさしいてのひら
+#org @NAME_LV100_FAIRY_29
+ぬいぐるみガード
+#org @NAME_LV100_FAIRY_30
+ふんわりベール
+#org @NAME_LV100_FAIRY_31
+ようせいキス
+#org @NAME_LV100_FAIRY_32
+きらめきのまもり
+#org @NAME_LV100_FAIRY_33
+スイートパンチ
+#org @NAME_LV100_FAIRY_34
+つきあかりのまい
+#org @NAME_LV100_FAIRY_35
+ようせいはばたき
+#org @NAME_LV100_FAIRY_36
+めざめのキス
+#org @NAME_LV100_FAIRY_37
+こびとのいたずら
+#org @NAME_LV100_FAIRY_38
+ひかりのこなごな
+#org @NAME_LV100_FAIRY_39
+ほしのパレット
+#org @NAME_LV100_FAIRY_40
+きらきらスパイク
+#org @NAME_LV100_FAIRY_41
+ようせいささやき
+#org @NAME_LV100_FAIRY_42
+ほしくずのゆめ
+#org @NAME_LV100_FAIRY_43
+フェアリーテール
+#org @NAME_LV100_FAIRY_44
+ミラクルドレイン
+#org @NAME_LV100_FAIRY_45
+かなたのうた
+#org @NAME_LV100_FAIRY_46
+まほうのリボン
+#org @NAME_LV100_FAIRY_47
+しあわせのかけら
+#org @NAME_LV100_FAIRY_48
+ハートブレイカー
+#org @NAME_LV100_FAIRY_49
+ひかりのさざなみ
+#org @NAME_LV100_FAIRY_50
+ミルキーロード
+#org @NAME_LV100_FAIRY_51
+ふしぎのうた
+#org @NAME_LV100_FAIRY_52
+ほしのしずく
+#org @NAME_LV100_FAIRY_53
+ようせいのつるぎ
+#org @NAME_LV100_FAIRY_54
+ときめきのひかり
+#org @NAME_LV100_FAIRY_55
+フェアリーガード
+#org @NAME_LV100_FAIRY_56
+ゆめうらないキス
+#org @NAME_LV100_FAIRY_57
+ほしのいたずら
+#org @NAME_LV100_FAIRY_58
+ふんわりパンチ
+#org @NAME_LV100_FAIRY_59
+きらきらのにわ
+#org @NAME_LV100_FAIRY_60
+ねがいのたま
+#org @NAME_LV100_FAIRY_61
+ようせいのひとみ
+#org @NAME_LV100_FAIRY_62
+ミラクルステップ
+#org @NAME_LV100_FAIRY_63
+ラブリーハンマー
+#org @NAME_LV100_FAIRY_64
+ほしぞらのドレス
+#org @NAME_LV100_FAIRY_65
+きらめきげきりん
+#org @NAME_LV100_FAIRY_66
+ゆめのなかのキス
+#org @NAME_LV100_FAIRY_67
+フェアリーダイブ
+#org @NAME_LV100_FAIRY_68
+ひかりのつばさ
+#org @NAME_LV100_FAIRY_69
+こころのまじゅつ
+#org @NAME_LV100_FAIRY_70
+ミルクのしずく
+#org @NAME_LV100_FAIRY_71
+きせきのうたごえ
+#org @NAME_LV100_FAIRY_72
+ほしのまもり
+#org @NAME_LV100_FAIRY_73
+ようせいいたずら
+#org @NAME_LV100_FAIRY_74
+ハートのつるぎ
+#org @NAME_LV100_FAIRY_75
+ときめきのダンス
+#org @NAME_LV100_FAIRY_76
+ようせいのまなこ
+#org @NAME_LV100_FAIRY_77
+ミラクルひかり
+#org @NAME_LV100_FAIRY_78
+ようせいのめまい
+#org @NAME_LV100_FAIRY_79
+やさしいまほう
+#org @NAME_LV100_FAIRY_80
+きらめきのいき
+#org @NAME_LV100_FAIRY_81
+フェアリーほう
+#org @NAME_LV100_FAIRY_82
+ほしのうたげ
+#org @NAME_LV100_FAIRY_83
+ようせいていおう
+#org @NAME_LV100_FAIRY_84
+ときめきラッシュ
+#org @NAME_LV100_FAIRY_85
+しあわせのつばさ
+#org @NAME_LV100_FAIRY_86
+ほしぞらのダイブ
+#org @NAME_LV100_FAIRY_87
+ミラクルチャーム
+#org @NAME_LV100_FAIRY_88
+ひかりのおくり
+#org @NAME_LV100_FAIRY_89
+ようせいプリズム
+#org @NAME_LV100_FAIRY_90
+あまいゆめ
+#org @NAME_LV100_FAIRY_91
+きらめきのきおく
+#org @NAME_LV100_FAIRY_92
+ようせいほしぞら
+#org @NAME_LV100_FAIRY_93
+ひかりのつるぎ
+#org @NAME_LV100_FAIRY_94
+ほしくずのつばさ
+#org @NAME_LV100_FAIRY_95
+ミラクルバースト
+#org @NAME_LV100_FAIRY_96
+ようせいステッキ
+#org @NAME_LV100_FAIRY_97
+きらめきほう
+#org @NAME_LV100_FAIRY_98
+ほしのかなた
+#org @NAME_LV100_FAIRY_99
+ハートのげきど
+#org @NAME_LV100_FAIRY_100
+ようせいおうこく
+#org @NAME_LV100_RIL_1
+こぼれるつき
+#org @NAME_LV100_RIL_2
+ひとりごちる
+#org @NAME_LV100_RIL_3
+よいのくちぶえ
+#org @NAME_LV100_RIL_4
+つきのかげぼうし
+#org @NAME_LV100_RIL_5
+ほほのなみだ
+#org @NAME_LV100_RIL_6
+わすれもののうた
+#org @NAME_LV100_RIL_7
+かすかなおもいで
+#org @NAME_LV100_RIL_8
+こえをころして
+#org @NAME_LV100_RIL_9
+さびしいあしおと
+#org @NAME_LV100_RIL_10
+よるのひとみ
+#org @NAME_LV100_RIL_11
+きえそうなひかり
+#org @NAME_LV100_RIL_12
+おいてかれた
+#org @NAME_LV100_RIL_13
+つきあかりのみち
+#org @NAME_LV100_RIL_14
+みおくりのかげ
+#org @NAME_LV100_RIL_15
+せつないうた
+#org @NAME_LV100_RIL_16
+ねむれぬよる
+#org @NAME_LV100_RIL_17
+しずかなうたごえ
+#org @NAME_LV100_RIL_18
+ふりむけない
+#org @NAME_LV100_RIL_19
+かたすみのなみだ
+#org @NAME_LV100_RIL_20
+うすれゆくきおく
+#org @NAME_LV100_RIL_21
+つきあかりのいえ
+#org @NAME_LV100_RIL_22
+ひとりきりのよる
+#org @NAME_LV100_RIL_23
+おぼろづきよ
+#org @NAME_LV100_RIL_24
+たそがれのかげ
+#org @NAME_LV100_RIL_25
+ぬくもりのきおく
+#org @NAME_LV100_RIL_26
+だれもいないへや
+#org @NAME_LV100_RIL_27
+わかれのことば
+#org @NAME_LV100_RIL_28
+つきのしたたり
+#org @NAME_LV100_RIL_29
+むねのすきま
+#org @NAME_LV100_RIL_30
+やくそくゆびきり
+#org @NAME_LV100_RIL_31
+ほのかなつき
+#org @NAME_LV100_RIL_32
+うつろなこころ
+#org @NAME_LV100_RIL_33
+わすれられたまち
+#org @NAME_LV100_RIL_34
+なきむしのかげ
+#org @NAME_LV100_RIL_35
+しんやのつき
+#org @NAME_LV100_RIL_36
+さがしものさがし
+#org @NAME_LV100_RIL_37
+かげのまぼろし
+#org @NAME_LV100_RIL_38
+ゆうやみなきごえ
+#org @NAME_LV100_RIL_39
+つきのはなびら
+#org @NAME_LV100_RIL_40
+こころのひび
+#org @NAME_LV100_RIL_41
+おもいでのかけら
+#org @NAME_LV100_RIL_42
+くもまのつき
+#org @NAME_LV100_RIL_43
+ねがいごとのつき
+#org @NAME_LV100_RIL_44
+ひとりのダンス
+#org @NAME_LV100_RIL_45
+なみだけっしょう
+#org @NAME_LV100_RIL_46
+つきのかたすみ
+#org @NAME_LV100_RIL_47
+かえらぬひび
+#org @NAME_LV100_RIL_48
+さよならのきおく
+#org @NAME_LV100_RIL_49
+あしあとなきみち
+#org @NAME_LV100_RIL_50
+やさしいうそ
+#org @NAME_LV100_RIL_51
+つきのしらべ
+#org @NAME_LV100_RIL_52
+うたかたのゆめ
+#org @NAME_LV100_RIL_53
+こころのとりで
+#org @NAME_LV100_RIL_54
+せつなのまたたき
+#org @NAME_LV100_RIL_55
+きおくのかげ
+#org @NAME_LV100_RIL_56
+ふたりのひみつ
+#org @NAME_LV100_RIL_57
+まよいごのつき
+#org @NAME_LV100_RIL_58
+さびしさのうず
+#org @NAME_LV100_RIL_59
+おもいでがたり
+#org @NAME_LV100_RIL_60
+かなしみのつるぎ
+#org @NAME_LV100_RIL_61
+つきのかべ
+#org @NAME_LV100_RIL_62
+うらはらなきもち
+#org @NAME_LV100_RIL_63
+わすれえぬひ
+#org @NAME_LV100_RIL_64
+なみだのあめ
+#org @NAME_LV100_RIL_65
+おぼろげなきおく
+#org @NAME_LV100_RIL_66
+つきのつばさ
+#org @NAME_LV100_RIL_67
+こころのさけび
+#org @NAME_LV100_RIL_68
+ほしのないよる
+#org @NAME_LV100_RIL_69
+いつかのやくそく
+#org @NAME_LV100_RIL_70
+きえないこだま
+#org @NAME_LV100_RIL_71
+わすれなのつき
+#org @NAME_LV100_RIL_72
+つきのまなざし
+#org @NAME_LV100_RIL_73
+さびしがりのげき
+#org @NAME_LV100_RIL_74
+ゆうつきのよる
+#org @NAME_LV100_RIL_75
+なみだのかがみ
+#org @NAME_LV100_RIL_76
+ひとりのまもり
+#org @NAME_LV100_RIL_77
+いとしさのきおく
+#org @NAME_LV100_RIL_78
+つきのかなしみ
+#org @NAME_LV100_RIL_79
+こころのしじま
+#org @NAME_LV100_RIL_80
+かえれないばしょ
+#org @NAME_LV100_RIL_81
+つきあかりほう
+#org @NAME_LV100_RIL_82
+さびしさのはて
+#org @NAME_LV100_RIL_83
+ちいさななみだ
+#org @NAME_LV100_RIL_84
+わすれもののいけ
+#org @NAME_LV100_RIL_85
+つきへのいのり
+#org @NAME_LV100_RIL_86
+こえなきさけび
+#org @NAME_LV100_RIL_87
+けつい
+#org @NAME_LV100_RIL_88
+とわのつき
+#org @NAME_LV100_RIL_89
+きおくのなみ
+#org @NAME_LV100_RIL_90
+こころのくらやみ
+#org @NAME_LV100_RIL_91
+まんげつのよる
+#org @NAME_LV100_RIL_92
+つきのかなたへ
+#org @NAME_LV100_RIL_93
+わすれえぬなみだ
+#org @NAME_LV100_RIL_94
+ひとりのやいば
+#org @NAME_LV100_RIL_95
+さびしさのさけび
+#org @NAME_LV100_RIL_96
+つきあかりのうた
+#org @NAME_LV100_RIL_97
+きおくのはて
+#org @NAME_LV100_RIL_98
+とわのさびしさ
+#org @NAME_LV100_RIL_99
+つきのおもいで
+#org @NAME_LV100_RIL_100
+いつかまた
+#org @LV100_NAMES_0600_END
+#org @DUAL_NAMES_0630_BEGIN
+#org @NAME_DUAL_BUG_FLYING_1
+つむじサイズ
+#org @NAME_DUAL_BUG_FLYING_2
+そよかぜはねうち
+#org @NAME_DUAL_BUG_FLYING_3
+ビートルはばたき
+#org @NAME_DUAL_BUG_FLYING_4
+ソニックニードル
+#org @NAME_DUAL_BUG_FLYING_5
+かまきりつばさ
+#org @NAME_DUAL_NORMAL_FLYING_1
+ごういんドライブ
+#org @NAME_DUAL_NORMAL_FLYING_2
+まっすぐウイング
+#org @NAME_DUAL_NORMAL_FLYING_3
+かぜきりスタンプ
+#org @NAME_DUAL_NORMAL_FLYING_4
+ひらてかまいたち
+#org @NAME_DUAL_NORMAL_FLYING_5
+ぜんりょくダイブ
+#org @NAME_DUAL_GHOST_GRASS_1
+よみじふぶき
+#org @NAME_DUAL_GHOST_GRASS_2
+はなびらハンド
+#org @NAME_DUAL_GHOST_GRASS_3
+まぼろしウィップ
+#org @NAME_DUAL_GHOST_GRASS_4
+しんりょくクロー
+#org @NAME_DUAL_GHOST_GRASS_5
+つるミスト
+#org @NAME_DUAL_GRASS_POISON_1
+どくぎりシード
+#org @NAME_DUAL_GRASS_POISON_2
+ベノムストーム
+#org @NAME_DUAL_GRASS_POISON_3
+リーフスティング
+#org @NAME_DUAL_GRASS_POISON_4
+わかばポイズン
+#org @NAME_DUAL_GRASS_POISON_5
+しゅうきブレード
+#org @NAME_DUAL_BUG_POISON_1
+しびれどくシザー
+#org @NAME_DUAL_BUG_POISON_2
+かぶとファング
+#org @NAME_DUAL_BUG_POISON_3
+もうどくビート
+#org @NAME_DUAL_BUG_POISON_4
+はちのすどくばり
+#org @NAME_DUAL_BUG_POISON_5
+ヘドロサイズ
+#org @NAME_DUAL_BUG_STEEL_1
+クモのいとランス
+#org @NAME_DUAL_BUG_STEEL_2
+はねハンマー
+#org @NAME_DUAL_BUG_STEEL_3
+はがねスティング
+#org @NAME_DUAL_BUG_STEEL_4
+てっぺきニードル
+#org @NAME_DUAL_BUG_STEEL_5
+メタルリズム
+#org @NAME_DUAL_DRAGON_GROUND_1
+すなあらしブレス
+#org @NAME_DUAL_DRAGON_GROUND_2
+さばくテイル
+#org @NAME_DUAL_DRAGON_GROUND_3
+ドラゴドリル
+#org @NAME_DUAL_DRAGON_GROUND_4
+りゅうクエイク
+#org @NAME_DUAL_DRAGON_GROUND_5
+じなりパルス
+#org @NAME_DUAL_DRAGON_WATER_1
+きょうりゅうたき
+#org @NAME_DUAL_DRAGON_WATER_2
+たつウェーブ
+#org @NAME_DUAL_DRAGON_WATER_3
+りゅうみずポンプ
+#org @NAME_DUAL_DRAGON_WATER_4
+しおかぜクロー
+#org @NAME_DUAL_DRAGON_WATER_5
+しぶきパルス
+#org @NAME_DUAL_PSYCHIC_FAIRY_1
+ひらめきリボン
+#org @NAME_DUAL_PSYCHIC_FAIRY_2
+ねんりきウィンド
+#org @NAME_DUAL_PSYCHIC_FAIRY_3
+ほしビジョン
+#org @NAME_DUAL_PSYCHIC_FAIRY_4
+テレパスシャワー
+#org @NAME_DUAL_PSYCHIC_FAIRY_5
+きらめきサークル
+#org @NAME_DUAL_ROCK_FLYING_1
+あおぞらショット
+#org @NAME_DUAL_ROCK_FLYING_2
+せんぷうロック
+#org @NAME_DUAL_ROCK_FLYING_3
+ストーンつばさ
+#org @NAME_DUAL_ROCK_FLYING_4
+ガレキスタンプ
+#org @NAME_DUAL_ROCK_FLYING_5
+せきばんダイブ
+#org @NAME_DUAL_ROCK_WATER_1
+れいすいアーマー
+#org @NAME_DUAL_ROCK_WATER_2
+うずブレイク
+#org @NAME_DUAL_ROCK_WATER_3
+アクアいしつぶて
+#org @NAME_DUAL_ROCK_WATER_4
+ごつごつジェット
+#org @NAME_DUAL_ROCK_WATER_5
+なみショット
+#org @NAME_DUAL_STEEL_FAIRY_1
+ぎんいろスター
+#org @NAME_DUAL_STEEL_FAIRY_2
+くろがねダスト
+#org @NAME_DUAL_STEEL_FAIRY_3
+ムーンフィスト
+#org @NAME_DUAL_STEEL_FAIRY_4
+こうてつリボン
+#org @NAME_DUAL_STEEL_FAIRY_5
+ルナランス
+#org @NAME_DUAL_NORMAL_GRASS_1
+いっせいバインド
+#org @NAME_DUAL_NORMAL_GRASS_2
+おおぶりウィップ
+#org @NAME_DUAL_NORMAL_GRASS_3
+わかばストライク
+#org @NAME_DUAL_NORMAL_GRASS_4
+リーフアタック
+#org @NAME_DUAL_NORMAL_GRASS_5
+はなびらブロー
+#org @NAME_DUAL_WATER_GROUND_1
+だいちのながれ
+#org @NAME_DUAL_WATER_GROUND_2
+ぐらぐらポンプ
+#org @NAME_DUAL_WATER_GROUND_3
+どろぬまウェーブ
+#org @NAME_DUAL_WATER_GROUND_4
+しぶきじわれ
+#org @NAME_DUAL_WATER_GROUND_5
+アクアクラッシュ
+#org @NAME_DUAL_STEEL_PSYCHIC_1
+めいそうハンマー
+#org @NAME_DUAL_STEEL_PSYCHIC_2
+サイコセイバー
+#org @NAME_DUAL_STEEL_PSYCHIC_3
+はがねショック
+#org @NAME_DUAL_STEEL_PSYCHIC_4
+てっぺきブラスト
+#org @NAME_DUAL_WATER_FLYING_1
+れいすいウイング
+#org @NAME_DUAL_WATER_FLYING_2
+つむじジェット
+#org @NAME_DUAL_WATER_FLYING_3
+なみはばたき
+#org @NAME_DUAL_WATER_FLYING_4
+せんぷうたき
+#org @NAME_DUAL_WATER_DARK_1
+やみスプラッシュ
+#org @NAME_DUAL_WATER_DARK_2
+ダークストリーム
+#org @NAME_DUAL_WATER_DARK_3
+しおかぜフォール
+#org @NAME_DUAL_DRAGON_FLYING_1
+りゅうじんつばさ
+#org @NAME_DUAL_DRAGON_FLYING_2
+そよかぜブレス
+#org @NAME_DUAL_DRAGON_FLYING_3
+かぜきりテイル
+#org @NAME_DUAL_GRASS_DRAGON_1
+たつバインド
+#org @NAME_DUAL_GRASS_DRAGON_2
+つるファング
+#org @NAME_DUAL_GRASS_DRAGON_3
+ドラゴストーム
+#org @NAME_DUAL_FIRE_FIGHTING_1
+ねっけつフレイム
+#org @NAME_DUAL_FIRE_FIGHTING_2
+ほむらストレート
+#org @NAME_DUAL_FIRE_FIGHTING_3
+れんげきスパーク
+#org @NAME_DUAL_FIRE_GHOST_1
+かげファイア
+#org @NAME_DUAL_FIRE_GHOST_2
+ねっぷうゴースト
+#org @NAME_DUAL_FIRE_GHOST_3
+シャドーファイア
+#org @NAME_DUAL_PSYCHIC_FLYING_1
+ミラージュダイブ
+#org @NAME_DUAL_PSYCHIC_FLYING_2
+ソニックビジョン
+#org @NAME_DUAL_PSYCHIC_FLYING_3
+あおぞらサークル
+#org @NAME_DUAL_ROCK_GROUND_1
+がんせきスタンプ
+#org @NAME_DUAL_ROCK_GROUND_2
+いわやまドリル
+#org @NAME_DUAL_ROCK_GROUND_3
+ガレキすなけむり
+#org @NAME_DUAL_WATER_ICE_1
+うずスノー
+#org @NAME_DUAL_WATER_ICE_2
+フロストたき
+#org @NAME_DUAL_WATER_ICE_3
+つららポンプ
+#org @NAME_DUAL_DARK_FLYING_1
+くろいかまいたち
+#org @NAME_DUAL_DARK_FLYING_2
+あんこくドライブ
+#org @NAME_DUAL_DARK_FLYING_3
+つきやみはばたき
+#org @NAME_DUAL_GRASS_DARK_1
+よやみシード
+#org @NAME_DUAL_GRASS_DARK_2
+しんりょくベール
+#org @NAME_DUAL_GRASS_DARK_3
+やみざくらふぶき
+#org @NAME_DUAL_ELECTRIC_FLYING_1
+いかずちウイング
+#org @NAME_DUAL_ELECTRIC_FLYING_2
+しびれかまいたち
+#org @NAME_DUAL_ELECTRIC_FLYING_3
+かぜきりビーム
+#org @NAME_DUAL_FIRE_FLYING_1
+せんぷうほのお
+#org @NAME_DUAL_FIRE_FLYING_2
+ひばなつばさ
+#org @NAME_DUAL_FIRE_FLYING_3
+しゃくねつダイブ
+#org @NAME_DUAL_GROUND_STEEL_1
+くろがねじわれ
+#org @NAME_DUAL_GROUND_STEEL_2
+メタルクエイク
+#org @NAME_DUAL_GROUND_STEEL_3
+だいちフィスト
+#org @NAME_DUAL_WATER_PSYCHIC_1
+サイコジェット
+#org @NAME_DUAL_WATER_PSYCHIC_2
+テレパスウェーブ
+#org @NAME_DUAL_WATER_PSYCHIC_3
+しおかぜブラスト
+#org @NAME_DUAL_POISON_DARK_1
+ベノムホール
+#org @NAME_DUAL_POISON_DARK_2
+あんこくポイズン
+#org @NAME_DUAL_POISON_DARK_3
+しゅうきフォール
+#org @NAME_DUAL_DRAGON_ICE_1
+りゅうブリザード
+#org @NAME_DUAL_DRAGON_ICE_2
+れいきテイル
+#org @NAME_DUAL_DRAGON_ICE_3
+ふぶきブレス
+#org @NAME_DUAL_STEEL_DRAGON_1
+ぎんいろファング
+#org @NAME_DUAL_STEEL_DRAGON_2
+こうてつクロー
+#org @NAME_DUAL_STEEL_DRAGON_3
+りゅうせいのやり
+#org @NAME_DUAL_WATER_FIGHTING_1
+きあいストリーム
+#org @NAME_DUAL_WATER_FIGHTING_2
+アクアこぶし
+#org @NAME_DUAL_WATER_FIGHTING_3
+ごうけんポンプ
+#org @NAME_DUAL_GRASS_FLYING_1
+ソニックバインド
+#org @NAME_DUAL_GRASS_FLYING_2
+かまいたちカット
+#org @NAME_DUAL_GRASS_FLYING_3
+つむじシード
+#org @NAME_DUAL_GROUND_GHOST_1
+うらみクラッシュ
+#org @NAME_DUAL_GROUND_GHOST_2
+どろぬまラッシュ
+#org @NAME_DUAL_GROUND_GHOST_3
+ゆうれいじわれ
+#org @NAME_DUAL_NORMAL_PSYCHIC_1
+めいそうチャージ
+#org @NAME_DUAL_NORMAL_PSYCHIC_2
+ねんりきアタック
+#org @NAME_DUAL_NORMAL_PSYCHIC_3
+ミラージュブロー
+#org @NAME_DUAL_ROCK_STEEL_1
+ごつごつフィスト
+#org @NAME_DUAL_ROCK_STEEL_2
+がんせきハンマー
+#org @NAME_DUAL_ROCK_STEEL_3
+ぎんいろロック
+#org @NAME_DUAL_BUG_GRASS_1
+かぶとウィップ
+#org @NAME_DUAL_BUG_GRASS_2
+はねざくらふぶき
+#org @NAME_DUAL_BUG_GRASS_3
+はちのすストーム
+#org @NAME_DUAL_BUG_ROCK_1
+かまきりアーマー
+#org @NAME_DUAL_BUG_ROCK_2
+ストーンはねうち
+#org @NAME_DUAL_BUG_ROCK_3
+いわやまシザー
+#org @NAME_DUAL_DARK_FIGHTING_1
+しょうていベール
+#org @NAME_DUAL_DARK_FIGHTING_2
+ばくれつブレイク
+#org @NAME_DUAL_DARK_FIGHTING_3
+よやみラリアット
+#org @NAME_DUAL_GRASS_FAIRY_1
+ようせいシード
+#org @NAME_DUAL_GRASS_FAIRY_2
+つるスパークル
+#org @NAME_DUAL_GRASS_FAIRY_3
+リーフウィンド
+#org @NAME_DUAL_GRASS_FIGHTING_1
+わかばナックル
+#org @NAME_DUAL_GRASS_FIGHTING_2
+はなびらチョップ
+#org @NAME_DUAL_GRASS_FIGHTING_3
+しんりょくこぶし
+#org @NAME_DUAL_FIGHTING_PSYCHIC_1
+きあいショック
+#org @NAME_DUAL_FIGHTING_PSYCHIC_2
+ひらめきチョップ
+#org @NAME_DUAL_FIGHTING_PSYCHIC_3
+ごうけんブレイク
+#org @NAME_DUAL_FIRE_ROCK_1
+かえんいしつぶて
+#org @NAME_DUAL_FIRE_ROCK_2
+せきばんバースト
+#org @NAME_DUAL_FIRE_ROCK_3
+フレアアーマー
+#org @NAME_DUAL_GHOST_POISON_1
+シャドーどくばり
+#org @NAME_DUAL_GHOST_POISON_2
+ヘドロのきり
+#org @NAME_DUAL_GHOST_POISON_3
+どくぎりゴースト
+#org @NAME_DUAL_WATER_GHOST_1
+よみのしぶき
+#org @NAME_DUAL_WATER_GHOST_2
+れいすいラッシュ
+#org @NAME_DUAL_WATER_GHOST_3
+しぶきフレイム
+#org @NAME_DUAL_GRASS_PSYCHIC_1
+ひらめきブレード
+#org @NAME_DUAL_GRASS_PSYCHIC_2
+テレパスウィップ
+#org @NAME_DUAL_GRASS_PSYCHIC_3
+サイコはなふぶき
+#org @NAME_DUAL_POISON_WATER_1
+もうどくウェーブ
+#org @NAME_DUAL_POISON_WATER_2
+しびれどくたき
+#org @NAME_DUAL_POISON_WATER_3
+なみどくばり
+#org @NAME_DUAL_BUG_FIGHTING_1
+ビートルナックル
+#org @NAME_DUAL_BUG_FIGHTING_2
+れんげきはねうち
+#org @NAME_DUAL_FIRE_BUG_1
+クモのいとほのお
+#org @NAME_DUAL_FIRE_BUG_2
+ひばなニードル
+#org @NAME_DUAL_BUG_WATER_1
+うずまきシザー
+#org @NAME_DUAL_BUG_WATER_2
+はねスプラッシュ
+#org @NAME_DUAL_DARK_DRAGON_1
+りゅうじんホール
+#org @NAME_DUAL_DARK_DRAGON_2
+くろいパルス
+#org @NAME_DUAL_DARK_FIRE_1
+つきやみブレイズ
+#org @NAME_DUAL_DARK_FIRE_2
+やみのほむら
+#org @NAME_DUAL_DARK_GHOST_1
+うらみホール
+#org @NAME_DUAL_DARK_GHOST_2
+まぼろしベール
+#org @NAME_DUAL_DARK_NORMAL_1
+おおぶりフォール
+#org @NAME_DUAL_DARK_NORMAL_2
+つきやみチャージ
+#org @NAME_DUAL_ELECTRIC_DRAGON_1
+ボルトブレス
+#org @NAME_DUAL_ELECTRIC_DRAGON_2
+らいめいクロー
+#org @NAME_DUAL_DRAGON_GHOST_1
+ほしぞらナックル
+#org @NAME_DUAL_DRAGON_GHOST_2
+かげテイル
+#org @NAME_DUAL_POISON_DRAGON_1
+りゅうスティング
+#org @NAME_DUAL_POISON_DRAGON_2
+ドラゴポイズン
+#org @NAME_DUAL_DRAGON_PSYCHIC_1
+たつショック
+#org @NAME_DUAL_DRAGON_PSYCHIC_2
+ねんりきパルス
+#org @NAME_DUAL_ELECTRIC_POISON_1
+でんこうミスト
+#org @NAME_DUAL_ELECTRIC_POISON_2
+しびれどくボルト
+#org @NAME_DUAL_FAIRY_FLYING_1
+あおぞらダスト
+#org @NAME_DUAL_FAIRY_FLYING_2
+フェアリーつばさ
+#org @NAME_DUAL_NORMAL_FAIRY_1
+いっせいスター
+#org @NAME_DUAL_NORMAL_FAIRY_2
+ムーンストライク
+#org @NAME_DUAL_WATER_FAIRY_1
+ルナスプラッシュ
+#org @NAME_DUAL_WATER_FAIRY_2
+ほしストリーム
+#org @NAME_DUAL_FIGHTING_FLYING_1
+ばくれつドライブ
+#org @NAME_DUAL_FIGHTING_FLYING_2
+ねっけつウイング
+#org @NAME_DUAL_POISON_FIGHTING_1
+ベノムラリアット
+#org @NAME_DUAL_POISON_FIGHTING_2
+ヘドロストレート
+#org @NAME_DUAL_FIGHTING_STEEL_1
+しょうていランス
+#org @NAME_DUAL_FIGHTING_STEEL_2
+こうてつパンチ
+#org @NAME_DUAL_FIRE_PSYCHIC_1
+ねっぷうサークル
+#org @NAME_DUAL_FIRE_PSYCHIC_2
+フレアブラスト
+#org @NAME_DUAL_STEEL_FLYING_1
+てっぺきはばたき
+#org @NAME_DUAL_STEEL_FLYING_2
+はがねかまいたち
+#org @NAME_DUAL_STEEL_GHOST_1
+ゆうれいハンマー
+#org @NAME_DUAL_STEEL_GHOST_2
+くろがねラッシュ
+#org @NAME_DUAL_WATER_GRASS_1
+ようりょくそたき
+#org @NAME_DUAL_WATER_GRASS_2
+しおかぜストーム
+#org @NAME_DUAL_ICE_PSYCHIC_1
+はくぎんビジョン
+#org @NAME_DUAL_ICE_PSYCHIC_2
+こおりサークル
+#org @NAME_DUAL_BUG_ELECTRIC_1
+スパークサイズ
+#org @NAME_DUAL_BUG_ELECTRIC_2
+はちのすサンダー
+#org @NAME_DUAL_BUG_PSYCHIC_1
+めいそうビート
+#org @NAME_DUAL_BUG_PSYCHIC_2
+かまきりビジョン
+#org @NAME_DUAL_DARK_FAIRY_1
+くろいシャワー
+#org @NAME_DUAL_DARK_FAIRY_2
+よやみスパークル
+#org @NAME_DUAL_GROUND_DARK_1
+やみすなけむり
+#org @NAME_DUAL_GROUND_DARK_2
+さばくのキバ
+#org @NAME_DUAL_DARK_PSYCHIC_1
+やみのしねん
+#org @NAME_DUAL_DARK_PSYCHIC_2
+あんこくブレイク
+#org @NAME_DUAL_FIRE_DRAGON_1
+りゅうじんほのお
+#org @NAME_DUAL_FIRE_DRAGON_2
+かえんダイブ
+#org @NAME_DUAL_ROCK_ELECTRIC_1
+ガレキフラッシュ
+#org @NAME_DUAL_ROCK_ELECTRIC_2
+らいめいショット
+#org @NAME_DUAL_ELECTRIC_STEEL_1
+メタルビーム
+#org @NAME_DUAL_ELECTRIC_STEEL_2
+いかずちフィスト
+#org @NAME_DUAL_NORMAL_FIGHTING_1
+ひらてラリアット
+#org @NAME_DUAL_NORMAL_FIGHTING_2
+まっすぐナックル
+#org @NAME_DUAL_GRASS_FIRE_1
+ほむらバインド
+#org @NAME_DUAL_GRASS_FIRE_2
+リーフファイア
+#org @NAME_DUAL_FIRE_GROUND_1
+じなりスパーク
+#org @NAME_DUAL_FIRE_GROUND_2
+しゃくねつドリル
+#org @NAME_DUAL_FIRE_NORMAL_1
+ごういんバースト
+#org @NAME_DUAL_FIRE_NORMAL_2
+ぜんりょくほのお
+#org @NAME_DUAL_GROUND_FLYING_1
+ぐらぐらウイング
+#org @NAME_DUAL_GROUND_FLYING_2
+つむじスタンプ
+#org @NAME_DUAL_PSYCHIC_GHOST_1
+ミラージュハンド
+#org @NAME_DUAL_PSYCHIC_GHOST_2
+シャドーショック
+#org @NAME_DUAL_GRASS_ROCK_1
+はなびらロック
+#org @NAME_DUAL_GRASS_ROCK_2
+わかばいしつぶて
+#org @NAME_DUAL_POISON_GROUND_1
+すなあらしミスト
+#org @NAME_DUAL_POISON_GROUND_2
+どくぎりクエイク
+#org @NAME_DUAL_ROCK_POISON_1
+もうどくショット
+#org @NAME_DUAL_ROCK_POISON_2
+いわやまニードル
+#org @NAME_DUAL_DARK_ICE_1
+こおりベール
+#org @NAME_DUAL_DARK_STEEL_1
+メタルホール
+#org @NAME_DUAL_DRAGON_FIGHTING_1
+りゅうのチョップ
+#org @NAME_DUAL_NORMAL_DRAGON_1
+りゅうストライク
+#org @NAME_DUAL_ELECTRIC_FIGHTING_1
+でんこうこぶし
+#org @NAME_DUAL_ELECTRIC_GRASS_1
+しびれシード
+#org @NAME_DUAL_WATER_ELECTRIC_1
+スパークジェット
+#org @NAME_DUAL_GHOST_FAIRY_1
+ようせいフレイム
+#org @NAME_DUAL_ROCK_FAIRY_1
+きらめきアーマー
+#org @NAME_DUAL_POISON_FIRE_1
+しゅうきブレイズ
+#org @NAME_DUAL_GHOST_FLYING_1
+あおぞらのおばけ
+#org @NAME_DUAL_POISON_FLYING_1
+ソニックポイズン
+#org @NAME_DUAL_GROUND_GRASS_1
+つるのしめつけ
+#org @NAME_DUAL_GRASS_ICE_1
+はくぎんウィップ
+#org @NAME_DUAL_GRASS_STEEL_1
+しんりょくランス
+#org @NAME_DUAL_ICE_GROUND_1
+つららすなけむり
+#org @NAME_DUAL_GROUND_NORMAL_1
+ぐらぐらアタック
+#org @NAME_DUAL_ROCK_ICE_1
+ごつごつスノー
+#org @NAME_DUAL_POISON_PSYCHIC_1
+テレパスどくばり
+#org @NAME_DUAL_ROCK_PSYCHIC_1
+ストーンショック
+#org @NAME_DUAL_BUG_FAIRY_1
+フェアリーシザー
+#org @NAME_DUAL_BUG_GROUND_1
+ビートルドリル
+#org @NAME_DUAL_ICE_BUG_1
+かぶとブリザード
+#org @NAME_DUAL_ELECTRIC_DARK_1
+ボルトフォール
+#org @NAME_DUAL_ROCK_DARK_1
+せきばんファング
+#org @NAME_DUAL_ROCK_DRAGON_1
+がんせきクロー
+#org @NAME_DUAL_ELECTRIC_FAIRY_1
+ムーンサンダー
+#org @NAME_DUAL_ELECTRIC_GROUND_1
+さばくボルト
+#org @NAME_DUAL_ELECTRIC_ICE_1
+ふぶきフラッシュ
+#org @NAME_DUAL_ELECTRIC_NORMAL_1
+ひらてサンダー
+#org @NAME_DUAL_ELECTRIC_PSYCHIC_1
+ひらめきチャージ
+#org @NAME_DUAL_POISON_FAIRY_1
+ほしスティング
+#org @NAME_DUAL_FIGHTING_GHOST_1
+かげストレート
+#org @NAME_DUAL_FIGHTING_ICE_1
+れいきナックル
+#org @NAME_DUAL_ROCK_FIGHTING_1
+きあいいしつぶて
+#org @NAME_DUAL_FIRE_STEEL_1
+はがねスパーク
+#org @NAME_DUAL_ICE_FLYING_1
+フロストはばたき
+#org @NAME_DUAL_ICE_GHOST_1
+ゆうれいシャワー
+#org @NAME_DUAL_NORMAL_GHOST_1
+うらみブロー
+#org @NAME_DUAL_GROUND_PSYCHIC_1
+どろぬまビジョン
+#org @NAME_DUAL_ICE_STEEL_1
+てっぺきスノー
+#org @NAME_DUAL_POISON_NORMAL_1
+ごういんニードル
+#org @NAME_DUAL_STEEL_POISON_1
+しゅうきフィスト
+#org @NAME_DUAL_MAKKANA_CHIKAI
+まっかなちかい
+#org @DUAL_NAMES_0630_END
+
+#org @MASAKURU_NAMES_BEGIN
+#org @NAME_MASAKURUBAITSU
+マサクルバイツ
+#org @MASAKURU_NAMES_END
+
+#org @MOVE_EVO_NEW_NAMES_BEGIN
+#org @NAME_BENOMUBAITO
+ベノムバイト
+#org @NAME_IWANAGURI
+いわなぐり
+#org @NAME_GAREKIKUZUSHI
+がれきくずし
+#org @NAME_JUERUREI
+ジュエルレイ
+#org @NAME_KURAYAMIZUKI
+くらやみづき
+#org @NAME_MIRAABAASUTO
+ミラーバースト
+#org @NAME_EREKIHOON
+エレキホーン
+#org @NAME_KIRAKIRABOISU
+きらきらボイス
+#org @NAME_HAYATEZUKI
+はやてづき
+#org @NAME_KAGIZUMEOTOSHI
+かぎづめおとし
+#org @NAME_KAZENOYAIBA
+かぜのやいば
+#org @NAME_NENRIKIZUKI
+ねんりきづき
+#org @NAME_SAIKONAKKURU
+サイコナックル
+#org @NAME_YUKIDAMABUTSUKE
+ゆきだまぶつけ
+#org @NAME_AISUHOON
+アイスホーン
+#org @NAME_DORAGONJABU
+ドラゴンジャブ
+#org @NAME_RYUUNOKIBA
+りゅうのキバ
+#org @NAME_HAATOTACCHI
+ハートタッチ
+#org @NAME_SUTAAPANCHI
+スターパンチ
+#org @NAME_KUSAKARI
+くさかり
+#org @NAME_UDDOBASSHU
+ウッドバッシュ
+#org @NAME_BENOMUKURANCHI
+ベノムクランチ
+#org @NAME_HAYATEHADOU
+はやてはどう
+#org @NAME_SHINSOKUHADOU
+しんそくはどう
+#org @NAME_METARUJABU
+メタルジャブ
+#org @NAME_METARUSUTOREETO
+メタルストレート
+#org @NAME_SHIBUKIDASSHU
+しぶきダッシュ
+#org @NAME_TAKITSUBORASSHU
+たきつぼラッシュ
+#org @NAME_FUTAGOGERI
+ふたごげり
+#org @NAME_NIRENKYAKU
+にれんきゃく
+#org @NAME_HONENORENDA
+ほねのれんだ
+#org @NAME_HONENORANBU
+ほねのらんぶ
+#org @NAME_RYUUNOFUTATSUME
+りゅうのふたつめ
+#org @NAME_RYUUNOYOTSUME
+りゅうのよつめ
+#org @NAME_WEZAASHOTTO
+ウェザーショット
+#org @NAME_WEZAABURASUTO
+ウェザーブラスト
+#org @NAME_HIBIKINOUTA
+ひびきのうた
+#org @NAME_TODOROKIBOISU
+とどろきボイス
+#org @NAME_FUKIAGEKAZE
+ふきあげかぜ
+#org @NAME_FUKISUSABUKAZE
+ふきすさぶかぜ
+#org @NAME_UZUMAKINOIKI
+うずまきのいき
+#org @NAME_RYUUNOTSUMUJI
+りゅうのつむじ
+#org @NAME_HEDOROUNERI
+ヘドロうねり
+#org @NAME_NOROINOKAGE
+のろいのかげ
+#org @NAME_CHIKUSEKIPAWAA
+ちくせきパワー
+#org @NAME_CHIKUSEKIWEEBU
+ちくせきウェーブ
+#org @NAME_TAKERINOKIBA
+たけりのキバ
+#org @NAME_TAKERINOAGITO
+たけりのあぎと
+#org @NAME_KIRIKIZAMI
+きりきざみ
+#org @NAME_MIDAREBASAMI
+みだればさみ
+#org @NAME_OIUCHIGIRI
+おいうちぎり
+#org @NAME_OIUCHIBUROO
+おいうちブロー
+#org @NAME_SHIKAESHIDUKI
+しかえしづき
+#org @NAME_YARIKAESHI
+やりかえし
+#org @MOVE_EVO_NEW_NAMES_END
+
+#org @KOKAI_NAMES_BEGIN
+#org @NAME_KOKAINOKIBA
+こかいのきば
+#org @KOKAI_NAMES_END
+
+#org @SHADOW_NAMES_BEGIN
+#org @NAME_YAMITACKLE
+ダークアタック
+
+#org @NAME_YAMITOSSHIN
+ダークラッシュ
+
+#org @NAME_YAMIKUDAKI
+ダークブレイク
+
+#org @NAME_YAMITOTSUGEKI
+ダークエンド
+
+#org @NAME_YAMINOHADOU
+ダークウェーブ
+
+#org @NAME_YAMINOTSUKIAGE
+ダークレイブ
+
+#org @NAME_YAMINOTATSUMAKI
+ダークストーム
+
+#org @NAME_YAMINOHONOO
+ダークファイア
+
+#org @NAME_YAMINOINAZUMA
+ダークサンダー
+
+#org @NAME_YAMINOREIKI
+ダークフリーズ
+
+#org @NAME_YAMINOSORA
+ダークウェザー
+
+#org @NAME_YAMINOTOJIKOME
+ダークホールド
+
+#org @NAME_YAMINOKIRI
+ダークミスト
+
+#org @NAME_YAMINOMADOWASHI
+ダークパニック
+
+#org @NAME_YAMINOOMOSHI
+ダークダウン
+
+#org @NAME_YAMINOUZU
+ダークリムーブ
+
+#org @NAME_YAMINOHANBUN
+ダークハーフ
+
+#org @NAME_YAMINOSHINKUU
+ダークブラスト
+#org @SHADOW_NAMES_END

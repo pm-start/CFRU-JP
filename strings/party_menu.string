@@ -69,3 +69,18 @@
 
 #org @gText_ExpCandyGotExp
 [BUFFER1]は けいけんちを\n[BUFFER2] もらった！[PAUSE_UNTIL_PRESS]
+
+#org @gMenuText_PyramidToss
+すてる
+
+#org @gText_PyramidTossAsk
+[BUFFER1]を\nすてても いいですか？
+
+#org @gText_PyramidTossed
+[BUFFER1]を\nすてました！[PAUSE_UNTIL_PRESS]
+
+#org @gText_PyramidToBag
+[BUFFER2]を\nバトルバッグに いれました！[PAUSE_UNTIL_PRESS]
+
+#org @gText_PyramidBagFull
+バトルバッグが いっぱいで\nはいりません！[PAUSE_UNTIL_PRESS]

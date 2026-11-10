@@ -130,12 +130,14 @@
 #define TYPE_BLANK	  0x14
 #define TYPE_FAIRY	  0x17
 #define TYPE_STELLAR  0x18
+#define TYPE_RIL      0x19
+#define TYPE_SHADOW   0x1A   //[hack] patches/0955 段 D: ダーク技のタイプ（画面名「ダーク」・相性は表でなく IsShadowMove でコード処理）
 
-#define NUMBER_OF_MON_TYPES (TYPE_STELLAR + 1)
+#define NUMBER_OF_MON_TYPES (TYPE_SHADOW + 1)
 #define NUM_HIDDEN_POWER_TYPES 16
 
 #define PARTY_SIZE 6
-#define MAX_TOTAL_EVS 510
+#define MAX_TOTAL_EVS HACK_EV_TOTAL_CAP //[hack] patches/0677 値は stat_caps.json（src/hack_stat_caps.h）
 #define NUM_STATS 6
 #define UNOWN_FORM_COUNT 28
 #define MAX_MON_LEVEL 100
@@ -463,13 +465,13 @@ struct BattlePokemon
     /*0x23*/ u8 unknown;
     /*0x24*/ u8 pp[4];
     /*0x28*/ u16 hp;
-    /*0x2A*/ u8 level;
+    /*0x2A*/ u8 levelLo; //[hack] patches/0679 レベルの下位 8 ビット（素の機械語が直に読む位置）。上位 8 ビットは gNewBS->hackLevelHi[bank]（patches/0796）。読み書きは BM_LEVEL／BM_SET_LEVEL
     /*0x2B*/ u8 friendship;
     /*0x2C*/ u16 maxHP;
     /*0x2E*/ u16 item;
     /*0x30*/ u8 nickname[POKEMON_NAME_LENGTH - 2];
     /*0x38*/ u16 ability;
-    /*0x3A*/ u8 padding;
+    /*0x3A*/ u8 pad3A; //[hack] patches/0796 素の nickname[11] の 11 バイト目（素の機械語が戦闘の始めにスタックのゴミを丸ごと書く）。何も置かない（0679 の levelHi を置いて 1 発で倒れる不具合・0796 で gNewBS へ移した）
     /*0x3B*/ u8 ppBonuses;
     /*0x3C*/ u8 otName[8];
     /*0x44*/ u32 experience;
@@ -478,6 +480,13 @@ struct BattlePokemon
     /*0x50*/ u32 status2;
     /*0x54*/ u32 otId;
 };
+
+//[hack] patches/0679／0796 戦闘中のポケモンのレベル（u16）。下位は +0x2A（素の機械語が読む）・上位は gBattleMons の外＝gNewBS->hackLevelHi[bank]（戦闘の始めに 0 埋め・MAX_LEVEL ≦ 254 のあいだ常に 0）。
+//b は gBattleMons[x] か その中を指す *ptr。gBattleMons の外の BattlePokemon・gNewBS が無いときは上位 = 0（書かない）。窓口は src/hack_bm_level.c
+u16 HackBmGetLevel(const struct BattlePokemon* b);
+void HackBmSetLevel(struct BattlePokemon* b, u16 level);
+#define BM_LEVEL(b) HackBmGetLevel(&(b))
+#define BM_SET_LEVEL(b, v) HackBmSetLevel(&(b), (u16) (v))
 
 enum
 {
@@ -638,6 +647,7 @@ enum EvolutionMethods
     EVO_MAUSHOLD_FOUR,
     EVO_DUDUNSPARCE_TWO,
     EVO_DUDUNSPARCE_THREE,
+	EVO_LEVEL_FRIENDSHIP, //[hack] 2026-11-08 Lv（param）以上のレベルアップ＋なつき 220 以上（バブチフ→オモチフワ・patches/0969）
 };
 #define EVO_TERASTAL 0xFC
 #define EVO_GIGANTAMAX 0xFD
@@ -665,7 +675,25 @@ struct BattleMove
 	u8 z_move_power;
 	u8 split;
 	u8 z_move_effect;
+	//[hack] patches/0582 (#126): 技の表の 1 行を 12 → 16 バイトに広げた。威力 255 より大きい技の置き場。
+	//  0〜11 バイトは元のまま（素のコードが読む `power`＝1 バイト目は 255 で頭打ちの値）。
+	//  bigPower が 0 でなければ、それが本当の威力（256〜65535）。読むときは MOVE_POWER(move) を通す。
+	u16 bigPower;
+	//[hack] patches/0630 (#142): 2 つ目のタイプ（フライングプレス型）。値は「タイプ + 1」で 0 ＝ なし（0 は TYPE_NORMAL と衝突するため）。
+	//  相性の倍率だけに効く（STAB・特性・タイプ変更は 1 つ目の `type` だけを見る）。読むときは MOVE_SECOND_TYPE(move)。
+	u8 type2;
+	u8 reserved;
 };
+
+//技の 2 つ目のタイプ（無ければ 0xFF）
+#define MOVE_SECOND_TYPE(move) (gBattleMoves[move].type2 ? (u8) (gBattleMoves[move].type2 - 1) : 0xFF)
+//battle_moves.c で 2 つ目のタイプを持つ技の初期化に使う
+#define BM_TYPE2(t) .type2 = ((t) + 1)
+
+//技の本当の威力（255 をこえる技は bigPower・それ以外は power）
+#define MOVE_POWER(move) (gBattleMoves[move].bigPower ? gBattleMoves[move].bigPower : gBattleMoves[move].power)
+//battle_moves.c で威力 n の技の初期化に使う（n が 255 をこえるときだけ bigPower に入れ、power は 255 で頭打ち）
+#define BM_POWER(n) .power = ((n) > 255 ? 255 : (n)), .bigPower = ((n) > 255 ? (n) : 0)
 
 extern u8 gPlayerPartyCount;
 extern struct Pokemon gPlayerParty[PARTY_SIZE];
@@ -689,12 +717,12 @@ u8 CountAliveMons(u8 caseId);
 #define BATTLE_ALIVE_DEF_SIDE       2
 
 void __attribute__((long_call)) CalculateMonStats(struct Pokemon *mon);
-void __attribute__((long_call)) CreateMon(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 hasFixedPersonality, u32 fixedPersonality, u8 otIdType, u32 fixedOtId);
-void __attribute__((long_call)) CreateMonWithNature(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 nature);
-void __attribute__((long_call)) CreateMonWithGenderNatureLetter(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 gender, u8 nature, u8 unownLetter);
-void __attribute__((long_call)) CreateMonWithIVsPersonality(struct Pokemon* mon, u16 species, u8 level, u32 ivs, u32 personality);
-void __attribute__((long_call)) CreateMaleMon(struct Pokemon* poke_address, u16 species, u8 level);
-u8 __attribute__((long_call)) GetLevelFromBoxMonExp(struct BoxPokemon *boxMon);
+void __attribute__((long_call)) CreateMon(struct Pokemon *mon, u16 species, u16 level, u8 fixedIV, u8 hasFixedPersonality, u32 fixedPersonality, u8 otIdType, u32 fixedOtId);
+void __attribute__((long_call)) CreateMonWithNature(struct Pokemon *mon, u16 species, u16 level, u8 fixedIV, u8 nature);
+void __attribute__((long_call)) CreateMonWithGenderNatureLetter(struct Pokemon *mon, u16 species, u16 level, u8 fixedIV, u8 gender, u8 nature, u8 unownLetter);
+void __attribute__((long_call)) CreateMonWithIVsPersonality(struct Pokemon* mon, u16 species, u16 level, u32 ivs, u32 personality);
+void __attribute__((long_call)) CreateMaleMon(struct Pokemon* poke_address, u16 species, u16 level);
+u16 __attribute__((long_call)) GetLevelFromBoxMonExp(struct BoxPokemon *boxMon);
 u16 __attribute__((long_call)) GiveMoveToMon(struct Pokemon *mon, u16 move);
 u16 __attribute__((long_call)) GiveMoveToBoxMon(struct BoxPokemon *boxMon, u16 move);
 void __attribute__((long_call)) DeleteFirstMoveAndGiveMoveToMon(struct Pokemon *mon, u16 move);
@@ -729,7 +757,7 @@ void __attribute__((long_call)) CopyMon(void *dest, void *src, size_t size);
 
 u8 __attribute__((long_call)) CheckPartyHasHadPokerus(struct Pokemon *party, u8 selection);
 u16 __attribute__((long_call)) GetMonEVCount(struct Pokemon* mon);
-u8 __attribute__((long_call)) GetLevelFromMonExp(struct Pokemon *mon);
+u16 __attribute__((long_call)) GetLevelFromMonExp(struct Pokemon *mon);
 u16 __attribute__((long_call)) ModifyStatByNature(u8 nature, u16 n, u8 statIndex);
 const struct CompressedSpritePalette* __attribute__((long_call)) GetMonSpritePalStructFromOtIdPersonality(u16 species, u32 otId , u32 personality);
 const u32* __attribute__((long_call)) GetMonSpritePalFromSpeciesAndPersonality(u16 species, u32 otId, u32 personality);
@@ -777,16 +805,16 @@ u8 __attribute__((long_call)) GetItemEffectParamOffset(u16 itemId, u8 effectByte
 void ZeroMonData(struct Pokemon *mon);
 void ZeroPlayerPartyMons(void);
 void ZeroEnemyPartyMons(void);
-void CreateMon(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 hasFixedPersonality, u32 fixedPersonality, u8 otIdType, u32 fixedOtId);
+void CreateMon(struct Pokemon *mon, u16 species, u16 level, u8 fixedIV, u8 hasFixedPersonality, u32 fixedPersonality, u8 otIdType, u32 fixedOtId);
 //void CreateBoxMon(struct BoxPokemon *boxMon, u16 species, u8 level, u8 fixedIV, u8 hasFixedPersonality, u32 fixedPersonality, u8 otIdType, u32 fixedOtId);
-void CreateMonWithNature(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 nature);
-void CreateMonWithGenderNatureLetter(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 gender, u8 nature, u8 unownLetter);
-void CreateMaleMon(struct Pokemon *mon, u16 species, u8 level);
-void CreateMonWithIVsPersonality(struct Pokemon *mon, u16 species, u8 level, u32 ivs, u32 personality);
-void CreateMonWithIVsOTID(struct Pokemon *mon, u16 species, u8 level, u8 *ivs, u32 otId);
-void CreateMonWithEVSpread(struct Pokemon *mon, u16 species, u8 level, u8 fixedIV, u8 evSpread);
+void CreateMonWithNature(struct Pokemon *mon, u16 species, u16 level, u8 fixedIV, u8 nature);
+void CreateMonWithGenderNatureLetter(struct Pokemon *mon, u16 species, u16 level, u8 fixedIV, u8 gender, u8 nature, u8 unownLetter);
+void CreateMaleMon(struct Pokemon *mon, u16 species, u16 level);
+void CreateMonWithIVsPersonality(struct Pokemon *mon, u16 species, u16 level, u32 ivs, u32 personality);
+void CreateMonWithIVsOTID(struct Pokemon *mon, u16 species, u16 level, u8 *ivs, u32 otId);
+void CreateMonWithEVSpread(struct Pokemon *mon, u16 species, u16 level, u8 fixedIV, u8 evSpread);
 void CalculateMonStats(struct Pokemon *mon);
-u8 GetLevelFromBoxMonExp(struct BoxPokemon *boxMon);
+u16 GetLevelFromBoxMonExp(struct BoxPokemon *boxMon);
 u16 GiveMoveToMon(struct Pokemon *mon, u16 move);
 u16 GiveMoveToBoxMon(struct BoxPokemon *boxMon, u16 move);
 u16 GiveMoveToBattleMon(struct BattlePokemon *mon, u16 move);
@@ -885,7 +913,7 @@ u16 PlayerGenderToFrontTrainerPicId(u8 playerGender);
 void sub_806A1C0(u16 arg0, u8 bankIdentity);
 void sub_806A12C(u16 trainerSpriteId, u8 bankIdentity);
 u8 GetSecretBaseTrainerPicIndex(void);
-u8 GetLevelUpMovesBySpecies(u16 species, u16 *moves);
+u16 GetLevelUpMovesBySpecies(u16 species, u16 *moves); //[hack] patches/0598
 bool8 HealStatusConditions(struct Pokemon *mon, u32 battlePartyId, u32 healMask, u8 battlerId);
 
 #include "sprite.h"

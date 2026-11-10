@@ -22,7 +22,7 @@ hack_full_tutor.c
 
 #define HACK_FLAG_FULL_TUTOR 0x12EE         //tools/rom/build_hoenn_scripts.RESERVED_FLAGS と同じ
 #define HACK_VAR_FULL_TUTOR_PAGE 0x4009     //一時変数（地図に入ると 0）
-#define FULL_TUTOR_BUFFER (MAX_LEARNABLE_MOVES + EGG_MOVES_ARRAY_COUNT + EGG_MOVES_ARRAY_COUNT + NUM_TMSHMS + (LAST_TOTAL_TUTOR_NUM + 1))
+#define FULL_TUTOR_BUFFER (MAX_LEVEL_UP_MOVES + EGG_MOVES_ARRAY_COUNT + EGG_MOVES_ARRAY_COUNT + NUM_TMSHMS + (LAST_TOTAL_TUTOR_NUM + 1) + 1 /*[hack] patches/0630 まっかなちかい*/)
 
 u16 BuildLearnableMoveset(struct Pokemon* mon, u16* moves);
 

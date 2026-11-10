@@ -2,6 +2,7 @@
 #include "../include/event_data.h"
 #include "../include/item_use.h"
 #include "../include/list_menu.h"
+#include "../include/m4a.h"
 #include "../include/menu.h"
 #include "../include/script.h"
 #include "../include/sound.h"
@@ -31,8 +32,25 @@
 extern const u8 EventScript_MusicPlayer[];
 extern const struct ListMenuItem gMusicPlayerListItems[];
 extern const u16 gMusicPlayerListCount;
+extern const struct ListMenuItem gMusicPlayerListItemsNoBack[];   //後ろ半分（64MB）の曲を除いた一覧（生成・曲の番号 id は同じ）
+extern const u16 gMusicPlayerListCountNoBack;
+extern const u16 gMusicPlayerBackSongSlot;                        //後ろ半分の曲の 1 つ目の曲の表の番号（0xFFFF = なし）
+bool8 HackSplit_Native(void);                                     //src/hack_split_pics.c（0x0A000000 に後ろ半分が見える 64MB の ROM か）
 
-#define MAX_SHOWN 8
+//★ 2026-10-20 後ろ半分の PCM の曲（tools/bgm/back_pcm.py・おんがくプレイヤー専用）。後ろ半分が見えない ROM（SuperCard の 32MB・--rom32）では
+//  曲の窓にも入らず（448KB・資料 2026-10-20_bgm-battle-shuffle.md）、曲の表の枠は無音の見出しのまま＝選べないよう一覧から隠す。
+//  後ろ半分が見えても、その枠の見出しが後ろ半分を指していなければ（組み込まれていないビルド）隠す。
+static bool8 MusicPlayer_BackSongsPlayable(void)
+{
+	u32 header;
+
+	if (gMusicPlayerBackSongSlot == 0xFFFF || !HackSplit_Native())
+		return FALSE;
+	header = (u32) gSongTable[gMusicPlayerBackSongSlot].header;
+	return header >= 0x0A000000 && header < 0x0C000000;
+}
+
+#define MAX_SHOWN 9                                                //画面の高さに収まる最大（9 行 = 18 マス。矢印を出せないのでスクロールさせない）
 
 #define tListTaskId data[0]
 #define tWindowId   data[1]
@@ -77,13 +95,20 @@ void MusicPlayer_ShowList(void)
 {
 	struct ListMenuTemplate list;                //★ = {0} にすると memset の呼び出しが出る。欄は下で全部代入する
 	struct WindowTemplate win;
+	const struct ListMenuItem *items = gMusicPlayerListItems;
 	u32 i, count = gMusicPlayerListCount;
 	s32 maxWidth = 0;
 	u8 width, shown, windowId, taskId;
 
+	if (!MusicPlayer_BackSongsPlayable())                //後ろ半分が見えない ROM は、その曲を載せない一覧
+	{
+		items = gMusicPlayerListItemsNoBack;
+		count = gMusicPlayerListCountNoBack;
+	}
+
 	for (i = 0; i < count; ++i)
 	{
-		s32 w = GetStringWidth(2, gMusicPlayerListItems[i].name, 0);
+		s32 w = GetStringWidth(2, items[i].name, 0);
 		if (w > maxWidth)
 			maxWidth = w;
 	}
@@ -103,7 +128,7 @@ void MusicPlayer_ShowList(void)
 	windowId = AddWindow(&win);
 	DrawStdWindowFrame(windowId, FALSE);
 
-	list.items = gMusicPlayerListItems;
+	list.items = items;
 	list.moveCursorFunc = MusicPlayer_MoveCursor;
 	list.itemPrintFunc = NULL;
 	list.totalItems = count;

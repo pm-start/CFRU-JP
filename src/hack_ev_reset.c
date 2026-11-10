@@ -8,6 +8,7 @@
 #include "../include/task.h"
 #include "../include/constants/songs.h"
 #include "../include/new/Vanilla_functions.h"
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
 
 /*
  * どりょくリセット（ITEM_EV_RESET 0x340・2026-10-03）: ポケモンの努力値を 6 つとも 0 にする消費アイテム。
@@ -26,12 +27,13 @@ static void ItemUseCB_EVReset(u8 taskId, TaskFunc func)
 {
 	struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
 	u16 item = Var800E;
-	u8 i, zero = 0, total = 0;
+	u8 i;
+	u16 total = 0;
 	u16 oldHP, maxHP;
 
 	PlaySE(SE_SELECT);
 	for (i = 0; i < NUM_STATS; ++i)
-		total |= GetMonData(mon, MON_DATA_HP_EV + i, NULL);
+		total |= HackMon_GetEv(mon, i);
 
 	if (total == 0 || !RemoveBagItem(item, 1))
 	{
@@ -44,7 +46,7 @@ static void ItemUseCB_EVReset(u8 taskId, TaskFunc func)
 
 	oldHP = GetMonData(mon, MON_DATA_HP, NULL);
 	for (i = 0; i < NUM_STATS; ++i)
-		SetMonData(mon, MON_DATA_HP_EV + i, &zero);
+		HackMon_SetEv(mon, i, 0);
 	CalculateMonStats(mon);
 
 	maxHP = GetMonData(mon, MON_DATA_MAX_HP, NULL);

@@ -1,3 +1,4 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
 #include "../include/battle_string_ids.h"
@@ -13,6 +14,9 @@
 #include "../include/new/set_effect.h"
 #include "../include/new/stat_buffs.h"
 #include "../include/new/util.h"
+#include "lv200_custom_moves.h"
+#include "hack_item_restore.h" //[hack] 使いきった持ち物を戦いのあと戻す
+#include "hack_delta.h" //[hack] patches/0962 元ひこうのデルタ種（HackDelta_BankFlyingCover）
 
 bool8 HackDragonBoulder_Bank(u8 bank); //[hack] patches/0207 りゅうのいわお（src/hack_dragon_boulder.c）
 bool8 HackDragonBoulder_Mon(struct Pokemon* mon);
@@ -114,6 +118,7 @@ const u16 gWrappedStringIds[] =
 	0x184,
 };
 
+#include "hack_move_evo.h" //[hack] patches/0932 技の熟練度（HackMoveMastery_*）
 void atk15_seteffectwithchance(void)
 {
 	u32 percentChance = gBattleMoves[gCurrentMove].secondaryEffectChance;
@@ -121,15 +126,17 @@ void atk15_seteffectwithchance(void)
 	if (gCurrentMove == MOVE_TRIPLEARROWS && gBattleCommunication[MOVE_EFFECT_BYTE] == MOVE_EFFECT_FLINCH)
 		percentChance = 30;
 
-	//if (CheckSoundMove(gCurrentMove) || ABILITY(gBankAttacker) == ABILITY_INFILTRATOR)
+	percentChance = HackMoveMastery_EffectChance(gBankAttacker, gCurrentMove, percentChance); //[hack] patches/0932 技の熟練度（追加効果型・100 で止める・てんのめぐみ等の倍率より前）
+
+	//if (CheckSoundMove(gCurrentMove) || BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR))
 	//{
 	//	gHitMarker |= HITMARKER_IGNORE_SUBSTITUTE;
 	//}
-	if (ABILITY(gBankAttacker) == ABILITY_SERENEGRACE || BankSideHasRainbow(gBankAttacker))
+	if (BankHasAbility(gBankAttacker, ABILITY_SERENEGRACE) || BankSideHasRainbow(gBankAttacker))
 	{
 		percentChance *= 2;
 
-		if ((ABILITY(gBankAttacker) == ABILITY_SERENEGRACE && BankSideHasRainbow(gBankAttacker))
+		if ((BankHasAbility(gBankAttacker, ABILITY_SERENEGRACE) && BankSideHasRainbow(gBankAttacker))
 		&& (gBattleCommunication[MOVE_EFFECT_BYTE] & 0x3F) != MOVE_EFFECT_FLINCH)
 			percentChance *= 2;
 	}
@@ -168,7 +175,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
 	bool8 statusChanged = FALSE;
 	u8 affectsUser = 0; // 0x40 otherwise
 	u8 flags = 0;
-	bool8 mirrorArmorReflected = ABILITY(gBankTarget) == ABILITY_MIRRORARMOR;
+	bool8 mirrorArmorReflected = BankHasAbility(gBankTarget, ABILITY_MIRRORARMOR);
 
 	if (gBattleCommunication[MOVE_EFFECT_BYTE] & MOVE_EFFECT_AFFECTS_USER)
 	{
@@ -183,7 +190,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
 		gBattleScripting.bank = gBankAttacker;
 	}
 
-	if ((ABILITY(gEffectBank) == ABILITY_SHIELDDUST || ITEM_EFFECT(gEffectBank) == ITEM_EFFECT_COVERT_CLOAK)
+	if ((BankHasAbility(gEffectBank, ABILITY_SHIELDDUST) || ITEM_EFFECT(gEffectBank) == ITEM_EFFECT_COVERT_CLOAK)
 	&& !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD) //Used by contact abilities and synchronize
 	&& !primary
 	&& CheckTableForSpecialMoveEffect(gBattleCommunication[MOVE_EFFECT_BYTE], sShieldDustIgnoredEffects))
@@ -194,7 +201,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
 
 	if (BankSideHasSafeguard(gEffectBank)
 	&& !(gHitMarker & HITMARKER_IGNORE_SAFEGUARD)
-	&& ABILITY(gBankAttacker) != ABILITY_INFILTRATOR
+	&& !BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR)
 	&& gEffectBank != gBankAttacker
 	&& !primary
 	&& certain != MOVE_EFFECT_CERTAIN
@@ -205,7 +212,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
 	}
 
 	if (IsOfType(gEffectBank, TYPE_GRASS)
-	&& (ABILITY(gEffectBank) == ABILITY_FLOWERVEIL || (IS_DOUBLE_BATTLE && ABILITY(PARTNER(gEffectBank)) == ABILITY_FLOWERVEIL))
+	&& (BankHasAbility(gEffectBank, ABILITY_FLOWERVEIL) || (IS_DOUBLE_BATTLE && BankHasAbility(PARTNER(gEffectBank), ABILITY_FLOWERVEIL)))
 	&& gEffectBank != gBankAttacker
 	&& (gBattleCommunication[MOVE_EFFECT_BYTE] <= MOVE_EFFECT_TOXIC
 	 || (gBattleCommunication[MOVE_EFFECT_BYTE] >= MOVE_EFFECT_ATK_MINUS_1 && gBattleCommunication[MOVE_EFFECT_BYTE] <= MOVE_EFFECT_EVS_MINUS_1)
@@ -356,12 +363,16 @@ void SetMoveEffect(bool8 primary, u8 certain)
 				break;
 
 			case MOVE_EFFECT_FLINCH:
-				if (ABILITY(gEffectBank) == ABILITY_INNERFOCUS || IsDynamaxed(gEffectBank))
+				if (!Lv200CustomMove_CanFlinch(gEffectBank, gBankAttacker,
+					!BankHasAbility(gEffectBank, ABILITY_INNERFOCUS) && !IsDynamaxed(gEffectBank)))
 					gBattlescriptCurrInstr++;
 				else
 				{
 					if (gCurrentTurnActionNumber < GetBattlerTurnOrderNum(gEffectBank))
+					{
 						gBattleMons[gEffectBank].status2 |= sStatusFlagsForMoveEffects[gBattleCommunication[MOVE_EFFECT_BYTE]];
+						Lv200CustomMove_RecordFlinch(gEffectBank); //りゅうぎゃくりん: どの技のひるみでも「前のターンにひるんだ」を数える（Q27）
+					}
 					gBattlescriptCurrInstr++;
 				}
 				break;
@@ -388,7 +399,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
 					if (SIDE(gBankAttacker) == B_SIDE_PLAYER)
 					{
 						if (IsAnyMaxMove(gCurrentMove) && gBattleMoves[gCurrentMove].z_move_effect == MAX_EFFECT_CONFUSE_FOES_PAY_DAY)
-							gNewBS->maxGoldrushMoney += (100 * ++gNewBS->maxGoldrushUses * gBattleMons[gBankAttacker].level);
+							gNewBS->maxGoldrushMoney += (100 * ++gNewBS->maxGoldrushUses * BM_LEVEL(gBattleMons[gBankAttacker]));
 						else
 							gNewBS->PayDayByPartyIndices[gBattlerPartyIndexes[gBankAttacker]]++;
 					}
@@ -459,6 +470,9 @@ void SetMoveEffect(bool8 primary, u8 certain)
 
 					//Turn G-Max Moves into their corresponding trapping moves
 					switch (trappingMove) {
+						case MOVE_ENBUCHO: //特別なウルガモスの技（2026-10-16 patches/0415）: gTrappingMoves に無いと文の番号が 7 になり、gBattleStringLoader の古い値（解放済みの領域）が出る
+							trappingMove = MOVE_FIRESPIN;
+							break;
 						case MOVE_G_MAX_CENTIFERNO_P:
 						case MOVE_G_MAX_CENTIFERNO_S:
 							trappingMove = MOVE_FIRESPIN;
@@ -468,6 +482,13 @@ void SetMoveEffect(bool8 primary, u8 certain)
 							trappingMove = MOVE_SANDTOMB;
 							break;
 					}
+
+					//[hack] 文の番号を探すときだけ、独自効果の拘束技(すなのありじごく・ほむらのまとい)を元技に読み替える。wrappedMove(技名の表示)は変えない（#35 P2）
+					u16 trapTextMove = EffectiveMove(trappingMove);
+					if (trappingMove == MOVE_LV200_GROUND_150)
+						trapTextMove = MOVE_SANDTOMB;
+					else if (trappingMove == MOVE_LV200_FIRE_110)
+						trapTextMove = MOVE_FIRESPIN;
 
 					gBattleStruct->wrappedMove[gEffectBank] = trappingMove;
 					gBattleStruct->wrappedBy[gEffectBank] = gBankAttacker;
@@ -479,11 +500,11 @@ void SetMoveEffect(bool8 primary, u8 certain)
 					{
 						if (gBattleCommunication[MULTISTRING_CHOOSER] > 6)
 							break;
-						if (gTrappingMoves[gBattleCommunication[MULTISTRING_CHOOSER]] == trappingMove)
+						if (gTrappingMoves[gBattleCommunication[MULTISTRING_CHOOSER]] == trapTextMove) //[hack] 新技は効果元の技の文（gTrappingMoves に新技は無く、7 になって古い値が出ていた）
 							break;
 					}
 
-					switch (gCurrentMove) {
+					switch (EffectiveMove(gCurrentMove)) {
 						case MOVE_INFESTATION:
 							gBattleStringLoader = gText_TargetWasInfested;
 							break;
@@ -699,7 +720,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
 
 					if (gCurrentMove == MOVE_OCTOLOCK)
 						gNewBS->trappedByOctolock |= gBitTable[gEffectBank];
-					else if (gCurrentMove == MOVE_NORETREAT)
+					else if (MoveIs(gCurrentMove, MOVE_NORETREAT))
 						gNewBS->trappedByNoRetreat |= gBitTable[gEffectBank];
 					else
 						gNewBS->trappedByOctolock &= ~(gBitTable[gEffectBank]);
@@ -772,6 +793,7 @@ void SetMoveEffect(bool8 primary, u8 certain)
 					gNewBS->IncinerateCounters[gEffectBank] = TRUE;
 
 					gLastUsedItem = gBattleMons[gEffectBank].item;
+					HackItemRestore_NoteConsumed(gEffectBank, gLastUsedItem); //[hack] もやされたジュエルも戦いのあと戻す（きのみは対象外・src/hack_item_restore.c）
 					gBattleMons[gEffectBank].item = 0;
 					HandleUnburdenBoost(gEffectBank); //Give target Unburden boost
 
@@ -1069,7 +1091,7 @@ bool8 SetMoveEffect2(void)
 			break;
 
 		case MOVE_EFFECT_REMOVE_PARALYSIS: // Smelling salts
-			switch (gCurrentMove) {
+			switch (EffectiveMove(gCurrentMove)) {
 				case MOVE_SMELLINGSALTS:
 					if (gBattleMons[gEffectBank].status1 & STATUS1_PARALYSIS)
 					{
@@ -1129,6 +1151,7 @@ bool8 SetMoveEffect2(void)
 			}
 
 			if (IsOfType(gEffectBank, TYPE_FLYING)
+			||  HackDelta_BankFlyingCover(gEffectBank) //[hack] patches/0962 元の種族がひこうのデルタ種はひこうタイプ扱い（うちおとす・サウザンアローで落ちる）
 			||  (ABILITY(gEffectBank) == ABILITY_LEVITATE || ABILITY(gEffectBank) == ABILITY_EELEVATE)
 			||  HackDragonBoulder_Bank(gEffectBank) //[hack] patches/0207 りゅうのいわお ふゆう
 			||  (gStatuses3[gEffectBank] & (STATUS3_IN_AIR | STATUS3_LEVITATING | STATUS3_TELEKINESIS))

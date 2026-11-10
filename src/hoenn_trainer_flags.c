@@ -18,7 +18,9 @@ hoenn_trainer_flags.c
     ## どう広げたか
 
         番号 0〜767    … 0x500 + 番号   （素のまま。カントーは一切変わらない）
-        番号 768〜2047 … 0x1400 + (番号 - 768) ＝ 番号 + 0x1100
+        番号 768〜1791 … 0x1400 + (番号 - 768) ＝ 番号 + 0x1100（0x1400〜0x17FF）
+        番号 1792〜2047 … 0x1900 + (番号 - 1792)（0x1900〜0x19FF・★ patches/0986 FEAT-johto-j0: ジョウトの旗の窓＝SaveBlock1 +0x3A94〜。それまでの式だと 0x1800〜0x18FF でレイド・実績の旗とぶつかった）
+        番号 2048 以上 … 範囲の外（0x3FFF＝Var8000 へ逃がされる・★ FEAT-johto-p1: 0x1B00〜0x1CFF がジョウトの旗の窓 2 になったので印を 0x3FFF に移した）
 
     行き先の `0x1400`〜`0x18FF` は CFRU の**拡張フラグ**の一部
     （`src/save.c` の `GetExpandedFlagPointer` が 0x900〜0x18FF を見る）。
@@ -57,6 +59,12 @@ hoenn_trainer_flags.c
 #define HOENN_TRAINER_ID_SPLIT   768
 /* 768 番以降の行き先。拡張フラグ 0x1400〜0x18FF */
 #define HOENN_TRAINER_FLAG_BASE  0x1400
+/* ★ patches/0986（FEAT-johto-j0）: 番号 1792〜2047 は 0x1900〜0x19FF（ジョウトの旗の窓の前半＝SaveBlock1 +0x3A94〜）。768〜1791 は 0x1400〜0x17FF のまま
+   （今ある番号は最大 1746・2032〜2041 のピラミッド・ヒルは別の旗＝既存セーブの旗は動かない） */
+#define HOENN_TRAINER_ID_JOHTO   1792
+#define HOENN_TRAINER_ID_LAST    2047
+#define HOENN_TRAINER_FLAG_JOHTO 0x1900
+#define HOENN_TRAINER_FLAG_INVALID 0x3FFF
 
 u16 HoennTrainerFlag(u16 trainerId);
 u16 HoennGetTrainerAFlag(void);
@@ -79,7 +87,11 @@ u16 HoennTrainerFlag(u16 trainerId)
 	if (trainerId < HOENN_TRAINER_ID_SPLIT)
 		return FLAG_TRAINER_FLAG_START + trainerId;
 
-	return HOENN_TRAINER_FLAG_BASE + (trainerId - HOENN_TRAINER_ID_SPLIT);
+	if (trainerId < HOENN_TRAINER_ID_JOHTO)
+		return HOENN_TRAINER_FLAG_BASE + (trainerId - HOENN_TRAINER_ID_SPLIT);
+	if (trainerId <= HOENN_TRAINER_ID_LAST)
+		return HOENN_TRAINER_FLAG_JOHTO + (trainerId - HOENN_TRAINER_ID_JOHTO);   //★ patches/0986（FEAT-johto-j0）: 1792〜2047 は 0x1900〜0x19FF（SaveBlock1 +0x3A94〜・src/hack_johto_save.h）。0x1800〜0x186C はレイド・実績の旗なので使わない
+	return HOENN_TRAINER_FLAG_INVALID;   //2048 以上は範囲の外（0x3FFF＝Var8000 へ逃がされる）
 }
 
 /* 素 0807F7D8 GetTrainerAFlag */

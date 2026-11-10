@@ -4,6 +4,7 @@
 #include "../include/random.h"
 #include "../include/new/battle_util.h"
 #include "hack_affection.h"
+bool8 HackGibleAI_IsReito(u8 bank); //[hack] patches/0792（src/hack_gible_ai.c）
 
 /*
     なつき度で戦いに効く 10 の効果（2026-10-09 ユーザー「原作である親愛度システムでかなしませないためにふんばったみたいな
@@ -37,6 +38,8 @@
 
 static bool8 AllowedBattle(void)
 {
+	if (FlagGet(HACK_FLAG_AFFECTION_OFF))   //せってい「なかよし こうか なし」（patches/0418）: 入口はすべてここか IsOwnBank（＝ここ）を通る
+		return FALSE;
 	if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_TOWER_LINK_MULTI | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_TOWER
 	                        | BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_OLD_MAN | BATTLE_TYPE_POKE_DUDE | BATTLE_TYPE_OAK_TUTORIAL))
 		return FALSE;
@@ -51,6 +54,8 @@ static bool8 IsOwnBank(u8 bank)
 		return FALSE;
 	if ((gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER) && GetBattlerPosition(bank) == B_POSITION_PLAYER_RIGHT)
 		return FALSE;   //マルチバトルの味方
+	if (HackGibleAI_IsReito(bank) && !FlagGet(HACK_FLAG_AFFECTION_OFF))
+		return TRUE;   //[hack] patches/0792 れーとのおうの子は、通信対戦・フロンティア・タワーでも効く（「なかよし こうか なし」の設定は尊重）
 	return AllowedBattle();
 }
 
@@ -61,6 +66,8 @@ static u8 AffectionLevel(u8 bank)
 
 	if (bank >= gBattlersCount || !IsOwnBank(bank) || !BATTLER_ALIVE(bank))
 		return 0;
+	if (HackGibleAI_IsReito(bank))
+		return 2;   //[hack] patches/0792 れーとのおうの子は、いつも なつき度 最大の効果
 	mon = GetBankPartyData(bank);
 	if (mon->friendship >= AFFECTION_MAX)
 		return 2;
@@ -86,7 +93,7 @@ static bool8 IsLastMon(void)
 
 static bool8 Roll(u8 bank, u8 pctMax, u8 pctHigh)
 {
-	u8 level = AffectionLevel(bank);
+	u16 level = AffectionLevel(bank);
 	u32 pct;
 
 	if (level == 0)
@@ -142,7 +149,7 @@ bool8 HackAffection_TryEvade(u8 bankDef)
 
 u8 HackAffection_CritBonus(u8 bankAtk)
 {
-	u8 level = AffectionLevel(bankAtk);
+	u16 level = AffectionLevel(bankAtk);
 
 	if (level == 0)
 		return 0;

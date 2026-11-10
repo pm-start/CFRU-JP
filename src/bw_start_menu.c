@@ -79,6 +79,7 @@
      素のトレーナーカードから**こちらに入れ替わる**。
      フラグの番号は生成物から取る（船と条件を食い違わせないため）。 */
 void CB2_BwFrontierPass(void);
+u8 HoennFacility_SaveMode(void);   /* src/hoenn_tower.c patches/0683 */
 #define BwSm_CreateStartMenuTask ((void (*)(void *))(0x0806E97C + 1))
 #define BwSm_VanillaStartMenuTaskFunc ((void *)(0x0806E9E4 + 1))
 #define BwSm_SafariZoneRetirePrompt ((void (*)(void))(0x080A2210 + 1))
@@ -126,8 +127,17 @@ extern const u8 BwSmAchievementsTiles[];
 extern const u16 BwSmAchievementsPal[];
 extern const u8 BwSmPhoneTiles[];
 extern const u16 BwSmPhonePal[];
-extern const u8 gText_BwSm_Phone[];
-extern void CB2_HackPhoneBook(void);    /* src/hack_phone.c（2026-10-11 でんわ） */
+extern const u8 BwSmPokenavTiles[];
+extern const u16 BwSmPokenavPal[];
+extern const u8 gText_BwSm_Pokenav[];
+extern void CB2_HackPokenav(void);      /* src/hack_pokenav.c（2026-11-07 ポケナビ・FEAT-pokenav） */
+extern const u8 gText_BwSm_CustomFeatures[];
+extern const u8 gText_BwSm_FeatureGuide[];
+extern void CB2_HackFeatureGuide(void); /* src/hack_feature_guide.c */
+extern void CB2_HackEggBox(void);       /* src/hack_egg_box_screen.c（2026-10-23 たまごボックス） */
+extern const u8 gText_BwSm_EggBox[];
+extern void CB2_HackReliveBox(void);   /* src/hack_relive_box_screen.c（2026-11-09 リライブボックス・FEAT-relive-box-ext・patches/0975） */
+extern const u8 gText_BwSm_ReliveBox[];
 
 /* ---- 文字列（strings/bw_start_menu.string）---- */
 extern const u8 gText_BwSm_Pokedex[];
@@ -165,6 +175,7 @@ extern const u8 BwSmScript_Retire[];
 #define VSPACING 6
 #define BWSM_FONT 2                      /* 日本語の標準フォント（CFRU の時計と同じ）*/
 #define BWSM_ON_SCREEN 6                 /* 2 列 x 3 段 */
+#define BWSM_CHILD_PAGE_MARK 0x8000      /* Var8001 の一時的な戻り先印。復帰時に必ず除く */
 #define BWSM_STATE_PTR 0x203E038         /* CFRU の sDexNavStatePtr / gNewBS と兼用の語 */
 
 enum
@@ -181,7 +192,8 @@ enum
     GFXTAG_RETIRE,
     GFXTAG_DEXNAV,
     GFXTAG_ACHIEVEMENTS,
-    GFXTAG_PHONE,             /* 2026-10-11 でんわ（src/hack_phone.c） */
+    GFXTAG_PHONE,             /* 2026-10-11 でんわ（src/hack_phone.c）。べんりきのうの行の絵にも使う */
+    GFXTAG_POKENAV,           /* 2026-11-07 ポケナビ（src/hack_pokenav.c） */
 };
 
 enum
@@ -194,8 +206,12 @@ enum
     BWSM_OPTION,
     BWSM_DEXNAV,
     BWSM_ACHIEVEMENTS,      /* 2026-10-10 じっせき（src/achievements.c） */
-    BWSM_PHONE,             /* 2026-10-11 でんわ（pm-start/poke-call・src/hack_phone.c） */
+    BWSM_POKENAV,           /* 2026-11-07 ポケナビ（src/hack_pokenav.c）。★ 以前の「でんわ」（2026-10-11）の枠をそのまま置き換えた（ユーザー「でんわを置き換える ポケナビに機能追加でんわ」）＝番号が同じなので、保存された並び（settings-plus）がずれない。でんわはポケナビの中の機能 */
     BWSM_RETIRE,
+    BWSM_CUSTOM_FEATURES,
+    BWSM_FEATURE_GUIDE,
+    BWSM_EGG_BOX,           /* 2026-10-23 たまごボックス（src/hack_egg_box_screen.c・FEAT-save16-B4） */
+    BWSM_RELIVE_BOX,        /* 2026-11-09 リライブボックス（src/hack_relive_box_screen.c・FEAT-relive-box-ext）。★ 後ろに足した＝保存された並びの番号はずれない */
     BWSM_MAX_ITEMS,
 };
 
@@ -227,6 +243,7 @@ struct BwSmState
     u8 iconSpriteIds[BWSM_ON_SCREEN];
     u8 *bgTilemapBuffer;
     u8 runItem;             /* 0 でなければ 番号 + 1 を選んだことにして動かす（SELECT でレポート・L でずかんナビ・2026-10-05）*/
+    bool8 customPage;       /* 「べんりきのう」の子ページを表示中 */
 };
 
 #define sState (*((struct BwSmState **)BWSM_STATE_PTR))
@@ -308,15 +325,18 @@ static const struct SpriteTemplate sIconTemplates[BWSM_MAX_ITEMS] =
     [BWSM_OPTION] = ICON(GFXTAG_OPTIONS),
     [BWSM_DEXNAV] = ICON(GFXTAG_DEXNAV),
     [BWSM_ACHIEVEMENTS] = ICON(GFXTAG_ACHIEVEMENTS),
-    [BWSM_PHONE] = ICON(GFXTAG_PHONE),
+    [BWSM_POKENAV] = ICON(GFXTAG_POKENAV),
     [BWSM_RETIRE] = {GFXTAG_RETIRE, GFXTAG_RETIRE, &sExitOam, sAnimTableExit, NULL, gDummySpriteAffineAnimTable, PanelCallback},
+    [BWSM_CUSTOM_FEATURES] = ICON(GFXTAG_PHONE),
+    [BWSM_FEATURE_GUIDE] = ICON(GFXTAG_ACHIEVEMENTS),
+    [BWSM_EGG_BOX] = ICON(GFXTAG_POKEMON),
+    [BWSM_RELIVE_BOX] = ICON(GFXTAG_POKEMON),
 };
 
 static void BwSm_PlayerCard(void);
 static void BwSm_Options(void);
 static void BwSm_DexNav(void);
 static void BwSm_Achievements(void);
-static void BwSm_Phone(void);
 
 static const struct BwSmOption sOptions[BWSM_MAX_ITEMS] =
 {
@@ -336,10 +356,18 @@ static const struct BwSmOption sOptions[BWSM_MAX_ITEMS] =
                      {BwSmDexnavTiles, 32 * 32, GFXTAG_DEXNAV}, {BwSmDexnavPal, GFXTAG_DEXNAV}},
     [BWSM_ACHIEVEMENTS] = {gText_BwSm_Achievements, 0, NULL, BwSm_Achievements,
                            {BwSmAchievementsTiles, 32 * 32, GFXTAG_ACHIEVEMENTS}, {BwSmAchievementsPal, GFXTAG_ACHIEVEMENTS}},
-    [BWSM_PHONE] = {gText_BwSm_Phone, 0, NULL, BwSm_Phone,
-                    {BwSmPhoneTiles, 32 * 32, GFXTAG_PHONE}, {BwSmPhonePal, GFXTAG_PHONE}},
+    [BWSM_POKENAV] = {gText_BwSm_Pokenav, 0, NULL, CB2_HackPokenav,
+                    {BwSmPokenavTiles, 32 * 32, GFXTAG_POKENAV}, {BwSmPokenavPal, GFXTAG_POKENAV}},
     [BWSM_RETIRE] = {gText_BwSm_Retire, FLAG_SYS_SAFARI_MODE, BwSmScript_Retire, NULL,
                      {BwSmExitTiles, 16 * 16, GFXTAG_RETIRE}, {BwSmExitPal, GFXTAG_RETIRE}},
+    [BWSM_CUSTOM_FEATURES] = {gText_BwSm_CustomFeatures, 0, NULL, NULL,
+        {BwSmPhoneTiles, 32 * 32, GFXTAG_PHONE}, {BwSmPhonePal, GFXTAG_PHONE}},
+    [BWSM_FEATURE_GUIDE] = {gText_BwSm_FeatureGuide, 0, NULL, CB2_HackFeatureGuide,
+        {BwSmAchievementsTiles, 32 * 32, GFXTAG_ACHIEVEMENTS}, {BwSmAchievementsPal, GFXTAG_ACHIEVEMENTS}},
+    [BWSM_EGG_BOX] = {gText_BwSm_EggBox, 0, NULL, CB2_HackEggBox,
+        {BwSmPokemonTiles, 32 * 32, GFXTAG_POKEMON}, {BwSmPokemonPal, GFXTAG_POKEMON}},
+    [BWSM_RELIVE_BOX] = {gText_BwSm_ReliveBox, 0, NULL, CB2_HackReliveBox,
+        {BwSmPokemonTiles, 32 * 32, GFXTAG_POKEMON}, {BwSmPokemonPal, GFXTAG_POKEMON}},
 };
 
 static const u8 *const sDayNames[] =
@@ -425,6 +453,13 @@ static void ConfigureOnScreen(void)
     sState->numOnScreen = n;
 }
 
+static bool8 ItemOnCurrentPage(u8 id)
+{
+    if (sState->customPage)
+        return id == BWSM_POKENAV || id == BWSM_ACHIEVEMENTS || id == BWSM_DEXNAV || id == BWSM_FEATURE_GUIDE || id == BWSM_EGG_BOX || id == BWSM_RELIVE_BOX;
+    return id != BWSM_POKENAV && id != BWSM_ACHIEVEMENTS && id != BWSM_DEXNAV && id != BWSM_FEATURE_GUIDE && id != BWSM_EGG_BOX && id != BWSM_RELIVE_BOX;
+}
+
 static void BuildItems(void)
 {
     u8 i, n = 0;
@@ -432,9 +467,13 @@ static void BuildItems(void)
 
     for (i = 0; i < BWSM_MAX_ITEMS; ++i)
     {
+        if (!ItemOnCurrentPage(i))
+            continue;
         if (sOptions[i].flag != 0 && !FlagGet(sOptions[i].flag))
             continue;
         if (safari && (i == BWSM_SAVE || i == BWSM_DEXNAV))
+            continue;
+        if (i == BWSM_SAVE && HoennFacility_SaveMode() == 2)   /* [fix] patches/0683 台本で動かされる施設の部屋ではレポートを出さない（元の手持ちが失われる） */
             continue;
         if (i == BWSM_DEXNAV && !FlagGet(FLAG_SYS_POKEDEX_GET))
             continue;
@@ -617,6 +656,22 @@ static void RefreshOptions(void)
     CommitWindow(WIN_ITEMS);
 }
 
+static void ChangePage(bool8 customPage)
+{
+    u8 i;
+
+    CleanWindow(WIN_ITEMS);
+    for (i = 0; i < sState->numOnScreen; ++i)
+        DestroySpriteAndFreeResources(&gSprites[sState->iconSpriteIds[i]]);
+    sState->customPage = customPage;
+    sState->cursor = 0;
+    sState->scroll = 0;
+    BuildItems();
+    DrawIcons();
+    PrintItemNames();
+    CommitWindow(WIN_ITEMS);
+}
+
 /* ---- スプライトの動き ---- */
 
 static void PanelCallback(struct Sprite *sprite)
@@ -747,7 +802,12 @@ static void Task_WaitForKeyPress(u8 taskId)
         CommitWindow(WIN_TOPBAR_TIME);
     }
 
-    if (JOY_NEW(B_BUTTON | START_BUTTON))
+    if (JOY_NEW(B_BUTTON) && sState->customPage)
+    {
+        PlaySE(SE_PC_OFF);
+        ChangePage(FALSE);
+    }
+    else if (JOY_NEW(B_BUTTON | START_BUTTON))
     {
         sState->cursor = 0xFF;      /* 出口の印を選択中の色に */
         PlaySE(SE_PC_OFF);
@@ -762,21 +822,33 @@ static void Task_WaitForKeyPress(u8 taskId)
         u8 i, want = JOY_NEW(SELECT_BUTTON) ? BWSM_SAVE : BWSM_DEXNAV;
         for (i = 0; i < sState->numItems && sState->items[i] != want; ++i)
             ;
-        if (i < sState->numItems)
+        if (want == BWSM_SAVE && HoennFacility_SaveMode() == 2)   /* [fix] patches/0683 SELECT のショートカットも同じ */
+            ;
+        else if (i < sState->numItems
+         || (sState->customPage && want == BWSM_SAVE && !FlagGet(FLAG_SYS_SAFARI_MODE))
+         || (want == BWSM_DEXNAV && FlagGet(FLAG_SYS_DEXNAV) && FlagGet(FLAG_SYS_POKEDEX_GET) && !FlagGet(FLAG_SYS_SAFARI_MODE)))
         {
             PlaySE(SE_SELECT);
             VarSet(0x8000, cursor);
-            VarSet(0x8001, sState->scroll);
+            VarSet(0x8001, sState->scroll | (sState->customPage ? BWSM_CHILD_PAGE_MARK : 0));
             sState->runItem = want + 1;
             BeginNormalPaletteFade(0xFFFFFFFF, 0, 0, 16, RGB_BLACK);
             gTasks[taskId].func = Task_RunOption;
         }
     }
-    else if (JOY_NEW(A_BUTTON))
+    else if (JOY_NEW(A_BUTTON) && sState->numOnScreen != 0)
     {
+        u8 selected = sState->onScreen[cursor];
+
+        if (selected == BWSM_CUSTOM_FEATURES)
+        {
+            PlaySE(SE_SELECT);
+            ChangePage(TRUE);
+            return;
+        }
         PlaySE(SE_SELECT);
         VarSet(0x8000, cursor);
-        VarSet(0x8001, sState->scroll);
+        VarSet(0x8001, sState->scroll | (sState->customPage ? BWSM_CHILD_PAGE_MARK : 0));
         BeginNormalPaletteFade(0xFFFFFFFF, 0, 0, 16, RGB_BLACK);
         gTasks[taskId].func = Task_RunOption;
     }
@@ -890,12 +962,6 @@ static void BwSm_DexNav(void)
     StartMenuDexNavCallback();
 }
 
-static void BwSm_Phone(void)
-{
-    /* 電話帳（src/hack_phone.c・pm-start/poke-call）。B でこのメニューへ戻る・かけるとフィールドで台本 */
-    SetMainCallback2(CB2_HackPhoneBook);
-}
-
 static void BwSm_Achievements(void)
 {
     /* じっせきの画面（src/achievements.c・CFRU 用の入口をそのまま使う。戻りは CB2_ReturnToFieldWithOpenMenu＝このメニュー） */
@@ -958,6 +1024,7 @@ void BwReturnToFieldWithOpenMenu(void)
 
     sState = Calloc(sizeof(struct BwSmState));
     sState->cursor = VarGet(0x8000);
-    sState->scroll = VarGet(0x8001);
+    sState->customPage = (VarGet(0x8001) & BWSM_CHILD_PAGE_MARK) != 0;
+    sState->scroll = VarGet(0x8001) & ~BWSM_CHILD_PAGE_MARK;
     SetMainCallback2(CB2_BwStartMenu);
 }

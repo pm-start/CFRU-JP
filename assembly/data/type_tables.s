@@ -41,6 +41,8 @@ typeicon 32, 12, 0xC4       @ -PP- icon
 typeicon 32, 12, 0xC8       @ -Effect- icon
 typeicon 32, 12, 0xE0       @ Fairy icon
 typeicon 32, 12, 0xE4       @ Stellar icon
+typeicon 32, 12, 0xE8       @ Ril icon（[hack] patches/0408 #110・タイプ番号 0x19 + 1 ＝ 26 番。ボールの 2 つ（Unused・呼び元なし）は 27・28 番へ送った）
+typeicon 32, 12, 0xEC       @ Shadow（ダーク）icon（[hack] patches/0955 段 D・タイプ番号 0x1A + 1 ＝ 27 番。ボールの 2 つ（呼び元なし）は 28・29 番へ送った）
 typeicon  8,  8, 0xCE       @ Unused (Small white pokeball)
 typeicon  8,  8, 0xCF       @ Unused (Small dark pokeball)
 

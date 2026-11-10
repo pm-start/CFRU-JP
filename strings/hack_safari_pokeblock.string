@@ -1,0 +1,28 @@
+//ホウエンのサファリゾーンのポロック（FEAT-pokeblock 段 6・patches/0978）。★ 文は全部エメラルド日本語版 ROM の原文（tools/rom/verify_safari_pokeblock.py が ROM と突き合わせる）。
+//  戦闘の文の差し込みの記号は素の FR のもの（[FD][23]＝プレイヤー・[FD][06]＝野生の名前・[FD][00]＝BUFF1＝ポロックの名前）。原文のバイト列と同じ。
+//メニュー: 素の gText_SafariZoneMenu（0x083C46D5）の「エサだま」の所だけを「ポロック」に（原文の日本語版 ROM 0x5ABB86「ボール   ポロック」）。「いしころ」は素の FR のまま
+#org @gText_HoennSafariMenu
+[FC][05][05][FC][04][0D][0E][0F]ボール   ポロック\nいしころ  にげる
+
+//おき場（日本語版 ROM 0x082624B7／0x082624CD／0x082624DC）
+#org @gText_HoennSafari_PlacePokeblock
+ポロックおきばに ポロックを おきますか？
+
+#org @gText_HoennSafari_StillHere
+まだ [BUFFER1]が のこっています
+
+#org @gText_HoennSafari_WasPlaced
+[BUFFER1]を おきました！
+
+//戦闘（日本語版 ROM 0x005AADBA／0x005AAD71／0x005AAD8B／0x005AADA4）
+#org @gText_HoennSafari_ThrewPokeblock
+[FD][23]は\n[FD][06]に ポロックを なげた！
+
+#org @gText_HoennSafari_Curious
+[FD][06]は [FD][00]に\nきょうみを しめしている ようだ！
+
+#org @gText_HoennSafari_Enthralled
+[FD][06]は [FD][00]に\nむちゅうに なっている ようだ！
+
+#org @gText_HoennSafari_Ignored
+[FD][06]は [FD][00]に\nみむきも しない ようだ！

@@ -188,6 +188,8 @@ HackBagPage_PrintPocketName 081092E8 0 0
 ## 2026-10-11 64MB の後ろ半分（src/hack_split_pics.c・5e の指摘）: 展開前に大きさを直に読む素の 2 関数は、元が後ろ半分なら先に写しを取る
 HackSplit_MallocAndDecompress 080F7AF8 2 1
 HackSplit_LoadCompressedSpriteSheetUsingHeap 0800E9E8 1 1
+## 2026-10-20 P-A（DPE の色を後ろ半分へ・patches/0621）: 色の LZ77 も展開前に大きさを直に読む素の関数
+HackSplit_LoadCompressedSpritePaletteUsingHeap 0800EA2C 1 1
 
 ## 2026-10-12 ボックスジャンプ（src/hack_box_jump.c・pm-start/box-jump・#105・patches/0341）: 箱を選ぶ画面の素の 4 つ
 HackBoxJump_Input 0808C398 0 1
@@ -208,4 +210,42 @@ HackVs_GetNextAvailableRematchTrainer 0810DC3C 3 1
 HackVs_GetRematchTrainerId 0810D93C 1 1
 
 ## 2026-10-12 ランダム天気（src/hack_random_weather.c・#106・patches/0345）: 素の SetSav1WeatherFromCurrMapHeader（地図に入るとき）
-HackRandomWeather_SetSav1FromHeader 0807A8A0 0 0
+## HackRandomWeather_SetSav1FromHeader 0807A8A0 0 0
+## 2026-10-12 なみのりポケモンの絵（#114・src/hack_surf_sprite.c・patches/0360）。素の FldEff_SurfBlob 080DD3B8（push の入口・戻り値あり）
+HackSurf_Create 080DD3B8 0 1
+
+## 2026-10-18 しばり『ぜんぶレントラー』（src/hack_challenge_luxray.c・patches/0609）: 素の TradeMons が入れ替えたあとに呼ぶ UpdatePokedexForReceivedMon 08050070（74 バイト・呼び元は TradeMons の 1 か所だけ）。
+##   旗が OFF なら素と同じ（タマゴでなければ 見た・つかまえた）。ON なら先にレントラーにする。引数 1（partyIdx）・戻り値なし
+HackLuxray_UpdatePokedexForReceivedMon 08050070 1 0
+
+## 2026-10-19 なんいど しゃかりき: 回復の道具は キズぐすりだけ（src/hack_difficulty.c・patches/0616）。きのみぶくろ（素の Task_BerryPouch_Use が直に呼ぶ）・SELECT の登録も止めるため、
+##   素の ItemId_GetFieldFunc 0809A430（0x28 バイト・4 の倍数）・ItemId_GetBattleFunc 0809A47C（0x28 バイト）を C に置き換える。引数 1（itemId）・戻り値あり。
+##   しゃかりきでなければ 素と同じ（gItemData の fieldUseFunc／battleUseFunc）。止める道具には「つかえない」の一言を出す台本を返す
+HackShakariki_ItemGetFieldFunc 0809A430 1 1
+HackShakariki_ItemGetBattleFunc 0809A47C 1 1
+
+## 2026-10-19 リルの あいじょう（src/hack_luxray_love.c・patches/0617）: バッグの「もたせる」で 手持ちから相手を選ぶとき、素の IsSelectedMonNotEgg 0812054C（0x2C バイト・4 の倍数）は
+##   タマゴなら SE_ERROR を鳴らして FALSE。同じ動きに「しばり「ぜんぶレントラー」の固定の子も選べない」を足した C に置き換える。引数 1（slotPtr）・戻り値あり
+HackLuxrayLove_IsSelectedMonNotEgg 0812054C 1 1
+## 2026-10-20 SuperCard の曲の窓（src/hack_music_window.c・docs/research/2026-10-20_supercard-music-window.md）: 素の m4aSongNumStart／OrChange／OrContinue
+##   （081C10B0／081C10DC／081C1128・どれも 0x28〜0x4C バイトで、書き込みは先頭の 20 バイト）。曲の表の 081C10D8 の語（gSongTable）はそのまま。
+##   窓の曲（SuperCard のときだけ）は SD の PKSMUS.BIN から窓へ写して窓の中の見出しで鳴らす・それ以外と 64MB の直した mGBA は素と同じ分岐
+HackMus_SongNumStart 081C10B0 1 0
+HackMus_SongNumStartOrChange 081C10DC 1 0
+HackMus_SongNumStartOrContinue 081C1128 1 0
+HackMus_SongNumStop 081C117C 1 0
+HackMus_SongNumContinue 081C11B0 1 0
+## 2026-10-20 お金・コインのセッションの鍵（src/hack_session_key.c・patches/0627）: 素の ApplyNewEncryptionKeyToAllEncryptedData 0804BD5C（0x48 バイト・呼び元は 0804B8FA の MoveSaveBlocks_ResetHeap だけ）を、
+##   コイン（拡張の保存領域の gPlayerCoins）も付け替え・バッグ（CFRU は平文）は付け替えない C に置き換える。引数 1（新しい鍵）・戻り値なし
+HackKey_ApplyAll 0804BD5C 1 0
+## 2026-10-21 RAM チート検出（src/hack_ram_cheat.c・patches/0660）: 素の SetMoney 0809FC50（0x18 バイト・直前 GetMoney 0809FC38・直後 IsEnoughMoney 0809FC68）を、式は同じ（*p = 鍵 ^ 値）で お金の影も更新する C に置き換える。
+##   AddMoney 0809FC80・RemoveMoney 0809FCB8・はじめからの 3000 円は全部これを通る（tools/rom/verify_ram_cheat.py が BL の呼び元を数える）。引数 2・戻り値なし
+HackRamCheat_SetMoney 0809FC50 2 0
+## 2026-10-25 交換所の BP 売り場（src/mega_shop.c・patches/0815）: 素の PrintMoneyAmountInMoneyBox（0809FD20＝PrintMoneyAmount 0809FD40 を呼ぶだけの 0x20 バイト）を、BP 売り場の画面のあいだだけ窓 0 に「BP」と数を出す C に置き換える。引数 3・戻り値なし
+BpShop_PrintMoneyAmountInMoneyBox 0809FD20 3 0
+## 2026-10-27 liru 氏の新しい釣り（src/hack_nushi_*.c・tools/fishing/・Redmine #151）: 素の ItemUseOnFieldCB_Rod 080A26E4（竿の使用。中身は StartFishing(ItemId_GetSecondaryId(Var800E)) して DestroyTask するだけ・次の関数の入口は潰さない）を NfCfruRodCallback に差し替える。
+##   StartFishing 0805CB7C は素のまま残し、方式 1（いつものつり）が呼ぶ。引数 1（タスク番号）・戻り値なし
+NfCfruRodCallback 080A26E4 1 0
+## 2026-11-03 トキワシティのおじいさんのお手本（src/hack_oldman_legend.c・docs/research/2026-11-03_oldman-legend.md）: 素の StartOldManTutorialBattle 0807EFB0（プールまで 0x3C バイト・書き換えは先頭 20 バイトだけ。次の関数 0807EFEC の入口は潰さない）を、
+##   お手本の野生を「色違い・伝説・Moémon の姿」にする C に置き換える。引数なし・戻り値なし。呼び元は特殊の表（0x001632DC の語 0807EFB1）だけ
+HackOldMan_StartTutorialBattle 0807EFB0 0 0

@@ -73,6 +73,10 @@ FollowMe_BikeHook:
 FollowMe_SurfHook:
 	ldr r0, =FollowMe_FollowerToWater
 	bl bxr0
+	@ 2026-10-12 #114 なみのりを使った手持ちの種族・色違いを記録する（src/hack_surf_sprite.c・r6 = タスク。r4-r7 は C が守る）
+	mov r0, r6
+	ldr r1, =HackSurf_Capture
+	bl bxr1
 	ldr r1, =gFieldEffectArguments
 	mov r2, #0xA
 	ldrsh r0, [r6, r2]
@@ -84,6 +88,9 @@ FollowMe_SurfHook:
 
 bxr0:
 	bx r0
+
+bxr1:
+	bx r1
 
 @;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 .pool

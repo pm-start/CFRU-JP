@@ -9,6 +9,9 @@
 #include "../include/new/Vanilla_functions_battle.h"
 #include "../include/new/battle_util.h"
 #include "bw_hpbar_gfx.h"
+#include "hack_challenge.h" //[hack] patches/0510 しばり（？？？の Lv9999）
+#include "hack_challenge_f_blind.h" //[hack] patches/0951（仮）しばり「めかくしバトル」: 相手の名前・Lv・HP バーを ？？？
+#include "hack_shadow_screens.h" //[hack] patches/0966 段 H ダークの印（HP 枠のハート）
 
 /*
 bw_hpbar.c
@@ -119,7 +122,7 @@ bw_hpbar.c
 
     このファイルは書き込み可能な static を持たない（6.13 節）。
     作業領域は素と同じ `gMonSpritesGfxPtr->barFontGfx` と
-    `gDisplayedStringBattle`、そしてスタック。
+    スタック（★ 2026-10-13 gDisplayedStringBattle は戦闘の文の表示中に読まれるので借りない）。
 */
 
 #define BW_TILE_SIZE 32
@@ -196,7 +199,8 @@ static u8 *BwTextColorPrefix(u8 *p, u8 bg)
 
 static void BwHpTextToTiles(u8 spriteId, const u8 *digits, u8 nCols, u16 firstTile, u8 bg)
 {
-    u8 *buf = gDisplayedStringBattle;
+    u8 buf[48];   /* ★ 2026-10-13 自分の作業場（スタック）。前は gDisplayedStringBattle を借りていて、戦闘の文の表示中（文字列を 1 字ずつ読む）に
+                     描き直すと窓の字が化けた（ユーザー「場に出たとき窓に ま こ え え」）。色の指定 9 + 字 + EOS で 48 に収まる */
     u8 *p = BwTextColorPrefix(buf, bg);
     u8 *tiles = gMonSpritesGfxPtr->barFontGfx;
     u8 k;
@@ -240,7 +244,8 @@ static bool8 BwDoublesHpNumsOn(u8 battlerId)
    透明のまま（行 0）。数字は下のタイルの行 1〜7 に収まる（実機の写真で測った） */
 static void BwDoublesHpTextToTiles(u8 spriteId, const u8 *digits, u8 nCols, u8 firstIdx)
 {
-    u8 *buf = gDisplayedStringBattle;
+    u8 buf[48];   /* ★ 2026-10-13 自分の作業場（スタック）。前は gDisplayedStringBattle を借りていて、戦闘の文の表示中（文字列を 1 字ずつ読む）に
+                     描き直すと窓の字が化けた（ユーザー「場に出たとき窓に ま こ え え」）。色の指定 9 + 字 + EOS で 48 に収まる */
     u8 *p = BwTextColorPrefix(buf, BW_BG_HP_BAND);
     u8 *tiles = gMonSpritesGfxPtr->barFontGfx;
     const u8 *band = BwTile(spriteId, BW_DOUBLES_BAND_TILE);
@@ -339,12 +344,17 @@ static u8 BwMarkTileFor(u8 c)
         return BW_MARK_DAKUTEN;
     if ((u8)(c - 0x4B) <= 0x04 || (u8)(c - 0x9B) <= 0x04)
         return BW_MARK_HANDAKUTEN;
+    /* ★ 2026-11-08 BUG-hpbox-vu-dakuten（patches/0972）: 「ヴ」(0xF1) は CFRU が足した字で素の判定に無く、
+       上のタイル（濁点の段）が空白に潰れて濁点が消えた。字形はガ(0x87)と同じ位置に点を持つ＝濁点 */
+    if (c == 0xF1)
+        return BW_MARK_DAKUTEN;
     return BW_MARK_NONE;
 }
 
 static void BwDrawName(struct Pokemon *mon, u8 spriteId, u8 battlerId, u8 firstCol)
 {
-    u8 *buf = gDisplayedStringBattle;
+    u8 buf[48];   /* ★ 2026-10-13 自分の作業場（スタック）。前は gDisplayedStringBattle を借りていて、戦闘の文の表示中（文字列を 1 字ずつ読む）に
+                     描き直すと窓の字が化けた（ユーザー「場に出たとき窓に ま こ え え」）。色の指定 9 + 字 + EOS で 48 に収まる */
     u8 *p = BwTextColorPrefix(buf, BW_BG_TRANSPARENT);
     u8 nick[POKEMON_NAME_LENGTH + 1];
     u8 glyphs[BW_NAME_COLS];
@@ -362,6 +372,11 @@ static void BwDrawName(struct Pokemon *mon, u8 spriteId, u8 battlerId, u8 firstC
 
     GetMonData(mon, MON_DATA_NICKNAME, nick);
     StringGetEnd10(nick);
+    if (HackChallengeF_BlindBattler(battlerId))   /* [hack] めかくしバトル: 相手側の名前は ？？？（0xAC）・性別も出さない */
+    {
+        nick[0] = nick[1] = nick[2] = 0xAC;
+        nick[3] = EOS;
+    }
     for (k = 0; nick[k] != EOS && n < BW_NAME_COLS - 1; ++k)
     {
         *p++ = nick[k];
@@ -373,7 +388,7 @@ static void BwDrawName(struct Pokemon *mon, u8 spriteId, u8 battlerId, u8 firstC
     if ((species == SPECIES_NIDORAN_F || species == SPECIES_NIDORAN_M)
      && StringCompare(nick, gSpeciesNames[species]) == 0)
         gender = MON_GENDERLESS;
-    if (BwCheckBattleTypeGhost(mon, battlerId))
+    if (BwCheckBattleTypeGhost(mon, battlerId) || HackChallengeF_BlindBattler(battlerId))
         gender = MON_GENDERLESS;
 
     if (gender == MON_MALE)
@@ -413,20 +428,30 @@ static void BwDrawName(struct Pokemon *mon, u8 spriteId, u8 battlerId, u8 firstC
 
 /* ---- レベル（素の日本語フォント・左寄せ 3 列）/ バー / 状態異常 ------------ */
 
-static void BwDrawLevel(struct Pokemon *mon, u8 spriteId, u16 tileNum)
+static void BwDrawLevel(struct Pokemon *mon, u8 spriteId, u16 tileNum, u8 battlerId)
 {
-    u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
-    u8 text[BW_LEVEL_COLS + 1];
+    u16 level = HackChallenge_ShownLevel(mon, GetMonData(mon, MON_DATA_LEVEL, NULL));   /* ★ patches/0510 しばりの ？？？だけ 9999（見かけだけ） */
+    u8 cols = level > 999 ? BW_LEVEL_COLS + 1 : BW_LEVEL_COLS;   /* 4 けたのときは 4 つ目のタイル（枠の絵が透明かはゲーム内で確認が要る） */
+    u8 text[BW_LEVEL_COLS + 2];
     u8 n;
 
-    ConvertIntToDecimalStringN(text, level, STR_CONV_MODE_LEFT_ALIGN, BW_LEVEL_COLS);
-    for (n = 0; text[n] != EOS; ++n)
-        ;
-    for (; n < BW_LEVEL_COLS; ++n)      /* 余りは空白（0x00）で埋めて前の桁を消す */
-        text[n] = 0x00;
-    text[BW_LEVEL_COLS] = EOS;
+    if (HackChallengeF_BlindBattler(battlerId))   /* [hack] めかくしバトル: 相手側のレベルは ？？？（3 タイル） */
+    {
+        text[0] = text[1] = text[2] = 0xAC;
+        text[3] = EOS;
+        cols = BW_LEVEL_COLS;
+    }
+    else
+    {
+        ConvertIntToDecimalStringN(text, level, STR_CONV_MODE_LEFT_ALIGN, cols);
+        for (n = 0; text[n] != EOS; ++n)
+            ;
+        for (; n < cols; ++n)      /* 余りは空白（0x00）で埋めて前の桁を消す */
+            text[n] = 0x00;
+        text[cols] = EOS;
+    }
     /* レベルの 3 タイルは枠の絵が透明（0）なので背景も 0 */
-    BwHpTextToTiles(spriteId, text, BW_LEVEL_COLS, tileNum, BW_BG_TRANSPARENT);
+    BwHpTextToTiles(spriteId, text, cols, tileNum, BW_BG_TRANSPARENT);
 }
 
 static void BwDrawHpBar(u8 battlerId, u8 spriteId, struct Pokemon *mon)
@@ -434,15 +459,24 @@ static void BwDrawHpBar(u8 battlerId, u8 spriteId, struct Pokemon *mon)
     u16 maxHp, curHp;
 
     load_gfxc_health_bar(0);        /* 引数は素でも未使用 */
+    if (HackChallengeF_BlindBattler(battlerId))   /* [hack] めかくしバトル: 相手側の HP バーの中身は出さない。素の「HP を数字で」と同じ印（hpNumbersNoBars）で MoveBattleBar が絵を描かなくなる＋バーの 8 タイルを空に */
+    {
+        u32 *bar = (u32 *)BwTile(gSprites[spriteId].data[5], 0);
+        u8 t;
+
+        gBattleSpritesDataPtr->bankData[battlerId].hpNumbersNoBars = 1;
+        for (t = 0; t < BW_HEALTHBAR_TILES * BW_TILE_SIZE / 4; ++t)     /* VRAM は 32 ビットで */
+            bar[t] = 0;
+    }
     maxHp = GetMonData(mon, MON_DATA_MAX_HP, NULL);
     curHp = GetMonData(mon, MON_DATA_HP, NULL);
     SetBattleBarStruct(battlerId, spriteId, maxHp, curHp, 0);
     MoveBattleBar(battlerId, spriteId, HEALTH_BAR, 0);
 
-    if (GetBattlerSide(battlerId) == B_SIDE_PLAYER && !IsDoubleBattle())
+    if (GetBattlerSide(battlerId) == B_SIDE_PLAYER && !IsDoubleBattle() && !HackShadowHp_IsDark(battlerId))   /* [hack] patches/0966 段 H: ダークは EXP バーの位置にハート（経験値をもらわない） */
     {
         u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-        u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+        u16 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
         u32 totalExp = GetMonData(mon, MON_DATA_EXP, NULL);
         u8 growth = gBaseStats[species].growthRate;
         u32 expHave = gExperienceTables[growth][level];
@@ -560,6 +594,8 @@ static u8 BwCaughtMarkerFlags(u8 battlerId, struct Pokemon *mon)   //bit0 = ボ�
 
     if (battlerId >= gBattlersCount || GetBattlerSide(battlerId) != B_SIDE_OPPONENT)
         return 0;
+    if (HackChallengeF_BlindBattler(battlerId))   /* [hack] めかくしバトル: 「つかまえた」「色違い」の印も隠す */
+        return 0;
     if (gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_OLD_MAN | BATTLE_TYPE_LINK))
         return 0;
     if (GetMonData(mon, MON_DATA_SPECIES, NULL) == SPECIES_NONE || BwCheckBattleTypeGhost(mon, battlerId))
@@ -568,6 +604,16 @@ static u8 BwCaughtMarkerFlags(u8 battlerId, struct Pokemon *mon)   //bit0 = ボ�
     if (IsMonShiny(mon))
         flags |= 2;
     return flags;
+}
+
+/* ★ 2026-10-23 BUG-dynamax-shiny-icon-overlap（Redmine #45）: ボール／星の印が出ている相手かを battle_indicators.c（ダイマ・メガ等の 8×8 の印・
+   patches/0664）へ教える。印は 枠の左端 +88〜103（ボール 88〜95・星 96〜103）を使うので、出ている間は 8×8 の印が +104〜111 へ避ける。
+   出す条件は BwCaughtMarkerFlags そのもの（二重に書かない） */
+bool8 BwCaughtMarkerActive(u8 battlerId)
+{
+    if (battlerId >= gBattlersCount || gBattlerPartyIndexes[battlerId] >= PARTY_SIZE)
+        return FALSE;
+    return BwCaughtMarkerFlags(battlerId, &gEnemyParty[gBattlerPartyIndexes[battlerId]]) != 0;
 }
 
 static void BwCaughtMarkerFollow(struct Sprite *marker)
@@ -654,7 +700,7 @@ bool8 BwHpbarDrawElements(u8 spriteId, struct Pokemon *mon, u8 elementId)
         if (player)
         {
             BwDrawName(mon, spriteId, battlerId, BW_NAME_COL_PLAYER);
-            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_SINGLE_PLAYER);
+            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_SINGLE_PLAYER, battlerId);
             BwDrawHpBar(battlerId, spriteId, mon);
             BwDrawHpNums(mon, spriteId);        /* バーのあと（barFontGfx を使い回す）*/
             BwDrawAilment(mon, spriteId, BW_AILMENT_TILE_SINGLE_PLAYER, FALSE);
@@ -663,7 +709,7 @@ bool8 BwHpbarDrawElements(u8 spriteId, struct Pokemon *mon, u8 elementId)
         {
             gSprites[spriteId].pos1.x = BW_TILE_SIZE;   /* 元の BW と同じ置き場 */
             BwDrawName(mon, spriteId, battlerId, BW_NAME_COL_OPPONENT);
-            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_OPPONENT);
+            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_OPPONENT, battlerId);
             BwDrawHpBar(battlerId, spriteId, mon);
             BwDrawAilment(mon, spriteId, BW_AILMENT_TILE_OPPONENT, TRUE);
             BwCaughtMarkerSync(spriteId, mon, battlerId);
@@ -674,7 +720,7 @@ bool8 BwHpbarDrawElements(u8 spriteId, struct Pokemon *mon, u8 elementId)
         if (player)
         {
             BwDrawName(mon, spriteId, battlerId, BW_NAME_COL_PLAYER);
-            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_DOUBLES_PLAYER);
+            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_DOUBLES_PLAYER, battlerId);
             BwDrawHpBar(battlerId, spriteId, mon);      /* 数字モードでも値の設定は要る */
             if (BwDoublesHpNumsOn(battlerId))
                 BwDoublesShowHpNums(mon, spriteId);     /* 素は交代後に何も出なくなる */
@@ -684,11 +730,12 @@ bool8 BwHpbarDrawElements(u8 spriteId, struct Pokemon *mon, u8 elementId)
         {
             gSprites[spriteId].pos1.x = BW_TILE_SIZE;
             BwDrawName(mon, spriteId, battlerId, BW_NAME_COL_OPPONENT);
-            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_OPPONENT);
+            BwDrawLevel(mon, spriteId, BW_LEVEL_TILE_OPPONENT, battlerId);
             BwDrawHpBar(battlerId, spriteId, mon);
             BwDrawAilment(mon, spriteId, BW_AILMENT_TILE_OPPONENT, TRUE);
             BwCaughtMarkerSync(spriteId, mon, battlerId);
         }
     }
+    HackShadowHp_Sync(spriteId, battlerId, player && !IsDoubleBattle());   /* [hack] patches/0966 段 H: ダークだけ紫のハート */
     return TRUE;
 }

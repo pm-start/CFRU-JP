@@ -10,6 +10,8 @@
 @ ★ LSL r1,#24 は手前の 080C0F06 で済んでいる（入口の r1 = 番号 << 24）。もう一度 LSL すると 0 になる
 @ ★ 080C0F14 は CFRU の DynamicWhiteoutMap のフック（そこへは r6 = 索引で戻る・素の ADD r6,r0,#0 の代わり）
 @ ★ r4 = 戻り先（struct WarpData *）。関数の出口 080C0FBA は POP {r4-r7} / POP {r0} / BX r0
+@ ★ 2026-10-16 patches/0550 縛り C: 素の表を引く前に HackChallengeC_WhiteoutHome を呼ぶ。1 が返る（ポケセンの縛りが ON・手持ちを全回復した）ときは
+@   戻り先の番号 1（素の「マサラタウンの家」）で続ける。r0・r1（群・番号）は push して守る
 
 	.text
 	.thumb
@@ -21,6 +23,15 @@ RegionWhiteoutHook:
 	asr	r1, r1, #24
 	lsl	r1, r1, #16
 	lsr	r1, r1, #16
+	push	{r0, r1}
+	bl	HackChallengeC_WhiteoutHome	@ C: 1 = マサラの家（縛り C）
+	mov	r2, r0
+	pop	{r0, r1}
+	cmp	r2, #0
+	beq	RegionWhiteout_Lookup
+	mov	r0, #1
+	b	RegionWhiteout_Vanilla
+RegionWhiteout_Lookup:
 	ldr	r3, =0x080C0E20 + 1		@ GetHealLocationIndexFromMapGroupAndNum（素の 20 件）
 	bl	RegionWhiteout_BxR3
 	cmp	r0, #0

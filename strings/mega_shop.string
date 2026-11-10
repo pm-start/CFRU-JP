@@ -11,3 +11,23 @@ Zクリスタル うりば
 
 #org @gText_DangerLeafShopTitle
 あぶない しなもの
+
+// バトルフロンティアの交換所の BP 売り場（2026-10-25・Redmine #115・patches/0815）。文はエメラルド日本語版 ROM の交換所の文
+// （BattleFrontier_ExchangeServiceCorner_*・tools/rom/em_script_link.py で取り出した）。札と窓の語だけ地図の名前「ひきかえサービス」と「BP」
+#org @gText_BpShopTitle
+ひきかえサービス
+
+#org @gText_BpShopLabel
+BP
+
+#org @gText_BpShopUnit
+BP
+
+#org @gText_BpShopPurchased
+ーーーーBP
+
+#org @gText_BpShopConfirm
+[BUFFER][02]で よろしい ですか？
+
+#org @gText_BpShopNotEnough
+おきゃくさま……\nバトルポイントが たりません……

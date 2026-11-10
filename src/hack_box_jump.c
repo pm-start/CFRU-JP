@@ -24,8 +24,8 @@
 	  - 箱を選ぶ画面は CFRU でも素の 0808C 帯のコード（CFRU は箱の数 49 を bytereplacement で書くだけ）。素の 4 つを functionrewrites で置き換える:
 	    0808C398 入力（返り値 0xC8 なにもしない／0xC9 やめる／箱の番号）・0808C400 作る(u8 箱)・0808C5E0 消す・0808C6B0 描き直す。
 	    素の入れ物（0x020396F8 が指す構造・+0x244 が今の箱）の先頭の語に、ヒープに取った状態の番地を置く（元と同じ・6.13）
-	  - 箱の数: 追加のセーブ領域が使えれば 50・無ければ 39 で回る（40〜50 箱は 6MB のセーブの mGBA だけ・#51）
-	  - 中身は読むだけ（6.68）: 棚の箱は BoxShelf_ReadMon（入れ物を動かさない写し）・19〜24 箱は GetCompressedMonPtr の直の番地。
+	  - 箱の数: 追加のセーブ領域が使えれば 50・無ければ 34 で回る（35〜50 箱は 6MB のセーブの mGBA だけ・#51）
+	  - 中身は読むだけ（6.68）: 棚の箱は BoxShelf_ReadMon（入れ物を動かさない写し）・全 50 箱が棚（L 案・patches/0430）。
 	    読むのは開いたときの 5 箱と、左右で新しく見える 1 箱（30 匹）だけ（6.80）
 	  - アイコン: 元は 8×8 に縮めた表を ROM に前もって作っていた（素の 440 種）。こちらは表を持たず、読むときに
 	    GetIconSpecies → GetMonIconTiles の 32×32 から元と同じ取り方（4×4 の真ん中の点・無ければその 4×4 の最初の色）で作る。
@@ -47,7 +47,8 @@
 #define PREVIEW_COUNT 5
 #define BOX_SLOTS IN_BOX_COUNT
 #define MENU_TILE_BYTES (512 * 32)
-#define ICON_PAL_FIRST 10            //BG の色 10〜12
+#define ICON_PAL_FIRST 10            //BG の色 10〜13（アイコンの色の組を最大 4 本。14 は枠の色）
+#define ICON_PAL_SLOTS 4
 #define FRAME_PAL 14
 
 struct BoxPreview
@@ -92,7 +93,8 @@ static struct BoxJumpState* State(void)
 
 static u8 BoxCount(void)
 {
-	return HackExtSave_Available() ? TOTAL_BOXES_COUNT : 39;
+	return BoxShelf_ExtAvailable() ? BoxShelf_VisibleBoxes() : 34;   //FEAT-box100-unlock: 51〜100 箱目は 1〜50 が満杯になるまで出さない（覚えず毎回呼ぶ・呼びは軽い）
+	//旧コメント→   //★ 2026-10-24 patches/0741: 覚えた答え（スクロールのたびに 3〜4 回呼ばれ 1 回約 34 回のフラッシュ読みだった・答えは同じ）。L 案: 本体の棚は 34 箱（箱 id 0〜33）
 }
 
 static u8 Wrap(s32 box)
@@ -161,11 +163,11 @@ static void ReadBox(struct BoxJumpState* s, u8 box, struct BoxPreview* out)
 		out->pal[slot] = 0xFF;
 		if (BoxShelf_ShelfIndex(box) >= 0)
 		{
-			BoxShelf_ReadMon(box, slot, &s->readMon);   //入れ物を動かさない写し（40〜50 箱は使えなければ 0）
+			BoxShelf_ReadMon(box, slot, &s->readMon);   //入れ物を動かさない写し（35〜50 箱は使えなければ 0）
 			mon = &s->readMon;
 		}
 		else
-			mon = GetCompressedMonPtr(box, slot);       //19〜24 箱（棚でない）は直の番地・読むだけ
+			mon = GetCompressedMonPtr(box, slot);       //（全部の箱が棚なので BoxShelf_ReadMon のあと使わない・NULL のときの保険）
 		if (mon == NULL)
 			continue;
 		raw = (const u8*) mon;
@@ -219,6 +221,12 @@ static void Glyph(u8 window, const u8 shape[5], u16 x, u16 y, u8 color, u8 paper
 static void Number(u8 window, u8 value, u16 x, u16 y, u8 color, u8 paper)
 {
 	u8 tens = 0;
+	if (value >= 100)   //★ FEAT-box100（0.61.0）: 100 箱目は 3 桁（2 桁のままだと tens が 10 になり sDigits[10] が表の外）。1 桁ぶん（5 ドット）後ろへ
+	{
+		value -= 100;
+		Glyph(window, sDigits[1], x, y, color, paper);
+		x += 5;
+	}
 	while (value >= 10)
 	{
 		value -= 10;
@@ -247,11 +255,11 @@ static void DrawBackground(u8 window)
 	}
 }
 
-//アイコンの色の組（BG の 10〜12 に読んだもの）のうち、マス目の地（窓の枠の中の色＝灰）にいちばん近い色の番号（1〜15）
+//アイコンの色の組（BG の 10〜13 に読んだもの・bg は 0〜3）のうち、マス目の地（窓の枠の中の色＝灰）にいちばん近い色の番号（1〜15）
 //★ 2026-10-12 最初は見出しの帯の色（選んだカードは青）に寄せたが、アイコンのマスはどのカードも灰の地の上で、青に近い色は紫になった（mGBA）
-static u8 NearestIconColor(u8 pal)
+static u8 NearestIconColor(u8 bg)
 {
-	const u16* icon = &gPlttBufferUnfaded[(ICON_PAL_FIRST + pal) * 16];
+	const u16* icon = &gPlttBufferUnfaded[(ICON_PAL_FIRST + bg) * 16];
 	u16 want = gBoxJumpPalette[gBoxJumpFrameTiles[4][0] & 15];   //枠の真ん中のタイルの色
 	u32 i, best = 1, bestDist = 0xFFFFFFFF;
 
@@ -270,7 +278,7 @@ static u8 NearestIconColor(u8 pal)
 	return best;
 }
 
-static void DrawIcon(u8 window, const struct BoxPreview* p, u32 slot, u16 x, u16 y, u8 paperIndex)
+static void DrawIcon(u8 window, const struct BoxPreview* p, u32 slot, u16 x, u16 y, u8 paperIndex, u8 bg)
 {
 	u8* pixels = gWindows[window].tileData;
 	u8* dst = pixels + ((y >> 3) * gWindows[window].window.width + (x >> 3)) * 32;
@@ -282,13 +290,14 @@ static void DrawIcon(u8 window, const struct BoxPreview* p, u32 slot, u16 x, u16
 		u8 lo = src[i] & 15, hi = src[i] >> 4;
 		dst[i] = (lo ? lo : paperIndex) | ((hi ? hi : paperIndex) << 4);
 	}
-	PutWindowRectTilemapOverridePalette(window, x >> 3, y >> 3, 1, 1, ICON_PAL_FIRST + p->pal[slot]);
+	PutWindowRectTilemapOverridePalette(window, x >> 3, y >> 3, 1, 1, ICON_PAL_FIRST + bg);
 }
 
 static void Draw(struct BoxJumpState* s, u8 selected)
 {
 	u8 window = s->window;
-	u8 loaded = 0;
+	u8 bgOf[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};   //アイコンの色の組（0〜5）→ 読んだ BG の色の番号（0〜3）
+	u8 used = 0;
 	u32 i, line, row, column;
 
 	DrawBackground(window);
@@ -320,13 +329,22 @@ static void Draw(struct BoxJumpState* s, u8 selected)
 				u16 dx = x + column * 8, dy = 32 + row * 8;
 				if (p->pal[slot] != 0xFF)
 				{
-					u8 pal = p->pal[slot];
-					if (pal < 3 && !(loaded & (1 << pal)))   //アイコンの色の組 0〜2 → BG の 10〜12（元と同じ）
+					u8 pal = p->pal[slot], bg;
+					if (pal > 5)
+						pal = 0;
+					bg = bgOf[pal];
+					if (bg == 0xFF)   //★ 2026-10-16 色の組は 0〜5（3〜5 は わたしたちの伝説の専用の色）。BG の 10〜13 に出てきた順に読む（4 本をこえたら最後の 13 を借りる）
 					{
-						LoadPalette(GetValidMonIconPalettePtr(p->icon[slot]), (ICON_PAL_FIRST + pal) * 16, 32);
-						loaded |= 1 << pal;
+						if (used < ICON_PAL_SLOTS)
+						{
+							bg = used++;
+							LoadPalette(GetValidMonIconPalettePtr(p->icon[slot]), (ICON_PAL_FIRST + bg) * 16, 32);
+						}
+						else
+							bg = ICON_PAL_SLOTS - 1;
+						bgOf[pal] = bg;
 					}
-					DrawIcon(window, p, slot, dx, dy, NearestIconColor(pal));
+					DrawIcon(window, p, slot, dx, dy, NearestIconColor(bg), bg);
 				}
 				else
 					Rect(window, dx + 2, dy + 2, 4, 4, 3);

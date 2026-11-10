@@ -1,0 +1,26 @@
+#org @gText_MoveEvo
+[SCRIPTING_BANK]の [BUFFER][00]が\n[BUFFER][01]に しんかした！
+
+#org @gText_MoveMastery
+[SCRIPTING_BANK]の [BUFFER][00]が\nじゅくれん [BUFFER][01]に あがった！
+
+#org @gText_MoveMasteryMax
+[SCRIPTING_BANK]の [BUFFER][00]を\nじゅくれん MAXまで きわめた！
+
+#org @gText_MasteryShinka
+しんか
+
+#org @gText_MasteryJukuren
+じゅくれん
+
+#org @gText_MasteryConfirm
+じゅくれんにすると\nしんかへ もどせません\nSELECTで けってい\nBで やめる
+
+#org @gText_MasteryLocked
+じゅくれんの わざは\nしんかに もどせません
+
+#org @gText_MasteryForgetWarn
+じゅくれんの わざ！\nわすれると\nじゅくれんが きえます
+
+#org @gText_MasteryHint
+ セレクト

@@ -1,0 +1,53 @@
+#org @gText_FlyShop_Intro_Rocket
+あら いらっしゃい ぼうや。\nあたしは ロケットだんの したっぱよ。\pいちばの すみで こっそり ひこうポケモンや\nめずらしい すがたの\pポケモンを うってるの。 ただし ねだんは\nたかいわよ！
+
+#org @gText_FlyShop_Ask_Rocket
+なにか かっていく？
+
+#org @gText_FlyShop_Which_Rocket
+どれに するの？
+
+#org @gText_FlyShop_Bye_Rocket
+あら つれないわね……\nまた いらっしゃい。
+
+#org @gText_FlyShop_Intro_Unown
+ふふ…… ようこそ。 あたしは\nロケットだんの アンノーンせんもんの\lうりこよ。\pこの もじは ぜんぶ そろうと なにかが\nおこるとか おこらないとか……\pきょうみ あるでしょ？
+
+#org @gText_FlyShop_Ask_Unown
+ひとつ いかが？
+
+#org @gText_FlyShop_Which_Unown
+どの もじが ほしいの？
+
+#org @gText_FlyShop_Bye_Unown
+そう…… ざんねん。\nまた きてちょうだい。
+
+#org @gText_FlyShop_Intro_Vivi
+はぁい いらっしゃい！ あたしは\nロケットだんの ビビヨンせんもんの\lうりこよ。\pせかいじゅうの もようの\nビビヨンを あつめてるの。 きれいでしょ？\lねだんも きれいよ！
+
+#org @gText_FlyShop_Ask_Vivi
+おきにいりは みつかった？
+
+#org @gText_FlyShop_Which_Vivi
+どの もようが いい？
+
+#org @gText_FlyShop_Bye_Vivi
+また みにきてね。\nあなたに にあう もようが あるはずよ。
+
+#org @gText_FlyShop_Confirm
+[BUFFER1]の\nLv[BUFFER3]ね！\lねだんは [BUFFER2]えんよ。\pそれで いいかしら？
+
+#org @gText_FlyShop_Got
+[BUFFER1]を てにいれた！
+
+#org @gText_FlyShop_Handed
+はい どうぞ！ だいじに してね。\nロケットだんからの おくりものよ！
+
+#org @gText_FlyShop_ToPC
+てもちが いっぱいだから パソコンに\nおくっておいたわ！
+
+#org @gText_FlyShop_Full
+てもちも パソコンも いっぱいじゃない！\nあけてから いらっしゃい。
+
+#org @gText_FlyShop_NoMoney
+あら おかねが たりないわよ。\nひやかしは おことわりよ！

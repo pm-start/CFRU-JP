@@ -30,3 +30,18 @@ A:けってい  B:とじる
 
 #org @gText_BwFp_HintBack
 B:もどる
+
+#org @gText_BwFp_CapPrefix
+じょうげん Lv
+
+#org @gText_BwFp_CapNone
+じょうげん なし
+
+#org @gText_BwFp_CapRowLv
+こ Lv
+
+#org @gText_BwFp_CapRowNone
+こ なし
+
+#org @gText_BwFp_Kanto
+カントー

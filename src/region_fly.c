@@ -3,6 +3,7 @@
 #include "map_region.h"
 #include "region_fly.h"
 #include "Tables/hoenn_script_flags.h"
+#include "hack_johto.h"   //[hack] patches/0986
 
 /*
 region_fly.c
@@ -36,6 +37,8 @@ const struct RegionFlyCity *RegionFlyFindCity(u8 region, u8 mapsec)
    （訪問フラグそのものは立てない＝デバッグを外せば元どおり） */
 bool8 RegionFlyCityVisited(const struct RegionFlyCity *c)
 {
+    if (!MapRegion_IsTravelMapAllowed(c->group, c->num))
+        return FALSE;
 #ifdef JOHTO_TOWNMAP_DEBUG
     if (c->region == MAP_REGION_JOHTO)
         return TRUE;
@@ -64,7 +67,7 @@ bool8 RegionFlySetWarp(u8 region, u8 mapsec)
 {
     const struct RegionFlyCity *c = RegionFlyFindCity(region, mapsec);
 
-    if (c == NULL)
+    if (c == NULL || !MapRegion_IsTravelMapAllowed(c->group, c->num))
         return FALSE;
     SetWarpDestination((s8) c->group, (s8) c->num, -1, (s8) c->x, (s8) c->y);
     return TRUE;
@@ -87,6 +90,16 @@ void RegionFlyVisitTick(void)
     if (c != NULL && c->group == (u8) gSaveBlock1->location.mapGroup)
         FlagSet(c->flag);
 }
+
+/* ★ 2026-11-03 perf-region-1: 歩きタスク（HoennStepTick）が毎コマ呼ぶ「訪問の旗」＋「回復地点」を 1 つにまとめた版。
+   RegionFlyVisitTick と RegionHealTick の表の線形検索（町 29 件・ポケセン 46 件）が、町でもポケセンでもない地図
+   （道・洞窟・ダンジョン）では毎コマ空振りしていた（合計約 2,000 サイクル）。
+   空振りだった地図の「群<<8 | 番号」を歩きタスクの空き欄 data[6] に覚え、同じ地図にいる間は表を引かない。
+   ・旗の立て方は前と同じ: タウンマップのページの旗（SINNOH/JOHTO_FLAG_TOWNMAP）は毎コマ確かめる（空振りの地図でも）。
+     町・ポケセンのある地図は覚えない＝前と同じに毎コマ表を引いて旗を立て・回復地点を書く
+   ・data[6] は素の per-step コールバック（data[0]〜[5]）にも空のひび割れ（[7]〜[11]・[14]）にも使われない（hoenn_steps.c 冒頭）
+   ・タスクを作り直すと 0 に戻る。0 = 群 0・番号 0（カントーのマサラタウン）の鍵だが、そこは元から空振り（群<43 かつカントー）なので正しい */
+#define REGION_MAP_TICK_KEY(g, n) ((s16) ((((u16) (u8) (g)) << 8) | (u8) (n)))
 
 static const struct RegionPokeCenter *FindPokeCenterHere(void)
 {
@@ -115,6 +128,46 @@ void RegionHealTick(void)
     w->warpId = -1;
     w->x = p->healX;
     w->y = p->healY;
+}
+
+void RegionMapTick(s16 *cache)
+{
+    s16 key = REGION_MAP_TICK_KEY(gSaveBlock1->location.mapGroup, gSaveBlock1->location.mapNum);
+    u8 region = GetCurrentMapRegion();
+    bool8 empty = (*cache == key);      /* この地図は前に調べて 町でもポケセンでもなかった */
+    const struct RegionFlyCity *c = NULL;
+    const struct RegionPokeCenter *p = NULL;
+    struct WarpData *w;
+
+    if (region == MAP_REGION_JOHTO || region == MAP_REGION_SINNOH || region == MAP_REGION_KITAKAMI)
+    {
+        if (region == MAP_REGION_SINNOH && !FlagGet(SINNOH_FLAG_TOWNMAP))
+            FlagSet(SINNOH_FLAG_TOWNMAP);
+        else if (region == MAP_REGION_JOHTO && !FlagGet(JOHTO_FLAG_TOWNMAP))
+            FlagSet(JOHTO_FLAG_TOWNMAP);
+        if (!empty)
+        {
+            c = RegionFlyFindCity(region, gMapHeader.regionMapSectionId);
+            if (c != NULL && c->group == (u8) gSaveBlock1->location.mapGroup)
+                FlagSet(c->flag);
+            else
+                c = NULL;
+        }
+    }
+    if (empty)
+        return;
+    p = FindPokeCenterHere();
+    if (p != NULL)
+    {
+        w = &gSaveBlock1->lastHealLocation;
+        w->mapGroup = (s8) p->healGroup;
+        w->mapNum = (s8) p->healNum;
+        w->warpId = -1;
+        w->x = p->healX;
+        w->y = p->healY;
+    }
+    if (c == NULL && p == NULL)
+        *cache = key;
 }
 
 /*
@@ -158,9 +211,10 @@ u8 RegionWhiteoutRespawn(struct WarpData *warp)
    キッサキ・アサギの選択肢を出さずに「ホウエンへ いきますか」だけにする */
 void Region_IsDemoBuild(void)
 {
+/* 船の既存3択（ミナモ・キッサキ・やめる）を通常版でも使う。 */
 #ifdef HACK_DEMO_BUILD
 	gSpecialVar_LastResult = TRUE;
 #else
-	gSpecialVar_LastResult = FALSE;
+	gSpecialVar_LastResult = !HackJohto_Open();   //[hack] patches/0986 ジョウトが開くまで（J7 まで）は 3 択（HACK_OMIT_JOHTO の置き換え）
 #endif
 }

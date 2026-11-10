@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
 #include "../include/random.h"
 #include "../include/party_menu.h"
 #include "../include/constants/songs.h"
@@ -30,8 +31,12 @@
 #include "../include/new/switching.h"
 #include "../include/new/trainer_sliding.h"
 #include "../include/new/z_move_battle_scripts.h"
+#include "hack_chf_rotgacha.h" //[hack] 縛り F
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダーク技の組み立て
 
 u8 HackDragonBoulder_Type2(const struct Pokemon* mon, u16 species, u8 type2); //[hack] patches/0207 りゅうのいわお（src/hack_dragon_boulder.c・特別なガブリアスZ は 2 つ目のタイプが いわ）
+u8 HackDebugMon_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0422 デバッグモン（src/hack_debug_mon.c・配る版は base をそのまま返す）
+u8 HackDelta_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0962 デルタ種のタイプ（src/hack_delta.c・印がデルタでなければ base をそのまま返す）
 /*
 switching.c
 	handles battle switching logic
@@ -66,6 +71,7 @@ enum SwitchInStates
 	SwitchIn_MirrorHerb,
 	SwitchIn_LastPokemonMusic,
 	SwitchIn_TrainerMessage,
+	SwitchIn_Lv200CustomMoves,
 	SwitchIn_PreEnd,
 	SwitchIn_EjectPack,
 	SwitchIn_End,
@@ -279,7 +285,7 @@ static bool8 TryActivateFlowerGift(u8 leavingBank)
 	u32 i = 0;
 
 	if (ABILITY(leavingBank) == ABILITY_AIRLOCK
-	||  ABILITY(leavingBank) == ABILITY_CLOUDNINE)
+	||  BankHasAbility(leavingBank, ABILITY_CLOUDNINE))
 		gBattleMons[leavingBank].ability = ABILITY_NONE; //Remove ability because we can't have these anymore
 
 	for (u8 bank = gBanksByTurnOrder[i]; i < gBattlersCount; ++i, bank = gBanksByTurnOrder[i])
@@ -287,12 +293,26 @@ static bool8 TryActivateFlowerGift(u8 leavingBank)
 		if (bank == leavingBank)
 			continue; //Don't do this form change if you're the bank switching out
 
-		if ((ABILITY(bank) == ABILITY_FLOWERGIFT || ABILITY(bank) == ABILITY_FORECAST || ABILITY(bank) == ABILITY_PROTOSYNTHESIS)) //Just in case someone with Air Lock/Cloud Nine switches out
+		if (ABILITY(bank) == ABILITY_FLOWERGIFT || ABILITY(bank) == ABILITY_FORECAST || gBattleMons[bank].ability == ABILITY_PROTOSYNTHESIS) //[hack] 1 つ目だけを見る（2 つ目は下の else if）。ABILITY(bank) と書くと route_second_abilities の検算が生の判定として拾う。Just in case someone with Air Lock/Cloud Nine switches out
 		{
 			gStatuses3[bank] &= ~STATUS3_SWITCH_IN_ABILITY_DONE;
 
 			if (AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, bank, 0, 0, 0))
 				return TRUE;
+		}
+		else if (BankHasAbility(bank, ABILITY_PROTOSYNTHESIS)) //[hack] BUG-unnerve-loop 2 つ目だけ こだいかっせい: 1 つ目（きんちょうかん等）を巻き込まず 2 つ目だけを名指しで動かす。済み印は呼ぶ前のとおりに戻す
+		{
+			u32 done = gStatuses3[bank] & STATUS3_SWITCH_IN_ABILITY_DONE;
+			u8 effect;
+
+			gStatuses3[bank] &= ~STATUS3_SWITCH_IN_ABILITY_DONE;
+			effect = AbilityBattleEffects(ABILITYEFFECT_ON_SWITCHIN, bank, 0, ABILITY_PROTOSYNTHESIS, 0);
+			gStatuses3[bank] = (gStatuses3[bank] & ~STATUS3_SWITCH_IN_ABILITY_DONE) | done;
+			if (effect)
+			{
+				gNewBS->abilityPopupOverwrite = ABILITY_PROTOSYNTHESIS;
+				return TRUE;
+			}
 		}
 	}
 
@@ -353,11 +373,16 @@ void atk4D_switchindataupdate(void)
 	if (gBattleExecBuffer) return;
 
 	gActiveBattler = GetBankForBattleScript(gBattlescriptCurrInstr[1]);
+Lv200CustomMove_OnSwitchOut(gActiveBattler);
+	HackChFGacha_OnSwitchOut(gActiveBattler); //[hack] 縛り F わざガチャ: 出ていく子の PP を控える
+	ShadowBattle_OnSwitchOut(gActiveBattler); //[hack] patches/0963 段 E ダーク技の組み立て: 出ていくダークの子の元の技の PP を控える
 	oldData = gBattleMons[gActiveBattler];
 	monData = (u8*)(&gBattleMons[gActiveBattler]);
 
 	for (i = 0; i < sizeof(struct BattlePokemon); ++i)
 		monData[i] = gBattleBufferB[gActiveBattler][4 + i];
+	HackChFGacha_OnSwitchIn(gActiveBattler); //[hack] 縛り F わざガチャ: 出てきた子の技を入れ替える（CAMOMONS の型の決定より前）
+	ShadowBattle_OnSwitchIn(gActiveBattler); //[hack] patches/0963 段 E ダーク技の組み立て: 出てきたダークの子の並びを作る（ガチャ中は何もしない）
 
 	if (gBattleTypeFlags & BATTLE_TYPE_CAMOMONS) //The Pokemon takes on the types of its first two moves
 	{
@@ -365,9 +390,13 @@ void atk4D_switchindataupdate(void)
 	}
 	else
 	{
-		gBattleMons[gActiveBattler].type1 = gBaseStats[gBattleMons[gActiveBattler].species].type1;
-		gBattleMons[gActiveBattler].type2 = HackDragonBoulder_Type2(GetBankPartyData(gActiveBattler), gBattleMons[gActiveBattler].species,
-		                                                            gBaseStats[gBattleMons[gActiveBattler].species].type2); //[hack] patches/0207 りゅうのいわお
+		gBattleMons[gActiveBattler].type1 = HackDebugMon_Type(GetBankPartyData(gActiveBattler), gBattleMons[gActiveBattler].species, 0,
+		                                                      HackDelta_Type(GetBankPartyData(gActiveBattler), gBattleMons[gActiveBattler].species, 0,
+		                                                                     gBaseStats[gBattleMons[gActiveBattler].species].type1)); //[hack] patches/0422 デバッグモン・patches/0962 デルタ種
+		gBattleMons[gActiveBattler].type2 = HackDebugMon_Type(GetBankPartyData(gActiveBattler), gBattleMons[gActiveBattler].species, 1,
+		                                                      HackDelta_Type(GetBankPartyData(gActiveBattler), gBattleMons[gActiveBattler].species, 1,
+		                                                                     HackDragonBoulder_Type2(GetBankPartyData(gActiveBattler), gBattleMons[gActiveBattler].species,
+		                                                                                             gBaseStats[gBattleMons[gActiveBattler].species].type2))); //[hack] patches/0207 りゅうのいわお・patches/0422 デバッグモン・patches/0962 デルタ種
 	}
 
 	gBattleMons[gActiveBattler].ability = GetMonAbility(GetBankPartyData(gActiveBattler));
@@ -428,6 +457,7 @@ void atk4D_switchindataupdate(void)
 	}
 	HoennPalace_OnSwitchIn(gActiveBattler); //★ バトルパレス: すでに HP 半分以下なら印（src/hoenn_palace.c・patches/0085）
 	HoennArena_OnSwitchIn(); //★ バトルアリーナ: ターンを数え直す・点数を 0 に（src/hoenn_arena.c・patches/0096）
+	Lv200CustomMove_OnSwitchIn(gActiveBattler);
 
 	if (ABILITY(gActiveBattler) == ABILITY_ILLUSION)
 	{
@@ -469,7 +499,8 @@ void atk4F_jumpifcantswitch(void)
 	}
 	else if (!(T2_READ_8(gBattlescriptCurrInstr + 1) & ATK4F_DONT_CHECK_STATUSES)
 	&& CanBeTrapped(gActiveBattler)
-	&& ((gBattleMons[gActiveBattler].status2 & (STATUS2_WRAPPED | STATUS2_ESCAPE_PREVENTION)) || (gStatuses3[gActiveBattler] & STATUS3_ROOTED) || IsFairyLockActive()))
+	&& ((gBattleMons[gActiveBattler].status2 & (STATUS2_WRAPPED | STATUS2_ESCAPE_PREVENTION)) || (gStatuses3[gActiveBattler] & STATUS3_ROOTED) || IsFairyLockActive()
+	 || !Lv200CustomMove_CanSwitch(gActiveBattler, TRUE))) //[hack] FIX-moves-P6 しんけんしょうぶ・まよいごのさそい（A）と B の逃げ止めは とんぼがえり・バトンタッチ系でも抜けられない
 	{
 		gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 2);
 	}
@@ -690,7 +721,7 @@ void atk52_switchineffects(void)
 		case SwitchIn_Spikes:
 			if (CheckGrounding(gActiveBattler)
 			&& gSideTimers[SIDE(gActiveBattler)].spikesAmount > 0
-			&& ability != ABILITY_MAGICGUARD
+			&& !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD) //[hack] 2026-10-22 2 つ目（BUG-ability2-no-effect）
 			&& itemEffect != ITEM_EFFECT_HEAVY_DUTY_BOOTS)
 			{
 				gBattleMoveDamage = CalcSpikesDamage(gActiveBattler);
@@ -710,7 +741,7 @@ void atk52_switchineffects(void)
 
 		case SwitchIn_StealthRock:
 			if (gSideTimers[SIDE(gActiveBattler)].srAmount > 0
-			&& ability != ABILITY_MAGICGUARD
+			&& !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD) //[hack] 2026-10-22 2 つ目（BUG-ability2-no-effect）
 			&& itemEffect != ITEM_EFFECT_HEAVY_DUTY_BOOTS)
 			{
 				gBattleMoveDamage = CalcStealthRockDamage(gActiveBattler);
@@ -730,7 +761,7 @@ void atk52_switchineffects(void)
 
 		case SwitchIn_Steelsurge:
 			if (gSideTimers[SIDE(gActiveBattler)].steelsurge > 0
-			&& ability != ABILITY_MAGICGUARD
+			&& !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD) //[hack] 2026-10-22 2 つ目（BUG-ability2-no-effect）
 			&& itemEffect != ITEM_EFFECT_HEAVY_DUTY_BOOTS)
 			{
 				gBattleMoveDamage = CalcSteelsurgeDamage(gActiveBattler);
@@ -1006,6 +1037,22 @@ void atk52_switchineffects(void)
 			}
 		__attribute__ ((fallthrough));
 
+		case SwitchIn_Lv200CustomMoves:
+		{
+			const u8 *script = Lv200CustomMove_GetSwitchInScript(gActiveBattler);
+			if (script != NULL)
+			{
+				gBattleScripting.bank = gActiveBattler;
+				gBankAttacker = gActiveBattler;
+				gBankTarget = gActiveBattler;
+				BattleScriptPushCursor();
+				gBattlescriptCurrInstr = script;
+				return;
+			}
+			++gNewBS->switchInEffectsState;
+		}
+		__attribute__ ((fallthrough));
+
 		case SwitchIn_PreEnd:
 		SWITCH_IN_END:
 			gSideStatuses[SIDE(gActiveBattler)] &= ~(SIDE_STATUS_SPIKES_DAMAGED);
@@ -1098,6 +1145,12 @@ void atk8F_forcerandomswitch(void)
 	struct Pokemon* party = NULL;
 	
 	bankDef = GetBankForBattleScript(gBattlescriptCurrInstr[1]);
+
+	if (HoennArena_IsActive()) //★ バトルアリーナは ほえる・ドラゴンテール・レッドカードも失敗（エメラルドの BattleScript_EffectRoar・patches/0596）
+	{
+		gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3);
+		return;
+	}
 
 	if (gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_DOUBLE)) //Trainer Battle or Wild Double Battle
 	{
@@ -1200,7 +1253,7 @@ static bool8 TryDoForceSwitchOut(void)
 				gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3);
 				return FALSE;
 			}
-			else if (gBattleMons[bankAtk].level < gBattleMons[bankDef].level)
+			else if (BM_LEVEL(gBattleMons[bankAtk]) < BM_LEVEL(gBattleMons[bankDef]))
 			{
 				//Pokemon using Roar must be of higher level to end the battle in a Single battle
 				gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 3);
@@ -1244,6 +1297,8 @@ static bool8 PPIsMaxed(u8 bank)
 	}
 	return TRUE;
 }
+
+bool8 HackChallengeC_NoSwitch(u8 bank); //[hack] patches/0550 縛り C（src/hack_challenge_c.c）
 
 bool8 HasNoMonsToSwitch(u8 battler)
 {
@@ -1291,6 +1346,7 @@ void ClearSwitchBytes(u8 bank)
 	gNewBS->IncinerateCounters[bank] = 0;
 	gNewBS->EmbargoTimers[bank] = 0;
 	gNewBS->DisabledMoldBreakerAbilities[bank] = 0;
+	gNewBS->hackSecondAbilityIgnored &= ~gBitTable[bank]; //[hack] 2026-10-20
 	gNewBS->SuppressedAbilities[bank] = 0;
 	gNewBS->neutralizingGasBlockedAbilities[bank] = 0;
 	gNewBS->lastTargeted[bank] = 0;
@@ -1351,7 +1407,9 @@ void PartyMenuSwitchingUpdate(void)
 	gBattleStruct->switchoutPartyIndex[gActiveBattler] = gBattlerPartyIndexes[gActiveBattler];
 
 	if (gStatuses3[gActiveBattler] & STATUS3_SKY_DROP_TARGET
+	|| HackChallengeC_NoSwitch(gActiveBattler) //[hack] patches/0550 ？？？戦は自分からの入れ替えもできない
 	|| gNewBS->commanderActive[gActiveBattler] != SPECIES_NONE //Being Ghost doesn't get you out of this
+	|| !Lv200CustomMove_CanSwitch(gActiveBattler, TRUE)
 	|| HoennArena_IsActive()) //★ バトルアリーナは入れ替えられない（エメラルドの battle_main.c:4243・patches/0096）
 		goto TRAPPED;
 	else if (!CanBeTrapped(gActiveBattler))
@@ -1509,6 +1567,7 @@ u32 GetMonEntryHazardDamage(struct Pokemon* mon, u8 side)
 
 	if (gSideStatuses[side] & SIDE_STATUS_SPIKES
 	&& GetMonAbility(mon) != ABILITY_MAGICGUARD
+	&& SecondAbility_OfMonActive(mon) != ABILITY_MAGICGUARD //[hack] 2026-10-22 2 つ目
 	&& ItemId_GetHoldEffect(GetMonData(mon, MON_DATA_HELD_ITEM, NULL)) != ITEM_EFFECT_HEAVY_DUTY_BOOTS) //Has Klutz or not holding boots
 	{
 		if (gSideTimers[side].srAmount > 0)

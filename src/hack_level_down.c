@@ -27,7 +27,7 @@ static void ItemUseCB_LevelDown(u8 taskId, TaskFunc func)
 	struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
 	u16 item = Var800E;
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-	u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	u16 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
 	u32 exp;
 	u16 oldHP, maxHP;
 

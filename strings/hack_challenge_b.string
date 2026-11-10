@@ -1,0 +1,62 @@
+// しばり B（#118・0.50.3・src/hack_challenge_b.c・assembly/hack_challenge/challenge_b_scripts.s）の文。
+// せっていの行（名前・説明）は メニューの字（1 字 11 画素）・戦闘の文は 会話の字（1 字 9 画素・1 行 21 字まで）・会話の文は 会話の窓の幅（CLAUDE.md 6.25）。
+
+#org @gText_BwOpt_ChbLevelCap
+レベルキャップ
+
+#org @gText_BwOpt_ChbNoSwitch
+こうたいきんし
+
+#org @gText_BwOpt_ChbNoWildExp
+やせいけいけんなし
+
+#org @gText_BwOpt_ChbDoubleDmg
+ダメージ1.5ばい
+
+#org @gText_BwOpt_ChbNoFly
+そらをとぶきんし
+
+#org @gText_BwOpt_DescChbLevelCap
+バッジの かずで レベルの じょうげんが\nきまり それいじょう あがりません
+
+#org @gText_BwOpt_DescChbNoSwitch
+せんとうで じぶんから ポケモンを\nいれかえることが できません
+
+#org @gText_BwOpt_DescChbNoWildExp
+やせいの ポケモンと たたかっても\nけいけんちが もらえません
+
+#org @gText_BwOpt_DescChbDoubleDmg
+あいての こうげきで うける\nダメージが 1.5ばいに なります
+
+#org @gText_BwOpt_DescChbNoFly
+『そらをとぶ』と『ゆうらん』が\nつかえなく なります
+
+// 戦闘（exp.c・move_menu.c）。上限の文は 末尾の \p で Ａボタンを待つ（0x184 の printstring には waitmessage が無く 次の文に すぐ消されたため・2026-10-17）。★ 0.50.6 から レベルの上限は縛りが OFF でもいつも効く（今いる地方のバッジ・#124）ので、上限の文は しばりと言わない（縛りの上限でも同じ文）
+#org @String_ChB_LevelCapped
+[FD][00]は いまの バッジでは\nじょうげん Lv[FD][01]で あがらない！\p
+
+#org @String_ChB_NoWildExp
+しばりで やせいの ポケモンから\nけいけんちは もらえない！\p
+
+#org @gText_ChB_NoSwitch
+しばりちゅうは ポケモンを\nいれかえられない！
+
+// 手持ちの画面（ふしぎなアメ・けいけんアメ）
+#org @gText_ChB_CandyCapped
+いまの バッジの じょうげんは\nLv[BUFFER1]だから あがらない！
+
+// 最後のバッジ（台本 HackScr_ChallengeB_FinaleList）
+#org @gText_Challenge_FinaleLevelCap
+『レベルキャップ』を まもりぬいた！
+
+#org @gText_Challenge_FinaleNoSwitch
+『こうたいきんし』を まもりぬいた！
+
+#org @gText_Challenge_FinaleNoWildExp
+『やせいけいけんなし』を まもりぬいた！
+
+#org @gText_Challenge_FinaleDoubleDmg
+『ダメージ1.5ばい』を まもりぬいた！
+
+#org @gText_Challenge_FinaleNoFly
+『そらをとぶきんし』を まもりぬいた！

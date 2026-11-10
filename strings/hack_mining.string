@@ -1,0 +1,21 @@
+#org @gText_UndergroundMining_Instructions
+かべの なかの かせきを\nツルハシと ハンマーで ほりだそう！\p[L_BUTTON][R_BUTTON]で どうぐを きりかえ\nAボタンで かべを ほるよ\pほりすぎると かべが くずれて\nかせきが こわれるから ちゅうい！
+
+
+#org @gText_ExplorerKit_CantUseHere
+ここでは たんけんセットは\nつかえない！[PAUSE_UNTIL_PRESS]
+
+#org @gText_ExplorerKit_AskDive
+たんけんセットを つかって ちかへ\nもぐりますか？
+
+#org @gText_ExplorerKit_Intro
+おお きみは ポケモントレーナーか わしは\nちかを たんけんするのが だいすきなんじゃ\pきみも ちかの せかいを\nのぞいてみんかね？\pこの たんけんセットを あげよう
+
+#org @gText_ExplorerKit_Explain
+そとで たんけんセットを つかうと ちかの\nひろばへ もぐれるぞ\pかべに かせきが うまっておる ツルハシと\nハンマーで ていねいに ほるんじゃよ\pかべは まいにち ふっかつする また\nほりにくると いい
+
+#org @gText_ExplorerKit_NoRoom
+おや にもつが いっぱいじゃな なにか\nととのえてから また きなさい
+
+#org @gText_ExplorerKit_Again
+ちかの かべは\nまいにち ふっかつするんじゃ\pたんけんセットを つかって また\nほってくると いい

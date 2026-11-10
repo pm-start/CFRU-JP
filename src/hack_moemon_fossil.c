@@ -46,6 +46,7 @@ void HackMoemonFossil_Revive(void)
 	CreateMon(&mon, species, MOEMON_FOSSIL_LEVEL, 32, FALSE, 0, OT_ID_PLAYER_ID, 0);
 	HackMonId_MakeMoemon((struct BoxPokemon*) &mon);
 	result = GiveMonToPlayer(&mon);
+	species = GetMonData(&mon, MON_DATA_SPECIES, NULL);   //[hack] しばり『ぜんぶレントラー』ON のときは レントラーになっている（OFF は同じ種族）＝名前の文と図鑑もその種族
 	gSpecialVar_LastResult = result;
 	StringCopy(gStringVar1, gSpeciesNames[species]);
 	if (result < 2)

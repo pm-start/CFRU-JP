@@ -1,5 +1,7 @@
 #include "defines.h"
 #include "defines_battle.h"
+#include "hack_move_alias.h"
+#include "lv200_custom_moves.h"
 #include "../include/event_data.h"
 #include "../include/party_menu.h"
 
@@ -126,7 +128,7 @@ void HoennArena_OnBattleStart(void)
 //エメラルドの sMindRatings を決まりに直したもの（上の説明）
 static s8 MindRating(u16 move)
 {
-	switch (move)
+	switch (EffectiveMove(move)) //[hack] 効果元で判定する
 	{
 		case MOVE_PROTECT:
 		case MOVE_DETECT:
@@ -139,6 +141,11 @@ static s8 MindRating(u16 move)
 		case MOVE_SILKTRAP:
 		case MOVE_BURNINGBULWARK:
 		case MOVE_MAX_GUARD:
+		case MOVE_LV200_FLYING_150: //[hack] 独自効果の守る系もまもるの仲間（#35 P2）
+		case MOVE_LV200_FIRE_150:
+		case MOVE_LV200_FIGHTING_190:
+		case MOVE_LV200_ROCK_110:
+		case MOVE_LV200_GHOST_200:
 			return -1;
 		case MOVE_COUNTER:
 		case MOVE_BIDE:
@@ -395,9 +402,27 @@ bool8 HoennArena_PlayerChooseNext(void)
 }
 
 //相手の次の子（OpponentHandleChoosePokemon・エメラルドの GetMostSuitableMonToSwitchInto）。PARTY_SIZE ならアリーナではない
+static bool8 ArenaMonUsable(u8 i)
+{
+	return gEnemyParty[i].species != SPECIES_NONE
+		&& !GetMonData(&gEnemyParty[i], MON_DATA_IS_EGG, NULL)
+		&& GetMonData(&gEnemyParty[i], MON_DATA_HP, NULL) != 0;
+}
+
 u8 HoennArena_OpponentNextMon(void)
 {
+	u8 next, i;
+
 	if (!HoennArena_IsActive())
 		return PARTY_SIZE;
-	return gBattlerPartyIndexes[gActiveBattler] + 1;
+	next = gBattlerPartyIndexes[gActiveBattler] + 1;
+	if (next < PARTY_SIZE && ArenaMonUsable(next))
+		return next;
+	//★ patches/0596 並び順の次が空の枠・負けた子（HP 0）なら「？」になる。まだ戦える子を先頭から探す（ほえる等は失敗にしたので保険）
+	for (i = 0; i < PARTY_SIZE; ++i)
+	{
+		if (i != gBattlerPartyIndexes[gActiveBattler] && ArenaMonUsable(i))
+			return i;
+	}
+	return next;
 }

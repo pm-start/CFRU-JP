@@ -1,5 +1,8 @@
+#include "../lv200_custom_move_ai.h"
 #include "../defines.h"
+#include "../lv200_custom_move_ai.h"
 #include "../defines_battle.h"
+#include "../lv200_custom_moves.h"
 #include "../../include/random.h"
 #include "../../include/constants/items.h"
 
@@ -24,6 +27,7 @@
 #include "../../include/new/switching.h"
 #include "../../include/new/terastal.h"
 #include "../../include/new/z_move_effects.h"
+bool8 HoennPalace_IsActive(void); //[hack] patches/0631・src/hoenn_palace.c
 
 /*
 ai_util.c
@@ -227,7 +231,7 @@ bool8 CanKnockOutWithoutMove(const u16 ignoredMove, const u8 bankAtk, const u8 b
 	{
 		move = GetBattleMonMove(bankAtk, i);
 
-		if (move == ignoredMove || (ignoreFutureAttacks && gBattleMoves[move].effect == EFFECT_FUTURE_SIGHT)) //Can't actually knock out right now
+		if (move == ignoredMove || (ignoreFutureAttacks && gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_FUTURE_SIGHT)) //Can't actually knock out right now
 			continue;
 
 		if (move == MOVE_NONE)
@@ -314,7 +318,7 @@ bool8 IsWeakestContactMoveWithBestAccuracy(u16 move, u8 bankAtk, u8 bankDef)
 		if (currMove == MOVE_NONE)
 			break;
 
-		moveEffect = gBattleMoves[currMove].effect;
+		moveEffect = gBattleMoves[Lv200MoveAIBase(currMove)].effect;
 
 		if (!(gBitTable[i] & moveLimitations)
 		&& CheckContact(currMove, bankAtk, bankDef)
@@ -531,7 +535,7 @@ void UpdateBestDoubleKillingMoveScore(u8 bankAtk, u8 bankDef, u8 bankAtkPartner,
 						{
 							#define CALC (CalcSecondaryEffectChance(bankAtk, move) >= 50)
 							//These move effects are good even if they do minimal damage
-							switch (gBattleMoves[move].effect) {
+							switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 								case EFFECT_FLINCH_HIT:
 									if (MoveWouldHitFirst(move, bankAtk, currTarget))
 										break;
@@ -618,10 +622,10 @@ void UpdateBestDoubleKillingMoveScore(u8 bankAtk, u8 bankDef, u8 bankAtkPartner,
 				{
 					if (partnerMove != MOVE_NONE) //Partner has chosen a move
 					{
-						u8 moveEffect = gBattleMoves[partnerMove].effect;
+						u8 moveEffect = gBattleMoves[Lv200MoveAIBase(partnerMove)].effect;
 
 						if (moveEffect == EFFECT_PROTECT
-						&&  partnerMove != MOVE_QUICKGUARD
+						&&  Lv200MoveAIBase(partnerMove) != MOVE_QUICKGUARD
 						&&  partnerMove != MOVE_CRAFTYSHIELD
 						&& (partnerMove != MOVE_MATBLOCK || gDisableStructs[bankAtkPartner].isFirstTurn))
 						{
@@ -747,7 +751,7 @@ void TryRemovePartnerDoublesKillingScoreComplete(u8 bankAtk, u8 bankDef, u16 cho
 bool8 RangeMoveCanHurtPartner(u16 move, u8 bankAtk, u8 bankAtkPartner)
 {
 	return BATTLER_ALIVE(bankAtkPartner)
-		&& ABILITY(bankAtkPartner) != ABILITY_TELEPATHY
+		&& !BankHasAbility(bankAtkPartner, ABILITY_TELEPATHY)
 		&& !(BATTLER_SEMI_INVULNERABLE(bankAtkPartner) && MoveWouldHitFirst(move, bankAtk, bankAtkPartner)) //Target will still be semi-invulnerable when attack hits
 		&& !(AI_SpecialTypeCalc(move, bankAtk, bankAtkPartner) & MOVE_RESULT_NO_EFFECT); //Move has effect
 }
@@ -756,7 +760,7 @@ static bool8 CalculateMoveKnocksOutXHits(u16 move, u8 bankAtk, u8 bankDef, u8 nu
 {
 	u16 ability = ABILITY(bankDef);
 	u16 species = SPECIES(bankDef);
-	bool8 noMoldBreakers = NO_MOLD_BREAKERS(ABILITY(bankAtk), move);
+	bool8 noMoldBreakers = NO_MOLD_BREAKERS(SecondAbility_MoldBreakerAbility(bankAtk), move);
 
 	if (MoveBlockedBySubstitute(move, bankAtk, bankDef)
 	#ifdef SPECIES_MIMIKYU
@@ -783,7 +787,7 @@ bool8 MoveKnocksOutXHits(u16 move, u8 bankAtk, u8 bankDef, u8 numHits)
 
 	switch (numHits) {
 		case 1:
-			if (gBattleMoves[move].effect == EFFECT_FUTURE_SIGHT)
+			if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_FUTURE_SIGHT)
 				return FALSE; //Really always 3 hits
 
 			movePos = FindMovePositionInMoveset(move, bankAtk);
@@ -795,7 +799,7 @@ bool8 MoveKnocksOutXHits(u16 move, u8 bankAtk, u8 bankDef, u8 numHits)
 			return gNewBS->ai.moveKnocksOut1Hit[bankAtk][bankDef][movePos] = CalculateMoveKnocksOutXHits(move, bankAtk, bankDef, 1);
 
 		case 2:
-			if (gBattleMoves[move].effect == EFFECT_FUTURE_SIGHT)
+			if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_FUTURE_SIGHT)
 				return FALSE; //Really always 3 hits
 
 			movePos = FindMovePositionInMoveset(move, bankAtk);
@@ -864,7 +868,7 @@ u16 CalcFinalAIMoveDamage(u16 move, u8 bankAtk, u8 bankDef, u8 numHits, struct D
 	if (move == MOVE_NONE || numHits == 0 || gBattleMoves[move].power == 0)
 		return 0;
 
-	switch (gBattleMoves[move].effect) {
+	switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 		case EFFECT_FAKE_OUT:
 			if (!gDisableStructs[bankAtk].isFirstTurn)
 				return 0;
@@ -881,7 +885,7 @@ u16 CalcFinalAIMoveDamage(u16 move, u8 bankAtk, u8 bankDef, u8 numHits, struct D
 			break;
 
 		case EFFECT_0HKO:
-			if (gBattleMons[bankAtk].level <= gBattleMons[bankDef].level)
+			if (BM_LEVEL(gBattleMons[bankAtk]) <= BM_LEVEL(gBattleMons[bankDef]))
 				return 0;
 			if (move == MOVE_SHEERCOLD && IsOfType(bankDef, TYPE_ICE))
 				return 0;
@@ -898,7 +902,7 @@ u16 CalcFinalAIMoveDamage(u16 move, u8 bankAtk, u8 bankDef, u8 numHits, struct D
 		return gBattleMons[bankDef].hp;
 
 	u16 defAbility = ABILITY(bankDef);
-	if (numHits >= 2 && BATTLER_MAX_HP(bankDef) && (defAbility == ABILITY_MULTISCALE || defAbility == ABILITY_SHADOWSHIELD || defAbility == ABILITY_DRAGONARMOR)) //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150）
+	if (numHits >= 2 && BATTLER_MAX_HP(bankDef) && ((defAbility == ABILITY_MULTISCALE || SecondAbility_OfBank(bankDef) == ABILITY_MULTISCALE) || (defAbility == ABILITY_SHADOWSHIELD || SecondAbility_OfBank(bankDef) == ABILITY_SHADOWSHIELD) || defAbility == ABILITY_DRAGONARMOR || defAbility == ABILITY_REITONOOU)) //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150） 2026-10-23 れーとのおう（patches/0790）
 		return MathMin(dmg + (dmg * 2) * (numHits - 1), gBattleMons[bankDef].maxHP); //Adjust damage on subsequent hits
 
 	return MathMin(dmg * numHits, gBattleMons[bankDef].maxHP);
@@ -923,9 +927,9 @@ u16 CalcFinalAIMoveDamageFromParty(u16 move, struct Pokemon* monAtk, u8 bankDef,
 	if (move == MOVE_NONE || SPLIT(move) == SPLIT_STATUS || gBattleMoves[move].power == 0)
 		return 0;
 
-	switch (gBattleMoves[move].effect) {
+	switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 		case EFFECT_0HKO:
-			if (GetMonData(monAtk, MON_DATA_LEVEL, NULL) <= gBattleMons[bankDef].level)
+			if (GetMonData(monAtk, MON_DATA_LEVEL, NULL) <= BM_LEVEL(gBattleMons[bankDef]))
 				return 0;
 			if (move == MOVE_SHEERCOLD && IsOfType(bankDef, TYPE_ICE))
 				return 0;
@@ -957,7 +961,7 @@ static u32 CalcPredictedDamageForCounterMoves(u16 move, u8 bankAtk, u8 bankDef)
 	{
 		predictedDamage = GetFinalAIMoveDamage(predictedMove, bankDef, bankAtk, 1, NULL); //The damage the enemy will do to the AI
 
-		switch (move) {
+		switch (Lv200MoveAIBase(move)) {
 			case MOVE_COUNTER:
 				if (CalcMoveSplit(bankDef, predictedMove, bankAtk) == SPLIT_PHYSICAL)
 					predictedDamage *= 2;
@@ -1013,7 +1017,7 @@ move_t CalcStrongestMove(const u8 bankAtk, const u8 bankDef, const bool8 onlySpr
 			|| (onlySpreadMoves && !(gBattleMoves[move].target & (MOVE_TARGET_BOTH | MOVE_TARGET_ALL))))
 				continue;
 
-			if (gBattleMoves[move].effect == EFFECT_COUNTER || gBattleMoves[move].effect == EFFECT_MIRROR_COAT) //Includes Metal Burst
+			if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_COUNTER || gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_MIRROR_COAT) //Includes Metal Burst
 			{
 				predictedDamage = CalcPredictedDamageForCounterMoves(move, bankAtk, bankDef);
 				if (predictedDamage > (u32) highestDamage)
@@ -1022,15 +1026,15 @@ move_t CalcStrongestMove(const u8 bankAtk, const u8 bankDef, const bool8 onlySpr
 					highestDamage = predictedDamage;
 				}
 			}
-			else if (gBattleMoves[move].effect == EFFECT_0HKO)
+			else if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_0HKO)
 			{
 				gNewBS->ai.moveKnocksOut1Hit[bankAtk][bankDef][i] = FALSE;
 				gNewBS->ai.damageByMove[bankAtk][bankDef][i] = 0;
-				if (gBattleMons[bankAtk].level <= gBattleMons[bankDef].level)
+				if (BM_LEVEL(gBattleMons[bankAtk]) <= BM_LEVEL(gBattleMons[bankDef]))
 					continue;
 				if (move == MOVE_SHEERCOLD && IsOfType(bankDef, TYPE_ICE))
 					continue;
-				if (ABILITY(bankDef) == ABILITY_STURDY)
+				if (BankHasAbility(bankDef, ABILITY_STURDY))
 					continue;
 				if (MoveWillHit(move, bankAtk, bankDef))
 				{
@@ -1111,7 +1115,7 @@ bool8 MoveWillHit(u16 move, u8 bankAtk, u8 bankDef)
 	if (gStatuses3[bankDef] & STATUS3_COMMANDER)
 		return FALSE;
 
-	if (ABILITY(bankAtk) == ABILITY_NOGUARD
+	if (BankHasAbility(bankAtk, ABILITY_NOGUARD)
 	||  defAbility == ABILITY_NOGUARD
 	||  (gStatuses3[bankDef] & STATUS3_ALWAYS_HITS && gDisableStructs[bankDef].bankWithSureHit == bankAtk))
 		return TRUE;
@@ -1122,9 +1126,9 @@ bool8 MoveWillHit(u16 move, u8 bankAtk, u8 bankDef)
 	||   (gStatuses3[bankDef] & STATUS3_DISAPPEARED))
 		return FALSE;
 
-	if ((move == MOVE_TOXIC && IsOfType(bankAtk, TYPE_POISON))
+	if ((Lv200MoveAIBase(move) == MOVE_TOXIC && IsOfType(bankAtk, TYPE_POISON))
 	||  (CheckTableForMove(move, gAlwaysHitWhenMinimizedMoves) && gStatuses3[bankDef] & STATUS3_MINIMIZED)
-	|| ((gStatuses3[bankDef] & STATUS3_TELEKINESIS) && gBattleMoves[move].effect != EFFECT_0HKO)
+	|| ((gStatuses3[bankDef] & STATUS3_TELEKINESIS) && gBattleMoves[Lv200MoveAIBase(move)].effect != EFFECT_0HKO)
 	||  gBattleMoves[move].accuracy == 0
 	|| (WEATHER_HAS_EFFECT && (gBattleWeather & WEATHER_RAIN_ANY) && CheckTableForMove(move, gAlwaysHitInRainMoves))
 	||  IsZMove(move)
@@ -1231,6 +1235,7 @@ bool8 WillTakeSignificantDamageFromEntryHazards(u8 bank, u8 healthFraction)
 
 	if (gSideStatuses[SIDE(bank)] & SIDE_STATUS_SPIKES
 	&& GetMonAbility(GetBankPartyData(bank)) != ABILITY_MAGICGUARD
+	&& SecondAbility_OfBank(bank) != ABILITY_MAGICGUARD //[hack] 2026-10-22 2 つ目
 	&& ITEM_EFFECT(bank) != ITEM_EFFECT_HEAVY_DUTY_BOOTS)
 	{
 		struct Pokemon* mon = GetBankPartyData(bank);
@@ -1406,6 +1411,8 @@ bool8 IsTrapped(u8 bank, bool8 switching)
 {
 	if (gNewBS->commanderActive[bank] != SPECIES_NONE)
 		return TRUE;
+if (!Lv200CustomMove_CanSwitch(bank, TRUE))
+return TRUE;
 
 	if (IsOfType(bank, TYPE_GHOST)
 	|| (switching && ITEM_EFFECT(bank) == ITEM_EFFECT_SHED_SHELL)
@@ -1433,7 +1440,7 @@ bool8 IsTakingSecondaryDamage(u8 bank)
 	if (gStatuses3[bank] & STATUS3_PERISH_SONG)
 		return TRUE;
 
-	if (ability != ABILITY_MAGICGUARD)
+	if (ability != ABILITY_MAGICGUARD && SecondAbility_OfBank(bank) != ABILITY_MAGICGUARD) //[hack] 2026-10-22 2 つ目
 	{
 		if (TakesDamageFromSandstorm(bank)
 		||  TakesDamageFromHail(bank)
@@ -1463,7 +1470,7 @@ bool8 WillFaintFromSecondaryDamage(u8 bank)
 	&&  gDisableStructs[bank].perishSongTimer == 0)
 		return TRUE;
 
-	if (ability != ABILITY_MAGICGUARD)
+	if (ability != ABILITY_MAGICGUARD && SecondAbility_OfBank(bank) != ABILITY_MAGICGUARD) //[hack] 2026-10-22 2 つ目
 	{
 		u32 damage = 0;
 		if (gWishFutureKnock.weatherDuration != 1)
@@ -1498,6 +1505,7 @@ static u32 GetContactDamageByDefAbilityItemEffect(u16 defAbility, u8 defItemEffe
 
 	if (defAbility == ABILITY_ROUGHSKIN
 	|| defAbility == ABILITY_DRAGONARMOR //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150）
+	|| defAbility == ABILITY_REITONOOU //[hack] 2026-10-23 れーとのおう(patches/0790)
 	#ifdef ABILITY_IRONBARBS
 	|| defAbility == ABILITY_IRONBARBS
 	#endif
@@ -1516,7 +1524,7 @@ u32 GetContactDamage(u16 move, u16 bankAtk, u16 bankDef)
 		return 0;
 
 	if (ABILITY(bankAtk) == ABILITY_LONGREACH
-	|| ABILITY(bankAtk) == ABILITY_MAGICGUARD
+	|| BankHasAbility(bankAtk, ABILITY_MAGICGUARD)
 	|| (ITEM_EFFECT(bankAtk) == ITEM_EFFECT_PUNCHING_GLOVE && CheckTableForMove(move, gPunchingMoves)))
 		return 0;
 
@@ -1527,7 +1535,7 @@ u16 CalcSecondaryEffectChance(u8 bank, u16 move)
 {
 	u16 chance = gBattleMoves[move].secondaryEffectChance;
 
-	if (ABILITY(bank) == ABILITY_SERENEGRACE || BankSideHasRainbow(bank))
+	if (BankHasAbility(bank, ABILITY_SERENEGRACE) || BankSideHasRainbow(bank))
 		chance *= 2;
 
 	return chance;
@@ -1537,9 +1545,9 @@ u16 CalcAIAccuracy(u16 move, u8 bankAtk, u8 bankDef)
 {
 	u16 acc = AccuracyCalc(move, bankAtk, bankDef);
 
-	if (gBattleMoves[move].effect == EFFECT_RECHARGE)
+	if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_RECHARGE)
 		acc = 49; //Set recharge moves to a pretty low number only higher than OHKO moves
-	else if (gBattleMoves[move].effect == EFFECT_RAMPAGE || gBattleMoves[move].effect == EFFECT_ROLLOUT)
+	else if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_RAMPAGE || gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_ROLLOUT)
 		acc -= 1; //Don't rampage if you don't have to
 	else if (move == MOVE_FINALGAMBIT)
 		acc -= 5; //Don't kill yourself if you don't have to
@@ -1562,7 +1570,7 @@ bool8 ShouldAIDelayMegaEvolution(u8 bankAtk, unusedArg u8 bankDef, u16 move)
 	switch (atkAbility) {
 		case ABILITY_SPEEDBOOST:
 		case ABILITY_MOODY:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_PROTECT:
 				case MOVE_DETECT:
 				case MOVE_SPIKYSHIELD:
@@ -1623,19 +1631,19 @@ bool8 BadIdeaToPoison(u8 bankDef, u8 bankAtk)
 		||  defItemEffect == ITEM_EFFECT_CURE_STATUS
 		||  defAbility == ABILITY_SHEDSKIN
 		||  defAbility == ABILITY_POISONHEAL
-		||  defAbility == ABILITY_MAGICGUARD
+		||  (defAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankDef) == ABILITY_MAGICGUARD)
 		||  defAbility == ABILITY_QUICKFEET
 		|| (defAbility == ABILITY_SYNCHRONIZE && CanBePoisoned(bankAtk, bankDef, TRUE) && !GoodIdeaToPoisonSelf(bankAtk))
 		|| (defAbility == ABILITY_MARVELSCALE && PhysicalMoveInMoveset(bankAtk))
 		|| (defAbility == ABILITY_NATURALCURE && CAN_SWITCH_OUT(bankDef))
 		|| (defAbility == ABILITY_TOXICBOOST && PhysicalMoveInMoveset(bankDef))
-		|| (defAbility == ABILITY_GUTS && PhysicalMoveInMoveset(bankDef))
+		|| ((defAbility == ABILITY_GUTS || SecondAbility_OfBank(bankDef) == ABILITY_GUTS) && PhysicalMoveInMoveset(bankDef))
 		|| (atkAbility == ABILITY_POISONTOUCH && ContactMovesThatAffectTargetInMoveset(bankAtk, bankDef)) //Just poison it using attacker's ability
 		||  atkAbility == ABILITY_TOXICCHAIN
 		|| (defAbility == ABILITY_HYDRATION && gBattleWeather & WEATHER_RAIN_ANY && gWishFutureKnock.weatherDuration != 1)
 		|| (IS_DOUBLE_BATTLE && BATTLER_ALIVE(PARTNER(bankDef)) && ABILITY(PARTNER(bankDef)) == ABILITY_HEALER)
-		||  MoveInMoveset(MOVE_FACADE, bankDef)
-		||  MoveInMoveset(MOVE_PSYCHOSHIFT, bankDef);
+		||  AIMoveInMoveset(MOVE_FACADE, bankDef)
+		||  AIMoveInMoveset(MOVE_PSYCHOSHIFT, bankDef);
 }
 
 bool8 GoodIdeaToPoisonSelf(u8 bankAtk)
@@ -1646,11 +1654,11 @@ bool8 GoodIdeaToPoisonSelf(u8 bankAtk)
 		&&  (atkAbility == ABILITY_MARVELSCALE
 		 ||  atkAbility == ABILITY_POISONHEAL
 		 ||  atkAbility == ABILITY_QUICKFEET
-		 ||  atkAbility == ABILITY_MAGICGUARD
+		 ||  (atkAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtk) == ABILITY_MAGICGUARD)
 		 || (atkAbility == ABILITY_TOXICBOOST && PhysicalMoveInMoveset(bankAtk))
-		 || (atkAbility == ABILITY_GUTS && PhysicalMoveInMoveset(bankAtk))
-		 ||  MoveInMoveset(MOVE_FACADE, bankAtk)
-		 ||  MoveInMoveset(MOVE_PSYCHOSHIFT, bankAtk));
+		 || ((atkAbility == ABILITY_GUTS || SecondAbility_OfBank(bankAtk) == ABILITY_GUTS) && PhysicalMoveInMoveset(bankAtk))
+		 ||  AIMoveInMoveset(MOVE_FACADE, bankAtk)
+		 ||  AIMoveInMoveset(MOVE_PSYCHOSHIFT, bankAtk));
 }
 
 bool8 BadIdeaToParalyze(u8 bankDef, u8 bankAtk)
@@ -1666,11 +1674,11 @@ bool8 BadIdeaToParalyze(u8 bankDef, u8 bankAtk)
 	   || (defAbility == ABILITY_SYNCHRONIZE && CanBeParalyzed(bankAtk, bankDef, TRUE) && !GoodIdeaToParalyzeSelf(bankAtk))
 	   || (defAbility == ABILITY_MARVELSCALE && PhysicalMoveInMoveset(bankAtk))
 	   || (defAbility == ABILITY_NATURALCURE && CAN_SWITCH_OUT(bankDef))
-	   || (defAbility == ABILITY_GUTS && PhysicalMoveInMoveset(bankDef))
+	   || ((defAbility == ABILITY_GUTS || SecondAbility_OfBank(bankDef) == ABILITY_GUTS) && PhysicalMoveInMoveset(bankDef))
 	   || (defAbility == ABILITY_HYDRATION && gBattleWeather & WEATHER_RAIN_ANY && gWishFutureKnock.weatherDuration != 1)
 	   || (IS_DOUBLE_BATTLE && BATTLER_ALIVE(PARTNER(bankDef)) && ABILITY(PARTNER(bankDef)) == ABILITY_HEALER)
-	   ||  MoveInMoveset(MOVE_FACADE, bankDef)
-	   ||  MoveInMoveset(MOVE_PSYCHOSHIFT, bankDef);
+	   ||  AIMoveInMoveset(MOVE_FACADE, bankDef)
+	   ||  AIMoveInMoveset(MOVE_PSYCHOSHIFT, bankDef);
 }
 
 bool8 GoodIdeaToParalyzeSelf(u8 bankAtk)
@@ -1680,9 +1688,9 @@ bool8 GoodIdeaToParalyzeSelf(u8 bankAtk)
 	return CanBeParalyzed(bankAtk, bankAtk, FALSE)
 		&&  (atkAbility == ABILITY_MARVELSCALE
 		 ||  atkAbility == ABILITY_QUICKFEET
-		 || (atkAbility == ABILITY_GUTS && PhysicalMoveInMoveset(bankAtk))
-		 || MoveInMoveset(MOVE_FACADE, bankAtk)
-		 || MoveInMoveset(MOVE_PSYCHOSHIFT, bankAtk));
+		 || ((atkAbility == ABILITY_GUTS || SecondAbility_OfBank(bankAtk) == ABILITY_GUTS) && PhysicalMoveInMoveset(bankAtk))
+		 || AIMoveInMoveset(MOVE_FACADE, bankAtk)
+		 || AIMoveInMoveset(MOVE_PSYCHOSHIFT, bankAtk));
 }
 
 bool8 BadIdeaToBurn(u8 bankDef, u8 bankAtk)
@@ -1694,17 +1702,17 @@ bool8 BadIdeaToBurn(u8 bankDef, u8 bankAtk)
 		||  defItemEffect == ITEM_EFFECT_CURE_BRN
 		||  defItemEffect == ITEM_EFFECT_CURE_STATUS
 		||  defAbility == ABILITY_SHEDSKIN
-		||  defAbility == ABILITY_MAGICGUARD
+		||  (defAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankDef) == ABILITY_MAGICGUARD)
 		||  defAbility == ABILITY_QUICKFEET
 		|| (defAbility == ABILITY_SYNCHRONIZE && CanBeBurned(bankAtk, bankDef, TRUE) && !GoodIdeaToBurnSelf(bankAtk))
 		|| (defAbility == ABILITY_MARVELSCALE && PhysicalMoveInMoveset(bankAtk))
 		|| (defAbility == ABILITY_NATURALCURE && CAN_SWITCH_OUT(bankDef))
 		|| (defAbility == ABILITY_FLAREBOOST && SpecialMoveInMoveset(bankDef))
-		|| (defAbility == ABILITY_GUTS && PhysicalMoveInMoveset(bankDef))
+		|| ((defAbility == ABILITY_GUTS || SecondAbility_OfBank(bankDef) == ABILITY_GUTS) && PhysicalMoveInMoveset(bankDef))
 		|| (defAbility == ABILITY_HYDRATION && gBattleWeather & WEATHER_RAIN_ANY && gWishFutureKnock.weatherDuration != 1)
 		|| (IS_DOUBLE_BATTLE && BATTLER_ALIVE(PARTNER(bankDef)) && ABILITY(PARTNER(bankDef)) == ABILITY_HEALER)
-		||  MoveInMoveset(MOVE_FACADE, bankDef)
-		||  MoveInMoveset(MOVE_PSYCHOSHIFT, bankDef);
+		||  AIMoveInMoveset(MOVE_FACADE, bankDef)
+		||  AIMoveInMoveset(MOVE_PSYCHOSHIFT, bankDef);
 }
 
 bool8 GoodIdeaToBurnSelf(u8 bankAtk)
@@ -1713,12 +1721,12 @@ bool8 GoodIdeaToBurnSelf(u8 bankAtk)
 
 	return CanBeBurned(bankAtk, bankAtk, FALSE)
 		&&  (atkAbility == ABILITY_QUICKFEET
-		 ||  atkAbility == ABILITY_HEATPROOF
-		 ||  atkAbility == ABILITY_MAGICGUARD
+		 ||  (atkAbility == ABILITY_HEATPROOF || SecondAbility_OfBank(bankAtk) == ABILITY_HEATPROOF)
+		 ||  (atkAbility == ABILITY_MAGICGUARD || SecondAbility_OfBank(bankAtk) == ABILITY_MAGICGUARD)
 		 || (atkAbility == ABILITY_FLAREBOOST && SpecialMoveInMoveset(bankAtk))
-		 || (atkAbility == ABILITY_GUTS && PhysicalMoveInMoveset(bankAtk))
-		 || MoveInMoveset(MOVE_FACADE, bankAtk)
-		 || MoveInMoveset(MOVE_PSYCHOSHIFT, bankAtk));
+		 || ((atkAbility == ABILITY_GUTS || SecondAbility_OfBank(bankAtk) == ABILITY_GUTS) && PhysicalMoveInMoveset(bankAtk))
+		 || AIMoveInMoveset(MOVE_FACADE, bankAtk)
+		 || AIMoveInMoveset(MOVE_PSYCHOSHIFT, bankAtk));
 }
 
 bool8 BadIdeaToFreeze(u8 bankDef, u8 bankAtk)
@@ -1726,9 +1734,10 @@ bool8 BadIdeaToFreeze(u8 bankDef, u8 bankAtk)
 	u16 defAbility = ABILITY(bankDef);
 	u8 defItemEffect = ITEM_EFFECT(bankDef);
 
+	//[hack] patches/0942: 上流は != と書いていて（CURE_FRZ でない || CURE_STATUS でない＝いつも真）、AI は凍らせる技をいつも『悪手』にしていた。BadIdeaToPutToSleep と同じ == に直す
 	return !CanBeFrozen(bankDef, bankAtk, TRUE)
-		|| defItemEffect != ITEM_EFFECT_CURE_FRZ
-		|| defItemEffect != ITEM_EFFECT_CURE_STATUS
+		|| defItemEffect == ITEM_EFFECT_CURE_FRZ
+		|| defItemEffect == ITEM_EFFECT_CURE_STATUS
 		|| (defAbility == ABILITY_SYNCHRONIZE && CanBeFrozen(bankAtk, bankDef, TRUE))
 		|| (defAbility == ABILITY_NATURALCURE && CAN_SWITCH_OUT(bankDef)) //Don't waste a one-time freeze
 		|| UnfreezingMoveInMoveset(bankDef);
@@ -1878,7 +1887,7 @@ bool8 IsMovePredictionSemiInvulnerable(u8 bankAtk, u8 bankDef)
 
 	if (move != MOVE_NONE)
 	{
-		u8 effect = gBattleMoves[move].effect;
+		u8 effect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 		return effect == EFFECT_SEMI_INVULNERABLE;
 
 	}
@@ -1892,7 +1901,7 @@ bool8 IsMovePredictionHealingMove(u8 bankAtk, u8 bankDef)
 
 	if (move != MOVE_NONE)
 	{
-		u8 effect = gBattleMoves[move].effect;
+		u8 effect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 		return effect == EFFECT_RESTORE_HP
 			|| effect == EFFECT_MORNING_SUN
 			|| effect == EFFECT_SWALLOW
@@ -1908,7 +1917,7 @@ bool8 IsPredictedToUsePursuitableMove(u8 bankAtk, u8 bankDef)
 
 	if (move != MOVE_NONE)
 	{
-		u8 effect = gBattleMoves[move].effect;
+		u8 effect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 		return effect == EFFECT_BATON_PASS && move != MOVE_BATONPASS;
 	}
 
@@ -1924,7 +1933,7 @@ bool8 IsMovePredictionPhazingMove(u8 bankAtk, u8 bankDef)
 
 	if (move != MOVE_NONE)
 	{
-		u8 effect = gBattleMoves[move].effect;
+		u8 effect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 		return effect == EFFECT_ROAR || effect == EFFECT_HAZE || effect == EFFECT_REMOVE_TARGET_STAT_CHANGES;
 	}
 
@@ -1936,7 +1945,7 @@ bool8 CanMovePredictionProtectAgainstMove(u8 bankAtk, u8 bankDef, u16 move)
 {
 	u16 protectMove = IsValidMovePrediction(bankAtk, bankDef);
 
-	if (move != MOVE_NONE && gBattleMoves[protectMove].effect == EFFECT_PROTECT)
+	if (move != MOVE_NONE && gBattleMoves[Lv200MoveAIBase(protectMove)].effect == EFFECT_PROTECT)
 	{
 		return DoesProtectionMoveBlockMove(bankDef, bankAtk, move, protectMove); //The "target" is the one not using Protection move and attacking
 	}
@@ -1959,8 +1968,8 @@ bool8 DamagingMoveInMoveset(u8 bank)
 		{
 			if (SPLIT(move) != SPLIT_STATUS
 			&& gBattleMoves[move].power != 0
-			&& gBattleMoves[move].effect != EFFECT_COUNTER
-			&& gBattleMoves[move].effect != EFFECT_MIRROR_COAT)
+			&& gBattleMoves[Lv200MoveAIBase(move)].effect != EFFECT_COUNTER
+			&& gBattleMoves[Lv200MoveAIBase(move)].effect != EFFECT_MIRROR_COAT)
 				return TRUE;
 		}
 	}
@@ -1983,7 +1992,7 @@ bool8 PhysicalMoveInMoveset(u8 bank)
 		{
 			if (CalcMoveSplit(bank, move, bank) == SPLIT_PHYSICAL
 			&& gBattleMoves[move].power != 0
-			&& gBattleMoves[move].effect != EFFECT_COUNTER)
+			&& gBattleMoves[Lv200MoveAIBase(move)].effect != EFFECT_COUNTER)
 				return TRUE;
 		}
 	}
@@ -2006,7 +2015,7 @@ bool8 SpecialMoveInMoveset(u8 bank)
 		{
 			if (CalcMoveSplit(bank, move, bank) == SPLIT_SPECIAL
 			&& gBattleMoves[move].power != 0
-			&& gBattleMoves[move].effect != EFFECT_MIRROR_COAT)
+			&& gBattleMoves[Lv200MoveAIBase(move)].effect != EFFECT_MIRROR_COAT)
 				return TRUE;
 		}
 	}
@@ -2041,7 +2050,7 @@ bool8 PhysicalMoveInMonMoveset(struct Pokemon* mon, u8 moveLimitations)
 		{
 			if (CalcMoveSplitFromParty(mon, move) == SPLIT_PHYSICAL
 			&& gBattleMoves[move].power != 0
-			&& gBattleMoves[move].effect != EFFECT_COUNTER)
+			&& gBattleMoves[Lv200MoveAIBase(move)].effect != EFFECT_COUNTER)
 				return TRUE;
 		}
 	}
@@ -2064,7 +2073,7 @@ bool8 SpecialMoveInMonMoveset(struct Pokemon* mon, u8 moveLimitations)
 		{
 			if (CalcMoveSplitFromParty(mon, move) == SPLIT_SPECIAL
 			&& gBattleMoves[move].power != 0
-			&& gBattleMoves[move].effect != EFFECT_MIRROR_COAT)
+			&& gBattleMoves[Lv200MoveAIBase(move)].effect != EFFECT_MIRROR_COAT)
 				return TRUE;
 		}
 	}
@@ -2107,7 +2116,7 @@ bool8 HasProtectionMoveInMoveset(u8 bank, u8 checkType)
 		{
 			if (gBattleMoves[gBattleMons[bank].moves[i]].effect == EFFECT_PROTECT)
 			{
-				switch (move) {
+				switch (Lv200MoveAIBase(move)) {
 					case MOVE_PROTECT:
 					case MOVE_SPIKYSHIELD:
 					case MOVE_KINGSSHIELD:
@@ -2292,7 +2301,7 @@ bool8 MoveEffectInMoveset(u8 moveEffect, u8 bank)
 
 		if (!(gBitTable[i] & moveLimitations))
 		{
-			if (gBattleMoves[move].effect == moveEffect)
+			if (gBattleMoves[Lv200MoveAIBase(move)].effect == moveEffect)
 				return TRUE;
 		}
 	}
@@ -2363,7 +2372,7 @@ bool8 FlinchingMoveInMoveset(u8 bank)
 
 		if (!(gBitTable[i] & moveLimitations))
 		{
-			if (gBattleMoves[move].effect == EFFECT_FLINCH_HIT)
+			if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_FLINCH_HIT)
 				return TRUE;
 		}
 	}
@@ -2384,7 +2393,7 @@ bool8 HealingMoveInMoveset(u8 bank)
 
 		if (!(gBitTable[i] & moveLimitations))
 		{
-			u8 effect = gBattleMoves[move].effect;
+			u8 effect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 			if (effect == EFFECT_RESTORE_HP
 			||  effect == EFFECT_MORNING_SUN
 			||  effect == EFFECT_SWALLOW
@@ -2409,7 +2418,7 @@ bool8 HealingMoveInMonMoveset(struct Pokemon* mon)
 
 		if (!(gBitTable[i] & moveLimitations))
 		{
-			u8 effect = gBattleMoves[move].effect;
+			u8 effect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 			if (effect == EFFECT_RESTORE_HP
 			||  effect == EFFECT_MORNING_SUN
 			||  effect == EFFECT_SWALLOW
@@ -2455,7 +2464,7 @@ bool8 MoveThatCanHelpAttacksHitInMoveset(u8 bank)
 
 		if (!(gBitTable[i] & moveLimitations))
 		{
-			switch (gBattleMoves[move].effect) {
+			switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 				case EFFECT_ACCURACY_UP:
 				case EFFECT_ACCURACY_UP_2:
 				case EFFECT_EVASION_DOWN:
@@ -2463,12 +2472,12 @@ bool8 MoveThatCanHelpAttacksHitInMoveset(u8 bank)
 					return TRUE;
 
 				case EFFECT_LOCK_ON:
-					if (move != MOVE_LASERFOCUS)
+					if (Lv200MoveAIBase(move) != MOVE_LASERFOCUS)
 						return TRUE;
 					break;
 			}
 
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_HONECLAWS:
 				case MOVE_COIL:
 				case MOVE_DEFOG:
@@ -2558,7 +2567,7 @@ bool8 SleepMoveInMovesetWithLowAccuracy(u8 bankAtk, u8 bankDef)
 
 		if (!(gBitTable[i] & moveLimitations))
 		{
-			if (gBattleMoves[move].effect == EFFECT_SLEEP && AccuracyCalc(move, bankAtk, bankDef) < 85)
+			if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_SLEEP && AccuracyCalc(move, bankAtk, bankDef) < 85)
 				return TRUE;
 		}
 	}
@@ -2640,7 +2649,7 @@ static bool8 CalcOnlyBadMovesLeftInMoveset(u8 bankAtk, u8 bankDef)
 				if (SPLIT(move) == SPLIT_STATUS)
 					return FALSE; //Has viable status move
 
-				if (gBattleMoves[move].effect == EFFECT_KNOCK_OFF
+				if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_KNOCK_OFF
 				&&  CanKnockOffItem(bankDef))
 					return FALSE; //Using Knock-Off is good even if it does minimal damage
 
@@ -2676,7 +2685,7 @@ static bool8 CalcOnlyBadMovesLeftInMoveset(u8 bankAtk, u8 bankDef)
 			return FALSE; //Don't switch if hiding legitimately behind substitute
 		}
 		else if (!MoveEffectInMoveset(EFFECT_BATON_PASS, bankAtk) //U-Turn/Volt Switch switch on their own
-		&& (ABILITY(bankDef) == ABILITY_MAGICGUARD || !(gBattleMons[bankDef].status2 & STATUS2_WRAPPED)) //Only switch if the enemy isn't taking trap damage
+		&& (BankHasAbility(bankDef, ABILITY_MAGICGUARD) || !(gBattleMons[bankDef].status2 & STATUS2_WRAPPED)) //Only switch if the enemy isn't taking trap damage
 		&& (!IsTrapped(bankDef, TRUE) || !(gStatuses3[bankDef] & STATUS3_PERISH_SONG) || gDisableStructs[bankDef].perishSongTimer == 0) //Don't let a trapped foe escape from Perish Song
 		/*&& numDamageMoves == 1*/) //Only 1 viable damaging move left
 		{
@@ -3008,7 +3017,7 @@ bool8 AnyStatIsRaised(u8 bank)
 
 bool8 AnyUsefulStatIsRaised(u8 bank)
 {
-	bool8 storedPowerInMoveset = MoveInMoveset(MOVE_STOREDPOWER, bank) || MoveInMoveset(MOVE_STOREDPOWER, bank);
+	bool8 storedPowerInMoveset = AIMoveInMoveset(MOVE_STOREDPOWER, bank) || AIMoveInMoveset(MOVE_STOREDPOWER, bank);
 
 	for (u8 statId = STAT_STAGE_ATK; statId < BATTLE_STATS_NO; ++statId)
 	{
@@ -3109,15 +3118,15 @@ bool8 ShouldAIUseZMove(u8 bankAtk, u8 bankDef, u16 move)
 		{
 			u16 defAbility = ABILITY(bankDef);
 			u16 defSpecies = SPECIES(bankDef);
-			bool8 noMoldBreakers = NO_MOLD_BREAKERS(ABILITY(bankAtk), zMove);
+			bool8 noMoldBreakers = NO_MOLD_BREAKERS(SecondAbility_MoldBreakerAbility(bankAtk), zMove);
 
-			if (move == MOVE_FAKEOUT && ShouldUseFakeOut(bankAtk, bankDef))
+			if (Lv200MoveAIBase(move) == MOVE_FAKEOUT && ShouldUseFakeOut(bankAtk, bankDef))
 				return FALSE; //Prefer actual Fake Out over Breakneck Blitz
 
 			if (MoveBlockedBySubstitute(zMove, bankAtk, bankDef)
-			|| (defMovePrediction == MOVE_SUBSTITUTE
+			|| (Lv200MoveAIBase(defMovePrediction) == MOVE_SUBSTITUTE
 			 && !MoveWouldHitFirst(zMove, bankAtk, bankDef)
-			 && !MoveIgnoresSubstitutes(zMove, ABILITY(bankAtk))))
+			 && !MoveIgnoresSubstitutes(zMove, SecondAbility_AsIf(bankAtk, ABILITY_INFILTRATOR))))
 				return FALSE; //Don't use a Z-Move on a Substitute or if the enemy is going to go first and use Substitute
 
 			#ifdef SPECIES_MIMIKYU
@@ -3129,7 +3138,7 @@ bool8 ShouldAIUseZMove(u8 bankAtk, u8 bankDef, u16 move)
 				return FALSE; //Don't waste a Z-Move busting Eiscue's Ice Face
 			#endif
 
-			if (defMovePrediction == MOVE_PROTECT || defMovePrediction == MOVE_KINGSSHIELD || defMovePrediction == MOVE_SPIKYSHIELD || defMovePrediction == MOVE_OBSTRUCT || defMovePrediction == MOVE_SILKTRAP
+			if (Lv200MoveAIBase(defMovePrediction) == MOVE_PROTECT || Lv200MoveAIBase(defMovePrediction) == MOVE_KINGSSHIELD || Lv200MoveAIBase(defMovePrediction) == MOVE_SPIKYSHIELD || Lv200MoveAIBase(defMovePrediction) == MOVE_OBSTRUCT || defMovePrediction == MOVE_SILKTRAP
 			|| (IsDynamaxed(bankDef) && SPLIT(defMovePrediction) == SPLIT_STATUS))
 				return FALSE; //Don't waste a Z-Move on a Protect
 
@@ -3149,7 +3158,7 @@ bool8 ShouldAIUseZMove(u8 bankAtk, u8 bankDef, u16 move)
 			}
 
 			//These moves should always be turned into Z-Moves, regardless if they KO or not
-			switch (gBattleMoves[move].effect) {
+			switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 				case EFFECT_RECHARGE:
 				case EFFECT_SEMI_INVULNERABLE:
 				case EFFECT_SKY_ATTACK:
@@ -3261,7 +3270,7 @@ static bool8 MonCanTriggerWeatherAbilityWithMaxMove(struct Pokemon* mon)
 {
 	if (WEATHER_HAS_EFFECT)
 	{
-		switch (GetMonAbility(mon)) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (GetMonAbility(mon)) : SecondAbility_OfMonActive(mon); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_SWIFTSWIM:
 			case ABILITY_RAINDISH:
 			case ABILITY_DRYSKIN:
@@ -3279,7 +3288,7 @@ static bool8 MonCanTriggerWeatherAbilityWithMaxMove(struct Pokemon* mon)
 				return MonCanUseMaxMoveWithEffect(mon, MAX_EFFECT_HAIL);
 			case ABILITY_SURGESURFER:
 				return MonCanUseMaxMoveWithEffect(mon, MAX_EFFECT_ELECTRIC_TERRAIN);
-		}
+		} }
 	}
 
 	return FALSE;
@@ -3410,7 +3419,7 @@ void CalcShouldAIDynamax(u8 bankAtk, u8 bankDef)
 		if (IsRaidBattle() && bankAtk == BANK_RAID_BOSS)
 			return; //Raid Boss is always Dynamaxed
 
-		if (!IsMockBattle() && SIDE(bankAtk) == B_SIDE_PLAYER)
+		if (!IsMockBattle() && !HoennPalace_IsActive() && SIDE(bankAtk) == B_SIDE_PLAYER) //[hack] patches/0631 バトルパレスは主人公側も自動で選ぶ
 		{
 			if (IsTagBattle())
 			{
@@ -3502,7 +3511,7 @@ void CalcShouldAITerastal(u8 bankAtk, u8 bankDef)
 		if (IS_DOUBLE_BATTLE && bankDef == PARTNER(bankAtk))
 			return;
 
-		if (!IsMockBattle() && SIDE(bankAtk) == B_SIDE_PLAYER)
+		if (!IsMockBattle() && !HoennPalace_IsActive() && SIDE(bankAtk) == B_SIDE_PLAYER) //[hack] patches/0631 バトルパレスは主人公側も自動で選ぶ
 		{
 			if (IsTagBattle())
 			{

@@ -274,6 +274,9 @@ SystemScript_PickUpItem:
 	textcolor BLACK
 	hidesprite LASTTALKED
 	pause 0x1
+	callasm HackHmOnce_CheckOwned @;[hack] patches/0392: もう持っているひでんマシンは数を増やさない（LASTRESULT=1）
+	compare LASTRESULT 0x1
+	if equal _goto SystemScript_HmAlreadyOwned
 	special SPECIAL_SHOW_ITEM_SPRITE_ON_FIND_OBTAIN
 	additem 0x8004 0x8005
 	special2 LASTRESULT 0x196
@@ -307,10 +310,29 @@ SystemScript_ObtainItem:
 	copyvar 0x8004 0x8000 @;Copy item to 0x8004
 	copyvar 0x8005 0x8001 @;Copy amount to 0x8005
 	textcolor BLACK
+	callasm HackHmOnce_CheckOwned @;[hack] patches/0392: もう持っているひでんマシンは渡さない（LASTRESULT=1）
+	compare LASTRESULT 0x1
+	if equal _goto SystemScript_HmAlreadyOwnedObtain
 	additem 0x8000 0x8001
 	copyvar 0x8007 LASTRESULT
 	call 0x8193F65
 	copyvar 0x8012 0x8013
+	return
+
+@;[hack] patches/0392: ひでんマシンを持っている。数は 1 のまま「もう もっている」とだけ出す。
+@;渡す側の台本は成功と同じに進める（LASTRESULT=TRUE なので 旗を立てる・次へ進む が止まらない）
+SystemScript_HmAlreadyOwnedObtain:
+	bufferitem 1, 0x8004
+	msgbox gText_HmAlreadyOwned MSG_KEEPOPEN
+	setvar LASTRESULT 0x1
+	copyvar 0x8007 LASTRESULT
+	copyvar 0x8012 0x8013
+	return
+
+SystemScript_HmAlreadyOwned: @;拾う（ボール）側。ボールは拾った扱いで消える（旗が立つ）
+	bufferitem 1, 0x8004
+	msgbox gText_HmAlreadyOwned MSG_KEEPOPEN
+	setvar LASTRESULT 0x1
 	return
 
 .global SystemScript_ObtainItemMessage
@@ -1143,3 +1165,19 @@ TestScript_HyperTrainingNoItem:
 	preparemsg gText_HyperTrainingNoItem
 	waitmsg
 	goto TestScript_HyperTrainingEnd
+
+@;[hack] patches/0405: msgbox YESNO（callstd 5・repoints 0816376C）の入口。素の中身は message 0 → waitmessage → yesnobox 20 8 → return（67 00 00 00 00 66 6E 14 08 03）。
+@;旗 FLAG_DONT_OFFER_NICKNAMES_BATTLE が立っていて出す文が「ニックネームを つけますか？」のときだけ、出さずに いいえ(0) で戻る
+.global SystemScript_MsgboxYesNo
+SystemScript_MsgboxYesNo:
+	callasm HackNicknameSetting_CheckPrompt
+	compare LASTRESULT 0x1
+	if equal _goto SystemScript_MsgboxYesNo_NoNickname
+	message 0x0
+	waitmessage
+	yesnobox 20 8
+	return
+
+SystemScript_MsgboxYesNo_NoNickname:
+	setvar LASTRESULT 0x0
+	return

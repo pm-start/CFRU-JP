@@ -1,0 +1,31 @@
+// しばり 縛り C（0.50.3・src/hack_challenge_c.c・assembly/hack_challenge/challenge_c_scripts.s）の文。会話の窓の幅（CLAUDE.md 6.25）。
+
+#org @gText_ChallengeC_NurseRefuse
+もうしわけありません！ しばりちゅうは\nおあずかりできません
+
+#org @gText_ChallengeC_ShopBan
+しばりちゅうは おみせでは かいものも\nうりものも できない！
+
+#org @gText_ChallengeC_WrathTouch
+？？？の いかりに ふれた！\nすべての ポケモンが たおれた！
+
+#org @gText_ChallengeC_WrathHit
+？？？の いちげきで すべての ポケモンが\nたおれた！
+
+#org @gText_ChallengeC_WrathTime
+？？？の いかりが ばくはつした！\nすべての ポケモンが たおれた！
+
+#org @gText_ChallengeC_FinaleCenterBan
+『ポケセンきんし』を まもりぬいた！
+
+#org @gText_ChallengeC_FinaleShopBan
+『おみせきんし』を まもりぬいた！
+
+#org @gText_ChallengeC_FinaleNoRevive
+『ひんしどうぐきんし』を まもりぬいた！
+
+#org @gText_ChallengeC_FinaleMonoType
+『モノタイプ』を まもりぬいた！
+
+#org @gText_ChallengeC_FinaleRandom
+『ランダム』を まもりぬいた！

@@ -267,7 +267,7 @@ gBattleScriptsForMoveEffects:
 .word BS_249_RevivalBlessing
 .word BS_250_OrderUp
 .word BS_251_Enbucho
-.word BS_252_Blank
+.word BS_252_Lv200Custom
 .word BS_253_MaxMove
 .word BS_254_Blank
 .word BS_255_Blank

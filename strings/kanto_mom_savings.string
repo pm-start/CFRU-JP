@@ -73,11 +73,26 @@
 #org @gText_MomSav_Stopped
 わかったわ ちょきんは おやすみ するわね
 
+#org @gText_MomSav_ShopStop
+かいもの やすむ
+
+#org @gText_MomSav_ShopStart
+かいもの する
+
+#org @gText_MomSav_ShopStopped
+わかったわ かいものは おやすみ するわね\pちょきんは そのまま ためておくわ
+
+#org @gText_MomSav_ShopStarted
+まかせて！ ちょきんで やくに たつ ものを\nかっておくわね
+
+#org @gText_MomSav_ShopOffNote
+いまは かいものも おやすみ してるわ
+
 #org @gText_MomSav_Bye
 いってらっしゃい！
 
 #org @gText_MomSav_BattleSent
-ママに [BUFFER][02]えん おくった！\nちょきんは いま [BUFFER][03]えん
+ママに [BUFFER][04]えん おくった！\nちょきんは いま [BUFFER][03]えん
 
 #org @gText_MomSav_Etc
 など
@@ -87,3 +102,24 @@
 
 #org @gText_MomSav_BagFull
 バッグが いっぱいで わたせなかった ものは\nまたこんど わたすわね
+
+#org @gText_MomSav_Deposit
+あずける
+
+#org @gText_MomSav_DepAsk
+いくら あずけてくれるの？
+
+#org @gText_MomSav_Deposited
+[BUFFER1]えん あずかったわ\nちょきんは いま [BUFFER2]えん！
+
+#org @gText_MomSav_DepNoMoney
+いまは あずけられる おかねが\nないみたいね
+
+#org @gText_MomSav_DepFull
+ちょきんは もう いっぱいよ！
+
+#org @gText_MomSav_DepYen
+えん
+
+#org @gText_MomSav_DepSavings
+ちょきん

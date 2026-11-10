@@ -74,7 +74,22 @@ enum BallTypes
 	BALL_TYPE_SPORT_BALL,	//24
 	BALL_TYPE_BEAST_BALL,	//25
 	BALL_TYPE_DREAM_BALL,	//26
-	BALL_TYPE_DYNAMAX_BALL, //27 - Don't give to player!
+	BALL_TYPE_START_BALL,	//27 [hack] patches/0393 STARTボール（セーブの pokeball は u8 なので 254 まで入る）
+// WATASHI_BALLS_BEGIN enum
+	BALL_TYPE_MOON_PETAL_BALL,	//28 [hack] patches/0393 わたしたち りる のボール（ムーンペタルボール）
+	BALL_TYPE_MEMORY_VEIL_BALL,	//29 [hack] patches/0393 わたしたち うい のボール（メモリーヴェールボール）
+	BALL_TYPE_TEAR_WISTERIA_BALL,	//30 [hack] patches/0393 わたしたち しだれ のボール（ティアウィステリアボール）
+	BALL_TYPE_SWEET_HEART_BALL,	//31 [hack] patches/0393 わたしたち みるく のボール（スイートハートボール）
+	BALL_TYPE_SILENT_HALO_BALL,	//32 [hack] patches/0393 わたしたち なお のボール（サイレントヘイローボール）
+	BALL_TYPE_GAME_PULSE_BALL,	//33 [hack] patches/0393 わたしたち かいり のボール（ゲームパルスボール）
+	BALL_TYPE_WINTER_BLOSSOM_BALL,	//34 [hack] patches/0393 わたしたち りっか のボール（ウィンターブロッサムボール）
+	BALL_TYPE_THORN_HEART_BALL,	//35 [hack] patches/0393 わたしたち しぃ のボール（ソーンハートボール）
+	BALL_TYPE_FOX_SPIRIT_BALL,	//36 [hack] patches/0393 わたしたち らん のボール（フォックススピリットボール）
+	BALL_TYPE_BERRY_BLOOM_BALL,	//37 [hack] patches/0393 わたしたち いちご のボール（ベリーブルームボール）
+// WATASHI_BALLS_END enum
+	BALL_TYPE_ROCKET_BALL, //38 [hack] patches/0914 ロケットボール（ロケット団が相手のポケモンを奪うときだけ・道具なし・奪われた子の入れ物の絵）
+	BALL_TYPE_SNATCH_BALL, //39 [hack] patches/0961 スナッチボール（組織のトレーナーのダークだけに使える・必ず捕まえる・戦闘は続く）
+	BALL_TYPE_DYNAMAX_BALL, //40 - Don't give to player!
 
 	BALL_TYPE_RANDOM = 0xFF,
 };
@@ -83,7 +98,22 @@ enum BallTypes
 #define BALL_TYPE_MASTER_BALL 0
 #define BALL_TYPE_POKE_BALL 3
 #define BALL_TYPE_LUXURY_BALL 10
-#define BALL_TYPE_DYNAMAX_BALL 27
+#define BALL_TYPE_START_BALL 27
+// WATASHI_BALLS_BEGIN defines
+#define BALL_TYPE_MOON_PETAL_BALL 28
+#define BALL_TYPE_MEMORY_VEIL_BALL 29
+#define BALL_TYPE_TEAR_WISTERIA_BALL 30
+#define BALL_TYPE_SWEET_HEART_BALL 31
+#define BALL_TYPE_SILENT_HALO_BALL 32
+#define BALL_TYPE_GAME_PULSE_BALL 33
+#define BALL_TYPE_WINTER_BLOSSOM_BALL 34
+#define BALL_TYPE_THORN_HEART_BALL 35
+#define BALL_TYPE_FOX_SPIRIT_BALL 36
+#define BALL_TYPE_BERRY_BLOOM_BALL 37
+// WATASHI_BALLS_END defines
+#define BALL_TYPE_ROCKET_BALL 38
+#define BALL_TYPE_SNATCH_BALL 39
+#define BALL_TYPE_DYNAMAX_BALL 40
 
-#define LAST_BALL_INDEX BALL_TYPE_DREAM_BALL
-#define NUM_BALLS (BALL_TYPE_DREAM_BALL + 1) //Make sure to update 0804B5AA in bytereplacement!
+#define LAST_BALL_INDEX BALL_TYPE_SNATCH_BALL
+#define NUM_BALLS (BALL_TYPE_SNATCH_BALL + 1) //Make sure to update 0804B5AA in bytereplacement!

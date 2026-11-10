@@ -28,6 +28,7 @@
 #include "../include/constants/moves.h"
 #include "../include/constants/songs.h"
 #include "../include/constants/species.h"
+#include "../include/constants/vars.h"
 #include "../include/gba/io_reg.h"
 #include "../include/new/achievements.h"
 #include "../include/new/Vanilla_functions.h"
@@ -50,6 +51,8 @@ achievements.c
 
 #include "achievements_data.h" //Generated: gAchievements[] (scripts/achievements_gen.py)
 #include "achievements_gfx.h" //Generated (scripts/achievements_gfx.py)
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
+#include "hack_flag_fast.h" //[hack] 2026-11-03 perf-region-3 実績の旗の読み（FlagGet の約 1/10）
 
 extern const u8 gText_Ach_Slash[];
 
@@ -58,7 +61,17 @@ extern const u8 gText_Ach_Slash[];
 #define KANTO_DEX_SIZE 151
 #define NUM_BASE_TMS 50
 
-#define PENDING_CHECK_INTERVAL 8 //Frames between checks for popups / rewards / gifts that are due
+//★ 2026-10-16 作り直し（patches/0500・docs/research/2026-10-16_achievements-refactor.md）: 前は 1 コマに 1 個ずつ全部を巡回して
+//  （見つけるまで最大 ACH_COUNT コマ）・知らせは 8 コマごと・ごほうびは知らせ（約 3 秒）が消えるまで待たされた。今は出来事で動く:
+//  - 出来事（ACH_EV_*）が起きたら、それを聞いているロック中のじっせきだけをその場で確かめる（Achievements_Notify・gAchEvents[]）
+//  - フラグ・ゲームの記録は 4 コマごと・バッグは 8 コマごとにまとめて確かめる（軽い・取りこぼしが無い）
+//  - 重い判定（図鑑・手持ち）の巡回は 8 コマに 1 個だけの予備（出来事の道に載らなかった変化を拾う）
+//  - 知らせ（ポップアップ）とごほうびは別: ごほうびが出るときは待たせずに台本を始め、台本の中でまとめて知らせる
+#define PENDING_CHECK_INTERVAL 2 //Frames between checks for popups that are due
+#define REWARD_RECHECK_INTERVAL 16 //Frames between retries of a reward that is due (bag was full) when nothing new is pending
+#define POLL_FAST_INTERVAL 4 //FLAG / STAT achievements (cheap) are checked all at once
+#define POLL_BAG_INTERVAL 8 //BAG achievements (key items, TMs)
+#define POLL_SWEEP_INTERVAL 8 //Safety net: one heavy (dex / party) achievement per time
 
 //Vanilla functions:
 void __attribute__((long_call)) TransferPlttBuffer(void);
@@ -74,12 +87,19 @@ struct AchievementReward
 };
 
 #include "achievements_rewards.h" //Generated: sAchievementRewards[] (scripts/achievements_gen.py)
+#include "hack_challenge_luxray.h" //[hack] patches/0617 しばり「ぜんぶレントラー」: じっせきの ほうしゅうの道具は リルの あいじょう
 
 //The flag after the last reward is used by the Pikachu gift
 #define ACH_MAX_REWARDS 32
 #if NUM_ACH_REWARDS > ACH_MAX_REWARDS
 	#error "Too many achievement rewards (max 32)"
 #endif
+
+//★ 2026-11-03 perf-region-3: 実績まわりの旗（解放済み・通知済み・もらった・渡した）は全部 0x900〜0x18FF の拡張の旗（gExpandedFlags）。
+//  1 コマに FlagGet が約 83 回（1 回約 160 サイクル）出ていたので、HackXFlagGetRt（hack_flag_fast.h）で直に読む。値は FlagGet と同じ
+//  （検算 tools/rom/verify_perf_region_3.py）。範囲はコンパイル時に確かめる
+_Static_assert(ACH_FLAG_START >= 0x900 && ACH_FLAG_REWARD_START + ACH_MAX_REWARDS + 1 <= 0x1900 && ACH_FLAG_CLAIMED_START + ACH_MAX_COUNT <= 0x1900,
+               "achievement flags must stay inside the expanded flags (0x900-0x18FF)");
 
 //Next reward that is due (reached the required count and not received yet), whether or not it fits in the bag
 static s8 GetNextRewardDue(void)
@@ -88,7 +108,7 @@ static s8 GetNextRewardDue(void)
 
 	for (u8 i = 0; i < NUM_ACH_REWARDS; ++i)
 	{
-		if (count >= sAchievementRewards[i].requiredCount && !FlagGet(ACH_FLAG_REWARD_START + i))
+		if (count >= sAchievementRewards[i].requiredCount && !HackXFlagGetRt(ACH_FLAG_REWARD_START + i))
 			return i;
 	}
 
@@ -104,7 +124,7 @@ static s8 GetNextReward(void)
 	#else
 	s8 i = GetNextRewardDue();
 
-	if (i >= 0 && !CheckBagHasSpace(sAchievementRewards[i].item, sAchievementRewards[i].amount))
+	if (i >= 0 && !CheckBagHasSpace(HackLuxrayLove_ShopItem(sAchievementRewards[i].item), sAchievementRewards[i].amount))
 		return -1;
 
 	return i;
@@ -117,7 +137,7 @@ static s8 GetNextReward(void)
 
 static bool8 IsGiftDue(void)
 {
-	return Achievements_IsUnlocked(ACH_PARTNER) && !FlagGet(ACH_FLAG_GIFT_PIKACHU);
+	return Achievements_IsUnlocked(ACH_PARTNER) && !HackXFlagGetRt(ACH_FLAG_GIFT_PIKACHU);
 }
 
 //Given automatically by the unlock script. Always FALSE when an NPC hands out the rewards (ACH_REWARDS_VIA_NPC).
@@ -131,9 +151,9 @@ static bool8 IsAutoGiftDue(void)
 }
 
 //This file's functions:
+struct AchCtx;
 static bool8 IsSpeciesCaught(u16 species);
-static bool8 IsFuncConditionMet(u16 func);
-static bool8 IsConditionMet(u16 id);
+static bool8 IsFuncConditionMet(u16 func, struct AchCtx* ctx);
 static u16 CountPending(void);
 static u32 CountTMsInBag(void);
 
@@ -156,38 +176,60 @@ const struct Achievement* Achievements_Get(u16 id)
 
 bool8 Achievements_IsUnlocked(u16 id)
 {
-	return id < ACH_COUNT && FlagGet(ACH_FLAG_START + id);
+	return id < ACH_COUNT && HackXFlagGetRt(ACH_FLAG_START + id);   //★ 2026-11-03 perf-region-3 直読み（id < ACH_COUNT <= ACH_MAX_COUNT なので範囲の中）
 }
 
 static bool8 IsNotified(u16 id)
 {
-	return FlagGet(ACH_FLAG_NOTIFIED_START + id);
+	return HackXFlagGetRt(ACH_FLAG_NOTIFIED_START + id);   //★ 2026-11-03 perf-region-3 直読み（呼び元は id < ACH_COUNT）
+}
+
+//★ 2026-11-03 perf-region-1: 解放済み／通知済みの旗は 0xB00〜の連続ビット（gExpandedFlags は 0x900〜0x1900 が 1 本の並び・src/save.c）。
+//  FlagGet を 116 回呼ぶ代わりに 1 バイト（8 個分）ずつ見る。数も判定も前と同じ（ACH_COUNT 以降のビットは数えない）
+_Static_assert(ACH_FLAG_START >= 0x900 && ACH_FLAG_START % 8 == 0 && ACH_FLAG_START + 2 * ACH_MAX_COUNT <= 0x1900, "achievement flags must be one byte run in gExpandedFlags");
+
+static u16 CountFlagBits(bool8 pendingOnly)
+{
+	const u8* unlocked = GetFlagPointer(ACH_FLAG_START);
+	const u8* notified = unlocked + ACH_MAX_COUNT / 8;
+	u16 count = 0;
+
+	if (unlocked == NULL) //Not expected: keep the old flag-by-flag count
+	{
+		for (u16 i = 0; i < ACH_COUNT; ++i)
+		{
+			if (FlagGet(ACH_FLAG_START + i) && !(pendingOnly && FlagGet(ACH_FLAG_NOTIFIED_START + i)))
+				++count;
+		}
+		return count;
+	}
+
+	for (u16 k = 0; k < (ACH_COUNT + 7) / 8; ++k)
+	{
+		u8 bits = unlocked[k];
+
+		if (pendingOnly)
+			bits &= ~notified[k];
+		if (k == ACH_COUNT / 8) //The last, partly used byte
+			bits &= (1 << (ACH_COUNT % 8)) - 1;
+		while (bits != 0)
+		{
+			bits &= bits - 1;
+			++count;
+		}
+	}
+
+	return count;
 }
 
 u16 Achievements_CountUnlocked(void)
 {
-	u16 count = 0;
-
-	for (u16 i = 0; i < ACH_COUNT; ++i)
-	{
-		if (Achievements_IsUnlocked(i))
-			++count;
-	}
-
-	return count;
+	return CountFlagBits(FALSE);
 }
 
 static u16 CountPending(void)
 {
-	u16 count = 0;
-
-	for (u16 i = 0; i < ACH_COUNT; ++i)
-	{
-		if (Achievements_IsUnlocked(i) && !IsNotified(i))
-			++count;
-	}
-
-	return count;
+	return CountFlagBits(TRUE);
 }
 
 bool8 Achievements_Unlock(u16 id)
@@ -360,67 +402,226 @@ static u8 CountRegionsCaught(void)
 	return count;
 }
 
-static bool8 IsValidPartyMon(struct Pokemon* mon)
+//Party properties: one pass over the party computes every property that a locked achievement still needs.
+//(GetMonData decrypts on every call, so this runs on events / the safety-net sweep only, never every frame: CLAUDE.md 6.80)
+enum
 {
-	return GetMonData(mon, MON_DATA_SPECIES, NULL) != SPECIES_NONE && !GetMonData(mon, MON_DATA_IS_EGG, NULL);
+	PP_MEGA_STONE      = 1 << 0,
+	PP_Z_CRYSTAL       = 1 << 1,
+	PP_GIGANTAMAX      = 1 << 2,
+	PP_HIDDEN_ABILITY  = 1 << 3,
+	PP_MAX_FRIENDSHIP  = 1 << 4,
+	PP_POKERUS         = 1 << 5,
+	PP_PERFECT_IV      = 1 << 6,
+	PP_MAX_EV          = 1 << 7,
+	PP_SHINY           = 1 << 8,
+	PP_LEVEL_100       = 1 << 9,  //Any party member is Lv100 or higher
+	PP_SURF_PIKACHU    = 1 << 10, //A Pikachu that knows Surf
+	PP_NICKNAME        = 1 << 11,
+	PP_ALL_LEVEL_100   = 1 << 12, //A full party where everyone is Lv100
+	PP_SAME_TYPE       = 1 << 13, //A full party where every member shares at least one type
+};
+
+_Static_assert(NUMBER_OF_MON_TYPES < 32, "type mask of the party check is 32 bits");
+
+static u16 PartyPropOfFunc(u16 func)
+{
+	switch (func) {
+		case ACH_FUNC_MEGA_STONE:          return PP_MEGA_STONE;
+		case ACH_FUNC_Z_CRYSTAL:           return PP_Z_CRYSTAL;
+		case ACH_FUNC_GIGANTAMAX:          return PP_GIGANTAMAX;
+		case ACH_FUNC_HIDDEN_ABILITY:      return PP_HIDDEN_ABILITY;
+		case ACH_FUNC_MAX_FRIENDSHIP:      return PP_MAX_FRIENDSHIP;
+		case ACH_FUNC_POKERUS:             return PP_POKERUS;
+		case ACH_FUNC_PERFECT_IV:          return PP_PERFECT_IV;
+		case ACH_FUNC_MAX_EV:              return PP_MAX_EV;
+		case ACH_FUNC_SHINY:               return PP_SHINY;
+		case ACH_FUNC_LEVEL_100:           return PP_LEVEL_100;
+		case ACH_FUNC_SURF_PIKACHU:        return PP_SURF_PIKACHU;
+		case ACH_FUNC_NICKNAME:            return PP_NICKNAME;
+		case ACH_FUNC_PARTY_ALL_LEVEL_100: return PP_ALL_LEVEL_100;
+		case ACH_FUNC_PARTY_SAME_TYPE:     return PP_SAME_TYPE;
+	}
+
+	return 0;
 }
 
-static bool8 PartyMonMatches(u16 func, struct Pokemon* mon)
+static bool8 IsNicknamed(struct Pokemon* mon, u16 species)
 {
-	u16 item = GetMonData(mon, MON_DATA_HELD_ITEM, NULL);
+	u8 name[POKEMON_NAME_LENGTH + 2];
 
-	switch (func) {
-		case ACH_FUNC_MEGA_STONE:
-			return IsMegaStone(item);
-		case ACH_FUNC_Z_CRYSTAL:
-			return IsZCrystal(item);
-		case ACH_FUNC_GIGANTAMAX:
-			return mon->gigantamax;
-		case ACH_FUNC_HIDDEN_ABILITY:
-			return mon->hiddenAbility;
-		case ACH_FUNC_MAX_FRIENDSHIP:
-			return GetMonData(mon, MON_DATA_FRIENDSHIP, NULL) >= 255;
-		case ACH_FUNC_POKERUS:
-			return GetMonData(mon, MON_DATA_POKERUS, NULL) != 0;
-		case ACH_FUNC_PERFECT_IV:
-			for (u8 stat = 0; stat < NUM_STATS; ++stat)
-			{
-				if (GetMonData(mon, MON_DATA_HP_IV + stat, NULL) < 31)
-					return FALSE;
-			}
+	for (u8 k = 0; k < sizeof(name); ++k)
+		name[k] = EOS;
+
+	GetMonData(mon, MON_DATA_NICKNAME, name);
+
+	//JP names are short (5 chars + EOS); compare char by char until either ends
+	for (u8 k = 0; k < sizeof(SpeciesNames_t); ++k)
+	{
+		if (name[k] != gSpeciesNames[species][k])
 			return TRUE;
-		case ACH_FUNC_MAX_EV:
-		{
-			u16 total = 0;
-			for (u8 stat = 0; stat < NUM_STATS; ++stat)
-				total += GetMonData(mon, MON_DATA_HP_EV + stat, NULL);
-			return total >= 510;
-		}
+
+		if (name[k] == EOS)
+			break;
 	}
 
 	return FALSE;
 }
 
-static bool8 AnyPartyMonMatches(u16 func)
+static u16 ComputePartyProps(u16 need)
 {
+	u16 props = 0;
+	u32 commonTypes = (1u << NUMBER_OF_MON_TYPES) - 1;
+	bool8 allLevel100 = TRUE;
+
 	for (u8 i = 0; i < gPlayerPartyCount && i < PARTY_SIZE; ++i)
 	{
-		if (IsValidPartyMon(&gPlayerParty[i]) && PartyMonMatches(func, &gPlayerParty[i]))
-			return TRUE;
+		struct Pokemon* mon = &gPlayerParty[i];
+		u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+
+		if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG, NULL))
+		{
+			allLevel100 = FALSE;
+			commonTypes = 0;
+			continue;
+		}
+
+		if (need & (PP_MEGA_STONE | PP_Z_CRYSTAL))
+		{
+			u16 item = GetMonData(mon, MON_DATA_HELD_ITEM, NULL);
+
+			if (IsMegaStone(item))
+				props |= PP_MEGA_STONE;
+			if (IsZCrystal(item))
+				props |= PP_Z_CRYSTAL;
+		}
+
+		if ((need & PP_GIGANTAMAX) && mon->gigantamax)
+			props |= PP_GIGANTAMAX;
+
+		if ((need & PP_HIDDEN_ABILITY) && mon->hiddenAbility)
+			props |= PP_HIDDEN_ABILITY;
+
+		if ((need & PP_MAX_FRIENDSHIP) && GetMonData(mon, MON_DATA_FRIENDSHIP, NULL) >= 255)
+			props |= PP_MAX_FRIENDSHIP;
+
+		if ((need & PP_POKERUS) && GetMonData(mon, MON_DATA_POKERUS, NULL) != 0)
+			props |= PP_POKERUS;
+
+		if ((need & PP_SHINY) && IsMonShiny(mon))
+			props |= PP_SHINY;
+
+		if (need & (PP_LEVEL_100 | PP_ALL_LEVEL_100))
+		{
+			if (GetMonData(mon, MON_DATA_LEVEL, NULL) >= 100)
+				props |= PP_LEVEL_100;
+			else
+				allLevel100 = FALSE;
+		}
+
+		if (need & PP_PERFECT_IV)
+		{
+			bool8 perfect = TRUE;
+
+			for (u8 stat = 0; stat < NUM_STATS && perfect; ++stat)
+			{
+				if (HackMon_GetIv(mon, stat) < HACK_IV_MAX) //[hack] patches/0677
+					perfect = FALSE;
+			}
+
+			if (perfect)
+				props |= PP_PERFECT_IV;
+		}
+
+		if (need & PP_MAX_EV)
+		{
+			u16 total = 0;
+
+			for (u8 stat = 0; stat < NUM_STATS; ++stat)
+				total += HackMon_GetEv(mon, stat);
+
+			if (total >= HACK_EV_TOTAL_CAP) //[hack] patches/0677
+				props |= PP_MAX_EV;
+		}
+
+		if ((need & PP_SURF_PIKACHU) && species == SPECIES_PIKACHU)
+		{
+			for (u8 j = 0; j < MAX_MON_MOVES; ++j)
+			{
+				if (GetMonData(mon, MON_DATA_MOVE1 + j, NULL) == MOVE_SURF)
+					props |= PP_SURF_PIKACHU;
+			}
+		}
+
+		if ((need & PP_NICKNAME) && IsNicknamed(mon, species))
+			props |= PP_NICKNAME;
+
+		if (need & PP_SAME_TYPE)
+			commonTypes &= (1u << gBaseStats[species].type1) | (1u << gBaseStats[species].type2);
 	}
 
-	return FALSE;
+	if (gPlayerPartyCount >= PARTY_SIZE)
+	{
+		if (allLevel100)
+			props |= PP_ALL_LEVEL_100;
+		if (commonTypes != 0)
+			props |= PP_SAME_TYPE;
+	}
+
+	return props & need;
 }
 
-static bool8 IsFuncConditionMet(u16 func)
+//Values that several achievements share are computed once per check and kept here (on the stack)
+struct AchCtx
+{
+	u16 dexCount;    //0xFFFF = not counted yet
+	u16 partyProps;  //PP_* computed for this check (only the bits that were needed)
+	u8 tmCount;      //0xFF = not counted yet
+};
+
+static u16 CtxDexCount(struct AchCtx* ctx)
+{
+	if (ctx->dexCount == 0xFFFF)
+		ctx->dexCount = GetNationalPokedexCount(FLAG_GET_CAUGHT);
+
+	return ctx->dexCount;
+}
+
+static u8 CtxTMCount(struct AchCtx* ctx)
+{
+	if (ctx->tmCount == 0xFF)
+		ctx->tmCount = CountTMsInBag();
+
+	return ctx->tmCount;
+}
+
+static bool8 AreAllOthersUnlocked(void)
+{
+	for (u16 i = 0; i < ACH_COUNT; ++i)
+	{
+		if (gAchievements[i].kind == ACH_KIND_FUNC && gAchievements[i].param == ACH_FUNC_ALL_OTHERS)
+			continue; //Itself
+
+		if (!Achievements_IsUnlocked(i))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+static bool8 IsFuncConditionMet(u16 func, struct AchCtx* ctx)
 {
 	const struct AchSpeciesSet* set = GetSpeciesSet(func);
+	u16 partyProp = PartyPropOfFunc(func);
 
 	if (set != NULL)
 	{
 		u8 caught = CountSpeciesSetCaught(set);
 		return func == ACH_FUNC_ULTRA_BEAST ? caught > 0 : caught >= set->count;
 	}
+
+	if (partyProp != 0)
+		return (ctx->partyProps & partyProp) != 0;
 
 	switch (func) {
 		case ACH_FUNC_MEGA_RING:
@@ -436,21 +637,9 @@ static bool8 IsFuncConditionMet(u16 func)
 		case ACH_FUNC_OVAL_CHARM:
 			return CheckBagHasItem(ITEM_OVAL_CHARM, 1);
 
-		case ACH_FUNC_MEGA_STONE:
-		case ACH_FUNC_Z_CRYSTAL:
-		case ACH_FUNC_GIGANTAMAX:
-		case ACH_FUNC_HIDDEN_ABILITY:
-		case ACH_FUNC_MAX_FRIENDSHIP:
-		case ACH_FUNC_POKERUS:
-		case ACH_FUNC_PERFECT_IV:
-		case ACH_FUNC_MAX_EV:
-			return AnyPartyMonMatches(func);
-
 		case ACH_FUNC_ALL_REGIONS:
 			return AreAllRegionsCaught();
-	}
 
-	switch (func) {
 		case ACH_FUNC_KANTO_DEX:
 			for (u16 i = 1; i <= KANTO_DEX_SIZE; ++i)
 			{
@@ -458,28 +647,6 @@ static bool8 IsFuncConditionMet(u16 func)
 					return FALSE;
 			}
 			return TRUE;
-
-		case ACH_FUNC_SHINY:
-			for (u8 i = 0; i < gPlayerPartyCount && i < PARTY_SIZE; ++i)
-			{
-				struct Pokemon* mon = &gPlayerParty[i];
-				if (GetMonData(mon, MON_DATA_SPECIES, NULL) != SPECIES_NONE
-				&& !GetMonData(mon, MON_DATA_IS_EGG, NULL)
-				&& IsMonShiny(mon))
-					return TRUE;
-			}
-			return FALSE;
-
-		case ACH_FUNC_LEVEL_100:
-			for (u8 i = 0; i < gPlayerPartyCount && i < PARTY_SIZE; ++i)
-			{
-				struct Pokemon* mon = &gPlayerParty[i];
-				if (GetMonData(mon, MON_DATA_SPECIES, NULL) != SPECIES_NONE
-				&& !GetMonData(mon, MON_DATA_IS_EGG, NULL)
-				&& GetMonData(mon, MON_DATA_LEVEL, NULL) >= 100)
-					return TRUE;
-			}
-			return FALSE;
 
 		case ACH_FUNC_LEGEND_BIRDS:
 			return IsSpeciesCaught(SPECIES_ARTICUNO)
@@ -492,127 +659,36 @@ static bool8 IsFuncConditionMet(u16 func)
 			    && IsSpeciesCaught(SPECIES_SUICUNE);
 
 		case ACH_FUNC_TM_10:
-			return CountTMsInBag() >= 10;
+			return CtxTMCount(ctx) >= 10;
 
 		case ACH_FUNC_TM_30:
-			return CountTMsInBag() >= 30;
+			return CtxTMCount(ctx) >= 30;
 
 		case ACH_FUNC_TM_50:
-			return CountTMsInBag() >= 50;
-
-		case ACH_FUNC_SURF_PIKACHU: //A Pikachu that knows Surf is in the party
-			for (u8 i = 0; i < gPlayerPartyCount && i < PARTY_SIZE; ++i)
-			{
-				struct Pokemon* mon = &gPlayerParty[i];
-				if (GetMonData(mon, MON_DATA_SPECIES, NULL) != SPECIES_PIKACHU || GetMonData(mon, MON_DATA_IS_EGG, NULL))
-					continue;
-
-				for (u8 j = 0; j < MAX_MON_MOVES; ++j)
-				{
-					if (GetMonData(mon, MON_DATA_MOVE1 + j, NULL) == MOVE_SURF)
-						return TRUE;
-				}
-			}
-			return FALSE;
-
-		case ACH_FUNC_PARTY_ALL_LEVEL_100: //A full party where everyone is Lv100
-			if (gPlayerPartyCount < PARTY_SIZE)
-				return FALSE;
-
-			for (u8 i = 0; i < PARTY_SIZE; ++i)
-			{
-				struct Pokemon* mon = &gPlayerParty[i];
-				if (GetMonData(mon, MON_DATA_SPECIES, NULL) == SPECIES_NONE
-				|| GetMonData(mon, MON_DATA_IS_EGG, NULL)
-				|| GetMonData(mon, MON_DATA_LEVEL, NULL) < 100)
-					return FALSE;
-			}
-			return TRUE;
-
-		case ACH_FUNC_PARTY_SAME_TYPE: //A full party where every member shares at least one type
-		{
-			u8 type;
-
-			if (gPlayerPartyCount < PARTY_SIZE)
-				return FALSE;
-
-			for (type = 0; type < NUMBER_OF_MON_TYPES; ++type)
-			{
-				bool8 all = TRUE;
-
-				for (u8 i = 0; i < PARTY_SIZE && all; ++i)
-				{
-					struct Pokemon* mon = &gPlayerParty[i];
-					u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-
-					if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG, NULL)
-					|| (gBaseStats[species].type1 != type && gBaseStats[species].type2 != type))
-						all = FALSE;
-				}
-
-				if (all)
-					return TRUE;
-			}
-			return FALSE;
-		}
-
-		case ACH_FUNC_NICKNAME: //Any party member (non-egg) whose name differs from its species name
-			for (u8 i = 0; i < gPlayerPartyCount && i < PARTY_SIZE; ++i)
-			{
-				struct Pokemon* mon = &gPlayerParty[i];
-				u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-				u8 name[POKEMON_NAME_LENGTH + 2];
-
-				if (species == SPECIES_NONE || GetMonData(mon, MON_DATA_IS_EGG, NULL))
-					continue;
-
-				for (u8 k = 0; k < sizeof(name); ++k)
-					name[k] = EOS;
-
-				GetMonData(mon, MON_DATA_NICKNAME, name);
-
-				//JP names are short (5 chars + EOS); compare char by char until either ends
-				for (u8 k = 0; k < sizeof(SpeciesNames_t); ++k)
-				{
-					if (name[k] != gSpeciesNames[species][k])
-						return TRUE;
-
-					if (name[k] == EOS)
-						break;
-				}
-			}
-			return FALSE;
+			return CtxTMCount(ctx) >= 50;
 
 		case ACH_FUNC_ALL_OTHERS:
-			for (u16 i = 0; i < ACH_COUNT; ++i)
-			{
-				if (gAchievements[i].kind == ACH_KIND_FUNC && gAchievements[i].param == ACH_FUNC_ALL_OTHERS)
-					continue; //Itself
-
-				if (!Achievements_IsUnlocked(i))
-					return FALSE;
-			}
-			return TRUE;
+			return AreAllOthersUnlocked();
 	}
 
 	return FALSE;
 }
 
-static bool8 IsConditionMet(u16 id)
+static bool8 IsConditionMet(u16 id, struct AchCtx* ctx)
 {
 	const struct Achievement* ach = &gAchievements[id];
 
 	switch (ach->kind) {
 		case ACH_KIND_FLAG:
-			return FlagGet(ach->param);
+			return HackFlagGetAny(ach->param);   //★ 2026-11-03 perf-region-3 拡張の旗なら直読み・外なら素の FlagGet
 		case ACH_KIND_STAT:
 			return GetGameStat(ach->param) >= ach->target;
 		case ACH_KIND_DEX_COUNT:
-			return GetNationalPokedexCount(FLAG_GET_CAUGHT) >= ach->target;
+			return CtxDexCount(ctx) >= ach->target;
 		case ACH_KIND_SPECIES:
 			return IsSpeciesCaught(ach->param);
 		case ACH_KIND_FUNC:
-			return IsFuncConditionMet(ach->param);
+			return IsFuncConditionMet(ach->param, ctx);
 		case ACH_KIND_ITEM: //[hack] 2026-10-10
 			return CheckBagHasItem(ach->param, 1);
 	}
@@ -620,25 +696,100 @@ static bool8 IsConditionMet(u16 id)
 	return FALSE;
 }
 
-//Slow checks scan large tables (Pokedex, Bag, party) so they aren't done every time
-static bool8 IsSlowCheck(u16 id)
+static void InitCtx(struct AchCtx* ctx)
 {
-	u8 kind = gAchievements[id].kind;
-	return kind == ACH_KIND_DEX_COUNT || kind == ACH_KIND_FUNC || kind == ACH_KIND_ITEM;
+	ctx->dexCount = 0xFFFF;
+	ctx->partyProps = 0;
+	ctx->tmCount = 0xFF;
+}
+
+//Re-checks every locked achievement that listens to one of the events (ACH_EV_*, gAchEvents[]).
+//"Everything locked that listens" is at most ACH_COUNT cheap flag reads plus the conditions themselves; shared values
+//(dex count, TM count, the party scan) are computed once.
+static void RunChecks(u8 events)
+{
+	struct AchCtx ctx;
+	u16 need = 0;
+	bool8 unlocked = FALSE;
+	u8 direct = events & ~ACH_EV_UNLOCK;
+
+	InitCtx(&ctx);
+
+	if (direct & ACH_EV_PARTY)
+	{
+		for (u16 i = 0; i < ACH_COUNT; ++i)
+		{
+			if ((gAchEvents[i] & ACH_EV_PARTY) && !Achievements_IsUnlocked(i))
+				need |= PartyPropOfFunc(gAchievements[i].param);
+		}
+
+		if (need != 0)
+			ctx.partyProps = ComputePartyProps(need);
+	}
+
+	for (u16 i = 0; i < ACH_COUNT; ++i)
+	{
+		if (!(gAchEvents[i] & direct) || Achievements_IsUnlocked(i))
+			continue;
+
+		if (IsConditionMet(i, &ctx))
+			unlocked |= Achievements_Unlock(i);
+	}
+
+	if (unlocked || (events & ACH_EV_UNLOCK)) //"All other achievements" is decided after the others
+	{
+		for (u16 i = 0; i < ACH_COUNT; ++i)
+		{
+			if ((gAchEvents[i] & ACH_EV_UNLOCK) && !Achievements_IsUnlocked(i) && AreAllOthersUnlocked())
+				Achievements_Unlock(i);
+		}
+	}
+}
+
+//One achievement (the safety-net sweep): same conditions, a party scan only for its own property
+static void CheckOne(u16 id)
+{
+	struct AchCtx ctx;
+
+	InitCtx(&ctx);
+	if (gAchEvents[id] & ACH_EV_PARTY)
+		ctx.partyProps = ComputePartyProps(PartyPropOfFunc(gAchievements[id].param));
+
+	if (gAchEvents[id] & ACH_EV_UNLOCK)
+	{
+		if (AreAllOthersUnlocked())
+			Achievements_Unlock(id);
+	}
+	else if (IsConditionMet(id, &ctx))
+		Achievements_Unlock(id);
+}
+
+//Something happened (ACH_EV_*): check the achievements that listen to it now (instead of waiting for the next sweep)
+void Achievements_Notify(u8 events)
+{
+	#ifndef DISABLE_ACHIEVEMENTS
+	RunChecks(events);
+	#endif
 }
 
 void Achievements_CheckAll(bool8 includeSlowChecks)
 {
-	for (u16 i = 0; i < ACH_COUNT; ++i)
+	(void) includeSlowChecks; //Kept for the callers: a full check always includes everything now
+	RunChecks(ACH_EV_ALL);
+}
+
+//Safety net for changes that no event reported: the next locked "heavy" achievement (dex / party) from index start
+static void SweepOne(u32 start)
+{
+	for (u16 k = 0; k < ACH_COUNT; ++k)
 	{
-		if (Achievements_IsUnlocked(i))
+		u16 id = (start + k) % ACH_COUNT;
+
+		if (!(gAchEvents[id] & (ACH_EV_DEX | ACH_EV_PARTY)) || Achievements_IsUnlocked(id))
 			continue;
 
-		if (!includeSlowChecks && IsSlowCheck(i))
-			continue;
-
-		if (IsConditionMet(i))
-			Achievements_Unlock(i);
+		CheckOne(id);
+		return;
 	}
 }
 
@@ -778,7 +929,7 @@ static void PrintTinyText(u8 windowId, u16 x, u16 y, const u8* str)
 #define POPUP_ICON_Y (POPUP_TILEMAP_TOP * 8 + POPUP_NAME_Y + 7) //Ball centered on the name (same spacing as the list screen)
 #define POPUP_OFFSCREEN_Y 48
 #define POPUP_SLIDE_FRAMES 18
-#define POPUP_SHOW_FRAMES 150
+#define POPUP_SHOW_FRAMES 54 //2026-10-16 150 -> 54: slide in 18 + show 54 + slide out 18 = 90 frames (1.5 s)
 #define POPUP_NO_WINDOW 0xFF
 #define POPUP_SE SE_RG_CARD3 //Sound played when it appears (include/constants/songs.h)
 
@@ -1055,6 +1206,15 @@ static void HandlePopupInput(void)
 	}
 }
 
+//Removes the popup that is on screen (if any) right away: a newer unlock replaces it, and a reward script does not wait for it
+static void DestroyActivePopup(void)
+{
+	u8 taskId = FindTaskIdByFunc(Task_AchievementPopup);
+
+	if (taskId != 0xFF)
+		DestroyPopup(taskId);
+}
+
 static bool8 CanShowPopup(void)
 {
 	return gMain.callback2 == CB2_Overworld
@@ -1071,45 +1231,55 @@ static bool8 CanShowPopup(void)
 #undef tIconX
 #endif //ACH_UNLOCK_MESSAGEBOX
 
+//Cheap conditions are checked in groups every few frames; the heavy ones (dex / party) only by events (Achievements_Notify)
+//plus a one-per-time safety-net sweep. The frame numbers are staggered so two groups never land on the same frame.
+static void PollConditions(u32 frame)
+{
+	if (frame % POLL_FAST_INTERVAL == 0)
+		RunChecks(ACH_EV_FLAG | ACH_EV_STAT);
+	else if (frame % POLL_BAG_INTERVAL == 1)
+		RunChecks(ACH_EV_BAG | ACH_EV_UNLOCK);
+	else if (frame % POLL_SWEEP_INTERVAL == 3)
+		SweepOne(frame / POLL_SWEEP_INTERVAL);
+}
+
 //Called every frame from TryRunOnFrameMapScript. Returns TRUE if a script was started.
 bool8 Achievements_FieldFrameUpdate(void)
 {
 	u32 frame = gMain.vblankCounter2;
-	u16 id = frame % ACH_COUNT;
 
-	//Only ONE achievement is evaluated per frame (a full pass takes ACH_COUNT frames, ~1 second).
-	//Checking everything at once (dex / bag / party scans) made the game hitch while walking.
-	if (!Achievements_IsUnlocked(id) && IsConditionMet(id))
-		Achievements_Unlock(id);
+	PollConditions(frame);
 
 	#ifndef ACH_UNLOCK_MESSAGEBOX
+	u16 pending;
+
 	if (IsPopupActive())
-	{
-		HandlePopupInput(); //Rewards wait until the popup is gone
-		return FALSE;
-	}
+		HandlePopupInput();
 
 	if (frame % PENDING_CHECK_INTERVAL != 0)
 		return FALSE;
 
-	if (CountPending() > 0)
-	{
-		if (CanShowPopup())
-		{
-			u16 count = CountPending();
-			TryCreatePopup(TakePendingNotification(), count);
-		}
+	pending = CountPending();
+	if (pending == 0 && frame % REWARD_RECHECK_INTERVAL != 0)
 		return FALSE;
-	}
 
-	if (GetNextReward() >= 0 || IsAutoGiftDue()) //The reward / gift messages still use the script
+	//A reward / gift that is due does not wait for the popup: the script announces what is pending and gives it
+	if (GetNextReward() >= 0 || IsAutoGiftDue())
 	{
+		DestroyActivePopup();
 		ScriptContext1_SetupScript(EventScript_AchievementUnlocked);
 		return TRUE;
 	}
+
+	//A newer unlock replaces the popup that is still on screen (it never waits for the old one)
+	if (pending > 0 && CanShowPopup())
+	{
+		DestroyActivePopup();
+		TryCreatePopup(TakePendingNotification(), pending);
+	}
 	#else
 	if (frame % PENDING_CHECK_INTERVAL == 0
-	&& (CountPending() > 0 || GetNextReward() >= 0 || IsAutoGiftDue()))
+	&& (CountPending() > 0 || (frame % REWARD_RECHECK_INTERVAL == 0 && (GetNextReward() >= 0 || IsAutoGiftDue()))))
 	{
 		ScriptContext1_SetupScript(EventScript_AchievementUnlocked);
 		return TRUE;
@@ -1154,15 +1324,15 @@ void AchievementsPrepareReward(void)
 	if (i < 0)
 		return;
 
-	if (!CheckBagHasSpace(sAchievementRewards[i].item, sAchievementRewards[i].amount))
+	if (!CheckBagHasSpace(HackLuxrayLove_ShopItem(sAchievementRewards[i].item), sAchievementRewards[i].amount))
 	{
 		gSpecialVar_LastResult = 2;
 		return;
 	}
 
-	AddBagItem(sAchievementRewards[i].item, sAchievementRewards[i].amount);
+	AddBagItem(HackLuxrayLove_ShopItem(sAchievementRewards[i].item), sAchievementRewards[i].amount);
 	FlagSet(ACH_FLAG_REWARD_START + i);
-	StringCopy(gStringVar1, ItemId_GetName(sAchievementRewards[i].item));
+	StringCopy(gStringVar1, ItemId_GetName(HackLuxrayLove_ShopItem(sAchievementRewards[i].item)));
 	ConvertIntToDecimalStringN(gStringVar2, sAchievementRewards[i].amount, STR_CONV_MODE_LEFT_ALIGN, 3);
 	gSpecialVar_LastResult = 1;
 }
@@ -1210,7 +1380,7 @@ void AchievementsPrepareNpcDialog(void)
 	//The smallest count among the rewards not received yet (entries added later may need fewer unlocks)
 	for (u8 i = 0; i < NUM_ACH_REWARDS; ++i)
 	{
-		if (!FlagGet(ACH_FLAG_REWARD_START + i) && sAchievementRewards[i].requiredCount < next)
+		if (!HackXFlagGetRt(ACH_FLAG_REWARD_START + i) && sAchievementRewards[i].requiredCount < next)
 			next = sAchievementRewards[i].requiredCount;
 	}
 
@@ -1273,6 +1443,7 @@ enum
 	TD_STATE,
 	TD_ARROWS,
 	TD_ICONS, //6 entries
+	TD_ICON_SIGS = TD_ICONS + NUM_VISIBLE_ROWS, //[hack] BUG-achievement-speed: what each row's ball was made from (0 = none). 6 entries (data[] has 16)
 };
 
 enum
@@ -1299,7 +1470,7 @@ extern const u8 gText_Ach_ClaimMonPC[];
 extern const u8 gText_Ach_ClaimBagFull[];
 extern const u8 gText_Ach_ClaimMonFull[];
 
-u8 ScriptGiveMon(u16 species, u8 level, u16 item, u32 unused1, u32 customGivePokemon, u8 ballType); //src/build_pokemon.c
+u8 ScriptGiveMon(u16 species, u16 level, u16 item, u32 unused1, u32 customGivePokemon, u8 ballType); //src/build_pokemon.c
 
 static const struct BgTemplate sAchBgTemplates[] =
 {
@@ -1330,12 +1501,34 @@ static bool8 HasReward(u16 id)
 
 static bool8 IsRewardClaimed(u16 id)
 {
-	return HasReward(id) && FlagGet(ACH_FLAG_CLAIMED_START + id);
+	return HasReward(id) && HackXFlagGetRt(ACH_FLAG_CLAIMED_START + id);   //★ 2026-11-03 perf-region-3 直読み（呼び元は id < ACH_COUNT）
 }
 
 static bool8 CanClaimReward(u16 id)
 {
 	return HasReward(id) && Achievements_IsUnlocked(id) && !IsRewardClaimed(id);
+}
+
+//[hack] BUG-achievement-speed: the reward text in the title bar (PrintTitle) is shown only for this case
+static bool8 IsRewardShownInTitle(u16 id)
+{
+	return HasReward(id) && !IsRewardClaimed(id);
+}
+
+//ACH_PARTNER: the reward is the lab starter that neither the player nor the rival took.
+//Index = VAR_STARTER_MON (0 Bulbasaur, 1 Squirtle, 2 Charmander); the rival takes the one that beats it
+//(0 -> Charmander, 1 -> Bulbasaur, 2 -> Squirtle), so the leftover is the third. Not chosen yet: the table entry (Charmander).
+static const u16 sLeftoverStarter[3] = {SPECIES_SQUIRTLE, SPECIES_CHARMANDER, SPECIES_BULBASAUR};
+
+static u16 GetRewardSpecies(u16 id)
+{
+	if (id == ACH_PARTNER && FlagGet(FLAG_SYS_POKEMON_GET))
+	{
+		u16 starter = VarGet(VAR_STARTER_MON);
+		if (starter < ARRAY_COUNT(sLeftoverStarter))
+			return sLeftoverStarter[starter];
+	}
+	return gAchievements[id].rewardId;
 }
 
 //"ほうしゅう:ふしぎなアメ x3" / "ほうしゅう:ピカチュウ Lv5"
@@ -1346,7 +1539,7 @@ static void GetRewardText(u16 id, u8* dst)
 	dst = StringCopy(dst, gText_Ach_RewardLabel);
 	if (ach->rewardType == ACH_REWARD_ITEM)
 	{
-		dst = StringCopy(dst, ItemId_GetName(ach->rewardId));
+		dst = StringCopy(dst, ItemId_GetName(HackLuxrayLove_ShopItem(ach->rewardId)));
 		if (ach->rewardAmount > 1)
 		{
 			*dst++ = 0x00; //Space
@@ -1356,7 +1549,7 @@ static void GetRewardText(u16 id, u8* dst)
 	}
 	else
 	{
-		GetSpeciesName(dst, ach->rewardId);
+		GetSpeciesName(dst, GetRewardSpecies(id));
 		dst += StringLength(dst);
 		*dst++ = 0x00; //Space
 		dst = StringCopy(dst, gText_Ach_RewardLv);
@@ -1385,22 +1578,30 @@ static const struct SpriteTemplate sBallIconTemplate =
 };
 
 //Icons are plain sprites that are recreated on every redraw: their ids are kept in the task data
-static void DestroyBallIcons(u8 taskId)
+static void DestroyBallIcon(u8 taskId, u8 row)
 {
 	s16* data = gTasks[taskId].data;
+	u16 tag = BALL_TAG_BASE + row;
 
-	for (u8 row = 0; row < NUM_VISIBLE_ROWS; ++row)
+	data[TD_ICON_SIGS + row] = 0;
+	if (data[TD_ICONS + row] != MAX_SPRITES)
 	{
-		u16 tag = BALL_TAG_BASE + row;
-
-		if (data[TD_ICONS + row] != MAX_SPRITES)
-		{
-			DestroySprite(&gSprites[data[TD_ICONS + row]]);
-			data[TD_ICONS + row] = MAX_SPRITES;
-			FreeSpriteTilesByTag(tag);
-			FreeSpritePaletteByTag(tag);
-		}
+		DestroySprite(&gSprites[data[TD_ICONS + row]]);
+		data[TD_ICONS + row] = MAX_SPRITES;
+		FreeSpriteTilesByTag(tag);
+		FreeSpritePaletteByTag(tag);
 	}
+}
+
+//[hack] BUG-achievement-speed: the ball only depends on the tier and on locked / unlocked
+static s16 GetBallIconSig(u16 id)
+{
+	u8 tier = gAchievements[id].tier;
+
+	if (tier > ACH_TIER_PLATINUM)
+		tier = ACH_TIER_BRONZE;
+
+	return 1 + tier * 2 + (Achievements_IsUnlocked(id) ? 1 : 0);
 }
 
 static void CreateBallIcon(u8 taskId, u8 row, u16 id)
@@ -1440,7 +1641,10 @@ static void CreateBallIcon(u8 taskId, u8 row, u16 id)
 	template.paletteTag = tag;
 	spriteId = CreateSprite(&template, ICON_X, ICON_Y(row), 0);
 	if (spriteId != MAX_SPRITES)
+	{
 		gTasks[taskId].data[TD_ICONS + row] = spriteId;
+		gTasks[taskId].data[TD_ICON_SIGS + row] = GetBallIconSig(id);
+	}
 	else
 	{
 		FreeSpriteTilesByTag(tag);
@@ -1551,12 +1755,12 @@ static bool8 ClaimReward(u16 id)
 
 	if (ach->rewardType == ACH_REWARD_ITEM)
 	{
-		StringCopy(gStringVar1, ItemId_GetName(ach->rewardId));
+		StringCopy(gStringVar1, ItemId_GetName(HackLuxrayLove_ShopItem(ach->rewardId)));
 		ConvertIntToDecimalStringN(gStringVar2, ach->rewardAmount, STR_CONV_MODE_LEFT_ALIGN, 3);
 
-		if (CheckBagHasSpace(ach->rewardId, ach->rewardAmount))
+		if (CheckBagHasSpace(HackLuxrayLove_ShopItem(ach->rewardId), ach->rewardAmount))
 		{
-			AddBagItem(ach->rewardId, ach->rewardAmount);
+			AddBagItem(HackLuxrayLove_ShopItem(ach->rewardId), ach->rewardAmount);
 			msg = gText_Ach_ClaimItem;
 			received = TRUE;
 		}
@@ -1565,9 +1769,20 @@ static bool8 ClaimReward(u16 id)
 	}
 	else
 	{
-		GetSpeciesName(gStringVar1, ach->rewardId);
+		u16 rewardSpecies = GetRewardSpecies(id);
+		u8 given;
 
-		switch (ScriptGiveMon(ach->rewardId, ach->rewardAmount, ach->rewardHeldItem, 0, 0, 0)) {
+		GetSpeciesName(gStringVar1, rewardSpecies);
+
+		//2026-10-16 patches/0500: the "first Pokemon" reward is treated like the lab starter (1/16 shiny, START Ball; src/hack_gift_shiny.c).
+		//The flag is only up while ScriptGiveMon runs. The Moemon picture is decided by the personality for every Pokemon (same chance)
+		if (id == ACH_PARTNER)
+			FlagSet(ACH_FLAG_STARTER_CTX);
+		given = ScriptGiveMon(rewardSpecies, ach->rewardAmount, ach->rewardHeldItem, 0, 0, 0);
+		if (id == ACH_PARTNER)
+			FlagClear(ACH_FLAG_STARTER_CTX);
+
+		switch (given) {
 			case 0: //Party
 				msg = gText_Ach_ClaimMonParty;
 				received = TRUE;
@@ -1590,18 +1805,100 @@ static bool8 ClaimReward(u16 id)
 	return received;
 }
 
-static void RedrawScreen(u8 taskId)
+//[hack] BUG-achievement-speed: a row keeps its ball when the new achievement's ball looks the same
+static void UpdateBallIcons(u8 taskId, u8 scroll)
+{
+	for (u8 row = 0; row < NUM_VISIBLE_ROWS; ++row)
+	{
+		u16 id = scroll + row;
+		s16* data = gTasks[taskId].data;
+
+		if (id >= ACH_COUNT)
+		{
+			DestroyBallIcon(taskId, row);
+			continue;
+		}
+
+		if (data[TD_ICONS + row] != MAX_SPRITES && data[TD_ICON_SIGS + row] == GetBallIconSig(id))
+			continue;
+
+		DestroyBallIcon(taskId, row);
+		CreateBallIcon(taskId, row, id);
+	}
+}
+
+//oldCursor: where the cursor was (0xFFFF = unknown / first draw: print everything)
+static void RedrawScreen(u8 taskId, u16 oldCursor)
 {
 	u8 cursor = gTasks[taskId].data[TD_CURSOR];
 	u8 scroll = gTasks[taskId].data[TD_SCROLL];
 
-	PrintTitle(cursor);
+	//[hack] BUG-achievement-speed: the title only changes when the reward text shown in it does
+	if (oldCursor == 0xFFFF || IsRewardShownInTitle(oldCursor) || IsRewardShownInTitle(cursor))
+		PrintTitle(cursor);
 	PrintList(cursor, scroll);
 	PrintDescription(cursor);
+	UpdateBallIcons(taskId, scroll);
+}
 
-	DestroyBallIcons(taskId);
-	for (u8 row = 0; row < NUM_VISIBLE_ROWS && scroll + row < ACH_COUNT; ++row)
-		CreateBallIcon(taskId, row, scroll + row);
+//[hack] 2026-10-28 BUG-achievement-speed (Redmine #198): カーソルが 1 つ動いただけ（画面が流れない）のときは、
+//  一覧の文字 13 回・絵 6 個・タイトルを全部描き直さず、変わる所だけ描く（前は 1 回の移動で処理が 5 コマ続いた）。
+//  - 一覧: 前のカーソルの行と新しいカーソルの行の左端（名前より左＝カーソルの▶だけがある所）を消して▶を描く
+//  - タイトル: ほうしゅうの文字は「ほうしゅうが あって まだ受け取っていない」ときだけ出る＝前後どちらもそうでなければ変わらないので描かない
+//  - ボールの絵: 画面が流れたときだけ作り直す（ここでは触らない）
+//  - せつめいの文は毎回違うので毎回描く
+static void RedrawCursorOnly(u8 oldCursor, u8 newCursor, u8 scroll)
+{
+	u8 rows[2] = {oldCursor - scroll, newCursor - scroll};
+
+	for (u8 i = 0; i < 2; ++i)
+	{
+		u16 y = LIST_TEXT_Y(rows[i]);
+		u16 h = ROW_HEIGHT + 3; //The arrow glyph may reach a little below its row
+
+		if (y + h > 12 * 8) //WIN_LIST is 12 tiles high
+			h = 12 * 8 - y;
+		FillWindowPixelRect(WIN_LIST, PIXEL_FILL(0), 0, y, NAME_X, h);
+	}
+
+	WindowPrint(WIN_LIST, 1, CURSOR_X, LIST_TEXT_Y(rows[1]), &sTextDark, 0, gText_Ach_Cursor);
+	PutWindowTilemap(WIN_LIST);
+	CopyWindowToVram(WIN_LIST, COPYWIN_BOTH);
+
+	if (IsRewardShownInTitle(oldCursor) || IsRewardShownInTitle(newCursor))
+		PrintTitle(newCursor);
+
+	PrintDescription(newCursor);
+}
+
+//[hack] BUG-achievement-speed: 1 つだけ流れるとき（▼を押し続けた下端・▲を押し続けた上端）は、
+//  一覧の絵を ScrollWindow で 1 行ぶんずらし、新しく出る 1 行（名前・じょうたい）だけ描く。左端（▶）は全部消して描き直す。
+//  ボールの絵は RedrawScreen と同じ「同じ見た目なら作り直さない」で整える
+static void RedrawScrollByOne(u8 taskId, u8 oldCursor, u8 cursor, u8 scroll, bool8 down)
+{
+	u8 newRow = down ? NUM_VISIBLE_ROWS - 1 : 0;
+	u16 id = scroll + newRow;
+
+	ScrollWindow(WIN_LIST, down ? 0 : 1, ROW_HEIGHT, PIXEL_FILL(0));
+	FillWindowPixelRect(WIN_LIST, PIXEL_FILL(0), 0, 0, NAME_X, 12 * 8); //All the arrows (the one that moved with its row too). The band that comes in is cleared by ScrollWindow
+	//The last pixel lines of the row that went out (its glyphs reach 0..11 px under its top, shadow included) now sit at the very top / bottom edge:
+	//a full redraw never leaves anything there (the first row's glyphs start at y=4, the last row's end at y=90)
+	if (down)
+		FillWindowPixelRect(WIN_LIST, PIXEL_FILL(0), 0, 0, 30 * 8, 4);
+	else
+		FillWindowPixelRect(WIN_LIST, PIXEL_FILL(0), 0, 12 * 8 - 4, 30 * 8, 4);
+
+	WindowPrint(WIN_LIST, 1, CURSOR_X, LIST_TEXT_Y(cursor - scroll), &sTextDark, 0, gText_Ach_Cursor);
+	WindowPrint(WIN_LIST, 1, NAME_X, LIST_TEXT_Y(newRow), &sTextDark, 0, gAchievements[id].name);
+	PrintStatus(id, LIST_TEXT_Y(newRow));
+	PutWindowTilemap(WIN_LIST);
+	CopyWindowToVram(WIN_LIST, COPYWIN_BOTH);
+
+	if (IsRewardShownInTitle(oldCursor) || IsRewardShownInTitle(cursor))
+		PrintTitle(cursor);
+
+	PrintDescription(cursor);
+	UpdateBallIcons(taskId, scroll);
 }
 
 static void Task_AchievementsFadeOut(u8 taskId)
@@ -1682,9 +1979,17 @@ static void Task_AchievementsMain(u8 taskId)
 		else if (cursor >= scroll + NUM_VISIBLE_ROWS)
 			scroll = cursor - NUM_VISIBLE_ROWS + 1;
 
+		u8 oldCursor = data[TD_CURSOR];
+		s16 oldScroll = data[TD_SCROLL];
+
 		data[TD_CURSOR] = cursor;
 		data[TD_SCROLL] = scroll;
-		RedrawScreen(taskId);
+		if (scroll == oldScroll)
+			RedrawCursorOnly(oldCursor, cursor, scroll); //[hack] BUG-achievement-speed
+		else if (scroll == oldScroll + 1 || scroll == oldScroll - 1)
+			RedrawScrollByOne(taskId, oldCursor, cursor, scroll, scroll > oldScroll);
+		else
+			RedrawScreen(taskId, oldCursor);
 	}
 }
 
@@ -1788,7 +2093,7 @@ static void CB2_Achievements(void)
 			gTasks[taskId].data[TD_ARROWS] = 0xFF;
 			for (u8 i = 0; i < NUM_VISIBLE_ROWS; ++i)
 				gTasks[taskId].data[TD_ICONS + i] = MAX_SPRITES;
-			RedrawScreen(taskId);
+			RedrawScreen(taskId, 0xFFFF);
 			gTasks[taskId].data[TD_ARROWS] = AddScrollIndicatorArrowPairParameterized(
 				SCROLL_ARROW_UP, 170, 18, 118, ACH_COUNT - NUM_VISIBLE_ROWS, SCROLL_ARROW_TAG, SCROLL_ARROW_TAG,
 				(u16*) &gTasks[taskId].data[TD_SCROLL]);

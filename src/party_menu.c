@@ -1,4 +1,7 @@
 #include "defines.h"
+#include "hack_bugfix_decide.h"
+
+static unsigned PartySpeciesAt(unsigned slot);
 #include "defines_battle.h"
 #include "../include/evolution_scene.h"
 #include "../include/field_control_avatar.h"
@@ -46,6 +49,7 @@
 #include "../include/new/overworld.h"
 #include "../include/new/party_menu.h"
 #include "../include/new/util.h"
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
 
 /*
 party_menu.c
@@ -79,6 +83,10 @@ struct PartyMenuBox
 };
 
 #include "party_menu_internal.h"
+#include "hack_challenge_b.h" //[hack] patches/0540 しばり B（レベルキャップ・そらをとぶきんし）
+#include "hack_fuuin.h" //[hack] patches/0560 縛り ふういんルーレット（レベルアップを数える）
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダークの子の成長止め
+#include "shadow_relive.h" //[hack] patches/0965 段 G かおり 3 種
 extern struct PartyMenuBox* sPartyMenuBoxes;
 
 //Vanilla Static Functions
@@ -136,6 +144,13 @@ static void FieldCallback_Defog(void);
 static bool8 SetUpFieldMove_Defog(void);
 static void CursorCb_MoveItemCallback(u8 taskId);
 static void CursorCb_MoveItem(u8 taskId);
+static void CursorCb_GiveItemLove(u8 taskId);   //[hack] patches/0617 リルの あいじょうは はずせない
+static void CursorCb_TakeItemLove(u8 taskId);
+static void CursorCb_PyramidTake(u8 taskId);    //[hack] BUG-pyramid-held-items-B ピラミッドの受付: 持ち物を取る（バトルバッグへ）
+static void CursorCb_PyramidToss(u8 taskId);    //同: 持ち物をすてる
+static void Task_PyramidTossYesNo(u8 taskId);
+static void Task_PyramidTossYesNoInput(u8 taskId);
+static void Task_PyramidTossDone(u8 taskId);
 
 //*highlightedMon = 0 is Player's Pokemon out
 //*highlightedMon = 1 is Link Partner's Pokemon out
@@ -534,7 +549,7 @@ bool32 SummaryScreenMonIsFromGBA(void)
 	return version == VERSION_FIRE_RED; //Not compatible with any other game
 }
 
-bool8 TryReplaceSummaryScreenLocationWithFarAwayLocation(struct Pokemon* mon, u8 metLocation)
+u16 TryReplaceSummaryScreenLocationWithFarAwayLocation(struct Pokemon* mon, u16 metLocation)
 {
 	if (IsTradedMon(mon) && !SummaryScreen_IsMultiBattlePartner())
 		metLocation = 0; //Forces "met in a trade"
@@ -803,6 +818,13 @@ u8 CanPokemonSelectedBeEnteredInBattleTower(void)
 extern u8 gMoveNames[][MOVE_NAME_LENGTH + 1];
 
 extern const u8 gMenuText_Move[];
+extern const u8 gMenuText_PyramidToss[];
+extern const u8 gText_PyramidTossAsk[];
+extern const u8 gText_PyramidTossed[];
+extern const u8 gText_PyramidToBag[];
+extern const u8 gText_PyramidBagFull[];
+bool8 HoennPyramid_PickModeOn(void);           //src/hoenn_pyramid.c: 受付で持ち物を整理している間（エメラルドの PARTY_MENU_TYPE_STORE_PYRAMID_HELD_ITEMS の代わり）
+bool8 HoennPyramid_PickBagAdd(u16 item);       //バトルバッグへ 1 つ入れる（満杯なら FALSE）
 extern const u8 gText_FieldMoveDesc_RockClimb[];
 extern const u8 gText_FieldMoveDesc_Defog[];
 extern const u8 gText_FieldMoveDesc_Dive[];
@@ -832,6 +854,8 @@ enum FieldMovesIDs
 };
 
 #define CursorCb_FieldMove (TaskFunc) 0x8124F09
+#define MENU_PYRAMID_TAKE (MENU_FIELD_MOVES + FIELD_MOVE_COUNT)
+#define MENU_PYRAMID_TOSS (MENU_PYRAMID_TAKE + 1)   //[hack] 表の末尾に足す（ほかの番号は動かさない）
 
 struct
 {
@@ -843,8 +867,8 @@ struct
 	[MENU_SWITCH] =	{(void*) 0x83DDDBC, (void*) 0x81235DD},
 	[MENU_CANCEL1] =   {(void*) 0x83DD805, (void*) 0x8123E1D},
 	[MENU_ITEM] =	  {(void*) 0x83DD810, (void*) 0x8123E7D},
-	[MENU_GIVE] =	  {(void*) 0x83DD7F3, (void*) 0x8123EE1},
-	[MENU_TAKE_ITEM] = {(void*) 0x83DD819, (void*) 0x8124415},
+	[MENU_GIVE] =	  {(void*) 0x83DD7F3, CursorCb_GiveItemLove},   //[hack] patches/0617 素は 0x8123EE1（固定の子は はずせない）
+	[MENU_TAKE_ITEM] = {(void*) 0x83DD819, CursorCb_TakeItemLove},   //[hack] patches/0617 素は 0x8124415
 	[MENU_MAIL] =	  {(void*) 0x83DD815, (void*) 0x81244D1},
 	[MENU_TAKE_MAIL] = {(void*) 0x83DDDDD, (void*) 0x81245E9},
 	[MENU_READ] =	  {(void*) 0x83DDDE4, (void*) 0x8124535},
@@ -875,6 +899,8 @@ struct
 	[MENU_FIELD_MOVES + FIELD_MOVE_ROCK_CLIMB] =  {gMoveNames[MOVE_ROCKCLIMB], CursorCb_FieldMove},
 	[MENU_FIELD_MOVES + FIELD_MOVE_DEFOG] =	      {gMoveNames[MOVE_DEFOG], CursorCb_FieldMove},
 	[MENU_FIELD_MOVES + FIELD_MOVE_DIVE] =	 	  {gMoveNames[MOVE_DIVE], CursorCb_FieldMove},
+	[MENU_PYRAMID_TAKE] = {(void*) 0x83DD819, CursorCb_PyramidTake},   //文字は素の「もちものを とる」と同じ
+	[MENU_PYRAMID_TOSS] = {gMenuText_PyramidToss, CursorCb_PyramidToss},
 };
 
 struct
@@ -976,12 +1002,19 @@ void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
 {
 	u8 i, j, k;
 	#ifdef ONLY_CHECK_ITEM_FOR_HM_USAGE
-	bool8 knowsFly = FALSE;
+	bool8 knowsFly = HackChallengeB_FlyBlocked(); //[hack] patches/0540 そらをとぶきんし: ひでんマシンからの「そらをとぶ」の追加もしない
 	bool8 knowsDig = FALSE;
 	bool8 knowsCut = FALSE;
 	#endif
 
 	sPartyMenuInternal->numActions = 0;
+	if (HoennPyramid_PickModeOn()) //[hack] BUG-pyramid-held-items-B: 受付の持ち物の整理は「取る／すてる／やめる」だけ（エメラルドの ACTIONS_TAKEITEM_TOSS）
+	{
+		AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_PYRAMID_TAKE);
+		AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_PYRAMID_TOSS);
+		AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_CANCEL1);
+		return;
+	}
 	AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, MENU_SUMMARY);
 
 	#ifdef FLAG_SANDBOX_MODE
@@ -1005,6 +1038,9 @@ void SetPartyMonFieldSelectionActions(struct Pokemon *mons, u8 slotId)
 				&& !CheckBagHasItem(ITEM_HM08_ROCK_CLIMB, 1))
 					continue; //Don't allow Rock Climbing until the item is obtained
 				#endif
+
+				if (gFieldMoves[j] == MOVE_FLY && HackChallengeB_FlyBlocked()) //[hack] patches/0540 そらをとぶきんし: 手持ちの画面に「そらをとぶ」を出さない（ゆうらんも出ない）
+					continue;
 
 				AppendToList(sPartyMenuInternal->actions, &sPartyMenuInternal->numActions, j + MENU_FIELD_MOVES);
 				++k;
@@ -1101,6 +1137,9 @@ SKIP_FIELD_MOVES:
 
 static bool8 SetUpFieldMove_Fly(void)
 {
+	if (HackChallengeB_FlyBlocked()) //[hack] patches/0540 しばり B そらをとぶきんし: 「ここでは つかえない」（Fly Reloaded の「ゆうらん」も この関数を呼ぶ）
+		return FALSE;
+
 	if (gFollowerState.inProgress && !(gFollowerState.flags & FOLLOWER_FLAG_CAN_LEAVE_ROUTE))
 		return FALSE;
 
@@ -1450,7 +1489,151 @@ void sp10C_CanUseStrengthOnBoulder(void)
 
 //Move Item - Credits to Sagiri/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//[hack] patches/0617 リルの あいじょう（src/hack_luxray_love.c）: しばり「ぜんぶレントラー」のレントラーの固定の持ち物。はずせない・替えられない
+bool8 HackLuxrayLove_IsFixed(const struct Pokemon* mon);
+extern const u8 gText_LuxrayLove_Fixed[];
+
+static void LoveFixedMessage(u8 taskId)
+{
+	PlaySE(SE_SELECT);
+	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+	DisplayPartyMenuMessage(gText_LuxrayLove_Fixed, 1);
+	ScheduleBgCopyTilemapToVram(2);
+	gTasks[taskId].func = Task_UpdatePartyMenuHeldItemSprite;
+}
+
+static void CursorCb_GiveItemLove(u8 taskId)
+{
+	if (HackLuxrayLove_IsFixed(&gPlayerParty[gPartyMenu.slotId]))
+		LoveFixedMessage(taskId);
+	else
+		((void (*)(u8)) 0x8123EE1)(taskId);   //素の CursorCb_GiveItem
+}
+
+static void CursorCb_TakeItemLove(u8 taskId)
+{
+	if (HackLuxrayLove_IsFixed(&gPlayerParty[gPartyMenu.slotId]))
+		LoveFixedMessage(taskId);
+	else
+		((void (*)(u8)) 0x8124415)(taskId);   //素の CursorCb_TakeItem
+}
+
 #define gText_PkmnNotHolding (const u8*) 0x083DDFD4
+
+//[hack] BUG-pyramid-held-items-B（ユーザー 2026-10-21「エメラルド通りにして」）: 受付で「バトルバッグに入りきらない持ち物」を整理する画面。
+//  エメラルドの PARTY_MENU_TYPE_STORE_PYRAMID_HELD_ITEMS（CursorCb_TakeItem / CursorCb_Toss）に相当。手持ちの子の持ち物を
+//  「取る」（バトルバッグへ・満杯なら入らない）か「すてる」（はい／いいえ）。素の取る（AddBagItem）は満杯でも TRUE を返して物が消えるので使わない。
+static void CursorCb_PyramidTake(u8 taskId)
+{
+	struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
+	u16 item = GetMonData(mon, MON_DATA_HELD_ITEM, NULL);
+
+	PlaySE(SE_SELECT);
+	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+	GetMonNickname(mon, gStringVar1);
+	if (item == ITEM_NONE)
+		StringExpandPlaceholders(gStringVar4, gText_PkmnNotHolding);
+	else if (HoennPyramid_PickBagAdd(item))
+	{
+		u16 none = ITEM_NONE;
+
+		CopyItemName(item, gStringVar2);
+		SetMonData(mon, MON_DATA_HELD_ITEM, &none);
+		StringExpandPlaceholders(gStringVar4, gText_PyramidToBag);
+	}
+	else
+		StringExpandPlaceholders(gStringVar4, gText_PyramidBagFull);
+	DisplayPartyMenuMessage(gStringVar4, 1);
+	ScheduleBgCopyTilemapToVram(2);
+	gTasks[taskId].func = Task_UpdatePartyMenuHeldItemSprite;
+}
+
+//スクリプト（fadescreen 1 のあと）から: 手持ちの画面を開く／バッグの画面を開く。どちらも閉じるとスクリプトの続き（waitstate）へ戻る。
+//エメラルドの BattlePyramidChooseMonHeldItems / ChooseItemsToTossFromPyramidBag に相当（バッグは素の画面・バトルバッグの表に差し替え済み）
+void HoennPyramid_ChooseMonHeldItems(void)
+{
+	CleanupOverworldWindowsAndTilemaps();
+	InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_CHOOSE_MON, FALSE, PARTY_MSG_CHOOSE_MON, Task_HandleChooseMonInput, CB2_ReturnToFieldContinueScript);
+}
+
+void SetMemoryForBagStorage(void);   //src/item.c: ポケットの表を作り直す（ピラミッドの間はバトルバッグへ向け直す＝HoennPyramid_ApplyBag）
+
+void HoennPyramid_ChooseItemsToToss(void)
+{
+	SetMemoryForBagStorage();   //前のバッグ／手持ちの画面のあとで表が素のバッグに戻っていることがあるので、開く前に必ずバトルバッグへ向け直す（実機で確認）
+	CleanupOverworldWindowsAndTilemaps();
+	GoToBagMenu(BAG_OPEN_REGULAR, OPEN_BAG_ITEMS, CB2_ReturnToFieldContinueScript);
+}
+
+static void CursorCb_PyramidToss(u8 taskId)
+{
+	struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
+	u16 item = GetMonData(mon, MON_DATA_HELD_ITEM, NULL);
+
+	PlaySE(SE_SELECT);
+	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+	if (item == ITEM_NONE)
+	{
+		GetMonNickname(mon, gStringVar1);
+		StringExpandPlaceholders(gStringVar4, gText_PkmnNotHolding);
+		DisplayPartyMenuMessage(gStringVar4, 1);
+		ScheduleBgCopyTilemapToVram(2);
+		gTasks[taskId].func = Task_UpdatePartyMenuHeldItemSprite;
+	}
+	else
+	{
+		CopyItemName(item, gStringVar1);
+		StringExpandPlaceholders(gStringVar4, gText_PyramidTossAsk);
+		DisplayPartyMenuMessage(gStringVar4, 1);
+		ScheduleBgCopyTilemapToVram(2);
+		gTasks[taskId].func = Task_PyramidTossYesNo;
+	}
+}
+
+static void Task_PyramidTossYesNo(u8 taskId)
+{
+	if (!IsPartyMenuTextPrinterActive())
+	{
+		PartyMenuDisplayYesNoMenu();
+		gTasks[taskId].func = Task_PyramidTossYesNoInput;
+	}
+}
+
+static void Task_PyramidTossYesNoInput(u8 taskId)
+{
+	struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
+
+	switch (Menu_ProcessInputNoWrapClearOnChoose())
+	{
+		case 0:
+			CopyItemName(GetMonData(mon, MON_DATA_HELD_ITEM, NULL), gStringVar1);
+			StringExpandPlaceholders(gStringVar4, gText_PyramidTossed);
+			DisplayPartyMenuMessage(gStringVar4, 0);
+			gTasks[taskId].func = Task_PyramidTossDone;
+			break;
+		case MENU_B_PRESSED:
+			PlaySE(SE_SELECT);
+			// Fallthrough
+		case 1:
+			gTasks[taskId].func = Task_ReturnToChooseMonAfterText;
+			break;
+	}
+}
+
+static void Task_PyramidTossDone(u8 taskId)
+{
+	if (!IsPartyMenuTextPrinterActive())
+	{
+		struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
+		u16 none = ITEM_NONE;
+
+		SetMonData(mon, MON_DATA_HELD_ITEM, &none);
+		gTasks[taskId].func = Task_UpdatePartyMenuHeldItemSprite;
+	}
+}
 #define  gText_PkmnWasGivenItem (const u8*) 0x83DDF9D
 extern const u8 gText_SwapItemsPart1[];
 extern const u8 gText_SwapItemsPart2[];
@@ -1472,7 +1655,8 @@ static void CursorCb_MoveItemCallback(u8 taskId)
 		case 1: //User hit A on a Pokemon
 			//Pokemon can't give away items to eggs or themselves
 			if (GetMonData(&gPlayerParty[gPartyMenu.slotId2], MON_DATA_IS_EGG, NULL)
-			|| gPartyMenu.slotId == gPartyMenu.slotId2)
+			|| gPartyMenu.slotId == gPartyMenu.slotId2
+			|| HackLuxrayLove_IsFixed(&gPlayerParty[gPartyMenu.slotId2])) //[hack] patches/0617 移し先が固定の子なら持ち物を入れ替えられない
 			{
 				PlaySE(SE_ERROR);
 				return;
@@ -1545,7 +1729,13 @@ static void CursorCb_MoveItem(u8 taskId)
 	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
 	PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
 
-	if (GetMonData(mon, MON_DATA_HELD_ITEM, NULL) != ITEM_NONE)
+	if (HackLuxrayLove_IsFixed(mon)) //[hack] patches/0617 固定の子の持ち物は うつせない
+	{
+		DisplayPartyMenuMessage(gText_LuxrayLove_Fixed, 1);
+		ScheduleBgCopyTilemapToVram(2);
+		gTasks[taskId].func = Task_UpdatePartyMenuHeldItemSprite;
+	}
+	else if (GetMonData(mon, MON_DATA_HELD_ITEM, NULL) != ITEM_NONE)
 	{
 		gPartyMenu.action = PARTY_ACTION_SWITCH;
 
@@ -1578,6 +1768,7 @@ static void ItemUseCB_EVReducingBerry(u8 taskId, TaskFunc func);
 static void ItemUseCB_FormChangeItem(u8 taskId, TaskFunc func);
 static void FormChangeItem_ShowPartyMenuFromField(u8 taskId);
 static void ItemUseCB_DNASplicersStep(u8 taskId, TaskFunc func);
+bool8 HackFrontier_FusionItemBlocked(u16 item); //src/hack_challenge.c
 static void Task_TryLearnPostFormeChangeMove(u8 taskId);
 static struct Pokemon* GetBaseMonForFusedSpecies(u16 species);
 static void ItemUseCB_AbilityCapsule(u8 taskId, TaskFunc func);
@@ -1640,7 +1831,8 @@ void ItemUseCB_MedicineStep(u8 taskId, TaskFunc func)
 	u16 item = Var800E;
 	bool8 canHeal;
 
-	if (NotUsingHPEVItemOnShedinja(mon, item))
+	if (NotUsingHPEVItemOnShedinja(mon, item)
+	&& !(Shadow_RefusesGrowth(mon) && GetItemEffectType(item) >= ITEM_EFFECT_ATK_EV && GetItemEffectType(item) <= ITEM_EFFECT_DEF_EV)) //[hack] patches/0963 段 E ダークの子には努力値の道具（ビタミン・はね）は効かない
 	{
 		canHeal = IsHPRecoveryItem(item);
 		if (canHeal == TRUE || GetItemEffectType(item) == ITEM_EFFECT_HP_EV)
@@ -1845,11 +2037,11 @@ static void ItemUseCB_EVReducingBerry(u8 taskId, TaskFunc func)
 	struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
 	u16 item = Var800E;
 	u8 stat = ItemId_GetHoldEffectParam(item);
-	u8 ev = GetMonData(mon, MON_DATA_HP_EV + stat, NULL);
+	u16 ev = HackMon_GetEv(mon, stat);
 	u8 friendship = GetMonData(mon, MON_DATA_FRIENDSHIP, NULL);
 
 	PlaySE(SE_SELECT);
-	if (friendship < MAX_FRIENDSHIP || ev > 0) //Stat can fall or friendship can increase
+	if (!Shadow_RefusesGrowth(mon) && (friendship < MAX_FRIENDSHIP || ev > 0)) //Stat can fall or friendship can increase //[hack] patches/0963 段 E ダークの子には効かない
 	{
 		u16 oldHP = GetMonData(mon, MON_DATA_HP, NULL);
 		u16 oldMaxHP = GetMonData(mon, MON_DATA_MAX_HP, NULL);
@@ -1863,7 +2055,7 @@ static void ItemUseCB_EVReducingBerry(u8 taskId, TaskFunc func)
 			else
 				ev = 0;
 
-			SetMonData(mon, MON_DATA_HP_EV + stat, &ev);
+			HackMon_SetEv(mon, stat, ev);
 			AdjustFriendshipForEVReducingBerry(mon);
 			StringExpandPlaceholders(gStringVar4, gText_EVReducingBerryBothEffects);
 			CalculateMonStats(mon);
@@ -1875,7 +2067,7 @@ static void ItemUseCB_EVReducingBerry(u8 taskId, TaskFunc func)
 			else
 				ev = 0;
 
-			SetMonData(mon, MON_DATA_HP_EV + stat, &ev);
+			HackMon_SetEv(mon, stat, ev);
 			StringExpandPlaceholders(gStringVar4, gText_EVReducingBerryLoweredStat);
 			CalculateMonStats(mon);
 		}
@@ -2133,6 +2325,8 @@ static void ItemUseCB_FormChangeItem(u8 taskId, TaskFunc func)
 		case ITEM_N_SOLARIZER:
 		case ITEM_N_LUNARIZER:
 		case ITEM_REINS_OF_UNITY:
+			if (HackFrontier_FusionItemBlocked(item)) //挑戦中は SELECT 登録からも合体・分離させない（patches/新）
+				goto NO_EFFECT;
 			if (!FormFuseItemMatchesSpecies(item, species))
                  goto NO_EFFECT;
 
@@ -2152,7 +2346,7 @@ static void ItemUseCB_FormChangeItem(u8 taskId, TaskFunc func)
 				if (species == SPECIES_KYUREM_BLACK || species == SPECIES_KYUREM_WHITE || species == SPECIES_NECROZMA_DUSK_MANE || species == SPECIES_NECROZMA_DAWN_WINGS || species == SPECIES_CALYREX_ICE_RIDER || species == SPECIES_CALYREX_SHADOW_RIDER)
 			{
 				u8 slotId;
-				for (slotId = 0; GetMonData(&gPlayerParty[slotId], MON_DATA_SPECIES, NULL) != SPECIES_NONE && slotId < PARTY_SIZE; ++slotId);
+				slotId = Fuse_EmptySlot(PARTY_SIZE, SPECIES_NONE, PartySpeciesAt);
 
 				if (GetMonData(GetBaseMonForFusedSpecies(species), MON_DATA_SPECIES, NULL) == SPECIES_NONE) //No fused mon
 				{
@@ -2269,16 +2463,15 @@ static bool8 AlreadyFused(u16 baseSpecies, u16 fuseSpecies)
 			}
 			break;
 		case SPECIES_NECROZMA:
-			switch (fuseSpecies) {
-				case SPECIES_SOLGALEO:
-					if (GetMonData(&gSaveBlock1->fusedSolgaleo, MON_DATA_SPECIES, NULL) != SPECIES_NONE)
-						alreadyFused = TRUE;
-					break;
-				case SPECIES_ZEKROM:
-					if (GetMonData(&gSaveBlock1->fusedLunala, MON_DATA_SPECIES, NULL) != SPECIES_NONE)
-						alreadyFused = TRUE;
-					break;
-			}
+			if (Fuse_AlreadyPartner(baseSpecies, fuseSpecies,
+				SPECIES_KYUREM, SPECIES_RESHIRAM, SPECIES_ZEKROM,
+				SPECIES_NECROZMA, SPECIES_SOLGALEO, SPECIES_LUNALA,
+				SPECIES_CALYREX, SPECIES_GLASTRIER, SPECIES_SPECTRIER,
+				FALSE, FALSE,
+				GetMonData(&gSaveBlock1->fusedSolgaleo, MON_DATA_SPECIES, NULL) != SPECIES_NONE,
+				GetMonData(&gSaveBlock1->fusedLunala, MON_DATA_SPECIES, NULL) != SPECIES_NONE,
+				FALSE, FALSE))
+				alreadyFused = TRUE;
 			break;
 		case SPECIES_CALYREX:
 			switch (fuseSpecies) {
@@ -2307,33 +2500,17 @@ static bool8 AlreadyFused(u16 baseSpecies, u16 fuseSpecies)
 	return alreadyFused;
 }
 
+static unsigned PartySpeciesAt(unsigned slot)
+{
+	return GetMonData(&gPlayerParty[slot], MON_DATA_SPECIES, NULL);
+}
+
 static bool8 DoBaseAndFuseSpeciesMatch(u16 baseSpecies, u16 fuseSpecies)
 {
-	switch (baseSpecies) {
-		case SPECIES_KYUREM:
-			switch (fuseSpecies) {
-				case SPECIES_RESHIRAM:
-				case SPECIES_ZEKROM:
-					return TRUE;
-			}
-			break;
-		case SPECIES_NECROZMA:
-			switch (fuseSpecies) {
-				case SPECIES_SOLGALEO:
-				case SPECIES_LUNALA:
-					return TRUE;
-			}
-			break;
-		case SPECIES_CALYREX:
-			switch (fuseSpecies) {
-				case SPECIES_GLASTRIER:
-				case SPECIES_SPECTRIER:
-					return TRUE;
-			}
-			break;
-	}
-	
-	return FALSE;
+	return Fuse_SpeciesMatch(baseSpecies, fuseSpecies,
+		SPECIES_KYUREM, SPECIES_RESHIRAM, SPECIES_ZEKROM,
+		SPECIES_NECROZMA, SPECIES_SOLGALEO, SPECIES_LUNALA,
+		SPECIES_CALYREX, SPECIES_GLASTRIER, SPECIES_SPECTRIER);
 }
 
 static void ItemUseCB_DNASplicersStep(u8 taskId, TaskFunc func)
@@ -2345,13 +2522,18 @@ static void ItemUseCB_DNASplicersStep(u8 taskId, TaskFunc func)
 
 	switch (PartyMenuButtonHandler(&gPartyMenu.slotId2)) {
 		case 1: //User hit A on a Pokemon
-			baseSpecies = GetMonData(&gPlayerParty[gPartyMenu.slotId2], MON_DATA_SPECIES2, NULL);
-			fuseSpecies = GetMonData(&gPlayerParty[gPartyMenu.slotId], MON_DATA_SPECIES2, NULL);
+			{
+				unsigned baseSlot, partnerSlot;
+
+				/* 実機: slotId2 が土台（道具を使った枠）、slotId が選んだ相手。取り違えると合体できない */
+				Fuse_BaseAndPartner(gPartyMenu.slotId2, gPartyMenu.slotId, &baseSlot, &partnerSlot);
+				baseSpecies = GetMonData(&gPlayerParty[baseSlot], MON_DATA_SPECIES2, NULL);
+				fuseSpecies = GetMonData(&gPlayerParty[partnerSlot], MON_DATA_SPECIES2, NULL);
+			}
 			PlaySE(SE_SELECT);
 
-			//Update colors of selected windows
-			AnimatePartySlot(gPartyMenu.slotId2, 1); //Kyurem
-			AnimatePartySlot(gPartyMenu.slotId, 0); //Reshiram or Zekrom
+			AnimatePartySlot(gPartyMenu.slotId2, 1); //土台（キュレム等）
+			AnimatePartySlot(gPartyMenu.slotId, 0); //相手
 
 			if (AlreadyFused(baseSpecies, fuseSpecies))
 			{
@@ -2362,12 +2544,11 @@ static void ItemUseCB_DNASplicersStep(u8 taskId, TaskFunc func)
 			if (DoBaseAndFuseSpeciesMatch(baseSpecies, fuseSpecies)
 			&& FormFuseItemMatchesSpecies(Var800E, fuseSpecies))
 			{
-				//Swap Slot Ids
+				/* 枠を入れ替え、slotId を土台・slotId2 を相手にそろえる（土台が合体後の姿。相手は控えに入れて消す） */
 				u8 temp = gPartyMenu.slotId;
 				gPartyMenu.slotId = gPartyMenu.slotId2;
-				gPartyMenu.slotId2 = temp; //Icon update acts on slotId 1
+				gPartyMenu.slotId2 = temp;
 
-				//Get Proper Form
 				struct Pokemon* mon = &gPlayerParty[gPartyMenu.slotId];
 				switch (fuseSpecies) {
 					case SPECIES_RESHIRAM:
@@ -2561,6 +2742,51 @@ static void Task_TryLearnPostFormeChangeMove(u8 taskId)
 	}
 }
 
+//[hack] patches/0965 段 G ルンルン／ワクワク／ドキドキのかおり: バッグ → 手持ちの画面で子を選ぶ。ダークでゲージが残っている子だけ心のゲージが下がる（強さ 1〜3 倍）。
+//  下がったときだけかおりを 1 つ減らして文を出す。ほかは「つかっても こうかが ないようだ」で減らさない。
+extern const u8 gText_ShadowScent_Used[];
+static void ItemUseCB_ShadowScent(u8 taskId, TaskFunc func);
+static void Task_ShadowScentDone(u8 taskId);
+
+void FieldUseFunc_ShadowScent(u8 taskId)
+{
+	gItemUseCB = ItemUseCB_ShadowScent;
+	SetUpItemUseCallback(taskId);
+}
+
+static void ItemUseCB_ShadowScent(u8 taskId, TaskFunc func)
+{
+	u16 item = Var800E;
+
+	if (Relive_UseScent(&gPlayerParty[gPartyMenu.slotId], item))
+	{
+		PlaySE(SE_USE_ITEM);
+		RemoveBagItem(item, 1);
+		StringExpandPlaceholders(gStringVar4, gText_ShadowScent_Used);
+		DisplayPartyMenuMessage(gStringVar4, TRUE);
+		ScheduleBgCopyTilemapToVram(2);
+		gTasks[taskId].func = Task_ShadowScentDone;
+	}
+	else
+	{
+		PlaySE(SE_SELECT);
+		gPartyMenuUseExitCallback = FALSE;
+		DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+		ScheduleBgCopyTilemapToVram(2);
+		gTasks[taskId].func = func;
+	}
+}
+
+//文のあと（A／B）はバッグへ戻る（かおりが残っていても 1 回の選択で 1 つ）
+static void Task_ShadowScentDone(u8 taskId)
+{
+	if (!IsPartyMenuTextPrinterActive())
+	{
+		gPartyMenuUseExitCallback = TRUE;
+		Task_ClosePartyMenu(taskId);
+	}
+}
+
 void FieldUseFunc_AbilityCapsule(u8 taskId)
 {
 	gItemUseCB = ItemUseCB_AbilityCapsule;
@@ -2602,11 +2828,17 @@ static u16 HackAbilityNormal(struct Pokemon* mon, u16 ability1, u16 ability2)
 	return (normal != now) ? normal : ABILITY_NONE; //同じなら効果なし
 }
 
+u16 HackGibleEgg_SpecialAbility(const struct Pokemon* mon, u16 species); //[hack] 2026-10-23 patches/0790 src/hack_gible_egg.c
 static u16 GetAbilityCapsuleNewAbility(struct Pokemon* mon)
 {
 	u16 item = Var800E;
 	u8 abilityType = ItemId_GetHoldEffectParam(item);
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
+
+	//[hack] 2026-10-23 patches/0790 れーとのおうの印は hiddenAbility ビットを使う（src/hack_gible_egg.c）。うんめいの印付きのフカマル・ガバイト・ガブリアスは
+	//  今も りゅうのよろい／れーとのおうが先に返る＝カプセル・パッチは実質何も変えないので、効果なし（「つかっても こうかが ないよ」）にしてビットを立てさせない
+	if (HackGibleEgg_SpecialAbility(mon, species) != ABILITY_NONE)
+		return ABILITY_NONE;
 	u16 ability = GetMonAbility(mon);
 	u16 ability1 = GetAbility1(species);
 	u16 ability2 = GetAbility2(species);
@@ -2828,13 +3060,17 @@ void ItemUseCB_RareCandy(u8 taskId, TaskFunc func)
 	bool8 noEffect;
 	struct Pokemon *mon = &gPlayerParty[gPartyMenu.slotId];
 	u16 item = gSpecialVar_ItemId;
-	u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	u16 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	bool8 chbCapped = HackChallengeB_AtLevelCap(mon); //[hack] patches/0540 しばり B レベルキャップ
 
 	PlaySE(SE_SELECT);
 
 	if (!CheckBagHasItem(item, 1))
 		noEffect = TRUE;
+	else if (Shadow_RefusesGrowth(mon)) //[hack] patches/0963 段 E ダークの子はレベルが上がらない（アメ・進化とも・リライブまで）
+		noEffect = TRUE;
 	else if (level >= 100 //[hack] patches/0236 2026-10-09 レベル上限 200 にしたが、ふしぎなアメは Lv100 まで（ユーザー「100からはふしぎなアメつかえないように」）
+	|| chbCapped //[hack] patches/0540 しばり B: バッジの数の上限のレベルからは レベルが上がらない（進化だけなら今までどおり）
 	#ifdef FLAG_HARD_LEVEL_CAP
 	|| (FlagGet(FLAG_HARD_LEVEL_CAP) && level >= GetCurrentLevelCap())
 	#endif
@@ -2858,7 +3094,7 @@ void ItemUseCB_RareCandy(u8 taskId, TaskFunc func)
 	if (noEffect)
 	{
 		gPartyMenuUseExitCallback = FALSE;
-		DisplayPartyMenuMessage(gText_WontHaveEffect, TRUE);
+		DisplayPartyMenuMessage(chbCapped ? HackChallengeB_CandyCappedText() : gText_WontHaveEffect, TRUE); //[hack] patches/0540 上限のときは しばりの一言
 		ScheduleBgCopyTilemapToVram(2);
 		gTasks[taskId].func = func;
 	}
@@ -2866,6 +3102,8 @@ void ItemUseCB_RareCandy(u8 taskId, TaskFunc func)
 	{
 		ItemUseCB_RareCandyStep(taskId, func);
 	}
+	if (GetMonData(mon, MON_DATA_LEVEL, NULL) > level) //[hack] patches/0560 ふういんルーレット: ふしぎなアメで上がった分を数える（最初の level との差）
+		HackFuuin_OnLevelsGained(level, GetMonData(mon, MON_DATA_LEVEL, NULL));
 }
 
 #ifdef UNBOUND

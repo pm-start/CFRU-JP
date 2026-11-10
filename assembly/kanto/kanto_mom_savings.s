@@ -18,6 +18,7 @@
 .equ SP_ADD_MENU, 0x25
 .equ MENU_4, 0x22
 .equ MENU_5, 0x23
+.equ MENU_6, 0x24
 .equ MENU_7, 0x25
 .equ KantoHome1F_EventScript_MomOriginal, 0x0817BCBB   @ 素のお母さんのスクリプト（kanto_home_scripts.s と同じ）
 
@@ -55,6 +56,7 @@ EventScript_MomSavingsCallPc:
 KantoHome1F_EventScript_MomSavings:
 	lock
 	faceplayer
+	setvar 0x8003 0                                    @ ★ 2026-10-16 電話から来たのではない印（Bye の分かれ目）
 	textcolor TEXT_COLOR_FEMALE
 	@ ★ 2026-10-10 ユーザー「ママのかいものを一気に渡すように」: まとめてバッグに入れる（HackMomSavings_GiveAll）
 	callasm HackMomSavings_GiveAll
@@ -80,31 +82,51 @@ KantoMomSav_Menu:
 	compare LASTRESULT 1
 	if 0x1 _goto KantoMomSav_StatusOn
 	msgbox gText_MomSav_StatusOff MSG_KEEPOPEN
-	goto KantoMomSav_Ask
+	goto KantoMomSav_ShopNote
 KantoMomSav_StatusOn:
 	msgbox gText_MomSav_StatusOn MSG_KEEPOPEN
+KantoMomSav_ShopNote:
+	@ ★ 2026-10-15 かいものを おやすみ しているときだけ ひとこと（HackMomSavings_ShopStatus: LASTRESULT 1 = かいものを する）
+	callasm HackMomSavings_ShopStatus
+	compare LASTRESULT 1
+	if 0x1 _goto KantoMomSav_Ask
+	msgbox gText_MomSav_ShopOffNote MSG_KEEPOPEN
 KantoMomSav_Ask:
 	callasm HackMomSavings_BufferStatus
 	preparemsg gText_MomSav_What
 	waitmsg
 	menu_item 0, gText_MomSav_Withdraw
-	menu_item 1, gText_MomSav_Percent
+	menu_item 1, gText_MomSav_Deposit                  @ ★ 2026-10-16 ユーザー「あずける を足す」（電話と家の両方）
+	menu_item 2, gText_MomSav_Percent
 	compare LASTRESULT 1
 	if 0x1 _goto KantoMomSav_ItemStop
-	menu_item 2, gText_MomSav_Start
+	menu_item 3, gText_MomSav_Start
 	goto KantoMomSav_ItemEnd
 KantoMomSav_ItemStop:
-	menu_item 2, gText_MomSav_Stop
+	menu_item 3, gText_MomSav_Stop
 KantoMomSav_ItemEnd:
-	menu_item 3, gText_MomSav_Cancel
-	setvar 0x8006, 8                                   @ 窓の幅（タイル・自前の選択肢は出す直前に 0x8006 で渡す）
-	multichoice 21, 0, MENU_4, 0
+	callasm HackMomSavings_ShopStatus                  @ ★ 2026-10-15 3 つ目: かいものの する／しない（LASTRESULT 1 = いまは する）
+	compare LASTRESULT 1
+	if 0x1 _goto KantoMomSav_ItemShopStop
+	menu_item 4, gText_MomSav_ShopStart
+	goto KantoMomSav_ItemShopEnd
+KantoMomSav_ItemShopStop:
+	menu_item 4, gText_MomSav_ShopStop
+KantoMomSav_ItemShopEnd:
+	menu_item 5, gText_MomSav_Cancel
+	callasm HackPhone_LockField                        @ ★ 2026-10-17 電話から来たときも項目の選択中は主人公を歩かせない（家のお母さんでは元から止まっている＝何も変わらない）
+	setvar 0x8006, 12                                  @ 窓の幅（タイル・自前の選択肢は出す直前に 0x8006 で渡す・「かいもの やすむ」が入る幅）
+	multichoice 17, 0, MENU_6, 0
 	compare LASTRESULT 0
 	if 0x1 _goto KantoMomSav_DoWithdraw
 	compare LASTRESULT 1
-	if 0x1 _goto KantoMomSav_DoPercent
+	if 0x1 _goto KantoMomSav_DoDeposit
 	compare LASTRESULT 2
+	if 0x1 _goto KantoMomSav_DoPercent
+	compare LASTRESULT 3
 	if 0x1 _goto KantoMomSav_DoToggle
+	compare LASTRESULT 4
+	if 0x1 _goto KantoMomSav_DoShopToggle
 	goto KantoMomSav_Bye
 
 KantoMomSav_DoWithdraw:
@@ -115,6 +137,28 @@ KantoMomSav_DoWithdraw:
 	goto KantoMomSav_Bye
 KantoMomSav_NoWithdraw:
 	msgbox gText_MomSav_NoWithdraw MSG_KEEPOPEN
+	goto KantoMomSav_Bye
+
+KantoMomSav_DoDeposit:
+	@ ★ 2026-10-16 あずける: 手持ちのお金（と貯金の上限）までの金額を数字で入れる（src/hack_mom_savings.c の HackMomSavings_Deposit*）
+	callasm HackMomSavings_DepositMax                  @ 0x8004/0x8005 = 預けられる最大・LASTRESULT 0 = 預けられる／1 = お金が無い／2 = 貯金がいっぱい
+	compare LASTRESULT 1
+	if 0x1 _goto KantoMomSav_DepNoMoney
+	compare LASTRESULT 2
+	if 0x1 _goto KantoMomSav_DepFull
+	msgbox gText_MomSav_DepAsk MSG_KEEPOPEN
+	callasm HackMomSavings_DepositOpen
+	waitstate
+	compare LASTRESULT 0
+	if 0x1 _goto KantoMomSav_Bye                       @ B でやめた
+	callasm HackMomSavings_Deposit                     @ gStringVar1 = 預けた額・gStringVar2 = 貯金
+	msgbox gText_MomSav_Deposited MSG_KEEPOPEN
+	goto KantoMomSav_Bye
+KantoMomSav_DepNoMoney:
+	msgbox gText_MomSav_DepNoMoney MSG_KEEPOPEN
+	goto KantoMomSav_Bye
+KantoMomSav_DepFull:
+	msgbox gText_MomSav_DepFull MSG_KEEPOPEN
 	goto KantoMomSav_Bye
 
 KantoMomSav_DoPercent:
@@ -144,9 +188,36 @@ KantoMomSav_DoToggle:
 KantoMomSav_Started:
 	callasm HackMomSavings_BufferStatus
 	msgbox gText_MomSav_Started MSG_KEEPOPEN
+	goto KantoMomSav_Bye
+
+KantoMomSav_DoShopToggle:
+	callasm HackMomSavings_ToggleShop
+	compare LASTRESULT 1
+	if 0x1 _goto KantoMomSav_ShopStarted
+	msgbox gText_MomSav_ShopStopped MSG_KEEPOPEN
+	goto KantoMomSav_Bye
+KantoMomSav_ShopStarted:
+	msgbox gText_MomSav_ShopStarted MSG_KEEPOPEN
 
 KantoMomSav_Bye:
+	compare 0x8003 1                                   @ ★ 2026-10-16 電話（HackScr_PhoneMomOutgoing）から来たときは 1
+	if 0x1 _goto KantoMomSav_ByePhone
 	msgbox gText_MomSav_Bye MSG_KEEPOPEN
 	closemessage
 	release
 	end
+KantoMomSav_ByePhone:
+	setvar 0x8003 0
+	msgbox gText_HackPhone_MomOut2 MSG_KEEPOPEN
+	closemessage
+	releaseall
+	end
+
+@ ★ 2026-10-16 ユーザー「ママに電話して、貯金のことを聞けるように」: 電話帳のママ（src/hack_phone.c・assembly/hack_phone/phone_scripts.s）から
+@   家のお母さんと同じ貯金の相談（ひきだす・わりあい・ためる・かいもの）へ。道具を渡す処理（GiveAll）は通らない（電話では渡せない）。
+@   0x8003 = 1 は電話の印（終わりの文だけ電話用・lockall の相手なので release ではなく releaseall）。家からは 0
+.align 2
+.global HackScr_PhoneMomSavingsEntry
+HackScr_PhoneMomSavingsEntry:
+	setvar 0x8003 1
+	goto KantoMomSav_Menu

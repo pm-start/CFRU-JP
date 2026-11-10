@@ -160,7 +160,7 @@ void DebugMenu_SetTeamToLevel100(void)
 void DebugMenu_MaxMoneyAndCoins(void)
 {
 	AddMoney(&gSaveBlock1->money, 0xFFFFFFFF);
-	SetCoins(999999999);
+	SetCoins(99999); //[hack] patches/0410 この ROM のコイン上限（MAX_COINS_DIGITS 5）。9 けたを入れると 5 けたの表示がこわれる
 }
 
 void DebugMenu_ShinyTeam(void)

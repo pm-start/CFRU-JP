@@ -125,9 +125,44 @@ MACH_ACTION(sMachFastestUp, DIR_NORTH)
 MACH_ACTION(sMachFastestLeft, DIR_WEST)
 MACH_ACTION(sMachFastestRight, DIR_EAST)
 
+/* ★ 2026-10-16 段差ジャンプの あとの硬直（docs/research/2026-10-16_ledge-landing.md）:
+   連れ歩きが段差のあとで追いつく 2 マスのジャンプ（素の 32 コマ）を、主人公の 1 歩（16 コマ）と同じ長さに縮める。
+   素のジャンプ（0x14〜0x17 JUMP_2・0x84〜0x87 ACRO_WHEELIE_JUMP）の Step0/Step1 をそのまま呼び、1 コマに 2 回進めるだけ
+   （素の表の中身を実行時に読む＝素の関数の番地を持たない・終わったら Step1 が data[2] = 2 にして TRUE を返す）。
+   0xE6〜0xE9 = JUMP_2 の下・上・左・右・0xEA〜0xED = ACRO_WHEELIE_JUMP の下・上・左・右（src/follow_me.c の ReturnFollowerDelayedState だけが使う）*/
+extern const void* const gSidewaysMovementActionFuncs[];
+#define FASTJUMP_ACTION(name, vanillaAction) \
+	static bool8 name##_Step0(struct EventObject* obj, struct Sprite* sprite) \
+	{ \
+		const MovementActionStep* v = (const MovementActionStep*) gSidewaysMovementActionFuncs[vanillaAction]; \
+		if (v[0](obj, sprite)) \
+			return TRUE; \
+		return v[1](obj, sprite); \
+	} \
+	static bool8 name##_Step1(struct EventObject* obj, struct Sprite* sprite) \
+	{ \
+		const MovementActionStep* v = (const MovementActionStep*) gSidewaysMovementActionFuncs[vanillaAction]; \
+		if (v[1](obj, sprite)) \
+			return TRUE; \
+		return v[1](obj, sprite); \
+	} \
+	static const MovementActionStep name[] = { name##_Step0, name##_Step1, SS_Finish };
+FASTJUMP_ACTION(sFastJump2Down, 0x14)
+FASTJUMP_ACTION(sFastJump2Up, 0x15)
+FASTJUMP_ACTION(sFastJump2Left, 0x16)
+FASTJUMP_ACTION(sFastJump2Right, 0x17)
+FASTJUMP_ACTION(sFastAcroJumpDown, 0x84)
+FASTJUMP_ACTION(sFastAcroJumpUp, 0x85)
+FASTJUMP_ACTION(sFastAcroJumpLeft, 0x86)
+FASTJUMP_ACTION(sFastAcroJumpRight, 0x87)
+
 #define SS_ROW(prefix) prefix##_LeftDownFaceDown, prefix##_LeftUpFaceUp, prefix##_LeftDownFaceLeft, prefix##_RightDownFaceRight, \
 	prefix##_RightDownFaceDown, prefix##_RightUpFaceUp, prefix##_LeftUpFaceLeft, prefix##_RightUpFaceRight
 #define SS_NONE8 sSSNone, sSSNone, sSSNone, sSSNone, sSSNone, sSSNone, sSSNone, sSSNone
+
+//★ 2026-11-10 コンテスト S10（ユーザー決定）: 0xEE＝観客のハートの吹き出し（原文 MOVEMENT_ACTION_EMOTE_HEART・src/hack_contest_heart.c）。0xEE は動きの表の番号（床の印の 0xEE とは別の表）
+bool8 HackContest_MoveEmoteHeart_Step0(struct EventObject* obj, struct Sprite* sprite);
+static const MovementActionStep sEmoteHeart[] = { HackContest_MoveEmoteHeart_Step0, SS_Finish };
 
 // 広げた動きの表（repoints で素の表 0836A644 の代わりに）
 const void* const gSidewaysMovementActionFuncs[] =
@@ -139,6 +174,9 @@ const void* const gSidewaysMovementActionFuncs[] =
 	SS_ROW(sSSRun),                                 //0xD2〜0xD9
 	SS_ROW(sSSFast),                                //0xDA〜0xE1
 	sMachFastestDown, sMachFastestUp, sMachFastestLeft, sMachFastestRight,   //0xE2〜0xE5 マッハ自転車（1 マス 2 コマ・こぐ絵）
+	sFastJump2Down, sFastJump2Up, sFastJump2Left, sFastJump2Right,           //0xE6〜0xE9 連れ歩きの段差の追いつき（16 コマ）
+	sFastAcroJumpDown, sFastAcroJumpUp, sFastAcroJumpLeft, sFastAcroJumpRight, //0xEA〜0xED 同じ・走って跳んだとき
+	sEmoteHeart,                                                              //0xEE コンテスト会場の観客のハート（S10）
 };
 
 // ---- 主人公の歩き ---------------------------------------------------------------------------------------------
@@ -153,6 +191,64 @@ static u8 SidewaysStairs_DiagonalDirection(u8 behaviour, u8 direction)
 		case 4: return direction == DIR_EAST ? DIR_NORTHEAST : 0;
 		case 5: return direction == DIR_WEST ? DIR_SOUTHWEST : 0;
 	}
+	return 0;
+}
+
+/* ★ 2026-10-15 遊ぶ人 v0.42.3「シンオウの階段で移動すると斜め移動した扱いになる・階段の上で左右に動くだけで、どんどん下へ下がっていく」
+   （docs/research/2026-10-15_sinnoh-stairs-diagonal.md）:
+   挙動値は正しかった（B0〜B5 は Neo の斜めの階段の絵のマスと、その下の足場だけ・ふつうの上下の階段には 0 マス）。
+   原因は「立っているマスだけで斜めかを決める」こと。階段のマスへ横から入ると横に 1 歩（斜めにならない）、そこから戻ると
+   斜めに下りる（例: ハクタイ (29,12) → 右 (30,12) → 左 (29,13) → 右 (30,13) → 左 (29,14)）。Neo の地図は足場（B1・B4）を
+   置いていない階段が多く（ハクタイ・クロガネ・215 番道路など 18 枚）、そこで左右に動くたびに 1 段ずつ下がっていた。
+   直し（主人公の歩き・自転車の両方）:
+     1. 今のマスで斜めにならないとき、横の列の 1 つ上／下の階段のマスが「逆向きに歩くとここへ斜めに来る」なら、その逆の斜めで入る
+        （斜めの 1 歩はいつも行って戻れる＝左右に動いても 1 段以上ずれない）
+     2. 足場（B1・B4）は斜めの先が階段のマス（B0・B2・B3・B5）のときだけ斜めにする（Neo の草の 0x010・0x011 が階段の無い所に
+        置かれていて、ただの草の上で斜めに動いた／ぶつかっていた・ポケモンリーグの前・209 番道路など） */
+static bool8 SidewaysStairs_IsStairTile(u8 behaviour)
+{
+	return behaviour == 0xB0 || behaviour == 0xB2 || behaviour == 0xB3 || behaviour == 0xB5;
+}
+
+static s8 SidewaysStairs_DeltaY(u8 diag)
+{
+	if (diag == DIR_NORTHWEST || diag == DIR_NORTHEAST)
+		return -1;
+	if (diag == DIR_SOUTHWEST || diag == DIR_SOUTHEAST)
+		return 1;
+	return 0;
+}
+
+static u8 SidewaysStairs_PlayerDiagonal(struct EventObject* player, u8 direction)
+{
+	s16 x = player->currentCoords.x;
+	s16 y = player->currentCoords.y;
+	u8 behaviour = player->currentMetatileBehavior;
+	u8 diag, back, other;
+	s16 nx;
+
+	if (direction != DIR_WEST && direction != DIR_EAST)
+		return 0;
+	nx = x + (direction == DIR_EAST ? 1 : -1);
+	back = (direction == DIR_EAST) ? DIR_WEST : DIR_EAST;
+
+	diag = SidewaysStairs_DiagonalDirection(behaviour, direction);
+	if (diag != 0 && (behaviour == 0xB1 || behaviour == 0xB4)
+	&& !SidewaysStairs_IsStairTile(MapGridGetMetatileBehaviorAt_(nx, y + SidewaysStairs_DeltaY(diag))))
+		diag = 0; //2. 斜めの先が階段でない足場は、ただの床
+	if (diag != 0)
+		return diag;
+
+	//1. 1 つ上の階段のマスから逆向きに歩くと斜めに下りてここへ来る → 斜めに上って入る
+	other = MapGridGetMetatileBehaviorAt_(nx, y - 1);
+	if (SidewaysStairs_IsStairTile(other) && SidewaysStairs_DeltaY(SidewaysStairs_DiagonalDirection(other, back)) == 1)
+		return (direction == DIR_EAST) ? DIR_NORTHEAST : DIR_NORTHWEST;
+
+	//   1 つ下の階段のマスから逆向きに歩くと斜めに上ってここへ来る → 斜めに下りて入る
+	other = MapGridGetMetatileBehaviorAt_(nx, y + 1);
+	if (SidewaysStairs_IsStairTile(other) && SidewaysStairs_DeltaY(SidewaysStairs_DiagonalDirection(other, back)) == -1)
+		return (direction == DIR_EAST) ? DIR_SOUTHEAST : DIR_SOUTHWEST;
+
 	return 0;
 }
 
@@ -174,7 +270,7 @@ static u8 SidewaysStairs_Action(u8 diag, u8 base)
 bool8 SidewaysStairs_TryBikeStep(u8 direction)
 {
 	struct EventObject* player = &gEventObjects[gPlayerAvatar->eventObjectId];
-	u8 diag = SidewaysStairs_DiagonalDirection(player->currentMetatileBehavior, direction);
+	u8 diag = SidewaysStairs_PlayerDiagonal(player, direction);   //★ 2026-10-15 行って戻れる斜め（上の説明）
 
 	if (diag == 0)
 		return FALSE;
@@ -194,7 +290,7 @@ void SidewaysStairs_PlayerNotOnBikeMoving(u8 direction, u16 heldKeys)
 	u8 diag = 0;
 
 	if (!(gPlayerAvatar->flags & PLAYER_AVATAR_FLAG_SURFING))
-		diag = SidewaysStairs_DiagonalDirection(player->currentMetatileBehavior, direction);
+		diag = SidewaysStairs_PlayerDiagonal(player, direction);   //★ 2026-10-15 行って戻れる斜め（上の説明）
 
 	if (diag == 0)
 	{

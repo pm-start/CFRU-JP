@@ -44,6 +44,11 @@ enum Prizes
 	PRIZE_COVER_FOSSIL,
 	PRIZE_JAW_FOSSIL,
 	PRIZE_SAIL_FOSSIL,
+	PRIZE_KYOGA_FOSSIL, //[hack] patches/0952 きょがのカセキ（Redmine #230）
+	PRIZE_FOSSILIZED_BIRD,
+	PRIZE_FOSSILIZED_FISH,
+	PRIZE_FOSSILIZED_DRAKE,
+	PRIZE_FOSSILIZED_DINO, //[hack] patches/0952 剣盾のかけら（とり・さかな・りゅう・きょうりゅう・ユーザー決定 2026-11-04）
 	PRIZE_COUNT
 };
 
@@ -52,7 +57,7 @@ enum Prizes
 #define PRIZE_FIRST_EVO_STONE PRIZE_FIRE_STONE
 #define PRIZE_LAST_EVO_STONE PRIZE_DUSK_STONE
 #define PRIZE_FIRST_FOSSIL PRIZE_OLD_AMBER
-#define PRIZE_LAST_FOSSIL PRIZE_SAIL_FOSSIL
+#define PRIZE_LAST_FOSSIL PRIZE_FOSSILIZED_DINO //[hack] 化石 16 種（OLD_AMBER〜FOSSILIZED_DINO の連続）を GetModifiedPrizeId が等分する
 
 typedef u8 PrizeShape_T[MAX_OBJECT_WIDTH];
 
@@ -119,6 +124,16 @@ extern const u8 MiningCoverFossilTiles[];
 extern const u8 MiningJawFossilTiles[];
 extern const u16 MiningJawFossilPal[];
 extern const u8 MiningSailFossilTiles[];
+extern const u8 MiningKyogaFossilTiles[];   //[hack] patches/0952
+extern const u16 MiningKyogaFossilPal[];
+extern const u8 MiningFossilizedBirdTiles[];   //[hack] patches/0952
+extern const u16 MiningFossilizedBirdPal[];
+extern const u8 MiningFossilizedFishTiles[];   //[hack] patches/0952
+extern const u16 MiningFossilizedFishPal[];
+extern const u8 MiningFossilizedDrakeTiles[];   //[hack] patches/0952
+extern const u16 MiningFossilizedDrakePal[];
+extern const u8 MiningFossilizedDinoTiles[];   //[hack] patches/0952
+extern const u16 MiningFossilizedDinoPal[];
 
 extern const u8 MiningBedrock0Tiles[];
 extern const u16 MiningBedrock0Pal[];
@@ -352,6 +367,14 @@ static const u8 sSailFossilShape[MAX_OBJECT_HEIGHT][MAX_OBJECT_WIDTH] =
 	{1, 1, 1, 1},
 };
 
+static const u8 sKyogaFossilShape[MAX_OBJECT_HEIGHT][MAX_OBJECT_WIDTH] = //[hack] patches/0952（tools/custom_mon/orcaiser/src/fossil/mining_kyoga_fossil_shape.json＝4x4 全部）
+{
+	{1, 1, 1, 1},
+	{1, 1, 1, 1},
+	{1, 1, 1, 1},
+	{1, 1, 1, 1},
+};
+
 static const struct MiningPrize sMiningPrizes[PRIZE_COUNT] =
 {
 	[PRIZE_HEART_SCALE] = {ITEM_HEART_SCALE, MiningHeartScaleTiles, MiningHeartScalePal, sHeartScaleShape, &gOamData_AffineOff_ObjNormal_32x32, (32 * 32) / 2},
@@ -384,6 +407,11 @@ static const struct MiningPrize sMiningPrizes[PRIZE_COUNT] =
 	[PRIZE_COVER_FOSSIL] = {ITEM_COVER_FOSSIL, MiningCoverFossilTiles,MiningPlumeFossilPal, sCoverFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2},
 	[PRIZE_JAW_FOSSIL] = {ITEM_JAW_FOSSIL, MiningJawFossilTiles, MiningJawFossilPal, sJawFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2},
 	[PRIZE_SAIL_FOSSIL] = {ITEM_SAIL_FOSSIL, MiningSailFossilTiles, MiningJawFossilPal, sSailFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2},
+	[PRIZE_KYOGA_FOSSIL] = {ITEM_KYOGA_FOSSIL, MiningKyogaFossilTiles, MiningKyogaFossilPal, sKyogaFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2}, //[hack] patches/0952
+	[PRIZE_FOSSILIZED_BIRD] = {ITEM_FOSSILIZED_BIRD, MiningFossilizedBirdTiles, MiningFossilizedBirdPal, sKyogaFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2}, //[hack] patches/0952（形は 4x4 全部＝きょがのカセキと同じ）
+	[PRIZE_FOSSILIZED_FISH] = {ITEM_FOSSILIZED_FISH, MiningFossilizedFishTiles, MiningFossilizedFishPal, sKyogaFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2}, //[hack] patches/0952（形は 4x4 全部＝きょがのカセキと同じ）
+	[PRIZE_FOSSILIZED_DRAKE] = {ITEM_FOSSILIZED_DRAKE, MiningFossilizedDrakeTiles, MiningFossilizedDrakePal, sKyogaFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2}, //[hack] patches/0952（形は 4x4 全部＝きょがのカセキと同じ）
+	[PRIZE_FOSSILIZED_DINO] = {ITEM_FOSSILIZED_DINO, MiningFossilizedDinoTiles, MiningFossilizedDinoPal, sKyogaFossilShape, &gOamData_AffineOff_ObjNormal_64x64, (64 * 64) / 2}, //[hack] patches/0952（形は 4x4 全部＝きょがのカセキと同じ）
 };
 
 static const u8 sPrizeEncounterChart[100] =

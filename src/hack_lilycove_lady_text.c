@@ -1,0 +1,23 @@
+// このファイルは tools/contest/extract_jp_lady.py が日本語版エメラルドの ROM から作った（手で編集しないこと・コンテスト S8）。
+#include "defines.h"
+
+const u8 gHackLadyFavor0[] = {0x0D, 0x49, 0x0D, 0x49, 0xFF};   // すべすべ（0x085D3C84）
+const u8 gHackLadyFavor1[] = {0x1F, 0x29, 0x1F, 0x29, 0xFF};   // まるまる（0x085D3C89）
+const u8 gHackLadyFavor2[] = {0x96, 0x57, 0x96, 0x57, 0xFF};   // バキバキ（0x085D3C8E）
+const u8 gHackLadyFavor3[] = {0x9C, 0x56, 0x9C, 0x56, 0xFF};   // ピカピカ（0x085D3C93）
+const u8 gHackLadyFavor4[] = {0x18, 0x46, 0x18, 0x46, 0xFF};   // ねばねば（0x085D3C98）
+const u8 gHackLadyFavor5[] = {0x11, 0x08, 0x11, 0x08, 0xFF};   // ちくちく（0x085D3C9D）
+const u8 gHackLadyMonName0[] = {0x6A, 0x7E, 0x5B, 0x71, 0xFF};   // ハンサム（0x085D3D94）
+const u8 gHackLadyMonName1[] = {0x8D, 0x86, 0x96, 0x7E, 0x66, 0xFF};   // ジョバンニ（0x085D3D99）
+const u8 gHackLadyMonName2[] = {0x23, 0x01, 0x23, 0x01, 0xFF};   // もあもあ（0x085D3D9F）
+const u8 gHackLadyMonName3[] = {0x13, 0x12, 0xFF};   // てつ（0x085D3DA4）
+const u8 gHackLadyMonName4[] = {0x07, 0x2E, 0x16, 0x08, 0x2E, 0xFF};   // きんにくん（0x085D3DA7）
+const u8 gHackLadyCategory0[] = {0x06, 0x50, 0x0A, 0x26, 0xFF};   // かっこよ（0x085D3DC4）
+const u8 gHackLadyCategory1[] = {0x03, 0x12, 0x08, 0x0C, 0xFF};   // うつくし（0x085D3DC9）
+const u8 gHackLadyCategory2[] = {0x06, 0x2C, 0x02, 0xFF};   // かわい（0x085D3DCE）
+const u8 gHackLadyCategory3[] = {0x06, 0x0C, 0x0A, 0xFF};   // かしこ（0x085D3DD2）
+const u8 gHackLadyCategory4[] = {0x10, 0x08, 0x1F, 0x0C, 0xFF};   // たくまし（0x085D3DD6）
+
+const u8* const gHackLadyFavor[] = {gHackLadyFavor0, gHackLadyFavor1, gHackLadyFavor2, gHackLadyFavor3, gHackLadyFavor4, gHackLadyFavor5};
+const u8* const gHackLadyMonName[] = {gHackLadyMonName0, gHackLadyMonName1, gHackLadyMonName2, gHackLadyMonName3, gHackLadyMonName4};
+const u8* const gHackLadyCategory[] = {gHackLadyCategory0, gHackLadyCategory1, gHackLadyCategory2, gHackLadyCategory3, gHackLadyCategory4};

@@ -1,0 +1,221 @@
+//ポロックケースの画面（FEAT-pokeblock 段 2・patches/0978）。★ 文はエメラルド日本語版 ROM（0x5C97C4〜0x5C98C5・0x5C93A3〜）から読んだ原文。
+//  ただし「【仮】」の 3 つは原文に無い（追加のセーブ領域が使えない版・レポート前・壊れた中身の案内）＝ユーザーの決定待ちの仮の文。
+#org @gText_Pb_Red
+あかいポロック
+
+#org @gText_Pb_Blue
+あおいポロック
+
+#org @gText_Pb_Pink
+ももいろポロック
+
+#org @gText_Pb_Green
+みどりのポロック
+
+#org @gText_Pb_Yellow
+きいろのポロック
+
+#org @gText_Pb_Purple
+むらさきポロック
+
+#org @gText_Pb_Indigo
+こんいろポロック
+
+#org @gText_Pb_Brown
+ちゃいろポロック
+
+#org @gText_Pb_LiteBlue
+そらいろポロック
+
+#org @gText_Pb_Olive
+きみどりポロック
+
+#org @gText_Pb_Gray
+はいいろポロック
+
+#org @gText_Pb_Black
+くろいポロック
+
+#org @gText_Pb_White
+しろいポロック
+
+#org @gText_Pb_Gold
+きんいろポロック
+
+#org @gText_Pb_Spicy
+からい
+
+#org @gText_Pb_Dry
+しぶい
+
+#org @gText_Pb_Sweet
+あまい
+
+#org @gText_Pb_Bitter
+にがい
+
+#org @gText_Pb_Sour
+すっぱい
+
+#org @gText_Pb_StowCase
+ケースをしまう
+
+#org @gText_Pb_Use
+つかう
+
+#org @gText_Pb_Toss
+すてる
+
+#org @gText_Pb_Cancel
+やめる
+
+#org @gText_Pb_Give
+あげる
+
+#org @gText_Pb_Title
+ポロックケース
+
+//すてる確認: [BUFFER1]（ポロックの名前・C が gStringVar1 に入れる）に続く文。先頭の [BUFFER1] が無いと名前が出ない（2026-11-09 mGBA で発見）
+#org @gText_Pb_ThrowAway
+[BUFFER1]を\nすてても　よろしいですか？
+
+#org @gText_Pb_ThrownAway
+[BUFFER1]を\nすてました
+
+//【仮】案内（原文に無い）
+#org @gText_Pb_NoExt
+この　バージョンでは\nポロックを　いれておけません[PAUSE_UNTIL_PRESS]
+
+#org @gText_Pb_NeedReport
+さきに　レポートを\nかいてください[PAUSE_UNTIL_PRESS]
+
+#org @gText_Pb_BadData
+ポロックケースの　なかみが\nよめませんでした[PAUSE_UNTIL_PRESS]
+
+//ポロックをあげる画面（FEAT-pokeblock 段 3・patches/0978）。エメラルド日本語版 ROM の原文（0x5CBD12〜0x5CBD6A・0x5CB7A2）。【仮】は無い（原文のみ）
+//  gText_Pbu_Coolness＝かっこよさ（原文 gText_Coolness）・Beauty＝うつくしさ（gText_Beauty3）・Cuteness＝かわいさ・Smartness＝かしこさ・Toughness＝たくましさ
+#org @gText_Pbu_Coolness
+かっこよさ
+
+#org @gText_Pbu_Beauty
+うつくしさ
+
+#org @gText_Pbu_Cuteness
+かわいさ
+
+#org @gText_Pbu_Smartness
+かしこさ
+
+#org @gText_Pbu_Toughness
+たくましさ
+
+//ニックネームの後ろに続ける（原文 gText_GetsAPokeBlockQuestion）
+#org @gText_Pbu_GetsAPokeBlockQuestion
+に　ポロックを　あげますか？
+
+#org @gText_Pbu_WasEnhanced
+に　みがきが　かかった！
+
+#org @gText_Pbu_NothingChanged
+なにも　かわらなかった！
+
+#org @gText_Pbu_WontEatAnymore
+もう　これいじょう　たべない　みたい…
+
+#org @gText_Pbu_NatureSlash
+せいかく/
+
+//ポロックを食べさせる演出の文 3 本（FEAT-pokeblock 段 3b・patches/0978）。エメラルド日本語版 ROM の原文（0x5C985C 付近・gText_Var1AteTheVar2／Var1HappilyAteVar2／Var1DisdainfullyAteVar2）。【仮】は無い
+//  {V1}＝ポケモンのなまえ・{V2}＝ポロックのなまえ。末尾は FC 09（ボタン待ち）
+#org @gText_Pbf_Ate
+[BUFFER1]は　[BUFFER2]を\nたべた！[PAUSE_UNTIL_PRESS]
+
+#org @gText_Pbf_HappilyAte
+[BUFFER1]は　[BUFFER2]を\nよろこんで　たべた！[PAUSE_UNTIL_PRESS]
+
+#org @gText_Pbf_DisdainfullyAte
+[BUFFER1]は　[BUFFER2]を\nいやそうに　たべた！[PAUSE_UNTIL_PRESS]
+
+//きのみブレンダーの文（FEAT-pokeblock 段 4b1・patches/0978）。エメラルド日本語版 ROM の原文（0x30F6AE 付近の sText_BerryBlenderStart・0x30F74D〜0x30F771 の相手の名前 6 本）。【仮】は無い
+//  全角の空白は ROM の 00（空白）。名前の先頭の空白（おじさん・おとこのこ・おにいさん）も原文のとおり
+#org @gText_Bbl_Start
+きのみブレンダーを　きどうします\pバッグから　きのみブレンダーに　いれる\nきのみを　えらんでください\p
+
+//相手の名前（原文 sText_Mister／Laddie／Lassie／Master／Dude／Miss の日本語版）
+#org @gText_Bbl_NameMister
+　おじさん
+
+#org @gText_Bbl_NameLaddie
+　おとこのこ
+
+#org @gText_Bbl_NameLassie
+おんなのこ
+
+#org @gText_Bbl_NameMaster
+めいじん
+
+#org @gText_Bbl_NameDude
+　おにいさん
+
+#org @gText_Bbl_NameMiss
+おばさん
+
+//きのみブレンダーの結果・ランキング・もう1回の文（FEAT-pokeblock 段 4b2・patches/0978）。エメラルド日本語版 ROM の原文（0x30F79B〜0x30F862）。【仮】は無い
+//  全角の空白は ROM の 00。数字は画面側が入れる。gText_Bbl_Dot は ROM の B8（日本語版の「,」・桁の区切りと「1,なまえ」の区切り）
+#org @gText_Bbl_WasMade
+　ができた！
+
+#org @gText_Bbl_NewLine
+\n
+
+#org @gText_Bbl_NewParagraph
+\p
+
+#org @gText_Bbl_TheLevelIs
+レベル
+
+#org @gText_Bbl_TheFeelIs
+で　なめらかさは
+
+#org @gText_Bbl_Dot2
+だ
+
+#org @gText_Bbl_Dot
+,
+
+#org @gText_Bbl_Ranking
+ランキング
+
+#org @gText_Bbl_Results
+まぜたけっか
+
+#org @gText_Bbl_Time
+じかん
+
+#org @gText_Bbl_Min
+ふん
+
+#org @gText_Bbl_Sec
+びょう
+
+#org @gText_Bbl_MaxSpeed
+さいこうそくど
+
+#org @gText_Bbl_RPM
+rpm
+
+#org @gText_Bbl_AnotherBerry
+もういちど　きのみを　まぜますか？\n　　　　
+
+#org @gText_Bbl_RunOutOfBerries
+きのみブレンダーに　いれる　きのみが\nないので　これいじょう　できません\p
+
+#org @gText_Bbl_CaseFull
+ポロックケースが　いっぱいの　ようです\p
+
+//ミナモのロビーの記録の看板（FEAT-pokeblock 段 5）。日本語版エメラルド ROM の原文（0x5C…0x0830FC38・0x0830FC50）
+#org @gText_Bbl_RecordTitle
+きのみブレンダー\nさいこうそくど　ランキング！
+
+#org @gText_Bbl_RecordPlayers
+ふたり\nさんにん\nよにん

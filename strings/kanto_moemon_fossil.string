@@ -12,3 +12,9 @@
 
 #org @gText_MoeFossil_Full
 てもちも パソコンも いっぱいだ あけてから\nまた きなさい
+
+#org @gText_Fossil_Ask
+おや？ それは [BUFFER1]！\nよみがえらせて みるかね？
+
+#org @gText_FossilPair_Ask
+おや？ [BUFFER1]と\n[BUFFER2]！\pくみあわせて よみがえらせて みるかね？

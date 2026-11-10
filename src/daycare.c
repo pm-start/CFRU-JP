@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "map_region.h" //[hack] patches/0091
+#include "hack_challenge_b.h" //[hack] patches/0540 しばり B（レベルキャップ）
 #include "../include/daycare.h"
 #include "../include/pokemon.h"
 #include "../include/pokemon_storage_system.h"
@@ -22,6 +23,9 @@
 #include "../include/new/item.h"
 #include "../include/new/pokemon_storage_system.h"
 #include "../include/new/util.h"
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
+#include "hack_mon_id.h" //[hack] BUG-moemon-special-gabu 孵化で自身の ID を引き継ぐ
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダークの子の成長止め
 /*
 daycare.c
 	functions that handle all daycare functions, including attribute inheritance and step counts
@@ -66,7 +70,7 @@ void BuildEggMoveset(struct Pokemon* egg, struct BoxPokemon* father, struct BoxP
 	u16 eggSpecies = egg->species;
 	u32 numLevelUpMoves, numEggMoves, numSharedParentMoves;
 	
-	u16 levelUpMoves[MAX_LEARNABLE_MOVES] = {0};
+	u16* levelUpMoves = Calloc(sizeof(u16) * MAX_LEVEL_UP_MOVES); //[hack] patches/0598 512 個（1,024 バイト）はスタックに置かない（CLAUDE.md 6.35）
 	u16 eggMoves[EGG_MOVES_ARRAY_COUNT] = {0};
 	u16 finalMoves[MAX_MON_MOVES] = {0};
 	u16 fatherMoves[MAX_MON_MOVES] = {0};
@@ -171,6 +175,8 @@ void BuildEggMoveset(struct Pokemon* egg, struct BoxPokemon* father, struct BoxP
 		}
 	}
 	#endif
+
+	Free(levelUpMoves); //[hack] patches/0598
 }
 
 
@@ -490,8 +496,8 @@ static void InheritIVs(struct Pokemon* egg, struct DayCare* daycare)
 			case STAT_SPATK:
 			case STAT_SPDEF: ;
 				u8 diff = selectedIvs[i] - STAT_HP;
-				u8 iv = GetBoxMonData(&daycare->mons[whichParent[i]].mon, MON_DATA_HP_IV + diff, NULL);
-				SetMonData(egg, MON_DATA_HP_IV + diff, &iv);
+				u16 iv = HackBoxMon_GetIv(&daycare->mons[whichParent[i]].mon, diff);   //[hack] patches/0763 親の個体値は表の上の桁も含めて読む
+				HackMon_SetIv(egg, diff, iv);
 				break;
 		}
 	}
@@ -780,6 +786,8 @@ bool8 IsEggPending(unusedArg struct DayCare *daycare)
 	#endif
 }
 
+bool8 HackChallengeLuxray_OnObtain(struct Pokemon* mon, bool8 markDex); //[hack] src/hack_challenge_luxray.c
+
 void CreateHatchedMon(struct Pokemon *egg, struct Pokemon *temp)
 {
 	u16 species;
@@ -788,6 +796,7 @@ void CreateHatchedMon(struct Pokemon *egg, struct Pokemon *temp)
 	u16 moves[4];
 	u32 ivs[NUM_STATS];
 	u8 ballType;
+	u32 monId = HackMonId_Get((struct BoxPokemon*) egg); //[hack] BUG-moemon-special-gabu 自身の表 ID・裏 ID（#70）
 
 	species = GetMonData(egg, MON_DATA_SPECIES, NULL);
 
@@ -842,10 +851,13 @@ void CreateHatchedMon(struct Pokemon *egg, struct Pokemon *temp)
 	SetMonData(temp, MON_DATA_OBEDIENCE, &obedience); //[hack] patches/0155
 	SetMonData(temp, MON_DATA_ALT_ABILITY, &abilityNum);
 	temp->hiddenAbility = hidden;
+	if (monId != 0)
+		HackMonId_Set((struct BoxPokemon*) temp, monId); //[hack] BUG-moemon-special-gabu 作り直しで消えていた自身の ID（Moémon・Tenp の当たりと色違い）を引き継ぐ
 
 	*egg = *temp;
 	CalculateMonStats(egg);
 	HealMon(egg); //Fixes a bug where new Pokemon could hatch with more HP
+	HackChallengeLuxray_OnObtain(egg, FALSE); //[hack] しばり『ぜんぶレントラー』: かえった子はレントラー♀（図鑑は素の AddHatchedMonToParty がレントラーの「つかまえた」を付ける）
 }
 
 static u8 GetEggStepsToSubtract(void)
@@ -878,6 +890,11 @@ static u8 GetEggStepsToSubtract(void)
 	#endif
 
 	return steps;
+}
+
+u8 HackEggBox_StepsPerCycle(void) //[hack] 卵専用ボックスも手持ちの卵と同じ数ずつ引く（src/hack_egg_box.c・FEAT-save16-B4）
+{
+	return GetEggStepsToSubtract();
 }
 
 u32 SubtractEggSteps(u32 steps, struct Pokemon* mon)
@@ -935,6 +952,9 @@ u8 GetDaycareCompatibilityScore(struct DayCare *daycare)
 		eggGroups[i][0] = gBaseStats[species[i]].eggGroup1;
 		eggGroups[i][1] = gBaseStats[species[i]].eggGroup2;
 	}
+
+	if (Shadow_RefusesGrowthBox(&daycare->mons[0].mon) || Shadow_RefusesGrowthBox(&daycare->mons[1].mon)) //[hack] patches/0963 段 E ダークの子とはタマゴができない
+		return PARENTS_INCOMPATIBLE;
 
 	//Check unbreedable egg group
 	if (eggGroups[0][0] == EGG_GROUP_UNDISCOVERED || eggGroups[1][0] == EGG_GROUP_UNDISCOVERED)
@@ -1062,10 +1082,13 @@ u32 GetExperienceAfterDaycareSteps(struct BoxPokemon* mon, u32 steps)
 	u32 originalExp = GetBoxMonData(mon, MON_DATA_EXP, NULL);
 	u32 experience = originalExp + steps;
 
+	if (Shadow_RefusesGrowthBox(mon)) //[hack] patches/0963 段 E ダークの子は育て屋でも経験値が入らない
+		return originalExp;
+
 	#ifdef FLAG_HARD_LEVEL_CAP
 	struct BoxPokemon tempMon = *mon;
 	SetBoxMonData(&tempMon, MON_DATA_EXP, &experience);
-	u8 level = GetLevelFromBoxMonExp(&tempMon);
+	u16 level = GetLevelFromBoxMonExp(&tempMon);
 	extern u8 GetCurrentLevelCap(void); //Must be implemented yourself
 	if (FlagGet(FLAG_HARD_LEVEL_CAP) && level >= GetCurrentLevelCap())
 	{
@@ -1077,10 +1100,12 @@ u32 GetExperienceAfterDaycareSteps(struct BoxPokemon* mon, u32 steps)
 	}
 	#endif
 
+	experience = HackChallengeB_DaycareExp(GetBoxMonData(mon, MON_DATA_SPECIES, NULL), originalExp, experience); //[hack] patches/0540 しばり B レベルキャップ（OFF なら そのまま）
+
 	return experience;
 }
 
-u8 GetLevelAfterDaycareSteps(struct BoxPokemon* mon, u32 steps)
+u16 GetLevelAfterDaycareSteps(struct BoxPokemon* mon, u32 steps)
 {
 	struct BoxPokemon tempMon = *mon;
 	u32 experience = GetExperienceAfterDaycareSteps(mon, steps);

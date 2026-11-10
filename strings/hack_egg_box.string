@@ -1,0 +1,83 @@
+#org @gText_EggBox_Hatched
+たまごボックスの たまごが かえった！
+
+#org @gText_EggBox_Title
+たまごボックス
+
+#org @gText_EggBox_Empty
+・・・・・
+
+#org @gText_EggBox_Egg
+タマゴ
+
+#org @gText_EggBox_Hatched1
+かえった
+
+#org @gText_EggBox_PartyTitle
+てもちの タマゴを えらんでください
+
+#org @gText_EggBox_HelpList
+A あずける・ひきとる / B もどる
+
+#org @gText_EggBox_HelpParty
+A あずける / B もどる
+
+#org @gText_EggBox_AskTake
+ひきとりますか？ / A はい / B いいえ
+
+#org @gText_EggBox_Full1
+たまごボックスが いっぱいです
+
+#org @gText_EggBox_Full2
+ひきとってから あずけてください
+
+#org @gText_EggBox_NotEgg1
+タマゴ しか あずけられません
+
+#org @gText_EggBox_NotEgg2
+ポケモンは パソコンの ボックスへ
+
+#org @gText_EggBox_LastMon1
+てもちに たたかえる ポケモンが
+
+#org @gText_EggBox_LastMon2
+いなくなるので あずけられません
+
+#org @gText_EggBox_PartyFull1
+てもちが いっぱいです
+
+#org @gText_EggBox_PartyFull2
+てもちを あけてから ひきとってください
+
+#org @gText_EggBox_NoEgg
+あずけられる タマゴが ありません
+
+#org @gText_EggBox_NoEgg2
+てもちに タマゴが いるときに つかえます
+
+#org @gText_EggBox_Unavail1
+この mGBAでは つかえません
+
+#org @gText_EggBox_Unavail2
+さいしんの mGBAを つかってください
+
+#org @gText_EggBox_NeedReport1
+たまごボックスを つかうには
+
+#org @gText_EggBox_NeedReport2
+さきに レポートを かいてください
+
+#org @gText_EggBox_BadData1
+たまごボックスを よみこめません
+
+#org @gText_EggBox_BadData2
+セーブデータいこうツールで なおせるかも
+
+#org @gText_EggBox_WriteFail1
+かきこみに しっぱいしました
+
+#org @gText_EggBox_WriteFail2
+もういちど ためしてください
+
+#org @gText_EggBox_Done
+Aボタンで つづける

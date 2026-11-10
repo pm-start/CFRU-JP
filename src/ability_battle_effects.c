@@ -1,3 +1,4 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
 #include "../include/battle_anim.h"
@@ -93,6 +94,8 @@ const s8 gAbilityRatings[ABILITIES_COUNT] =
 	[ABILITY_SUN_BUTTERFLY] = 6,    //★ たいようのちょう
 	[ABILITY_MIWAKUNOUROKO] = 7,    //★ 2026-10-11 ミワクノウロコ（いかく と同じ）
 	[ABILITY_TSUKINOMAMORI] = 4,    //★ 2026-10-11 ツキノマモリ（クリアボディ と同じ）
+	[ABILITY_WARMUP] = 5,           //★ 2026-10-17 ウォームアップ（かくとう 1.3 倍・てきおうりょく級）
+	[ABILITY_WORKBUG] = 6,          //★ 2026-10-17 しごとのむし（むし 1.5 倍）
 	[ABILITY_DEFEATIST] = -1,
 	[ABILITY_DEFIANT] = 5,
 	[ABILITY_DELTASTREAM] = 10,
@@ -132,6 +135,7 @@ const s8 gAbilityRatings[ABILITIES_COUNT] =
 	[ABILITY_GLUTTONY] = 3,
 	[ABILITY_GOODASGOLD] = 10,
 	[ABILITY_GOOEY] = 5,
+	[ABILITY_MOCHIHADA] = 5, //[hack] 2026-11-08 もちはだ（ぬめぬめと同じ・patches/0969）
 	[ABILITY_GRASSPELT] = 2,
 	[ABILITY_GRASSYSURGE] = 8,
 	[ABILITY_GRIMNEIGH] = 7,
@@ -146,6 +150,13 @@ const s8 gAbilityRatings[ABILITIES_COUNT] =
 	[ABILITY_HOSPITALITY] = 4,
 	[ABILITY_HUGEPOWER] = 10,
 	[ABILITY_DRAGONARMOR] = 10, //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150）
+	[ABILITY_REITONOOU] = 10, //[hack] 2026-10-23 れーとのおう(patches/0790)
+	[ABILITY_GEKIKOU] = 5, //[hack] 2026-10-25 げきこう（いかりのつぼ型・patches/0800）
+	[ABILITY_HOMURANOAGO] = 7, //[hack] 2026-10-25 ほむらのあご
+	[ABILITY_HAKUANOOU] = 8, //[hack] 2026-10-25 はくあのおう
+	[ABILITY_GENSHINOUZU] = 9, //[hack] 2026-11-02 ゲンシのうず（あめふらし と同じ）
+	[ABILITY_YOROIPLATE] = 6, //[hack] patches/0968 2026-11-08 よろいプレート（さめはだ と同じ）
+	[ABILITY_KOORINOUROKO] = 7, //[hack] patches/0968 2026-11-08 こおりのうろこ（こおりのりんぷん と同じ）
 	[ABILITY_HUSTLE] = 7,
 	[ABILITY_HYDRATION] = 4,
 	[ABILITY_HYPERCUTTER] = 3,
@@ -452,6 +463,7 @@ const bool8 gMoldBreakerIgnoredAbilities[ABILITIES_COUNT] =
 	[ABILITY_MIRRORARMOR] =		TRUE,
 	[ABILITY_PUNKROCK] =		TRUE,
 	[ABILITY_ICESCALES] =		TRUE,
+	[ABILITY_KOORINOUROKO] =	TRUE, //[hack] patches/0968 こおりのうろこ（りんぷんと同じ＝かたやぶりに無視される）
 	[ABILITY_ICEFACE] =			TRUE,
 	[ABILITY_PASTELVEIL] =		TRUE,
 };
@@ -485,7 +497,7 @@ extern u8 CastformDataTypeChange(u8 bank);
 extern void TransformPokemon(u8 bankAtk, u8 bankDef);
 
 //This file's functions:
-static u8 CalcMovePowerForForewarn(u16 move);
+static u16 CalcMovePowerForForewarn(u16 move);
 static u8 ActivateWeatherAbility(u16 flags, u16 item, u8 bank, u8 animArg, u8 stringIndex, bool8 moveTurn);
 static u8 TryActivateTerrainAbility(u8 terrain, u8 anim, u8 bank, bool8 special);
 static bool8 ImmunityAbilityCheck(u8 bank, u32 status, const u8* string);
@@ -493,7 +505,7 @@ static bool8 CanBeAffectedByIntimidate(u8 bank);
 bool8 Hack_StartIntimidateLike(u8 bank, bool8 atk);
 static bool8 AllMainStatsButOneAreMinned(u8 bank);
 
-u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveArg)
+u8 AbilityBattleEffectsCore(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveArg) //[hack] 2026-10-20 名前を変えた＝2 つ目の特性も見る包みが AbilityBattleEffects（src/second_ability.c）
 {
 	int i;
 	u8 effect = 0;
@@ -677,6 +689,28 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 			else if (gBattleWeather & WEATHER_PRIMAL_ANY && !(gBattleWeather & WEATHER_RAIN_ANY))
 			{
 				BattleScriptPushCursorAndCallback(BattleScript_WeatherAbilityBlockedByPrimalWeather);
+				effect++;
+			}
+			break;
+
+		case ABILITY_GENSHINOUZU: //[hack] patches/0952 2026-11-02 ゲンシのうず（ゲンシオルカイザー）: 登場時 天候を あらしのうみ（5 ターン・おおあめ／ゲンシ天候・サーカスには負ける）にする
+			if (gBattleWeather & (WEATHER_PRIMAL_ANY | WEATHER_CIRCUS))
+			{
+				if (!(gBattleWeather & WEATHER_RAIN_PRIMAL)) //おおあめは あめふらし と同じく何も言わない
+				{
+					BattleScriptPushCursorAndCallback(BattleScript_WeatherAbilityBlockedByPrimalWeather);
+					effect++;
+				}
+			}
+			else if (!(gBattleWeather & WEATHER_RAIN_DOWNPOUR)) //もう あらしのうみ なら そのまま（延ばさない）
+			{
+				gBattleWeather = WEATHER_STORMY_SEA; //ふつうの天気（ひでり・あめ・すなあらしなど・永続も）は上書き
+				gWishFutureKnock.weatherDuration = 5;
+				gBattleScripting.animArg1 = B_ANIM_RAIN_CONTINUES;
+				gBattleScripting.bank = bank;
+				gBattleStringLoader = gText_StormySeaActivate;
+				gBattleCommunication[MULTISTRING_CHOOSER] = 4;
+				BattleScriptPushCursorAndCallback(BattleScript_NewWeatherAbilityActivates);
 				effect++;
 			}
 			break;
@@ -1034,7 +1068,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 		case ABILITY_FOREWARN: ;
 			u16 strongestMove = MOVE_NONE;
 			u8 tieCount = 0; //★ Champions（patches/0070） 同じ威力は均等にランダム
-			u8 maxPower = 0;
+			u16 maxPower = 0; //[hack] patches/0582
 			u8 strongestTarget = FOE(bank);
 			u16 power;
 
@@ -1228,7 +1262,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 		case ABILITY_SCHOOLING:
 			if (!(gBattleMons[bank].status2 & STATUS2_TRANSFORMED))
 			{
-				if (SPECIES(bank) == SPECIES_WISHIWASHI && gBattleMons[bank].level >= 20
+				if (SPECIES(bank) == SPECIES_WISHIWASHI && BM_LEVEL(gBattleMons[bank]) >= 20
 				&&  gBattleMons[bank].hp >= (gBattleMons[bank].maxHP / 4)) //★ Champions（patches/0070） ぎょぐん 1/4 以上
 				{
 					DoFormChange(bank, SPECIES_WISHIWASHI_S, TRUE, TRUE, FALSE);
@@ -1236,7 +1270,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 					++effect;
 				}
 				else if (SPECIES(bank) == SPECIES_WISHIWASHI_S
-				&& (gBattleMons[bank].level < 20 ||
+				&& (BM_LEVEL(gBattleMons[bank]) < 20 ||
 					gBattleMons[bank].hp < (gBattleMons[bank].maxHP / 4))) //★ Champions（patches/0070）
 				{
 					DoFormChange(bank, SPECIES_WISHIWASHI, TRUE, TRUE, FALSE);
@@ -2185,11 +2219,13 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 			case ABILITY_IRONBARBS:
 			case ABILITY_ROUGHSKIN:
 			case ABILITY_DRAGONARMOR: //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150） さめはだの分
+			case ABILITY_REITONOOU: //[hack] 2026-10-23 れーとのおう(patches/0790) さめはだの分
+			case ABILITY_YOROIPLATE: //[hack] patches/0968 2026-11-08 よろいプレート（カセキメラ）: 直接攻撃を受けると 相手の最大HPの 1/8（さめはだの分）
 				if (MOVE_HAD_EFFECT
 				&& TOOK_DAMAGE(bank)
 				&& BATTLER_ALIVE(gBankAttacker)
 				&& gBankAttacker != bank
-				&& ABILITY(gBankAttacker) != ABILITY_MAGICGUARD
+				&& !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD)
 				&& ITEM_EFFECT(gBankAttacker) != ITEM_EFFECT_PROTECTIVE_PADS
 				&& CheckContact(move, gBankAttacker, bank))
 				{
@@ -2322,7 +2358,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				&& ITEM_EFFECT(gBankAttacker) != ITEM_EFFECT_PROTECTIVE_PADS
 				&& CheckContact(move, gBankAttacker, bank)
 				&& umodsi(Random(), 100) < 30 //★ Champions（patches/0070） メロメロボディ 30%
-				&& ABILITY(gBankAttacker) != ABILITY_OBLIVIOUS
+				&& !BankHasAbility(gBankAttacker, ABILITY_OBLIVIOUS)
 				&& ABILITY(gBankAttacker) != ABILITY_AROMAVEIL
 				&& !(IS_DOUBLE_BATTLE && ABILITY(PARTNER(gBankAttacker)) == ABILITY_AROMAVEIL)
 				&& GetGenderFromSpeciesAndPersonality(speciesAtk, pidAtk) != GetGenderFromSpeciesAndPersonality(speciesDef, pidDef)
@@ -2520,7 +2556,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				&& TOOK_DAMAGE(bank)
 				&& BATTLER_ALIVE(gBankAttacker)
 				&& gBankAttacker != bank
-				&& ABILITY(gBankAttacker) != ABILITY_MAGICGUARD
+				&& !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD)
 				&& ITEM_EFFECT(gBankAttacker) != ITEM_EFFECT_PROTECTIVE_PADS
 				&& CheckContact(move, gBankAttacker, bank)
 				&& !BATTLER_ALIVE(bank)
@@ -2549,6 +2585,22 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				}
 				break;
 
+			case ABILITY_GEKIKOU: //[hack] 2026-10-25 げきこう（イワオロチ・patches/0800）: HP が半分以下に減ったら こうげき +1
+				if (MOVE_HAD_EFFECT
+				&& TOOK_DAMAGE(bank)
+				&& BATTLER_ALIVE(bank)
+				&& gBattleMons[bank].hp <= gBattleMons[bank].maxHP / 2
+				&& gBattleMons[bank].hp + gHpDealt > gBattleMons[bank].maxHP / 2 //Hp fell below half
+				&& STAT_STAGE(bank, STAT_ATK) < 12
+				&& !SheerForceCheck())
+				{
+					gBattleScripting.statChanger = STAT_ATK | INCREASE_1;
+					BattleScriptPushCursor();
+					gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaise;
+					effect++;
+				}
+				break;
+
 			case ABILITY_ANGERSHELL:
 				if (MOVE_HAD_EFFECT
 				&& TOOK_DAMAGE(bank)
@@ -2565,6 +2617,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				break;
 
 			case ABILITY_TANGLINGHAIR:
+			case ABILITY_MOCHIHADA: //[hack] 2026-11-08 ぬめぬめと同じ（バブチフ・オモチフワの かくれ特性・patches/0969）
 			case ABILITY_GOOEY:
 				if (MOVE_HAD_EFFECT
 				&& TOOK_DAMAGE(bank)
@@ -2572,7 +2625,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				&& CheckContact(move, gBankAttacker, bank)
 				&& BATTLER_ALIVE(gBankAttacker)
 				&& gBankAttacker != bank
-				&& (STAT_CAN_FALL(gBankAttacker, STAT_SPD) || ABILITY(gBankAttacker) == ABILITY_MIRRORARMOR))
+				&& (STAT_CAN_FALL(gBankAttacker, STAT_SPD) || BankHasAbility(gBankAttacker, ABILITY_MIRRORARMOR)))
 				{
 					gBattleScripting.statChanger = STAT_SPD | DECREASE_1;
 					BattleScriptPushCursor();
@@ -2586,7 +2639,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				&& TOOK_DAMAGE(bank)
 				&& BATTLER_ALIVE(gBankAttacker)
 				&& gBankAttacker != bank
-				&& ABILITY(gBankAttacker) != ABILITY_MAGICGUARD
+				&& !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD)
 				&& !BATTLER_ALIVE(bank))
 				{
 					gBattleMoveDamage = MathMax(1, gHpDealt);
@@ -2903,7 +2956,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				&& BATTLER_ALIVE(gBankTarget)
 				&& !MoveBlockedBySubstitute(gCurrentMove, bank, gBankTarget)
 				&& !gProtectStructs[bank].confusionSelfDmg
-				&& ABILITY(gBankTarget) != ABILITY_SHIELDDUST //★ Champions（patches/0070） あくしゅう: りんぷん・おんみつマントには効かない
+				&& !BankHasAbility(gBankTarget, ABILITY_SHIELDDUST) //★ Champions（patches/0070） あくしゅう: りんぷん・おんみつマントには効かない
 				&& ITEM_EFFECT(gBankTarget) != ITEM_EFFECT_COVERT_CLOAK
 				&& umodsi(Random(), 100) < 10
 				&& gCurrentTurnActionNumber < GetBattlerTurnOrderNum(gBankTarget))
@@ -2919,7 +2972,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				&& !MoveBlockedBySubstitute(gCurrentMove, bank, gBankTarget)
 				&& !gProtectStructs[bank].confusionSelfDmg
 				&& CheckContact(gCurrentMove, bank, gBankTarget)
-				&& ABILITY(gBankTarget) != ABILITY_SHIELDDUST
+				&& !BankHasAbility(gBankTarget, ABILITY_SHIELDDUST)
 				&& ITEM_EFFECT(gBankTarget) != ITEM_EFFECT_COVERT_CLOAK
 				&& CanBePoisoned(gBankTarget, bank, TRUE)
 				&& umodsi(Random(), 100) < 30)
@@ -2936,7 +2989,7 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 				&& BATTLER_ALIVE(gBankTarget)
 				&& !MoveBlockedBySubstitute(gCurrentMove, bank, gBankTarget)
 				&& !gProtectStructs[bank].confusionSelfDmg
-				&& ABILITY(gBankTarget) != ABILITY_SHIELDDUST
+				&& !BankHasAbility(gBankTarget, ABILITY_SHIELDDUST)
 				&& ITEM_EFFECT(gBankTarget) != ITEM_EFFECT_COVERT_CLOAK
 				&& CanBePoisoned(gBankTarget, bank, TRUE)
 				&& umodsi(Random(), 100) < 30)
@@ -3135,9 +3188,9 @@ u8 AbilityBattleEffects(u8 caseID, u8 bank, u16 ability, u16 special, u16 moveAr
 	return effect;
 }
 
-static u8 CalcMovePowerForForewarn(u16 move)
+static u16 CalcMovePowerForForewarn(u16 move)
 {
-	u8 power;
+	u16 power; //[hack] patches/0582 (#126): 威力は 255 をこえる
 
 	if (gBattleMoves[move].effect == EFFECT_0HKO)
 	{
@@ -3145,7 +3198,7 @@ static u8 CalcMovePowerForForewarn(u16 move)
 	}
 	else
 	{
-		switch (move) {
+		switch (EffectiveMove(move)) {
 			case MOVE_COUNTER:
 			case MOVE_METALBURST:
 			case MOVE_MIRRORCOAT:
@@ -3192,7 +3245,7 @@ static u8 CalcMovePowerForForewarn(u16 move)
 				break;
 
 			default:
-				power = gBattleMoves[move].power;
+				power = MOVE_POWER(move); //[hack] patches/0582
 		}
 	}
 	return power;

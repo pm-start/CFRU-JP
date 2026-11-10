@@ -217,7 +217,7 @@ RemoveEvoItem:
 WriteTypeHook:
 	mov r0, r1	@move
 	push {r0}
-	ldrb r0, [r5]	@active battler
+	ldrb r0, [r6]	@active battler（[hack] patches/0721: JP の 080300D0 の関数は r6 = &gActiveBattler・r5 = gDisplayedStringBattle。上流（BPRE）は r5 のままで、JP では文字列の先頭の 1 バイトを戦闘者の番号として読んでしまう。080300D0 は MoveSelectionDisplayMoveType に置き換え済みでこのフックは今は通らない）
 	lsl r0, #1
 	ldr r1, =(0x02023B2E)
 	add r0, r0, r1
@@ -245,8 +245,7 @@ DisplayTypeHook:
 	pop {r3-r7}
 	strh r0, [r4]
 	ldr r0, [r6]
-	lsl r1, r7, #0x03
-	add r1, r7, r1
+	lsl r1, r7, #0x03	@[hack] patches/0721: JP は 081370BC で lsls r1, r7, #3（技名の欄は 8 バイト刻み・0x3118 + 8 * i）。上流の add r1, r7, r1（9 バイト刻み）は BPRE のまま
 	ldr r2, =(0x081370BE +1)
 	bx r2
 

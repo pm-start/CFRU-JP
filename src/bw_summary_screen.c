@@ -1,5 +1,9 @@
 #include "defines.h"
 #include "map_region.h"
+#include "hack_met_level.h"
+#include "hack_iv_over100.h" //[hack] patches/0591 #128 Lv100 をこえた子の実効の個体値
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダークの子の技の並び
+#include "shadow_gauge.h"
 #include "../include/constants/abilities.h"
 #include "../include/bg.h"
 #include "../include/window.h"
@@ -34,6 +38,11 @@
 #include "../include/new/multi.h"
 #include "../include/new/pokemon_storage_system.h"
 #include "../include/new/dns.h"
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
+#include "hack_move_evo.h" //[hack] patches/0932 技の熟練度（しんか／じゅくれん）
+#include "hack_kind.h" //[hack] patches/0966 段 H 個体の印
+#include "hack_aura.h"
+#include "hack_shadow_screens.h"
 
 /*
     BW 風ステータス画面（つよさをみる）— #19 の 4 つ目
@@ -82,13 +91,13 @@ void CreateBoxMonFromCompressedMon(struct BoxPokemon *boxMon, struct CompressedP
 void CreateCompressedMonFromBoxMon(struct BoxPokemon *boxMon, struct CompressedPokemon *compMon);
 s16 sub_808B884(struct CompressedPokemon *boxMons, u8 currIndex, u8 maxIndex, u8 arg3);
 void BoxShelf_MarkPtrDirty(const void *ptr);
-bool8 TryReplaceSummaryScreenLocationWithFarAwayLocation(struct Pokemon *mon, u8 metLocation);
+u16 TryReplaceSummaryScreenLocationWithFarAwayLocation(struct Pokemon *mon, u16 metLocation);
 bool8 SummaryScreen_IsMultiBattlePartner(void);
 bool8 CheckIsHmMove(u16 move);
 u16 GetMonAbility(const struct Pokemon *mon);
 u16 SecondAbility_OfSpecies(u16 species);
 u16 SecondAbility_OfMon(struct Pokemon* mon);      /* src/second_ability.c */
-bool8 SecondAbility_IsUnlocked(u8 level);
+bool8 SecondAbility_IsUnlocked(u16 level);
 static u16 SecondAbilityOfCurrentMon(void);
 extern const struct SpriteTemplate gBallSpriteTemplates[];
 extern u8 *gMoveDescriptions[];
@@ -224,6 +233,8 @@ struct BwSummaryScreen
     s16 slideX;
     u16 moveType[5];
     u16 moves[5];
+    u8 shadowOn;           /* [hack] patches/0963 段 E ダークの子の技の並び（組み立てた物）を出している */
+    u8 shadowSrc[4];       /* その由来（0〜3 元の枠・SHADOW_SRC_*） */
     u8 numMoves;
     u8 swapping;
     u8 monStatus;
@@ -242,6 +253,7 @@ struct BwSummaryScreen
     u8 queuedInput[2];
     u8 showEvIv;         /* ★ 2026-10-10 能力のページで 努力値／個体値 の数を出しているか（SELECT で切り替え・bw-reloaded の EV/IV のページの中身） */
     u8 showAbility2;     /* ★ 2026-10-03 能力のページで 2 つ目の特性を出しているか（A で切り替え・ポケモンを替えたら 0） */
+    u8 masteryMsg;       /* [hack] patches/0932 技の詳細に出している確かめ／お断り（0 = なし・1 = 「じゅくれんにするともどせません」・2 = 「もどせません」） */
 };
 
 #define sBwSs (*(struct BwSummaryScreen **)0x0203B0B4)
@@ -429,7 +441,7 @@ static void SpriteCB_Cursor(struct Sprite *sprite);
 static void SpriteCB_MonBob(struct Sprite *sprite);
 static void SpriteCB_EggShake(struct Sprite *sprite);
 static void SpriteCB_None(unusedArg struct Sprite *sprite);
-static bool32 IsMetLocationValid(u8 place);
+static bool32 IsMetLocationValid(u16 place);
 static bool32 IsMultiPartner(void);
 static bool32 NatureNeedsNoNa(u8 nature);
 static bool32 IsFromGenIII(void);
@@ -444,9 +456,12 @@ static void PrintMoveNames(void);
 static void PrintMoveNameAndPP(u8 i);
 static void PrintExpLabels(void);
 static void PrintMoveInfo(void);
+static void PrintMasteryStatus(u16 move);
+static const u8 *MasteryMessage(u16 move);
 static void PrintAbility(void);
 static void DrawMoveTypeIcons(void);
 static bool8 CanForgetSelectedMove(void);
+static bool8 CanEditMastery(void);
 static void ScrollBackground(void);
 
 /* ---------------- 入口 ---------------- */
@@ -533,18 +548,15 @@ static bool32 CheckPageInput(u8 dir)
     }
     if (IsPageTurnLocked(dir))
         return FALSE;
+    //★ 2026-10-16 ユーザー「ステータス画面で L と R でポケモン切り替え」: L・R はページではなく前・次のポケモン（Task_Main）。ページは左右だけ
     if (dir == 1)
     {
         if (JOY_NEW(DPAD_RIGHT))
-            return TRUE;
-        if (gSaveBlock2->optionsButtonMode == OPTIONS_BUTTON_MODE_LR && JOY_NEW(R_BUTTON))
             return TRUE;
     }
     else
     {
         if (JOY_NEW(DPAD_LEFT))
-            return TRUE;
-        if (gSaveBlock2->optionsButtonMode == OPTIONS_BUTTON_MODE_LR && JOY_NEW(L_BUTTON))
             return TRUE;
     }
     return FALSE;
@@ -605,11 +617,11 @@ static void Task_Main(u8 taskId)
         }
         if (!FuncIsActiveTask(Task_FlipPage) || FuncIsActiveTask(Task_ChangeMon))
         {
-            if (JOY_NEW(DPAD_UP))
+            if (JOY_NEW(DPAD_UP | L_BUTTON))
             {
                 TryChangeMon(taskId, -1);
             }
-            else if (JOY_NEW(DPAD_DOWN))
+            else if (JOY_NEW(DPAD_DOWN | R_BUTTON))
             {
                 TryChangeMon(taskId, 1);
             }
@@ -1655,26 +1667,32 @@ static u8 GetNatureForStats(struct Pokemon *mon)
 static u8 GetIvForDisplay(struct Pokemon *mon, u8 ivField)
 {
     if (mon->hyperTraining & gBitTable[ivField - MON_DATA_HP_IV])
-        return 31;
-    return GetMonData(mon, ivField, NULL);
+        return HACK_IV_MAX; //[hack] patches/0677
+    return HackMon_GetIv(mon, ivField - MON_DATA_HP_IV);
+}
+
+/* #128（patches/0591）: Lv100 をこえた子の実効の個体値（63 まで）。数の欄はこれを出す。ランクの印は 31 までの絵なので 生の値（上の関数）のまま */
+static u8 GetEffectiveIvForDisplay(struct Pokemon *mon, u8 ivField)
+{
+    return HackIv_Effective(GetIvForDisplay(mon, ivField), mon->level);
 }
 
 static void DrawIvRank(u8 iv, u8 x, u8 y)
 {
-    BlitBitmapRectToWindow(sBwSs->window[3], sIVRankImages[iv & 31], 0, 0, 8, 8, x, y, 16, 8);
+    BlitBitmapRectToWindow(sBwSs->window[3], sIVRankImages[iv > HACK_IV_MAX ? HACK_IV_MAX : iv], 0, 0, 8, 8, x, y, 16, 8);
 }
 
 /* ★ 2026-10-10 bw-reloaded の EV/IV のページの中身を、能力のページの SELECT で（ページを足さない）。「努力値/個体値」・個体値 31 は赤 */
 static void PrintEvIvRow(u8 y, u8 evField, u8 ivField, u8 x, u8 width)
 {
     u8 text[12];
-    u8 iv = GetIvForDisplay(&sBwSs->currentMon, ivField);
-    u8 *p = ConvertIntToDecimalStringN(text, GetMonData(&sBwSs->currentMon, evField, NULL), STR_CONV_MODE_LEFT_ALIGN, 3);
+    u8 iv = GetEffectiveIvForDisplay(&sBwSs->currentMon, ivField);   /* #128 Lv100 をこえると 32〜63 も出る */
+    u8 *p = ConvertIntToDecimalStringN(text, HackMon_GetEv(&sBwSs->currentMon, evField - MON_DATA_HP_EV), STR_CONV_MODE_LEFT_ALIGN, HACK_EV_DIGITS); //[hack] patches/0677
 
     *p++ = 0xBA;   /* / */
     *p = EOS;
-    ConvertIntToDecimalStringN(p, iv, STR_CONV_MODE_LEFT_ALIGN, 2);
-    PrintFit(3, x, width, y, iv == 31 ? RED : DARK, text);
+    ConvertIntToDecimalStringN(p, iv, STR_CONV_MODE_LEFT_ALIGN, HACK_IV_DIGITS);
+    PrintFit(3, x, width, y, iv >= HACK_IV_MAX ? RED : DARK, text);
 }
 
 static void PrintMonStats(void)
@@ -1683,9 +1701,14 @@ static void PrintMonStats(void)
     const s8 *mod = sNatureStatTable[nature];
     struct Pokemon *mon = &sBwSs->currentMon;
 
+    bool8 darkMon = HackSummary_IsDark(mon); /* [hack] patches/0966 段 H 2026-11-08 ユーザー「ほか推奨で」: ダークの子は経験値をもらわない＝「EXP」「つぎのLv」の見出しと数字を出さない */
+
     Print(3, 44, 0, WHITE, gBwSsText_HP);
-    Print(3, 10, 79, WHITE, gBwSsText_ExpPoints);
-    Print(3, 10, 91, WHITE, gBwSsText_ToNextLv);
+    if (!darkMon)
+    {
+        Print(3, 10, 79, WHITE, gBwSsText_ExpPoints);
+        Print(3, 10, 91, WHITE, gBwSsText_ToNextLv);
+    }
     Print(3, 10, 19, WHITE + mod[0], gBwSsText_Attack);
     Print(3, 10, 31, WHITE + mod[1], gBwSsText_Defense);
     Print(3, 10, 43, WHITE + mod[3], gBwSsText_SpAtk);
@@ -1700,8 +1723,11 @@ static void PrintMonStats(void)
         PrintEvIvRow(44, MON_DATA_SPATK_EV, MON_DATA_SPATK_IV, 90, 50);
         PrintEvIvRow(56, MON_DATA_SPDEF_EV, MON_DATA_SPDEF_IV, 90, 50);
         PrintEvIvRow(68, MON_DATA_SPEED_EV, MON_DATA_SPEED_IV, 90, 50);
-        PrintFit(3, 69, 72, 80, DARK, sBwSs->summary.expStr);
-        PrintFit(3, 69, 72, 92, DARK, sBwSs->summary.toNextStr);
+        if (!darkMon)
+        {
+            PrintFit(3, 69, 72, 80, DARK, sBwSs->summary.expStr);
+            PrintFit(3, 69, 72, 92, DARK, sBwSs->summary.toNextStr);
+        }
         return;
     }
     PrintFit(3, 68, 74, 0, DARK, sBwSs->summary.hpStr);       /* 右端 142（窓は 144） */
@@ -1710,8 +1736,11 @@ static void PrintMonStats(void)
     PrintFit(3, 90, 27, 44, DARK, sBwSs->summary.statStr[PSS_STAT_SPA]);
     PrintFit(3, 90, 27, 56, DARK, sBwSs->summary.statStr[PSS_STAT_SPD]);
     PrintFit(3, 90, 27, 68, DARK, sBwSs->summary.statStr[PSS_STAT_SPE]);
+    if (!darkMon)
+    {
     PrintFit(3, 69, 72, 80, DARK, sBwSs->summary.expStr);      /* 右端 141（実機 1 回目: 見出しと重なった・2026-10-09 ユーザー「経験値右にずらしたほうが」） */
     PrintFit(3, 69, 72, 92, DARK, sBwSs->summary.toNextStr);
+    }
     DrawIvRank(GetIvForDisplay(mon, MON_DATA_HP_IV), 10, 1);
     DrawIvRank(GetIvForDisplay(mon, MON_DATA_ATK_IV), 120, 21);
     DrawIvRank(GetIvForDisplay(mon, MON_DATA_DEF_IV), 120, 33);
@@ -1787,8 +1816,12 @@ static void PrintMoveNameAndPP(u8 i)
     u8 colour = WHITE;
     u16 move = sBwSs->moves[i];
     u8 ppBonuses = GetMonData(&sBwSs->currentMon, MON_DATA_PP_BONUSES, NULL);
-    u8 maxPP = CalculatePPWithBonus(move, ppBonuses, i);
-    u8 curPP = (i == 4) ? maxPP : GetMonData(&sBwSs->currentMon, MON_DATA_PP1 + i, NULL);
+    u8 slot = (i < 4 && sBwSs->shadowOn && sBwSs->shadowSrc[i] < 4) ? sBwSs->shadowSrc[i] : i; /* [hack] patches/0963 段 E 元の技は元の枠の PP */
+    u8 maxPP = CalculatePPWithBonus(move, ppBonuses, slot);
+    u8 curPP = (i == 4) ? maxPP : GetMonData(&sBwSs->currentMon, MON_DATA_PP1 + slot, NULL);
+
+    if (i < 4 && sBwSs->shadowOn && sBwSs->shadowSrc[i] == SHADOW_SRC_DARK) /* ダーク技は PP を使わない: 表の PP を満タンで出す */
+        maxPP = curPP = gBattleMoves[move].pp;
 
     /* 技名は 8 文字まで。窓は 80 画素なので字間 0 で詰める（実機 3 回目: こんげんのはどう が切れた） */
     AddTextPrinterParameterized4(sBwSs->window[3], BWSS_FONT, 1, MOVE_ROW_Y(i) - 2, 0, 0, sTextColours[WHITE], TEXT_SPEED_FF,
@@ -1808,6 +1841,58 @@ static void PrintMoveNameAndPP(u8 i)
     }
 }
 
+/* [hack] patches/0932 技の熟練度: 技の詳細の「こうか」の右に しんか／じゅくれん N を出す。説明の欄を確かめ・お断り・忘れる警告に借りる */
+static const u8 *MasteryMessage(u16 move)
+{
+    u8 lv;
+
+    if (sMoveCursor >= 4)
+        return NULL;
+    if (sBwSs->masteryMsg == 1)
+        return gText_MasteryConfirm;
+    if (sBwSs->masteryMsg == 2)
+        return gText_MasteryLocked;
+    if ((sBwSs->mode == PSS_MODE_SELECT_MOVE || sBwSs->mode == PSS_MODE_FORGET_MOVE)
+        && HackMoveMastery_SummaryState(&sBwSs->currentMon, move, &lv) == 2)
+        return gText_MasteryForgetWarn;      /* J7: 忘れると熟練度が消える（警告） */
+    return NULL;
+}
+
+static void PrintMasteryStatus(u16 move)
+{
+    u8 buf[24], lv;
+    u8 st;
+
+    if (move == MOVE_NONE || sMoveCursor >= 4)
+        return;
+    st = HackMoveMastery_SummaryState(&sBwSs->currentMon, move, &lv);
+    if (st == 0)
+        return;
+    if (st == 1)
+    {
+        u8 *end = StringCopy(buf, gText_MasteryShinka);
+
+        if (CanEditMastery())
+            StringCopy(end, gText_MasteryHint);   /* 切り替えられるときだけ「SELECT」の案内 */
+    }
+    else
+        ConvertIntToDecimalStringN(StringCopy(buf, gText_MasteryJukuren), lv, STR_CONV_MODE_LEFT_ALIGN, 2);
+    PrintTight(4, 42, 48, DARK, buf);
+}
+
+static bool8 CanEditMastery(void)
+{
+    u16 move;
+    u8 lv;
+
+    if (sBwSs->curPageIndex != PSS_PAGE_MOVES_INFO || sBwSs->mode == PSS_MODE_SELECT_MOVE || sBwSs->mode == PSS_MODE_FORGET_MOVE
+        || sBwSs->mode == PSS_MODE_TRADE || sBwSs->isEnemyParty || sBwSs->isEgg || sBwSs->swapping == TRUE
+        || gMain.inBattle || BWSS_RECEIVED_REMOTE_LINK_PLAYERS || sMoveCursor >= 4)
+        return FALSE;
+    move = sBwSs->moves[sMoveCursor];
+    return move != MOVE_NONE && HackMoveMastery_SummaryState(&sBwSs->currentMon, move, &lv) != 0;
+}
+
 static void PrintMoveInfo(void)
 {
     u16 move;
@@ -1825,10 +1910,13 @@ static void PrintMoveInfo(void)
     PrintTight(4, 14, 17, WHITE, gBwSsText_Power);
     PrintTight(4, 14, 32, WHITE, gBwSsText_Accuracy);
     PrintTight(4, 10, 48, WHITE, gBwSsText_Effect);
-    /* 説明は最大 5 行（素の日本語版を数えた）。窓の下端 112 に収めるため 1 行 10 画素（実機 2 回目で 5 行目が切れた） */
+    PrintMasteryStatus(move);
+    /* 説明は最大 5 行。フォント 2 は 1 行の高さ 12（maxLetterHeight）で、字は 9 画素＋影 1 画素＝10 画素。
+       行の間は u8 で足される（12 + (u8)-2 = 10 画素ごと）。以前の (u8)-3 は 9 画素ごとで字が前の行の影に重なった
+       （BUG-movedesc-overlap）。窓の下端 112 に 5 行目の影まで収めるため y = 60（60 + 4 × 10 + 10 = 110 < 112） */
     if (move != MOVE_NONE)
-        AddTextPrinterParameterized4(sBwSs->window[4], BWSS_FONT, 7, 61, 0, (u8)-3, sTextColours[DARK], TEXT_SPEED_FF,
-                                     gMoveDescriptions[move]);   /* CFRU の表は 0 が MOVE_NONE（技番号そのまま） */
+        AddTextPrinterParameterized4(sBwSs->window[4], BWSS_FONT, 7, 60, 0, (u8)-2, sTextColours[DARK], TEXT_SPEED_FF,
+                                     MasteryMessage(move) != NULL ? MasteryMessage(move) : gMoveDescriptions[move]);   /* CFRU の表は 0 が MOVE_NONE（技番号そのまま） */
     PutWindowTilemap(sBwSs->window[4]);
 }
 
@@ -1849,15 +1937,17 @@ static void DrawMoveTypeIcons(void)
 
 /* ---- トレーナーメモ ---- */
 /* 出会った場所の地名（2026-09-29）。★ 素の GetMapNameGeneric は**今いるマップの地方**で引くので使わない。
-   ポケモンの親の版（シンオウで出会ったら 12）で地方を決めて引く（src/map_region.c） */
-static void BwSs_GetMetLocationName(u8 *dest, u8 metLocation)
+   ポケモンの親の版（シンオウで出会ったら 12）で地方を決めて引く（src/map_region.c）。
+   ★ 2026-10-15 親の版は MapRegion_MonMetGame で読む（GetMonData は下 3 ビットだけ＝12 が 4 になり、
+   シンオウ・キタカミの番号をいつもの表＝ホウエンの地名で引いていた・patches/0379） */
+static void BwSs_GetMetLocationName(u8 *dest, u16 metLocation)
 {
-    u8 region = MapRegion_FromMetGame(GetMonData(&sBwSs->currentMon, MON_DATA_MET_GAME, NULL));
+    u8 region = MapRegion_FromMetGame(MapRegion_MonMetGame(&sBwSs->currentMon));
 
     StringCopy(dest, MapRegion_GetName(metLocation, region));
 }
 
-static bool32 IsMetLocationValid(u8 place)
+static bool32 IsMetLocationValid(u16 place)
 {
     return place <= METLOC_VALID_MAX;
 }
@@ -1869,7 +1959,7 @@ static bool32 NatureNeedsNoNa(u8 nature)
 
 static bool32 IsFromGenIII(void)
 {
-    u8 version = GetMonData(&sBwSs->currentMon, MON_DATA_MET_GAME, NULL);
+    u8 version = MapRegion_MonMetGame(&sBwSs->currentMon);   /* 4 ビットのまま（patches/0379） */
 
     /* サファイア・ルビー・エメラルド・FR・LG。★ シンオウで出会った印 12 もこのゲーム（2026-09-29・src/map_region.h） */
     return (version >= 1 && version <= 5) || version == MET_GAME_SINNOH || version == MET_GAME_KITAKAMI;
@@ -1892,11 +1982,11 @@ static void PrintMemoText(const u8 *withNa, const u8 *noNa, u8 nature)
     PrintTight(4, 16, 12, DARK, buf);
 }
 
-static void SetMemoPlaceholders(u8 nature, u8 *levelStr, u8 metLevel)
+static void SetMemoPlaceholders(u8 nature, u8 *levelStr, u16 metLevel)
 {
     BwSs_DynPlaceholderReset();
     BwSs_DynPlaceholderSet(0, gBwSsNatureNames[nature]);
-    ConvertIntToDecimalStringN(levelStr, metLevel == 0 ? 1 : metLevel, STR_CONV_MODE_LEFT_ALIGN, 3);
+    ConvertIntToDecimalStringN(levelStr, metLevel == 0 ? 1 : metLevel, STR_CONV_MODE_LEFT_ALIGN, HACK_LEVEL_DIGITS); //[hack] patches/0677
     BwSs_DynPlaceholderSet(1, levelStr);
 }
 
@@ -1906,8 +1996,8 @@ static void PrintTrainerMemoForeign(void)
     u8 nature = GetNature(&sBwSs->currentMon);
     u8 levelStr[5];
     u8 mapName[40];
-    u8 metLevel = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LEVEL, NULL);
-    u8 metLocation = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LOCATION, NULL);
+    u16 metLevel = HackMetLevel_Get((struct BoxPokemon*) &sBwSs->currentMon);   /* 2026-10-16 128 以上も読む */
+    u16 metLocation = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LOCATION, NULL);   /* L 案: 16 ビット */
 
     SetMemoPlaceholders(nature, levelStr, metLevel);
     if (IsMetLocationValid(metLocation))
@@ -1936,8 +2026,8 @@ static void PrintTrainerMemo(void)
     u8 nature = GetNature(&sBwSs->currentMon);
     u8 levelStr[5];
     u8 mapName[40];
-    u8 metLevel = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LEVEL, NULL);
-    u8 metLocation = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LOCATION, NULL);
+    u16 metLevel = HackMetLevel_Get((struct BoxPokemon*) &sBwSs->currentMon);   /* 2026-10-16 128 以上も読む */
+    u16 metLocation = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LOCATION, NULL);   /* L 案: 16 ビット */
 
     SetMemoPlaceholders(nature, levelStr, metLevel);
     /* 通信で来たポケモン（CFRU の TryReplaceSummaryScreenLocationWithFarAwayLocation と同じ判定） */
@@ -1983,7 +2073,7 @@ static void PrintEggMemo(void)
 /* たまごの window[4] */
 static void PrintEggInfo(void)
 {
-    u8 metLocation = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LOCATION, NULL);
+    u16 metLocation = GetMonData(&sBwSs->currentMon, MON_DATA_MET_LOCATION, NULL);   /* L 案: 16 ビット */
     u8 version;
     u8 idx = 0;
 
@@ -1991,7 +2081,7 @@ static void PrintEggInfo(void)
         idx = 4;
     else
     {
-        version = GetMonData(&sBwSs->currentMon, MON_DATA_MET_GAME, NULL);
+        version = MapRegion_MonMetGame(&sBwSs->currentMon);   /* 4 ビットのまま（patches/0379） */
         if (sBwSs->monList.mons != gEnemyParty)
         {
             if (!MapRegion_IsOurMetGame(version))
@@ -2107,7 +2197,7 @@ static void GetMonInfo(void)
     sBwSs->summary.otName[OT_NAME_LENGTH] = EOS;
     otId = GetMonData(mon, MON_DATA_OT_ID, NULL) & 0xFFFF;
     ConvertIntToDecimalStringN(sBwSs->summary.otId, otId, STR_CONV_MODE_LEADING_ZEROS, 5);
-    ConvertIntToDecimalStringN(tmp, GetMonData(mon, MON_DATA_LEVEL, NULL), STR_CONV_MODE_LEFT_ALIGN, 3);
+    ConvertIntToDecimalStringN(tmp, GetMonData(mon, MON_DATA_LEVEL, NULL), STR_CONV_MODE_LEFT_ALIGN, HACK_LEVEL_DIGITS); //[hack] patches/0677
     StringCopy(sBwSs->summary.level, gBwSsText_Lv);
     StringAppendN(sBwSs->summary.level, tmp, 4);
     heldItem = GetMonData(mon, MON_DATA_HELD_ITEM, NULL);
@@ -2128,7 +2218,7 @@ static void GetMonStats(void)
     u8 tmp[20];
     u16 hp;
     u16 species;
-    u8 level;
+    u16 level;
     u32 exp;
     u32 expToNext = 0;
     u16 ability;
@@ -2178,7 +2268,13 @@ static void GetMonStats(void)
 static void GetAllMoves(void)
 {
     u8 i;
+    u16 shadowMoves[4];
 
+    /* [hack] patches/0963 段 E ダークの子: 技欄は元のまま・並びは組み立てる（開いていない元の技は「？？？」の行・src/shadow_battle.c） */
+    sBwSs->shadowOn = ShadowSummary_Build(&sBwSs->currentMon, shadowMoves, sBwSs->shadowSrc);
+    if (sBwSs->shadowOn)
+        for (i = 0; i < 4; i++)
+            sBwSs->moves[i] = shadowMoves[i];
     for (i = 0; i < 4; i++)
         GetMove(i);
     if (sBwSs->mode == PSS_MODE_SELECT_MOVE)
@@ -2190,11 +2286,21 @@ static void GetMove(u8 i)
     struct Pokemon *mon = &sBwSs->currentMon;
     u16 move;
 
-    if (i < 4)
+    if (i < 4 && !sBwSs->shadowOn)
         sBwSs->moves[i] = GetMonData(mon, MON_DATA_MOVE1 + i, NULL);
     move = sBwSs->moves[i];
     if (move == MOVE_NONE)
     {
+        if (i < 4 && sBwSs->shadowOn && sBwSs->shadowSrc[i] == SHADOW_SRC_SEALED) /* まだ開いていない元の技: 「？？？」（選べない・PP なし） */
+        {
+            StringCopy(sBwSs->summary.moveName[i], gBwSsText_DexNoUnknown);
+            StringCopy(sBwSs->summary.ppStr[i], gBwSsText_TwoHyphens);
+            StringCopy(sBwSs->summary.power[i], gBwSsText_ThreeHyphens);
+            StringCopy(sBwSs->summary.accuracy[i], gBwSsText_ThreeHyphens);
+            sXpos->pp[i] = 0xFF;
+            sXpos->ppMax[i] = 0xFF;
+            return;
+        }
         StringCopy(sBwSs->summary.moveName[i], gBwSsText_OneHyphen);
         StringCopy(sBwSs->summary.ppStr[i], gBwSsText_TwoHyphens);
         StringCopy(sBwSs->summary.power[i], gBwSsText_ThreeHyphens);
@@ -2211,19 +2317,26 @@ static void GetMove(u8 i)
         ConvertIntToDecimalStringN(sBwSs->summary.ppStr[i], gBattleMoves[move].pp, STR_CONV_MODE_LEFT_ALIGN, 3);
         ConvertIntToDecimalStringN(sBwSs->summary.ppMaxStr[i], gBattleMoves[move].pp, STR_CONV_MODE_LEFT_ALIGN, 3);
     }
+    else if (i < 4 && sBwSs->shadowOn && sBwSs->shadowSrc[i] == SHADOW_SRC_DARK) /* ダーク技は PP を使わない（表の PP を出すだけ） */
+    {
+        ConvertIntToDecimalStringN(sBwSs->summary.ppStr[i], gBattleMoves[move].pp, STR_CONV_MODE_LEFT_ALIGN, 3);
+        ConvertIntToDecimalStringN(sBwSs->summary.ppMaxStr[i], gBattleMoves[move].pp, STR_CONV_MODE_LEFT_ALIGN, 3);
+    }
     else
     {
-        ConvertIntToDecimalStringN(sBwSs->summary.ppStr[i], GetMonData(mon, MON_DATA_PP1 + i, NULL), STR_CONV_MODE_LEFT_ALIGN, 3);
+        u8 slot = (i < 4 && sBwSs->shadowOn) ? sBwSs->shadowSrc[i] : i; /* [hack] patches/0963 段 E 元の技は元の枠の PP */
+
+        ConvertIntToDecimalStringN(sBwSs->summary.ppStr[i], GetMonData(mon, MON_DATA_PP1 + slot, NULL), STR_CONV_MODE_LEFT_ALIGN, 3);
         ConvertIntToDecimalStringN(sBwSs->summary.ppMaxStr[i],
-                                   CalculatePPWithBonus(move, GetMonData(mon, MON_DATA_PP_BONUSES, NULL), i),
+                                   CalculatePPWithBonus(move, GetMonData(mon, MON_DATA_PP_BONUSES, NULL), slot),
                                    STR_CONV_MODE_LEFT_ALIGN, 3);
     }
     sXpos->pp[i] = RightAlign(16, sBwSs->summary.ppStr[i]);
     sXpos->ppMax[i] = 0;
-    if (gBattleMoves[move].power <= 1)
+    if (MOVE_POWER(move) <= 1) //[hack] patches/0582 (#126): 威力 256 以上の技
         StringCopy(sBwSs->summary.power[i], gBwSsText_ThreeHyphens);
     else
-        ConvertIntToDecimalStringN(sBwSs->summary.power[i], gBattleMoves[move].power, STR_CONV_MODE_RIGHT_ALIGN, 3);
+        ConvertIntToDecimalStringN(sBwSs->summary.power[i], MOVE_POWER(move), STR_CONV_MODE_RIGHT_ALIGN, 3);
     if (gBattleMoves[move].accuracy == 0)
         StringCopy(sBwSs->summary.accuracy[i], gBwSsText_ThreeHyphens);
     else
@@ -2592,6 +2705,7 @@ static void LoadExpBar(void)
 
     LoadSpritePalette(&p);
     sExpBar = LoadBar(gBwSsExpBar, TAG_EXPBAR, TAG_EXPBAR, 11, 156, 130);
+    HackSummary_GaugeLoad();   /* [hack] patches/0966 段 H: ダークの心のゲージ（ハート 5 個）*/
     SetupExpBar();
     SetInvisExpBar(1);
 }
@@ -2600,7 +2714,7 @@ static void SetupExpBar(void)
 {
     u8 whole = 0;
     u8 i;
-    u8 level;
+    u16 level;
     u16 species;
     u32 exp, total, cur;
     u32 v0, v1;
@@ -2654,12 +2768,13 @@ static void SetInvisExpBar(u8 inv)
 
     for (i = 0; i < 11; i++)
         sExpBar->sprites[i]->invisible = inv;
+    HackSummary_GaugeInv(&sBwSs->currentMon, inv, sExpBar->sprites, 11);   /* [hack] patches/0966 段 H: ダークは経験値バーの代わりにハート */
 }
 
 /* ---- ポケルスの跡（点）と色違いの印 ---- */
 static void LoadDot(void)
 {
-    sDot = LoadSmallSprite(gBwSsDotGfx, 1, gBwSsDotPal, TAG_DOT, TAG_DOT, &sOam8x8, sAnimsDot, 114, 92);
+    sDot = LoadSmallSprite(gBwSsDotGfx, 4, gBwSsDotPal, TAG_DOT, TAG_DOT, &sOam16x16, sAnimsDot, 169, 53);
     SetInvisDot(1);
     UpdateDot();
 }
@@ -2687,8 +2802,8 @@ static void SetInvisDot(u8 inv)
     }
     else
     {
-        s->pos1.x = 114;
-        s->pos1.y = 92;
+        s->pos1.x = 169;
+        s->pos1.y = 53;
     }
 }
 
@@ -2769,7 +2884,7 @@ static void LoadBall(void)
        CFRU の `src/catching.c` は `ballType = ItemId_GetType(gLastUsedItem)` を**そのまま**
        しまう（87 / 177 / 234 行）。`src/build_pokemon.c` も `BALL_TYPE_POKE_BALL` を直接入れる。
        変換すると**二重変換**になって別のボールが出る（実機 2026-09-20）。そのまま使う。
-       ★ 表の外を引かない見張りも置く（6.23）。`gBallSpriteTemplates` は 0〜27 の 28 件。 */
+       ★ 表の外を引かない見張りも置く（6.23）。`gBallSpriteTemplates` は 0〜28 の 29 件（28 は ダイマックスボール・START ボール追加後）。 */
     u16 ballType = sBwSs->isEgg ? BALL_TYPE_POKE_BALL
                                 : GetMonData(&sBwSs->currentMon, MON_DATA_POKEBALL, NULL);
     struct Sprite *ball;
@@ -2867,6 +2982,7 @@ static void LoadMonPic(void)
     sBwSs->monSpriteId = spriteId;
     SetInvisMonPic(1);
     SetMonPicAnim(spriteId);
+    HackAura_SummaryAttach(spriteId, sBwSs->isEgg ? HACK_KIND_NONE : HackKind_Get((const struct BoxPokemon *)&sBwSs->currentMon)); /* [hack] patches/0966 段 H: 印のある個体は絵の後ろにオーラ */
 }
 
 static void SetMonPicAnim(u16 spriteId)
@@ -2968,6 +3084,7 @@ static void SetInvisMonPic(u8 inv)
 
 static void FreeMonPic(void)
 {
+    HackAura_SummaryDetach();   /* [hack] patches/0966 段 H */
     FreeAndDestroyMonPicSprite(sBwSs->monSpriteId);
     FREE_IF_SET(sAnim);
 }
@@ -2980,6 +3097,7 @@ static void FreeAllSprites(void)
     sHpBar = NULL;
     FreeBar(sExpBar, 11);
     sExpBar = NULL;
+    HackSummary_GaugeFree();   /* [hack] patches/0966 段 H */
     FreeMonPic();
     FreeIcon();
     FreeBall();
@@ -3004,6 +3122,7 @@ static void RefreshSprites(void)
     SetInvisMonPic(0);
     SetupHpBar();
     SetupExpBar();
+    SetInvisExpBar(HackSummary_GaugeWantedInv());   /* [hack] patches/0966 段 H: ポケモンを替えたら（ダークか否かで）経験値バー／ハートを切り替える */
     UpdateMarkings();
     ShowStatusIcon();
     UpdateDot();
@@ -3095,14 +3214,43 @@ static void Task_MovesInfoInput(unusedArg u8 taskId)
             return;
         if (JOY_NEW(DPAD_UP))
         {
+            sBwSs->masteryMsg = 0;
             MoveCursorUp(2);
         }
         else if (JOY_NEW(DPAD_DOWN))
         {
+            sBwSs->masteryMsg = 0;
             MoveCursorDown(2);
+        }
+        else if (JOY_NEW(SELECT_BUTTON) && CanEditMastery())
+        {
+            /* [hack] patches/0932 しんか → じゅくれん（一方通行・J2）。1 回目で「もどせません」と確かめ、もう 1 回で決める */
+            u16 move = sBwSs->moves[sMoveCursor];
+            u8 lv, st = HackMoveMastery_SummaryState(&sBwSs->currentMon, move, &lv);
+
+            if (st == 1 && sBwSs->masteryMsg != 1)
+            {
+                PlaySE(SE_SELECT);
+                sBwSs->masteryMsg = 1;
+            }
+            else if (st == 1)
+            {
+                if (HackMoveMastery_SummarySet(&sBwSs->currentMon, move))
+                    PlaySE(SE_SELECT);
+                else
+                    PlaySE(SE_ERROR);
+                sBwSs->masteryMsg = 0;
+            }
+            else
+            {
+                PlaySE(SE_ERROR);
+                sBwSs->masteryMsg = 2;
+            }
+            sBwSs->flipState = 2;     /* 技の詳細を描き直す（入れ替えのあとと同じ道） */
         }
         else if (JOY_NEW(A_BUTTON))
         {
+            sBwSs->masteryMsg = 0;
             PlaySE(SE_SELECT);
             if (sMoveCursor == 4)
             {
@@ -3119,7 +3267,8 @@ static void Task_MovesInfoInput(unusedArg u8 taskId)
             }
             if (sBwSs->swapping != TRUE)
             {
-                if (sBwSs->isEnemyParty == FALSE && gMain.inBattle == 0 && BWSS_RECEIVED_REMOTE_LINK_PLAYERS == 0)
+                if (sBwSs->isEnemyParty == FALSE && gMain.inBattle == 0 && BWSS_RECEIVED_REMOTE_LINK_PLAYERS == 0
+                    && !sBwSs->shadowOn) /* [hack] patches/0963 段 E ダークの子の並びは組み立てた物なので 並べ替えない */
                 {
                     sMoveSwapPos = sMoveCursor;
                     sBwSs->swapping = TRUE;
@@ -3139,6 +3288,12 @@ static void Task_MovesInfoInput(unusedArg u8 taskId)
         }
         else if (JOY_NEW(B_BUTTON))
         {
+            if (sBwSs->masteryMsg != 0)
+            {
+                sBwSs->masteryMsg = 0;      /* 確かめをやめる */
+                sBwSs->flipState = 2;
+                return;
+            }
             if (sBwSs->swapping == TRUE)
             {
                 sMoveSwapPos = sMoveCursor;

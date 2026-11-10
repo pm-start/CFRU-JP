@@ -570,6 +570,9 @@ const struct FlingStruct gFlingTable[ITEMS_COUNT] =
 	[ITEM_EXP_CANDY_XL] = {30, 0},
 	[ITEM_EXP_CANDY_XXL] = {30, 0},   //[hack] patches/0323
 	[ITEM_ALOLA_STONE] = {30, 0},   //[hack] patches/0327 アローラのいし
+	[ITEM_RUSTY_CROWN] = {30, 0},   //[hack] patches/0433 さびたおうかん（ぎんのおうかんと同じ）
+	[ITEM_RIRU_LOVE] = {30, 0},   //[hack] patches/0617 リルの あいじょう（なげつけても うばわれない＝CanTransferItem）
+	[ITEM_GARCHOMPITE_X] = {80, 0},   //[hack] patches/0813 ガブリアスナイトX（なげつけられない＝CanTransferItem が FALSE）
 };
 
 const u16 gBannedBattleEatBerries[] =
@@ -1118,6 +1121,7 @@ const u16 gItemsByType[ITEMS_COUNT] =
 	[ITEM_PLUME_FOSSIL] = ITEM_TYPE_FOSSIL,
 	[ITEM_JAW_FOSSIL] = ITEM_TYPE_FOSSIL,
 	[ITEM_SAIL_FOSSIL] = ITEM_TYPE_FOSSIL,
+	[ITEM_KYOGA_FOSSIL] = ITEM_TYPE_FOSSIL, //[hack] patches/0952 きょがのカセキ
 
 	[ITEM_ORANGE_MAIL] = ITEM_TYPE_MAIL,
 	[ITEM_HARBOR_MAIL] = ITEM_TYPE_MAIL,
@@ -1186,6 +1190,9 @@ const u16 gItemsByType[ITEMS_COUNT] =
 	[ITEM_EXP_CANDY_XL] = ITEM_TYPE_LEVEL_MODIFIER,
 	[ITEM_EXP_CANDY_XXL] = ITEM_TYPE_LEVEL_MODIFIER,   //[hack] patches/0323
 	[ITEM_ALOLA_STONE] = ITEM_TYPE_EVOLUTION_STONE,   //[hack] patches/0327 アローラのいし
+	[ITEM_RUSTY_CROWN] = ITEM_TYPE_SELLABLE,   //[hack] patches/0433 さびたおうかん（ぎんのおうかんと同じ）
+	[ITEM_RIRU_LOVE] = ITEM_TYPE_HELD_ITEM,   //[hack] patches/0617 リルの あいじょう（もたせる道具・効果なし）
+	[ITEM_GARCHOMPITE_X] = ITEM_TYPE_MEGA_STONE,   //[hack] patches/0813 ガブリアスナイトX
 };
 
 
@@ -2060,6 +2067,37 @@ const struct ItemIconTemplate gItemGraphicsTable[] =
 	{gItemIcon_ExpCandyXXLTiles, gItemIcon_ExpCandyXXLPal},	// ITEM_EXP_CANDY_XXL（graphics/item/gItemIcon_ExpCandyXXL.png＝XL の写し・patches/0323）
 	{gItemIcon_Alola_StoneTiles, gItemIcon_Alola_StonePal},	// ITEM_ALOLA_STONE（2026-10-11 Claude が描いた夕日色の石・tools/items/alola_stone/build_alola_stone_icon.py・patches/0327）
 	{gItemIcon_Creeper_IceTiles, gItemIcon_Creeper_IcePal},	// ITEM_CREEPER_ICE（ユーザーの絵を縮めた・tools/items/creeper_ice/build_creeper_ice_icon.py・patches/0333）
+	{gItemIcon_Start_BallTiles, gItemIcon_Start_BallPal},	// ITEM_START_BALL（デザイン画を縮めた・tools/balls/build_start_ball.py・patches/0393）
+// WATASHI_BALLS_BEGIN icons
+	{gItemIcon_MoonPetalBallTiles, gItemIcon_MoonPetalBallPal},	// ITEM_MOON_PETAL_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_MemoryVeilBallTiles, gItemIcon_MemoryVeilBallPal},	// ITEM_MEMORY_VEIL_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_TearWisteriaBallTiles, gItemIcon_TearWisteriaBallPal},	// ITEM_TEAR_WISTERIA_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_SweetHeartBallTiles, gItemIcon_SweetHeartBallPal},	// ITEM_SWEET_HEART_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_SilentHaloBallTiles, gItemIcon_SilentHaloBallPal},	// ITEM_SILENT_HALO_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_GamePulseBallTiles, gItemIcon_GamePulseBallPal},	// ITEM_GAME_PULSE_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_WinterBlossomBallTiles, gItemIcon_WinterBlossomBallPal},	// ITEM_WINTER_BLOSSOM_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_ThornHeartBallTiles, gItemIcon_ThornHeartBallPal},	// ITEM_THORN_HEART_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_FoxSpiritBallTiles, gItemIcon_FoxSpiritBallPal},	// ITEM_FOX_SPIRIT_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+	{gItemIcon_BerryBloomBallTiles, gItemIcon_BerryBloomBallPal},	// ITEM_BERRY_BLOOM_BALL（デザイン画を縮めた・tools/balls/build_watashi_balls.py・patches/0393）
+// WATASHI_BALLS_END icons
+	{gItemIcon_Rusty_CrownTiles, gItemIcon_Rusty_CrownPal},	// ITEM_RUSTY_CROWN（ぎんのおうかんを さびた茶色に塗り替えた・tools/items/rusty_crown/build_rusty_crown_icon.py・patches/0433）
+	{gItemIcon_HeartScaleTiles, gItemIcon_HeartScalePal},	// ITEM_RIRU_LOVE（ハートのウロコの絵を流用・patches/0617）
+	{gItemIcon_Garchompite_XTiles, gItemIcon_Garchompite_XPal},	// ITEM_GARCHOMPITE_X（ガブリアスナイトの金色版・tools/items/garchompite_x/build_garchompite_x_icon.py・patches/0813）
+	{gItemIcon_TMTiles, gItemIcon_TMFirePal},	// ITEM_TM121（やけっぱち・タイプ別の既存アイコン・patches/0861）
+	{gItemIcon_TMTiles, gItemIcon_TMElectricPal},	// ITEM_TM122（サンダーダイブ・タイプ別の既存アイコン・patches/0861）
+	{gItemIcon_TMTiles, gItemIcon_TMSteelPal},	// ITEM_TM123（ハードプレス・タイプ別の既存アイコン・patches/0861）
+	{gItemIcon_TMTiles, gItemIcon_TMDragonPal},	// ITEM_TM124（ドラゴンエール・タイプ別の既存アイコン・patches/0861）
+	{gItemIcon_TMTiles, gItemIcon_TM_FairyPal},	// ITEM_TM125（みわくのボイス・タイプ別の既存アイコン・patches/0861）
+	{gItemIcon_TMTiles, gItemIcon_TMPsychicPal},	// ITEM_TM126（サイコノイズ・タイプ別の既存アイコン・patches/0861）
+	{gItemIcon_TMTiles, gItemIcon_TMFightingPal},	// ITEM_TM127（はやてがえし・タイプ別の既存アイコン・patches/0861）
+	{gItemIcon_GennamaTiles, gItemIcon_GennamaPal},	// ITEM_GENNAMA（きんのたまの色違い＝緑の札束・tools/items/gennama/build_gennama_icon.py・patches/0868）
+	{gItemIcon_ItemfinderTiles, gItemIcon_ItemfinderPal},	// ITEM_EXPLORER_KIT 0x370（ダウジングマシンの絵を借りる・patches/0873）
+	{gItemIcon_Kyoga_FossilTiles, gItemIcon_Kyoga_FossilPal},	// ITEM_KYOGA_FOSSIL 0x371（きょがのカセキ・patches/0952・設定資料の絵）
+	{gItemIcon_Snatch_BallTiles, gItemIcon_Snatch_BallPal},	// ITEM_SNATCH_BALL 0x372（スナッチボール・ダスクボールの色替え・tools/balls/build_snatch_ball.py・patches/0961）
+	{gItemIcon_WhiteHerbTiles, gItemIcon_WhiteHerbPal},	// ITEM_JOY_SCENT 0x373（仮の絵＝しろいハーブ・patches/0965）
+	{gItemIcon_MentalHerbTiles, gItemIcon_MentalHerbPal},	// ITEM_EXCITE_SCENT 0x374（仮の絵＝メンタルハーブ）
+	{gItemIcon_Power_HerbTiles, gItemIcon_Power_HerbPal},	// ITEM_VIVID_SCENT 0x375（仮の絵＝パワフルハーブ）
+	{gItemIcon_FullRestoreTiles, gItemIcon_FullRestorePal},	// ITEM_SECRET_POTION 0x376（ひでんのくすり・仮の絵＝かいふくのくすり）
 };
 
 const struct Item gItemData[] =
@@ -6443,7 +6481,7 @@ const struct Item gItemData[] =
         .unk19 = 1,
 		.pocket = POCKET_KEY_ITEMS,
 		.type = ITEM_USE_BAG_MENU,
-		.fieldUseFunc = gFieldFunc_Item_None,
+		.fieldUseFunc = FieldUseFunc_PokeblockCase,
 		.battleUsage = 0,
         .battleUseFunc = NULL,
         .secondaryId = 0
@@ -7497,7 +7535,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM01,
 		.importance = 1,
-		.unk19 = 121,
+		.unk19 = 128, //[hack] patches/0861 ひでん 121 → 128
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -7513,7 +7551,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM02,
 		.importance = 1,
-		.unk19 = 122,
+		.unk19 = 129, //[hack] patches/0861 ひでん 122 → 129
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -7529,7 +7567,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM03,
 		.importance = 1,
-		.unk19 = 123,
+		.unk19 = 130, //[hack] patches/0861 ひでん 123 → 130
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -7545,7 +7583,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM04,
 		.importance = 1,
-		.unk19 = 124,
+		.unk19 = 131, //[hack] patches/0861 ひでん 124 → 131
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -7561,7 +7599,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM05,
 		.importance = 1,
-		.unk19 = 125,
+		.unk19 = 132, //[hack] patches/0861 ひでん 125 → 132
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -7577,7 +7615,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM06,
 		.importance = 1,
-		.unk19 = 126,
+		.unk19 = 133, //[hack] patches/0861 ひでん 126 → 133
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -7593,7 +7631,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM07,
 		.importance = 1,
-		.unk19 = 127,
+		.unk19 = 134, //[hack] patches/0861 ひでん 127 → 134
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -7609,7 +7647,7 @@ const struct Item gItemData[] =
 		.holdEffectParam = 0,
 		.description = DESC_HM08,
 		.importance = 1,
-		.unk19 = 128,
+		.unk19 = 135, //[hack] patches/0861 ひでん 128 → 135
 		.pocket = POCKET_TM_CASE,
 		.type = ITEM_USE_PARTY_MENU,
 		.fieldUseFunc = NULL,
@@ -9908,7 +9946,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x0a, 0x48, 0x0c, 0x19, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_FIST_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 1,
 		.description = DESC_FIST_PLATE,
@@ -9924,7 +9962,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x01, 0x05, 0x40, 0x27, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_SKY_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 2,
 		.description = DESC_SKY_PLATE,
@@ -9940,7 +9978,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x23, 0x03, 0x45, 0x08, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_TOXIC_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 3,
 		.description = DESC_TOXIC_PLATE,
@@ -9956,7 +9994,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x41, 0x02, 0x11, 0x19, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_EARTH_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 4,
 		.description = DESC_EARTH_PLATE,
@@ -9972,7 +10010,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x37, 0x2e, 0x0e, 0x07, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_STONE_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 5,
 		.description = DESC_STONE_PLATE,
@@ -9988,7 +10026,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x10, 0x1f, 0x21, 0x0c, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_INSECT_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 6,
 		.description = DESC_INSECT_PLATE,
@@ -10004,7 +10042,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x23, 0x19, 0x19, 0x09, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_SPOOKY_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 7,
 		.description = DESC_SPOOKY_PLATE,
@@ -10020,7 +10058,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x0a, 0x03, 0x13, 0x12, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_IRON_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 8,
 		.description = DESC_IRON_PLATE,
@@ -10036,7 +10074,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x1b, 0x19, 0x10, 0x1f, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_FLAME_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 10,
 		.description = DESC_FLAME_PLATE,
@@ -10052,7 +10090,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x0c, 0x3e, 0x08, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_SPLASH_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 11,
 		.description = DESC_SPLASH_PLATE,
@@ -10068,7 +10106,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x20, 0x45, 0x28, 0x19, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_MEADOW_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 12,
 		.description = DESC_MEADOW_PLATE,
@@ -10084,7 +10122,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x02, 0x06, 0x3e, 0x11, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_ZAP_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 13,
 		.description = DESC_ZAP_PLATE,
@@ -10100,7 +10138,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x1c, 0x0c, 0x38, 0x19, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_MIND_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 14,
 		.description = DESC_MIND_PLATE,
@@ -10116,7 +10154,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x12, 0x27, 0x27, 0x19, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_ICICLE_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 15,
 		.description = DESC_ICICLE_PLATE,
@@ -10132,7 +10170,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x28, 0x35, 0x03, 0x19, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_DRACO_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 16,
 		.description = DESC_DRACO_PLATE,
@@ -10148,7 +10186,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x0a, 0x2c, 0x23, 0x13, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_DREAD_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 17,
 		.description = DESC_DREAD_PLATE,
@@ -10164,7 +10202,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x0e, 0x02, 0x2a, 0x02, 0x9d, 0x7a, 0xae, 0x64, 0xff},
 		.itemId = ITEM_PIXIE_PLATE,
-		.price = 0,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_PLATE,
 		.holdEffectParam = 23,
 		.description = DESC_PIXIE_PLATE,
@@ -10180,7 +10218,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x6c, 0x7f, 0x52, 0x64, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_FIGHTING_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 1,
 		.description = DESC_FIGHTING_MEMORY,
@@ -10196,7 +10234,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x6c, 0x77, 0x52, 0x7e, 0x89, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_FLYING_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 2,
 		.description = DESC_FLYING_MEMORY,
@@ -10212,7 +10250,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x9f, 0x52, 0x8e, 0x7e, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_POISON_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 3,
 		.description = DESC_POISON_MEMORY,
@@ -10228,7 +10266,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x89, 0x77, 0x53, 0x7e, 0x95, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_GROUND_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 4,
 		.description = DESC_GROUND_MEMORY,
@@ -10244,7 +10282,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x7b, 0xa0, 0x58, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_ROCK_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 5,
 		.description = DESC_ROCK_MEMORY,
@@ -10260,7 +10298,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x96, 0x89, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_BUG_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 6,
 		.description = DESC_BUG_MEMORY,
@@ -10276,7 +10314,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x8b, 0xae, 0x5d, 0x64, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_GHOST_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 7,
 		.description = DESC_GHOST_MEMORY,
@@ -10292,7 +10330,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x5d, 0x61, 0xae, 0x79, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_STEEL_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 8,
 		.description = DESC_STEEL_MEMORY,
@@ -10308,7 +10346,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x6c, 0x7f, 0x52, 0x74, 0xae, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_FIRE_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 10,
 		.description = DESC_FIRE_MEMORY,
@@ -10324,7 +10362,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x53, 0x55, 0xae, 0x60, 0xae, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_WATER_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 11,
 		.description = DESC_WATER_MEMORY,
@@ -10340,7 +10378,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x89, 0x77, 0x5d, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_GRASS_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 12,
 		.description = DESC_GRASS_MEMORY,
@@ -10356,7 +10394,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x54, 0x7a, 0x58, 0x64, 0x7b, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_ELECTRIC_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 13,
 		.description = DESC_ELECTRIC_MEMORY,
@@ -10372,7 +10410,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x5b, 0x52, 0x57, 0xa0, 0x58, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_PSYCHIC_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 14,
 		.description = DESC_PSYCHIC_MEMORY,
@@ -10388,7 +10426,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x51, 0x52, 0x5d, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_ICE_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 15,
 		.description = DESC_ICE_MEMORY,
@@ -10404,7 +10442,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x95, 0x77, 0x8b, 0x7e, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_DRAGON_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 16,
 		.description = DESC_DRAGON_MEMORY,
@@ -10420,7 +10458,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x91, 0xae, 0x58, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_DARK_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 17,
 		.description = DESC_DARK_MEMORY,
@@ -10436,7 +10474,7 @@ const struct Item gItemData[] =
 	{
 		.name = {0x6c, 0x82, 0x51, 0x78, 0xae, 0x72, 0x73, 0x78, 0xff},
 		.itemId = ITEM_FAIRY_MEMORY,
-		.price = 1000,
+		.price = 10000,
 		.holdEffect = ITEM_EFFECT_MEMORY,
 		.holdEffectParam = 23,
 		.description = DESC_FAIRY_MEMORY,
@@ -13956,7 +13994,7 @@ const struct Item gItemData[] =
     {
         .name = {0x98, 0xae, 0x5d, 0x64, 0x54, 0x65, 0x8d, 0xae, 0xff},
         .itemId = ITEM_BOOSTER_ENERGY,
-        .price = 0,
+        .price = 10000,
         .holdEffect = ITEM_EFFECT_BOOSTER_ENERGY,
         .holdEffectParam = 0,
         .description = DESC_BOOSTER_ENERGY,
@@ -14043,8 +14081,8 @@ const struct Item gItemData[] =
         .importance = 0,
         .unk19 = 0,
         .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = gFieldFunc_Item_None,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = gFieldFunc_Evo_Item,
         .battleUsage = 0,
         .battleUseFunc = NULL,
         .secondaryId = 0
@@ -14059,8 +14097,8 @@ const struct Item gItemData[] =
         .importance = 0,
         .unk19 = 0,
         .pocket = POCKET_ITEMS,
-        .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = gFieldFunc_Item_None,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = gFieldFunc_Evo_Item,
         .battleUsage = 0,
         .battleUseFunc = NULL,
         .secondaryId = 0
@@ -15497,7 +15535,7 @@ const struct Item gItemData[] =
 	},
 	// きょせいどうぐ（自作・ITEM_GENDER_TOOL 0x346・2026-10-06・オス・メスを入れ替える・src/hack_gender_tool.c）
 	{
-		.name = {0x07, 0x36, 0x0E, 0x02, 0x45, 0x03, 0x39, 0xFF}, // きょせいどうぐ
+		.name = {0xCE, 0xCD, 0xC0, 0x24, 0x08, 0xFF}, // TSFやく（2026-10-13 ユーザー・前は きょせいどうぐ）
 		.itemId = ITEM_GENDER_TOOL,
 		.price = 10000,
 		.holdEffect = 0,
@@ -15831,6 +15869,499 @@ const struct Item gItemData[] =
 		.importance = 0,
 		.unk19 = 0,
 		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_BAG_MENU,
+		.fieldUseFunc = gFieldFunc_Item_None,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// STARTボール（自作・ITEM_START_BALL 0x35A・BALL_TYPE_START_BALL 27・2026-10-15・捕獲率 1.3 倍・210 円・patches/0393）
+	{
+		.name = {0xCD, 0xCE, 0xBB, 0xCC, 0xCE, 0x9A, 0xAE, 0x79, 0xFF}, // STARTボール
+		.itemId = ITEM_START_BALL,
+		.price = 210,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_START_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 27, //BALL_TYPE_START_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+// WATASHI_BALLS_BEGIN items
+	// ムーンペタルボール（ムーンペタルボール・ITEM_MOON_PETAL_BALL 0x35B・BALL_TYPE 28・わたしたち りる のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x71, 0xAE, 0x7E, 0x9E, 0x60, 0x79, 0x9A, 0xAE, 0x79, 0xFF}, // ムーンペタルボール
+		.itemId = ITEM_MOON_PETAL_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_MOON_PETAL_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 28, //BALL_TYPE_MOON_PETAL_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// メモリベールボール（メモリーヴェールボール・ITEM_MEMORY_VEIL_BALL 0x35C・BALL_TYPE 29・わたしたち うい のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x72, 0x73, 0x78, 0x99, 0xAE, 0x79, 0x9A, 0xAE, 0x79, 0xFF}, // メモリベールボール
+		.itemId = ITEM_MEMORY_VEIL_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_MEMORY_VEIL_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 29, //BALL_TYPE_MEMORY_VEIL_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// ウィステリアボール（ティアウィステリアボール・ITEM_TEAR_WISTERIA_BALL 0x35D・BALL_TYPE 30・わたしたち しだれ のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x53, 0x80, 0x5D, 0x63, 0x78, 0x51, 0x9A, 0xAE, 0x79, 0xFF}, // ウィステリアボール
+		.itemId = ITEM_TEAR_WISTERIA_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TEAR_WISTERIA_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 30, //BALL_TYPE_TEAR_WISTERIA_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// スイトハートボール（スイートハートボール・ITEM_SWEET_HEART_BALL 0x35E・BALL_TYPE 31・わたしたち みるく のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x5D, 0x52, 0x64, 0x6A, 0xAE, 0x64, 0x9A, 0xAE, 0x79, 0xFF}, // スイトハートボール
+		.itemId = ITEM_SWEET_HEART_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_SWEET_HEART_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 31, //BALL_TYPE_SWEET_HEART_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// サイレントボール（サイレントヘイローボール・ITEM_SILENT_HALO_BALL 0x35F・BALL_TYPE 32・わたしたち なお のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x5B, 0x52, 0x7A, 0x7E, 0x64, 0x9A, 0xAE, 0x79, 0xFF}, // サイレントボール
+		.itemId = ITEM_SILENT_HALO_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_SILENT_HALO_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 32, //BALL_TYPE_SILENT_HALO_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// ゲームパルスボール（ゲームパルスボール・ITEM_GAME_PULSE_BALL 0x360・BALL_TYPE 33・わたしたち かいり のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x8A, 0xAE, 0x71, 0x9B, 0x79, 0x5D, 0x9A, 0xAE, 0x79, 0xFF}, // ゲームパルスボール
+		.itemId = ITEM_GAME_PULSE_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_GAME_PULSE_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 33, //BALL_TYPE_GAME_PULSE_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// ウィンターボール（ウィンターブロッサムボール・ITEM_WINTER_BLOSSOM_BALL 0x361・BALL_TYPE 34・わたしたち りっか のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x53, 0x80, 0x7E, 0x60, 0xAE, 0x9A, 0xAE, 0x79, 0xFF}, // ウィンターボール
+		.itemId = ITEM_WINTER_BLOSSOM_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_WINTER_BLOSSOM_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 34, //BALL_TYPE_WINTER_BLOSSOM_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// ソーンハートボール（ソーンハートボール・ITEM_THORN_HEART_BALL 0x362・BALL_TYPE 35・わたしたち しぃ のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x5F, 0xAE, 0x7E, 0x6A, 0xAE, 0x64, 0x9A, 0xAE, 0x79, 0xFF}, // ソーンハートボール
+		.itemId = ITEM_THORN_HEART_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_THORN_HEART_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 35, //BALL_TYPE_THORN_HEART_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// フォックスボール（フォックススピリットボール・ITEM_FOX_SPIRIT_BALL 0x363・BALL_TYPE 36・わたしたち らん のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x6C, 0x83, 0xA0, 0x58, 0x5D, 0x9A, 0xAE, 0x79, 0xFF}, // フォックスボール
+		.itemId = ITEM_FOX_SPIRIT_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_FOX_SPIRIT_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 36, //BALL_TYPE_FOX_SPIRIT_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// ベリブルームボール（ベリーブルームボール・ITEM_BERRY_BLOOM_BALL 0x364・BALL_TYPE 37・わたしたち いちご のボール・捕獲率 2 倍・1200 円・2026-10-15・patches/0393）
+	{
+		.name = {0x99, 0x78, 0x98, 0x79, 0xAE, 0x71, 0x9A, 0xAE, 0x79, 0xFF}, // ベリブルームボール
+		.itemId = ITEM_BERRY_BLOOM_BALL,
+		.price = 1200,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_BERRY_BLOOM_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 37, //BALL_TYPE_BERRY_BLOOM_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+// WATASHI_BALLS_END items
+	// さびたおうかん（自作・ITEM_RUSTY_CROWN 0x365・2026-10-16・ぎんのおうかんの逆＝バッグで つかうと 好きな能力の個体値を 0 にする・src/hack_rusty_crown.c・patches/0433）
+	{
+		.name = {0x0B, 0x47, 0x10, 0x05, 0x03, 0x06, 0x2E, 0xFF}, // さびたおうかん
+		.itemId = ITEM_RUSTY_CROWN,
+		.price = 5000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_RUSTY_CROWN,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_FIELD,
+		.fieldUseFunc = FieldUseFunc_RustyCrown,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// リルの あいじょう（自作・ITEM_RIRU_LOVE 0x366・2026-10-19・patches/0617・効果なしのもたせる道具＝しばり「ぜんぶレントラー」のレントラーの固定の持ち物・値段 0＝売れない・src/hack_luxray_love.c）
+	{
+		.name = {0x78, 0x79, 0x19, 0x00, 0x01, 0x02, 0x3D, 0x36, 0x03, 0xFF}, // リルの あいじょう
+		.itemId = ITEM_RIRU_LOVE,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_RIRU_LOVE,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_BAG_MENU,
+		.fieldUseFunc = gFieldFunc_Item_None,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// ガブリアスナイトX（自作・ITEM_GARCHOMPITE_X 0x367・2026-10-25・patches/0813・とくべつなガブリアス専用のメガストーン・値段 0＝売れない・なげつけ／どろぼう不可＝CanTransferItem・src/hack_gible_switch.c）
+	{
+		.name = {0x87, 0x98, 0x78, 0x51, 0x5d, 0x65, 0x52, 0x64, 0xd2, 0xff}, // ガブリアスナイトX
+		.itemId = ITEM_GARCHOMPITE_X,
+		.price = 0,
+		.holdEffect = ITEM_EFFECT_MEGA_STONE,
+		.holdEffectParam = 0,
+		.description = DESC_GARCHOMPITE_X,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_BAG_MENU,
+		.fieldUseFunc = gFieldFunc_Item_None,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// わざマシン121 やけっぱち（自作・ITEM_TM121 0x368・2026-10-26・patches/0861・SV の TM 専用技・再利用可・Mystery2=121）
+	{
+		.name = {0x2c, 0x3c, 0x6f, 0x5c, 0x7e, 0xa2, 0xa3, 0xa2, 0xff},
+		.itemId = ITEM_TM121,
+		.price = 3000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TM121,
+		.importance = 1,
+		.unk19 = 121,
+		.pocket = POCKET_TM_CASE,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = NULL,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// わざマシン122 サンダーダイブ（自作・ITEM_TM122 0x369・2026-10-26・patches/0861・SV の TM 専用技・再利用可・Mystery2=122）
+	{
+		.name = {0x2c, 0x3c, 0x6f, 0x5c, 0x7e, 0xa2, 0xa3, 0xa3, 0xff},
+		.itemId = ITEM_TM122,
+		.price = 3000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TM122,
+		.importance = 1,
+		.unk19 = 122,
+		.pocket = POCKET_TM_CASE,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = NULL,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// わざマシン123 ハードプレス（自作・ITEM_TM123 0x36A・2026-10-26・patches/0861・SV の TM 専用技・再利用可・Mystery2=123）
+	{
+		.name = {0x2c, 0x3c, 0x6f, 0x5c, 0x7e, 0xa2, 0xa3, 0xa4, 0xff},
+		.itemId = ITEM_TM123,
+		.price = 3000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TM123,
+		.importance = 1,
+		.unk19 = 123,
+		.pocket = POCKET_TM_CASE,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = NULL,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// わざマシン124 ドラゴンエール（自作・ITEM_TM124 0x36B・2026-10-26・patches/0861・SV の TM 専用技・再利用可・Mystery2=124）
+	{
+		.name = {0x2c, 0x3c, 0x6f, 0x5c, 0x7e, 0xa2, 0xa3, 0xa5, 0xff},
+		.itemId = ITEM_TM124,
+		.price = 3000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TM124,
+		.importance = 1,
+		.unk19 = 124,
+		.pocket = POCKET_TM_CASE,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = NULL,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// わざマシン125 みわくのボイス（自作・ITEM_TM125 0x36C・2026-10-26・patches/0861・SV の TM 専用技・再利用可・Mystery2=125）
+	{
+		.name = {0x2c, 0x3c, 0x6f, 0x5c, 0x7e, 0xa2, 0xa3, 0xa6, 0xff},
+		.itemId = ITEM_TM125,
+		.price = 3000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TM125,
+		.importance = 1,
+		.unk19 = 125,
+		.pocket = POCKET_TM_CASE,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = NULL,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// わざマシン126 サイコノイズ（自作・ITEM_TM126 0x36D・2026-10-26・patches/0861・SV の TM 専用技・再利用可・Mystery2=126）
+	{
+		.name = {0x2c, 0x3c, 0x6f, 0x5c, 0x7e, 0xa2, 0xa3, 0xa7, 0xff},
+		.itemId = ITEM_TM126,
+		.price = 3000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TM126,
+		.importance = 1,
+		.unk19 = 126,
+		.pocket = POCKET_TM_CASE,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = NULL,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// わざマシン127 はやてがえし（自作・ITEM_TM127 0x36E・2026-10-26・patches/0861・SV の TM 専用技・再利用可・Mystery2=127）
+	{
+		.name = {0x2c, 0x3c, 0x6f, 0x5c, 0x7e, 0xa2, 0xa3, 0xa8, 0xff},
+		.itemId = ITEM_TM127,
+		.price = 3000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_TM127,
+		.importance = 1,
+		.unk19 = 127,
+		.pocket = POCKET_TM_CASE,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = NULL,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// げんなま（自作・ITEM_GENNAMA 0x36F・2026-10-26・patches/0868・ハルカ／ヒカリに「あげる」と好感度が一気に上がる隠しの裏技・値段 0＝売れない・どうぐポケット）
+	{
+		.name = {0x3A, 0x2E, 0x15, 0x1F, 0xFF}, // げんなま
+		.itemId = ITEM_GENNAMA,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_GENNAMA,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_BAG_MENU,
+		.fieldUseFunc = gFieldFunc_Item_None,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// たんけんセット（自作・ITEM_EXPLORER_KIT 0x370・2026-10-26・たいせつなもの・野外でつかうと ちかつうろ の ひろばへ もぐる・src/hack_mining.c・patches/0873）
+	{
+		.name = {0x10, 0x2E, 0x09, 0x2E, 0x5E, 0xA0, 0x64, 0xFF}, // たんけんセット
+		.itemId = ITEM_EXPLORER_KIT,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_EXPLORER_KIT,
+		.importance = 1,
+		.unk19 = 0,
+		.pocket = POCKET_KEY_ITEMS,
+		.type = ITEM_USE_FIELD,
+		.fieldUseFunc = FieldUseFunc_ExplorerKit,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// きょがのカセキ（自作・ITEM_KYOGA_FOSSIL 0x371・2026-11-02・patches/0952・ちかつうろの化石ほりで出る・グレンの研究所で よみがえらせる・src/hack_kyoga_fossil.c・Redmine #230）
+	{
+		.name = {0x07, 0x36, 0x37, 0x19, 0x56, 0x5E, 0x57, 0xFF}, // きょがのカセキ（ほかの化石と同じ ○○のカセキ）
+		.itemId = ITEM_KYOGA_FOSSIL,
+		.price = 7000,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_KYOGA_FOSSIL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_BAG_MENU,
+		.fieldUseFunc = gFieldFunc_Item_None,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// スナッチボール（自作・ITEM_SNATCH_BALL 0x372・BALL_TYPE_SNATCH_BALL 39・2026-11-08・patches/0961・組織のトレーナーのダークだけに使える・店では売らない・src/hack_snatch_ball.c）
+	{
+		.name = {0x5D, 0x65, 0xA0, 0x61, 0x9A, 0xAE, 0x79, 0xFF}, // スナッチボール
+		.itemId = ITEM_SNATCH_BALL,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_SNATCH_BALL,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_POKE_BALLS,
+		.type = 39, //BALL_TYPE_SNATCH_BALL（include/new/catching.h・ここでは catching.h を読まないので数で）
+		.fieldUseFunc = NULL,
+		.battleUsage = 2,
+		.battleUseFunc = gFieldFunc_Pokeballs,
+		.secondaryId = 0
+	},
+	// かおり 3 種（自作・ITEM_JOY_SCENT 0x373〜0x375・2026-11-08・patches/0965・ダークの子の心のゲージを下げる・店では売らない＝価格 0・src/shadow_relive.c）
+	{
+		.name = {0x79, 0x7E, 0x79, 0x7E, 0x19, 0x06, 0x05, 0x28, 0xFF}, // ルンルンのかおり
+		.itemId = ITEM_JOY_SCENT,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_JOY_SCENT,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = FieldUseFunc_ShadowScent,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	{
+		.name = {0x7C, 0x58, 0x7C, 0x58, 0x19, 0x06, 0x05, 0x28, 0xFF}, // ワクワクのかおり
+		.itemId = ITEM_EXCITE_SCENT,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_EXCITE_SCENT,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = FieldUseFunc_ShadowScent,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	{
+		.name = {0x95, 0x57, 0x95, 0x57, 0x19, 0x06, 0x05, 0x28, 0xFF}, // ドキドキのかおり
+		.itemId = ITEM_VIVID_SCENT,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_VIVID_SCENT,
+		.importance = 0,
+		.unk19 = 0,
+		.pocket = POCKET_ITEMS,
+		.type = ITEM_USE_PARTY_MENU,
+		.fieldUseFunc = FieldUseFunc_ShadowScent,
+		.battleUsage = 0,
+		.battleUseFunc = NULL,
+		.secondaryId = 0
+	},
+	// ひでんのくすり（自作・ITEM_SECRET_POTION 0x376・2026-11-10・たいせつなもの・使えない＝アサギのミカンに わたす・FEAT-johto-s1）
+	{
+		.name = {0x1B, 0x44, 0x2E, 0x19, 0x08, 0x0D, 0x28, 0xFF}, // ひでんのくすり
+		.itemId = ITEM_SECRET_POTION,
+		.price = 0,
+		.holdEffect = 0,
+		.holdEffectParam = 0,
+		.description = DESC_SECRET_POTION,
+		.importance = 1,
+		.unk19 = 0,
+		.pocket = POCKET_KEY_ITEMS,
 		.type = ITEM_USE_BAG_MENU,
 		.fieldUseFunc = gFieldFunc_Item_None,
 		.battleUsage = 0,

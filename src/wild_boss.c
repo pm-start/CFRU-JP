@@ -9,6 +9,7 @@ static const struct WildBossPolicy sPolicies[DIFFICULTY_COUNT] =
     [DIFFICULTY_NORMAL] = {50, 50, 40, 25, 2},
     [DIFFICULTY_HARD] = {100, 70, 20, 30, 3},
     [DIFFICULTY_MOMO_ICE] = {300, 100, 5, 40, 3},
+    [DIFFICULTY_SHAKARIKI] = {300, 100, 5, 40, 3},   //しゃかりき（ももアイスと同じ・りるアイス 5 は表に無い＝0 のまま）
 };
 
 const struct WildBossPolicy* WildBoss_GetPolicy(u16 difficulty)

@@ -1,5 +1,8 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
+#include "shadow_moves.h" //[hack] patches/0955 段 D ダーク技
 #include "../include/battle_anim.h"
 #include "../include/random.h"
 #include "../include/constants/items.h"
@@ -24,6 +27,11 @@
 #include "../include/new/terastal.h"
 #include "../include/new/util.h"
 
+bool8 HackFakemon_TryHomuraBurn(void); //src/hack_fakemon.c
+
+bool8 HackFakemon_TryHomuraBurn(void); //src/hack_fakemon.c
+void HackMoveEvo_OnMoveEnd(u8 arg1); //[hack] patches/0864 技進化（src/hack_move_evo.c）
+
 /*
 cmd49.c
 	handles a ton of battle logic at the end of each turn
@@ -42,6 +50,7 @@ BattleScript_SpikesOnTargetFainted
 enum
 {
 	ATK49_SET_UP,
+	ATK49_LV200_MOVE_END,
 	ATK49_ATTACKER_ABILITIES,
 	ATK49_ADVERSE_PROTECTION,
 	ATK49_RAGE,
@@ -75,6 +84,8 @@ enum
 	ATK49_ITEM_EFFECTS_END_TURN_TARGET_2,
 	ATK49_DEFROST,
 	ATK49_SECOND_MOVE_EFFECT,
+	ATK49_HOMURA_BURN, //[hack] 2026-10-25 ほむらのあご（patches/0800）。「prefaintmoveendeffects」で済む上の段より後ろ＝どの技の台本でも必ず通る所に置く（上の段に置くと、ふつうの技の台本では通らなかった）
+	ATK49_MOVE_EVO, //[hack] patches/0864 技進化: 抽選して保留を記録するだけ（枠の差し替えはターンの終わり・end_turn.c ET_MoveEvo）
 	ATK49_MAGICIAN_MOXIE_BATTLEBOND,
 	ATK49_FATIGUE,
 	ATK49_ITEM_EFFECTS_END_TURN_ATTACKER_2,
@@ -153,6 +164,7 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 		switch (gBattleScripting.atk49_state)
 		{
 		case ATK49_SET_UP: //For Emergency Exit to use later
+			SecondAbility_ClearPending(); //[hack] 2026-10-22 2 つ目の接触系の順番待ちを持ち越さない
 			gNewBS->originalAttackerBackup = gBankAttacker;
 
 			if (gBattleMoves[gCurrentMove].effect != EFFECT_CURSE) //Damage is done to the attacker, not the target
@@ -170,8 +182,28 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 
 			gNewBS->totalDamageGiven += gHpDealt;
 			gNewBS->ResultFlags[gBankTarget] = gMoveResultFlags;
+			if (CheckContact(gCurrentMove, gBankAttacker, gBankTarget))
+				Lv200CustomMove_OnContact(gCurrentMove, gBankAttacker, gBankTarget,
+									gProtectStructs[gBankAttacker].touchedProtectLike);
+			Lv200CustomMove_OnMoveEnd(gCurrentMove, gBankAttacker, gBankTarget,
+								 !(gMoveResultFlags & MOVE_RESULT_NO_EFFECT),
+								 gNewBS->totalDamageGiven > 0);
 			gBattleScripting.atk49_state++;
 			break;
+
+		case ATK49_LV200_MOVE_END:
+		{
+			const u8 *script = Lv200CustomMove_GetMoveEndScript();
+			if (script != NULL)
+			{
+				BattleScriptPushCursor();
+				gBattlescriptCurrInstr = script;
+				effect = TRUE;
+			}
+			else
+				gBattleScripting.atk49_state++;
+			break;
+		}
 
 		case ATK49_ATTACKER_ABILITIES:
 			if (arg1 != ARG_IN_FUTURE_ATTACK)
@@ -179,7 +211,8 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 				if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END_ATTACKER, gBankAttacker, 0, 0, 0))
 					effect = TRUE;
 			}
-			gBattleScripting.atk49_state++;
+			if (!SecondAbility_PendingNext()) //[hack] 2026-10-22 1 つ目が出て 2 つ目が順番待ちの間は同じ段にもう 1 回戻る
+				gBattleScripting.atk49_state++;
 			break;
 
 		case ATK49_ADVERSE_PROTECTION:
@@ -202,7 +235,7 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 				{
 					gProtectStructs[gBankAttacker].touchedProtectLike = FALSE;
 
-					if (BATTLER_ALIVE(gBankAttacker) && ABILITY(gBankAttacker) != ABILITY_MAGICGUARD)
+					if (BATTLER_ALIVE(gBankAttacker) && !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD))
 					{
 						gBattleMoveDamage = MathMax(1, GetBaseMaxHP(gBankAttacker) / 8);
 						BattleScriptPushCursor();
@@ -341,7 +374,8 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 		case ATK49_MOVE_END_ABILITIES: // Such as abilities activating on contact(Poison Spore, Rough Skin, etc.).
 			if (AbilityBattleEffects(ABILITYEFFECT_CONTACT, gBankTarget, 0, 0, 0))
 				effect = TRUE;
-			gBattleScripting.atk49_state++;
+			if (!SecondAbility_PendingNext()) //[hack] 2026-10-22 同上
+				gBattleScripting.atk49_state++;
 			break;
 
 		case ATK49_ITEM_EFFECTS_CONTACT_TARGET:
@@ -817,8 +851,25 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 			gBattleScripting.atk49_state++;
 			break;
 
+		case ATK49_HOMURA_BURN: //[hack] 2026-10-25 ほむらのあご: かむわざで 30% やけど（src/hack_fakemon.c）
+			if (HackFakemon_TryHomuraBurn())
+			{
+				BattleScriptPushCursor();
+				gBattlescriptCurrInstr = BattleScript_HomuraBurn;
+				effect = TRUE;
+			}
+
+			gBattleScripting.atk49_state++;
+			break;
+
+		case ATK49_MOVE_EVO: //[hack] patches/0864 技進化（src/hack_move_evo.c）
+			HackMoveEvo_OnMoveEnd(arg1);
+			gBattleScripting.atk49_state++;
+			break;
+
 		case ATK49_MAGICIAN_MOXIE_BATTLEBOND:
-			switch (ABILITY(gBankAttacker)) {
+			for (u8 abPass = 0; abPass < 2 && !effect; ++abPass) { //[hack] 2026-10-20 2 つ目の特性（じしんかじょう・ビーストブースト等）
+			switch (abPass == 0 ? ABILITY(gBankAttacker) : SecondAbility_OfBank(gBankAttacker)) {
 				case ABILITY_MAGICIAN:
 					if (arg1 != ARG_IN_FUTURE_ATTACK
 					&& ITEM(gBankAttacker) == ITEM_NONE
@@ -974,6 +1025,8 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 						effect = 1;
 					}
 			}
+			if (effect && abPass == 1) gNewBS->abilityPopupOverwrite = SecondAbility_OfBank(gBankAttacker);
+			}
 			*gSeedHelper = 0; //For Soul-Heart Loop
 			gBattleScripting.atk49_state++;
 			break;
@@ -1116,8 +1169,8 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 			&&  !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE))
 			{
 				if ((gCurrentMove == MOVE_MINDBLOWN || gCurrentMove == MOVE_STEELBEAM || gCurrentMove == MOVE_CHLOROBLAST)
-				&& ABILITY(gBankAttacker) != ABILITY_MAGICGUARD
-				&& !(gCurrentMove == MOVE_CHLOROBLAST && ABILITY(gBankAttacker) == ABILITY_ROCKHEAD) //★ Champions（patches/0070） クロロブラストは いしあたまで反動なし
+				&& !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD)
+				&& !(gCurrentMove == MOVE_CHLOROBLAST && BankHasAbility(gBankAttacker, ABILITY_ROCKHEAD)) //★ Champions（patches/0070） クロロブラストは いしあたまで反動なし
 				&& BATTLER_ALIVE(gBankAttacker)
 				&& !(gMoveResultFlags & MOVE_RESULT_FAILED))
 				{
@@ -1130,6 +1183,17 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 					BattleScriptPushCursor();
 					gBattlescriptCurrInstr = BattleScript_MindBlownDamage;
 
+					effect = 1;
+				}
+				else if (gCurrentMove == MOVE_YAMITOTSUGEKI //[hack] patches/0955 段 D ダークエンド: 自分の残り HP の半分を失う（いしあたまでは防げない）
+				&& !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD) //[hack] 2つ目の特性も見る
+				&& BATTLER_ALIVE(gBankAttacker)
+				&& gNewBS->AttackerDidDamageAtLeastOnce
+				&& Shadow_EndRecoil(gBankAttacker) > 0)
+				{
+					gBattleMoveDamage = Shadow_EndRecoil(gBankAttacker);
+					BattleScriptPushCursor();
+					gBattlescriptCurrInstr = BattleScript_Recoil;
 					effect = 1;
 				}
 				else if (gCurrentMove == MOVE_STRUGGLE
@@ -1154,8 +1218,8 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 
 					effect = 1;
 				}
-				else if (ABILITY(gBankAttacker) != ABILITY_MAGICGUARD
-				&& ABILITY(gBankAttacker) != ABILITY_ROCKHEAD
+				else if (!BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD)
+				&& !BankHasAbility(gBankAttacker, ABILITY_ROCKHEAD)
 				&& gNewBS->AttackerDidDamageAtLeastOnce
 				&& BATTLER_ALIVE(gBankAttacker))
 				{
@@ -1204,7 +1268,7 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 					&&  !(gNewBS->ResultFlags[banks[i]] & MOVE_RESULT_NO_EFFECT)
 					&&  gNewBS->turnDamageTaken[banks[i]] != 0
 					&&  !MoveBlockedBySubstitute(gCurrentMove, gBankAttacker, banks[i])
-					&&  ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) || SIDE(i) == B_SIDE_PLAYER)
+					&&  ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) || SIDE(banks[i]) == B_SIDE_PLAYER) //[hack] patches/0619 だっしゅつボタン: 速さ順の添字 i ではなく持ち主 banks[i] の側を見る（野生戦で味方の持ち物が働かない・相手の持ち物が働く）
 					&&  HasMonToSwitchTo(banks[i])) //Wilds can't activate
 					{
 						if (gBattleMoves[gCurrentMove].effect == EFFECT_BATON_PASS)
@@ -1357,6 +1421,7 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 			break;
 
 		case ATK49_RESTORE_ABILITIES:
+			gNewBS->hackSecondAbilityIgnored = 0; //[hack] 2026-10-20
 			for (i = 0; i < gBattlersCount; ++i)
 			{
 				if (gNewBS->DisabledMoldBreakerAbilities[i])
@@ -1378,7 +1443,7 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 
 				if (bank != gBankAttacker
 				&&  !SheerForceCheck()
-				&&  ABILITY(bank) == ABILITY_PICKPOCKET
+				&&  BankHasAbility(bank, ABILITY_PICKPOCKET)
 				&&  !(gNewBS->ResultFlags[bank] & MOVE_RESULT_NO_EFFECT)
 				&&  TOOK_DAMAGE(bank)
 				&& ((gBattleTypeFlags & BATTLE_TYPE_TRAINER) || SIDE(bank) == B_SIDE_PLAYER)
@@ -1534,7 +1599,7 @@ void atk49_moveend(void) //All the effects that happen after a move is used
 			gNewBS->poisonPuppeteerConfusion = FALSE;
 			#ifdef GEN9_CHARGE
 			if (moveType == TYPE_ELECTRIC
-			&& gChosenMove != MOVE_CHARGE && gCurrentMove != MOVE_CHARGE) //[hack] patches/0159 じゅうでん 自身（電気タイプ）は消さない。前は使い終えた瞬間に自分で消していた
+			&& !MoveIs(gChosenMove, MOVE_CHARGE) && !MoveIs(gCurrentMove, MOVE_CHARGE)) //[hack] patches/0159 じゅうでん 自身（電気タイプ）は消さない。前は使い終えた瞬間に自分で消していた
 				gStatuses3[gBankAttacker] &= ~STATUS3_CHARGED_UP;
 			#endif
 			gBattleScripting.atk49_state++;

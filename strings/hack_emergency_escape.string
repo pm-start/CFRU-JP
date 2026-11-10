@@ -1,0 +1,11 @@
+// 緊急脱出（patches/0751〜0753・src/hack_emergency_escape.c・TODO #144）の文。
+// タイトルのメインメニューの確かめ（src/bw_main_menu.c・x16 から・窓の右はし 240 まで）。せっていの行・説明は strings/bw_option_menu.string の gText_BwOpt_ChEscape など。
+
+#org @gText_BwrMain_EscapeAsk1
+きんきゅう だっしゅつ しますか？
+
+#org @gText_BwrMain_EscapeAsk2
+ポケモンセンターなど あんぜんな
+
+#org @gText_BwrMain_EscapeAsk3
+ばしょに もどります

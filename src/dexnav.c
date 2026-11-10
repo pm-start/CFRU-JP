@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "hack_bugfix_decide.h"
 #include "../include/battle.h"
 #include "../include/bg.h"
 #include "../include/event_data.h"
@@ -80,7 +81,7 @@ extern void sp09A_StopSounds(void);
 const u8* __attribute__((long_call)) GetCoordEventScriptAtPosition(struct MapHeader * mapHeader, u16 x, u16 y, u8 z);
 
 //This file's functions
-static void DexNavGetMon(u16 species, u8 potential, u8 level, u16 ability, u16* moves, u8 searchLevel, u8 chain);
+static void DexNavGetMon(u16 species, u8 potential, u16 level, u16 ability, u16* moves, u8 searchLevel, u8 chain);
 static u16 TryRandomizePumpkabooForm(u16 species);
 static bool8 SpeciesHasMultipleSearchableForms(u16 species);
 static u8 FindHeaderIndexWithLetter(u16 species, u8 letter);
@@ -226,7 +227,7 @@ static void CB2_DexNav(void);
 // ===== Dex Nav Pokemon Generator ===== //
 // ===================================== //
 
-static void DexNavGetMon(u16 species, u8 potential, u8 level, u16 ability, u16* moves, u8 searchLevel, u8 chain)
+static void DexNavGetMon(u16 species, u8 potential, u16 level, u16 ability, u16* moves, u8 searchLevel, u8 chain)
 {
 	struct Pokemon* mon = &gEnemyParty[0];
 
@@ -2749,15 +2750,10 @@ static void PrintGUISearchLevel(u16 species)
 		text = gText_DexNav_NoInfo;
 	else
 	{
-		u16 dexNum = SpeciesToNationalPokedexNum(species);
-		if (dexNum > 999)
-			text = gText_DexNav_NoInfo;
-		else
-		{
-			//★ [hack] patches/0042: 常に最大
-			ConvertIntToDecimalStringN(gStringVar4, DEXNAV_FIXED_SEARCH_LEVEL, 0, 4);
-			text = gStringVar4;
-		}
+		//★ [hack] patches/0042: 常に最大。素は図鑑の番号 999 までしか表（999 バイト）を持たず、1000 番から「なし」になっていた
+		//  （第 9 世代の後ろ・カゲノナカニなどの自作の種族）＝表はもう使わないので番号で切らない（2026-10-13）
+		ConvertIntToDecimalStringN(gStringVar4, DEXNAV_FIXED_SEARCH_LEVEL, 0, 4);
+		text = gStringVar4;
 	}
 
 	WindowPrint(WIN_SEARCH_LEVEL, 0, 4, 3, GetSpeciesDetailsTextColour(), 0, text);
@@ -3894,15 +3890,30 @@ bool8 StartMenuDexNavCallback(void)
 // ============ Script Specials ============= //
 // ========================================== //
 
+static bool8 WildTableAllCaught(const struct WildPokemonInfo *info, u8 count)
+{
+	u8 i;
+
+	for (i = 0; i < count; ++i)
+	{
+		u16 species = info->wildPokemon[i].species;
+
+		if (species != SPECIES_NONE
+		 && !GetSetPokedexFlag(SpeciesToNationalPokedexNum(species), FLAG_GET_CAUGHT))
+			return FALSE;
+	}
+	return TRUE;
+}
+
 void sp0E2_IsDexNavCompleteHere(void)
 {
 	const struct WildPokemonInfo* landMonsInfo = LoadProperMonsData(LAND_MONS_HEADER);
 	const struct WildPokemonInfo* waterMonsInfo = LoadProperMonsData(WATER_MONS_HEADER);
+	const struct WildPokemonInfo* fishMonsInfo = LoadProperMonsData(FISHING_MONS_HEADER);
 
-	gSpecialVar_LastResult = TRUE;
-
-	if (landMonsInfo != NULL && !CapturedAllLandBasedPokemon())
-		gSpecialVar_LastResult = FALSE;
-	else if (waterMonsInfo != NULL && !CapturedAllWaterBasedPokemon())
-		gSpecialVar_LastResult = FALSE;
+	gSpecialVar_LastResult = DexNav_MapComplete(
+		landMonsInfo != NULL, landMonsInfo == NULL || CapturedAllLandBasedPokemon(),
+		waterMonsInfo != NULL, waterMonsInfo == NULL || WildTableAllCaught(waterMonsInfo, NUM_WATER_MONS),
+		fishMonsInfo != NULL, fishMonsInfo == NULL || WildTableAllCaught(fishMonsInfo, NUM_FISHING_MONS))
+		? TRUE : FALSE;
 }

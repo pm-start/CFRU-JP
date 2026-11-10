@@ -11,6 +11,7 @@ mega_battle_scripts.s
 
 .global BattleScript_MegaEvolution
 .global BattleScript_MegaWish
+.global BattleScript_GibleSwitch
 .global BattleScript_UltraBurst
 .global BattleScript_Dynamax
 .global BattleScript_Terastal
@@ -28,6 +29,16 @@ MegaAnimBS:
 	setword BATTLE_STRING_LOADER MegaEvolutionCompleteString
 	printstring 0x184
 	waitmessage DELAY_1SECOND
+	callasm TryRemovePrimalWeatherAfterTransformation
+	end3
+
+@ ★ 2026-10-23 FEAT-gible-mega-switch（patches/0791）: れーとのおうのガブリアスがメガ↔メガZ を切り替えたとき（src/hack_gible_switch.c）。メガシンカのアニメを流用
+BattleScript_GibleSwitch:
+	setword BATTLE_STRING_LOADER gText_GibleSwitch
+	printstring 0x184
+	waitmessage DELAY_HALFSECOND
+	playanimation BANK_SCRIPTING ANIM_MEGA_EVOLUTION 0x0
+	reloadhealthbar BANK_SCRIPTING
 	callasm TryRemovePrimalWeatherAfterTransformation
 	end3
 

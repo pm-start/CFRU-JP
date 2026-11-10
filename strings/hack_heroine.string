@@ -1,0 +1,238 @@
+// ハルカ・ヒカリの電話・好感度の文（Redmine #76 段 1・手書き・assembly/hack_phone/phone_heroine.s が使う・tools/rom/verify_heroine_s1.py が幅と対応を確かめる）
+
+#org @gText_HrMenuCall
+かける
+
+#org @gText_HrMenuGive
+あげる
+
+#org @gText_HrMenuReceive
+うけとる
+
+#org @gText_HrMenuCancel
+やめる
+
+#org @gText_HrGiveItem
+どうぐ
+
+#org @gText_HrGiveMoney
+おかね
+
+#org @gText_HrGiveWhich
+なにを あげる？
+
+#org @gText_HrPcNote
+もちものが いっぱいだったので パソコンに\nおくっておいたよ！
+
+#org @gText_HrBoxNote
+てもちが いっぱいだったので タマゴは\nボックスに おくったよ！
+
+#org @gText_HackPhone_NameHaruka
+ハルカ
+
+#org @gText_HackPhone_NameHikari
+ヒカリ
+
+#org @gText_HrHa_Ring
+ハルカから でんわだ！\nでんわに でますか？
+
+#org @gText_HrHa_Dial
+ハルカに でんわを かけた！\nぷるる・・・
+
+#org @gText_HrHa_ChatA1
+もしもし！ ハルカだよ。\nきょうも ポケモンと\lがんばってる？
+
+#org @gText_HrHa_ChatA2
+わたしも まけないよ！\nまた でんわしてね。
+
+#org @gText_HrHa_ChatB1
+あっきてくれたんだ！\nちょうど はなしたかったの。
+
+#org @gText_HrHa_ChatB2
+あなたと いると\nポケモンも わたしも\lぜんぜん ちがうよ！
+
+#org @gText_HrHa_Kind1
+ねえきいて！\nあなたと はなしてると\lなんだか たのしいんだ。
+
+#org @gText_HrHa_Kind1b
+また でんわするね！\nじゃあね！
+
+#org @gText_HrHa_Kind2
+あなたに わたしたい\nものが あるの！\pでんわちょうの わたしから\nうけとってね！
+
+#org @gText_HrHa_ItemThanks
+[BUFFER1]を くれるの？\nありがとう！ うれしい！
+
+#org @gText_HrHa_ItemNo
+それは うけとれないよ…\nだいじに もっていてね。
+
+#org @gText_HrHa_Enough
+ありがとう。でも いまは\nだいじょうぶ！\pきもちだけで うれしいよ。
+
+#org @gText_HrHa_MoneyAsk
+おかねを くれるの？\nいくら あげる？
+
+#org @gText_HrHa_MoneyNone
+おかねが たりないみたい。\nむりしないでね！
+
+#org @gText_HrHa_MoneyThanks
+[BUFFER1]えんも くれるの！？\nありがとう！ だいじに するね！
+
+#org @gText_HrHa_RecvLead
+いつも ありがとう！\nこれ わたしからの おれい！
+
+#org @gText_HrHa_Recv2
+すごいキズぐすり5こと\nハイパーボール5こを\lもらった！
+
+#org @gText_HrHa_Recv3
+ふしぎなアメ3こと\nほしのすなを もらった！
+
+#org @gText_HrHa_Recv4
+ヒンバスの タマゴを\nもらった！
+
+#org @gText_HrHa_Recv5
+ふしぎなアメ10こを\nもらった！
+
+#org @gText_HrHa_Full
+もちものが いっぱいみたい。\nせいりしてから また きてね！
+
+#org @gText_HrHi_Ring
+ヒカリから でんわだ！\nでんわに でますか？
+
+#org @gText_HrHi_Dial
+ヒカリに でんわを かけた！\nぷるる・・・
+
+#org @gText_HrHi_ChatA1
+もしもしヒカリです！\nポケモンたちは げんき？
+
+#org @gText_HrHi_ChatA2
+わたしも ベストを\nつくすわ！ またね！
+
+#org @gText_HrHi_ChatB1
+でんわ うれしい！\nちょうど あなたの\lことを かんがえてたの。
+
+#org @gText_HrHi_ChatB2
+いっしょに いると\nなんでも できそうな\lきが するの。
+
+#org @gText_HrHi_Kind1
+ねえきいて！\nあなたと はなしてると\lなんだか ほっとするの。
+
+#org @gText_HrHi_Kind1b
+また でんわするね！\nじゃあまたね！
+
+#org @gText_HrHi_Kind2
+あなたに わたしたい\nものが あるの！\pでんわちょうの わたしから\nうけとってね！
+
+#org @gText_HrHi_ItemThanks
+[BUFFER1]を くれるの？\nありがとう！ うれしい！
+
+#org @gText_HrHi_ItemNo
+それは うけとれないよ…\nだいじに もっていてね。
+
+#org @gText_HrHi_Enough
+ありがとう。でも いまは\nだいじょうぶ！\pきもちだけで うれしいよ。
+
+#org @gText_HrHi_MoneyAsk
+おかねを くれるの？\nいくら あげる？
+
+#org @gText_HrHi_MoneyNone
+おかねが たりないみたい。\nむりしないでね！
+
+#org @gText_HrHi_MoneyThanks
+[BUFFER1]えんも くれるの！？\nありがとう！ だいじに するね！
+
+#org @gText_HrHi_RecvLead
+いつも ありがとう！\nこれ わたしからの おれい！
+
+#org @gText_HrHi_Recv2
+すごいキズぐすり5こと\nハイパーボール5こを\lもらった！
+
+#org @gText_HrHi_Recv3
+ふしぎなアメ3こと\nひかりのこなを もらった！
+
+#org @gText_HrHi_Recv4
+ポッチャマの タマゴを\nもらった！
+
+#org @gText_HrHi_Recv5
+ふしぎなアメ10こを\nもらった！
+
+#org @gText_HrHi_Full
+もちものが いっぱいみたい。\nせいりしてから また きてね！
+
+#org @gText_HrMenuFollow
+つれあるく
+
+#org @gText_HrMenuDismiss
+かえってもらう
+
+#org @gText_HrMenuLeave
+わかれる
+
+#org @gText_HrHa_TalkHi
+あ どうしたの？\nなにか あった？
+
+#org @gText_HrHa_FollowOk
+いいよ！ いっしょに\nいこう！ すぐ いくね！
+
+#org @gText_HrHa_FollowNo
+ごめんね。いまは ちょっと\nいけないの。
+
+#org @gText_HrHa_FollowBye
+うん わかった。\nじゃあ また ね！
+
+#org @gText_HrHa_Wait
+ここで まってるね！ きを つけてね！
+
+#org @gText_HrHi_TalkHi
+どうしたの？\nなにか ようかしら？
+
+#org @gText_HrHi_FollowOk
+ええ いっしょに いくわ！\nすぐ むかうね！
+
+#org @gText_HrHi_FollowNo
+ごめんなさい。いまは\nちょっと いけないの。
+
+#org @gText_HrHi_FollowBye
+ええ わかったわ。\nまた あいましょう！
+
+#org @gText_HrHa_FollowBusy
+ごめんね。いまは ヒカリと\nいっしょに いるの。
+
+#org @gText_HrHi_FollowBusy
+ごめんなさい。いまは ハルカと\nいっしょに いるの。
+
+#org @gText_HrHi_Wait
+ここで まってるわね！ きを つけてね！
+
+#org @sTrainerName_HackHikari
+ヒカリ
+
+#org @gText_HrHa_Gennama
+えっ！？ こんなに！？\nありがとう！！ だいじに するね！
+
+#org @gText_HrHi_Gennama
+えっ！？ こんなに！？\nありがとう！！ だいじに するね！
+
+#org @gText_HrHa_Heal0
+ハルカが ポケモンを すこし かいふくして\nくれた！
+
+#org @gText_HrHa_Heal1
+ハルカが ポケモンを だいぶ かいふくして\nくれた！
+
+#org @gText_HrHa_Heal2
+ハルカが ポケモンを げんきに\nして くれた！
+
+#org @gText_HrHa_Heal3
+ハルカが ポケモンを ぜんぶ かいふくして\nくれた！
+
+#org @gText_HrHi_Heal0
+ヒカリが ポケモンを すこし かいふくして\nくれた！
+
+#org @gText_HrHi_Heal1
+ヒカリが ポケモンを だいぶ かいふくして\nくれた！
+
+#org @gText_HrHi_Heal2
+ヒカリが ポケモンを げんきに\nして くれた！
+
+#org @gText_HrHi_Heal3
+ヒカリが ポケモンを ぜんぶ かいふくして\nくれた！

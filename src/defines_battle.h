@@ -28,10 +28,23 @@ defines_battle.h
 #define PARTNER(bank) (bank ^ BIT_FLANK)
 #define FOE(bank) ((bank ^ BIT_SIDE) & BIT_SIDE)
 #define ABILITY(bank) gBattleMons[bank].ability
+bool8 BankHasAbility(u8 bank, u16 ability); //[hack] 2026-10-20 1 つ目か 2 つ目の特性（src/second_ability.c）
+void SecondAbility_ClearPending(void); //[hack] 2026-10-22 接触系の 2 つ目の順番待ちを捨てる
+bool8 SecondAbility_PendingNext(void); //[hack] 直前の AbilityBattleEffects で 2 つ目が順番待ちなら TRUE
+u16 SecondAbility_OfBank(u8 bank); //[hack] 2 つ目の特性（無ければ ABILITY_NONE）
+u16 SecondAbility_AsIf(u8 bank, u16 ability); //[hack] 2026-10-22 bank が（1 つ目か 2 つ目で）ability を持てば ability・無ければ ABILITY(bank)（u16 の特性を受ける関数へ渡す用）
+void Hack_SturdyPopupName(void); //[hack] 2026-10-22 台本 callasm: gBattleScripting.bank の がんじょう が 2 つ目ならポップアップの名前を直す
+u16 SecondAbility_OfMonActive(struct Pokemon* mon); //[hack] 2026-10-20 手持ちの 1 匹の 2 つ目の特性（Lv が足りない・1 つ目と同じなら ABILITY_NONE・AI の先読み用）
+u16 SecondAbility_MoldBreakerAbility(u8 bank); //[hack] かたやぶり系の判定に渡す特性（2 つ目も見る）
+bool8 SecondAbility_TryEndTurn(u8 bank, u8 slot); //[hack] ターンの終わりの 2 つ目の特性
+#define SECOND_ET_WEATHER 0
+#define SECOND_ET_SPEEDBOOST 1
+#define SECOND_ET_HYDRATION 2
+#define SECOND_ET_HARVEST 3
 #define SPECIES(bank) gBattleMons[bank].species
 #define ITEM(bank) gBattleMons[bank].item
 #define ITEM_EFFECT(bank) GetBankItemEffect(bank)
-#define ITEM_QUALITY(bank) ItemId_GetHoldEffectParam(gBattleMons[bank].item)
+#define ITEM_QUALITY(bank) GetBankItemEffectParam(bank)
 #define ITEM_POCKET(bank) GetPocketByItemId(gBattleMons[bank].item)
 #define SPLIT(move) gBattleMoves[move].split
 #define CONSUMED_ITEMS(bank) gBattleStruct->usedHeldItems[bank]
@@ -52,7 +65,7 @@ defines_battle.h
 #define IS_BEHIND_SUBSTITUTE(bank) (gBattleMons[bank].status2 & STATUS2_SUBSTITUTE)
 #define TOOK_DAMAGE(bank) (gSpecialStatuses[bank].moveturnLostHP_physical || gSpecialStatuses[bank].moveturnLostHP_special || (gNewBS->enduredDamage & gBitTable[bank]))
 #define MOVE_HAD_EFFECT (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT))
-#define PINCH_BERRY_CHECK(bank) (gBattleMons[bank].hp <= gBattleMons[bank].maxHP / 4 || (ABILITY(bank) == ABILITY_GLUTTONY && gBattleMons[bank].hp <= gBattleMons[bank].maxHP / 2))
+#define PINCH_BERRY_CHECK(bank) (gBattleMons[bank].hp <= gBattleMons[bank].maxHP / 4 || (BankHasAbility(bank, ABILITY_GLUTTONY) && gBattleMons[bank].hp <= gBattleMons[bank].maxHP / 2))
 #define STAT_CAN_RISE(bank, stat) ((STAT_STAGE(bank, stat) < STAT_STAGE_MAX && ABILITY(bank) != ABILITY_CONTRARY) || (ABILITY(bank) == ABILITY_CONTRARY && STAT_STAGE(bank, stat) > 0))
 #define STAT_CAN_FALL(bank, stat) ((STAT_STAGE(bank, stat) > 0 && ABILITY(bank) != ABILITY_CONTRARY) || (ABILITY(bank) == ABILITY_CONTRARY && STAT_STAGE(bank, stat) < STAT_STAGE_MAX))
 #define AI_STAT_CAN_RISE(bank, stat) (STAT_STAGE(bank, stat) < STAT_STAGE_MAX)

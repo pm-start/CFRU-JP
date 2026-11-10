@@ -1,5 +1,8 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "hack_xram_battle.h"
+#include "lv200_custom_moves.h"
 #include "hack_difficulty.h"
 #include "Tables/hoenn_script_flags.h"
 #include "../include/battle_transition.h"
@@ -39,6 +42,8 @@
 #include "../include/new/terastal.h"
 #include "../include/new/util.h"
 #include "hack_volcarona.h"   //★ 2026-10-11 たいようのちょう
+#include "hack_mash_catch.h"  //[hack] patches/0423 A 連打で捕獲率（隠し機能）
+#include "hack_challenge_b.h" //[hack] patches/0540 しばり B（こうたいきんし）
 
 //★ 2026-10-11 ユーザー判断（5e 経由）「1 戦で使える道具の数は ボールだけ数えない」: なんいど むずかしい 3 回／ももアイス 1 回の数（playerItemUsedCount）に
 //  ボール（POCKET_POKE_BALLS）の使用は入れない。野生戦でも数える（回復の道具は制限・ボールは無制限）。選んだ道具は gBattleBufferB[bank][1..2]
@@ -115,10 +120,17 @@ const u8 gStatStageRatios[][2] =
 	{40, 10}  //  6
 };
 
+#include "hack_item_restore.h" //[hack] 使いきった持ち物を戦いのあと戻す
+#include "hack_chf_rotgacha.h" //[hack] 縛り F
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダーク技の組み立て
+
 //This file's functions:
 static void SavePartyItems(void);
 static void TryPrepareTotemBoostInBattleSands(void);
 static void TrySetupRaidBossRepeatedAttack(u8 turnActionNumber);
+bool8 HackGibleAI_TryDouble(u8 actionFuncId); //[hack] patches/0792 src/hack_gible_ai.c
+void HackGibleAI_TurnStart(void);
+extern const u8 BattleScript_GibleDoubleAction[];
 static u8 GetWhoStrikesFirstUseLastBracketCalc(u8 bank1, u8 bank2);
 static u32 BoostSpeedInWeather(u16 ability, u8 itemEffect, u32 speed);
 static u32 BoostSpeedByItemEffect(u8 itemEffect, u8 itemQuality, u16 species, u32 speed, bool8 isDynamaxed);
@@ -129,7 +141,8 @@ bool8 SecondAbility_TrySwitchIn(u8 bank); //★ 2026-10-01 src/second_ability.c
 
 void HandleNewBattleRamClearBeforeBattle(void)
 {
-	gNewBS = Calloc(sizeof(struct NewBattleStruct));
+	gNewBS = HackXramBattle_Alloc();
+	Lv200CustomMove_ResetState();
 	Memset(FIRST_NEW_BATTLE_RAM_LOC, 0, (u32) LAST_NEW_BATTLE_RAM_LOC - (u32) FIRST_NEW_BATTLE_RAM_LOC);
 	Memset(gBattleBufferA, 0x0, sizeof(gBattleBufferA)); //Clear both battle buffers
 	Memset(gBattleBufferB, 0x0, sizeof(gBattleBufferB));
@@ -176,6 +189,7 @@ static void SavePartyItems(void)
 {
 	for (int i = 0; i < PARTY_SIZE; ++i)
 		gNewBS->itemBackup[i] = GetMonData(&gPlayerParty[i], MON_DATA_HELD_ITEM, NULL);
+	HackItemRestore_Save(); //[hack] 使いきった持ち物を戦いのあと戻す（PID の写し・src/hack_item_restore.c）
 }
 
 static void TryBackupEnemyTeam(void)
@@ -204,7 +218,7 @@ static void TryClearLevelCapKeptOn(void)
 			u16 species = GetMonData(&gPlayerParty[i], MON_DATA_SPECIES2, NULL);
 			if (species != SPECIES_NONE && species != SPECIES_EGG)
 			{
-				u8 level = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL, NULL);
+				u16 level = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL, NULL);
 				if (level > levelCap)
 				{
 					FlagClear(FLAG_KEPT_LEVEL_CAP_ON);
@@ -217,6 +231,9 @@ static void TryClearLevelCapKeptOn(void)
 }
 
 extern void HoennArena_OnBattleStart(void); //★ src/hoenn_arena.c（patches/0096）
+
+void HackFirstBattler_OnBattleStart(void); //[hack] patches/0974 最初の 1 匹のタイプを個体のタイプに（src/hack_first_battler_type.c）
+void HackChallengeC_LentrantRules(void); //[hack] patches/0550 縛り C: ？？？戦は技を「ひっかく」だけに（src/hack_challenge_c.c）
 
 void BattleBeginFirstTurn(void)
 {
@@ -233,9 +250,15 @@ void BattleBeginFirstTurn(void)
 					gBattleScripting.battleStyle = OPTIONS_BATTLE_STYLE_SEMI_SHIFT;
 				#endif
 				SavePartyItems();
+				HackChallengeC_LentrantRules(); //[hack] patches/0550
+				ShadowBattle_OnBattleStart(); //[hack] patches/0963 段 E ダーク技の組み立て: 場に出たダークの子の技の並びを作る（手持ちの技欄は動かさない・src/shadow_battle.c・ガチャ中は何もしない）
+				HackChFGacha_OnBattleStart(); //[hack] 縛り F わざガチャ: 自分の側の技を全部の技からランダム 4 つに（手持ちは戦闘のあと戻す・src/hack_chf_rotgacha.c）
+				HackFirstBattler_OnBattleStart(); //[hack] patches/0974 最初に場に出ている子のタイプ: デバッグ・りゅうのいわお（src/hack_first_battler_type.c）
 				if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER))
 				&& !FlagGet(FLAG_BATTLE_FACILITY)
 				&& HackDifficulty_ForceSetStyle(VarGet(HOENN_VAR_DIFFICULTY)))
+					gBattleScripting.battleStyle = OPTIONS_BATTLE_STYLE_SET;
+				if (HackChallengeB_SwitchBlocked()) //[hack] patches/0540 しばり B こうたいきんし: 「かえられる」のバトルスタイルでも 相手がポケモンを出す前の入れ替えの質問を出さない
 					gBattleScripting.battleStyle = OPTIONS_BATTLE_STYLE_SET;
 				TryBackupEnemyTeam();
 				TryClearLevelCapKeptOn();
@@ -884,8 +907,8 @@ static void TryPrepareTotemBoostInBattleSands(void)
 			increaseMax = 6;
 
 		//Makes it so Contrary has no effect on the stat boost
-		u8 contraryShiftPlayer = (ABILITY(playerId) == ABILITY_CONTRARY) ? 0x80 : 0;
-		u8 contraryShiftEnemy = (ABILITY(enemyId) == ABILITY_CONTRARY) ? 0x80 : 0;
+		u8 contraryShiftPlayer = (BankHasAbility(playerId, ABILITY_CONTRARY)) ? 0x80 : 0;
+		u8 contraryShiftEnemy = (BankHasAbility(enemyId, ABILITY_CONTRARY)) ? 0x80 : 0;
 
 		increase = (Random() % increaseMax) + 1;
 		VarSet(VAR_TOTEM + playerId, playerStat | (increase * 0x10 + contraryShiftPlayer));
@@ -917,6 +940,8 @@ void SetActionsAndBanksTurnOrder(void)
 {
 	s32 turnOrderId = 0;
 	s32 i, j;
+
+	HackGibleAI_TurnStart(); //[hack] patches/0792 ターンの始め（2回目の記録を戻し、HP を控える）
 
 	if (gBattleTypeFlags & BATTLE_TYPE_SAFARI)
 	{
@@ -951,6 +976,11 @@ void SetActionsAndBanksTurnOrder(void)
 			{
 				gNewBS->playerItemUsedCount = MathMin(gNewBS->playerItemUsedCount + 1, 0xFF);
 			}
+
+			if (gChosenActionByBank[0] == ACTION_USE_ITEM && HackChosenItemIsBall(0))   //[hack] patches/0423 ボールを使うターンの始めから A 連打を数える
+				HackMashCatch_Begin(gBattleBufferB[0][1] | (gBattleBufferB[0][2] << 8));
+			else if (IS_DOUBLE_BATTLE && gChosenActionByBank[2] == ACTION_USE_ITEM && !IsTagBattle() && HackChosenItemIsBall(2))
+				HackMashCatch_Begin(gBattleBufferB[2][1] | (gBattleBufferB[2][2] << 8));
 
 			if (gChosenActionByBank[2] == ACTION_RUN)
 			{
@@ -1208,6 +1238,21 @@ void RunTurnActionsFunctions(void)
 						return;
 					}
 				}
+				else if (gCurrentActionFuncId == ACTION_USE_MOVE
+				&& !(gNewBS->commandingDondozo & gBitTable[bank])
+				&& !DoesZMoveUsageStopMegaEvolution(bank))
+				{
+					//[hack] patches/0791 れーとのおうのガブリアス（ももアイス）がメガ↔メガZ を自分で切り替える（src/hack_gible_switch.c・ターンは使わない・1 ターン 1 回）
+					const u8* script = HackGibleSwitch_Do(bank);
+					if (script != NULL)
+					{
+						gNewBS->megaData.megaEvoInProgress = TRUE;
+						gNewBS->megaData.script = script;
+						BattleScriptExecute(script);
+						gCurrentActionFuncId = savedActionFuncId;
+						return;
+					}
+				}
 			}
 
 			if (gNewBS->megaData.megaEvoInProgress)
@@ -1217,7 +1262,8 @@ void RunTurnActionsFunctions(void)
 			return;
 
 		case Mega_CalcTurnOrder:
-			for (i = 0; i < gBattlersCount - 1; ++i)
+			//[hack] patches/0811 もう動き終わった者（現在位置より前）は並べ直さない（HandleAction_UseMove と同じ形）。れーとのおうの2回目の前の切り替えで相手が2回動くのを防ぐ
+			for (i = gCurrentTurnActionNumber; i < gBattlersCount - 1; ++i)
 			{
 				for (j = i + 1; j < gBattlersCount; ++j)
 				{
@@ -1344,7 +1390,7 @@ void RunTurnActionsFunctions(void)
 			gActiveBattler = gBanksByTurnOrder[gBattleStruct->focusPunchBank];
 			++gBattleStruct->focusPunchBank;
 			u16 chosenMove = gActionsByTurnOrder[gActiveBattler] == ACTION_USE_MOVE ? gChosenMovesByBanks[gActiveBattler] : MOVE_NONE;
-			if ((chosenMove == MOVE_FOCUSPUNCH || chosenMove == MOVE_BEAKBLAST || chosenMove == MOVE_SHELLTRAP)
+			if ((MoveIs(chosenMove, MOVE_FOCUSPUNCH) || chosenMove == MOVE_BEAKBLAST || chosenMove == MOVE_SHELLTRAP)
 			&& !(gBattleMons[gActiveBattler].status1 & STATUS1_SLEEP)
 			&& !(gDisableStructs[gActiveBattler].truantCounter)
 			&& !(gProtectStructs[gActiveBattler].onlyStruggle)
@@ -1376,6 +1422,9 @@ void RunTurnActionsFunctions(void)
 	sTurnActionsFuncsTable[gCurrentActionFuncId]();
 
 	TrySetupRaidBossRepeatedAttack(savedActionFuncId);
+
+	if (HackGibleAI_TryDouble(savedActionFuncId)) //[hack] patches/0792 れーとのおうの2回目（特性の札のあと、仕込んだ技を使う）
+		BattleScriptExecute(BattleScript_GibleDoubleAction);
 
 	if (gCurrentTurnActionNumber >= gBattlersCount) // everyone did their actions, turn finished
 	{
@@ -1617,13 +1666,13 @@ void HandleAction_UseMove(void)
 		  && !IsMoveRedirectionPrevented(gCurrentMove, atkAbility)
 		  && (SPLIT(gCurrentMove) != SPLIT_STATUS || moveTarget != MOVE_TARGET_USER)
 		  && !(moveTarget & (MOVE_TARGET_ALL | MOVE_TARGET_BOTH))
-		  && NO_MOLD_BREAKERS(ABILITY(gBankAttacker), gCurrentMove))
+		  && NO_MOLD_BREAKERS(SecondAbility_MoldBreakerAbility(gBankAttacker), gCurrentMove))
 	{ //Try Ability Redirection
 		switch (moveType) {
 			case TYPE_WATER:
-				if (ABILITY(selectedTarget) != ABILITY_STORMDRAIN)
+				if (!BankHasAbility(selectedTarget, ABILITY_STORMDRAIN))
 				{
-					if (ABILITY(SIDE(gBankAttacker) ^ BIT_SIDE) == ABILITY_STORMDRAIN)
+					if (BankHasAbility(SIDE(gBankAttacker) ^ BIT_SIDE, ABILITY_STORMDRAIN))
 					{
 						gBankTarget = SIDE(gBankAttacker) ^ BIT_SIDE;
 						gSpecialStatuses[gBankTarget].lightningRodRedirected = 1;
@@ -1633,7 +1682,7 @@ void HandleAction_UseMove(void)
 						gBankTarget = PARTNER(SIDE(gBankAttacker) ^ BIT_SIDE);
 						gSpecialStatuses[gBankTarget].lightningRodRedirected = 1;
 					}
-					else if (ABILITY(PARTNER(gBankAttacker)) == ABILITY_STORMDRAIN)
+					else if (BankHasAbility(PARTNER(gBankAttacker), ABILITY_STORMDRAIN))
 					{
 						gBankTarget = PARTNER(gBankAttacker);
 						gSpecialStatuses[gBankTarget].lightningRodRedirected = 1;
@@ -1643,9 +1692,9 @@ void HandleAction_UseMove(void)
 				break;
 
 			case TYPE_ELECTRIC:
-				if (ABILITY(selectedTarget) != ABILITY_LIGHTNINGROD)
+				if (!BankHasAbility(selectedTarget, ABILITY_LIGHTNINGROD))
 				{
-					if (ABILITY(SIDE(gBankAttacker) ^ BIT_SIDE) == ABILITY_LIGHTNINGROD)
+					if (BankHasAbility(SIDE(gBankAttacker) ^ BIT_SIDE, ABILITY_LIGHTNINGROD))
 					{
 						gBankTarget = SIDE(gBankAttacker) ^ BIT_SIDE;
 						gSpecialStatuses[gBankTarget].lightningRodRedirected = 1;
@@ -1655,7 +1704,7 @@ void HandleAction_UseMove(void)
 						gBankTarget = PARTNER(SIDE(gBankAttacker) ^ BIT_SIDE);
 						gSpecialStatuses[gBankTarget].lightningRodRedirected = 1;
 					}
-					else if (ABILITY(PARTNER(gBankAttacker)) == ABILITY_LIGHTNINGROD)
+					else if (BankHasAbility(PARTNER(gBankAttacker), ABILITY_LIGHTNINGROD))
 					{
 						gBankTarget = PARTNER(gBankAttacker);
 						gSpecialStatuses[gBankTarget].lightningRodRedirected = 1;
@@ -1719,7 +1768,7 @@ void HandleAction_UseMove(void)
 			}
 			else //Targeted Partner
 			{
-				if (gCurrentMove == MOVE_HEALPULSE || gCurrentMove == MOVE_INSTRUCT)
+				if (MoveIs(gCurrentMove, MOVE_HEALPULSE) || gCurrentMove == MOVE_INSTRUCT)
 				{
 					//Never redirect Heal Pulse or Instruct to the enemy
 					goto FAIL_NO_TARGET;
@@ -1836,9 +1885,19 @@ static u16 GetRandomBattleBGM(void)
 }
 
 u16 HackHoenn_BattleMusic(void); //[hack] patches/0229
+u16 HackOak_BattleMusic(void); //[hack] patches/0820
+u16 HackVillain_BattleMusic(void); //[hack] patches/0936
 u16 GetMUS_ForBattle(void)
 {
 	u16 song;
+
+	song = HackOak_BattleMusic(); //[hack] patches/0820 オーキド戦はもらった曲（src/hack_oak_bgm.c・後ろ半分が見えないときは0＝今の曲）
+	if (song != 0)
+		return song;
+
+	song = HackVillain_BattleMusic(); //[hack] patches/0936 悪の組織（ギンガ団・アカギ・ロケット団・ヤマブキのサカキ）は BW 音源の曲（src/hack_villain_bgm.c・後ろ半分が見えないときは0＝今の曲）
+	if (song != 0)
+		return song;
 
 	song = HackHoenn_BattleMusic(); //[hack] patches/0229 ホウエンの地図の戦闘はエメラルドの曲（src/hack_hoenn_battle_music.c）
 	if (song != 0)
@@ -2177,7 +2236,8 @@ s8 PriorityCalc(u8 bank, u8 action, u16 move)
 		if (move != MOVE_BIDE && gBattleMons[bank].status2 & STATUS2_BIDE)
 			priority = 1;
 
-		switch (ABILITY(bank))
+		for (u8 abPass = 0; abPass < 2; ++abPass) //[hack] 2026-10-20 2 つ目の特性（重ねて効く）
+		switch (abPass == 0 ? ABILITY(bank) : SecondAbility_OfBank(bank))
 		{
 			case ABILITY_PRANKSTER:
 				if (SPLIT(move) == SPLIT_STATUS)
@@ -2204,14 +2264,16 @@ s8 PriorityCalc(u8 bank, u8 action, u16 move)
 			++priority;
 	}
 
-	return priority;
+if (action == ACTION_USE_MOVE)
+	priority = Lv200CustomMove_ModifyPriority(move, bank, gBattleStruct->moveTarget[bank], priority);
+return priority;
 }
 
 s8 PriorityCalcMon(struct Pokemon* mon, u16 move)
 {
 	u8 priority = gBattleMoves[move].priority;
 
-	switch (GetMonAbility(mon)) {
+	for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (GetMonAbility(mon)) : SecondAbility_OfMonActive(mon); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 		case ABILITY_PRANKSTER:
 			if (SPLIT(move) == SPLIT_STATUS)
 				++priority;
@@ -2231,7 +2293,7 @@ s8 PriorityCalcMon(struct Pokemon* mon, u16 move)
 			if (gBattleMoves[move].flags & FLAG_TRIAGE_AFFECTED)
 				priority += 3;
 			break;
-	}
+	} }
 
 	return priority;
 }
@@ -2289,7 +2351,7 @@ s32 BracketCalc(u8 bank, unusedArg u8 action, unusedArg u16 move)
 			}
 		}
 
-		if (ability == ABILITY_STALL)
+		if (ability == ABILITY_STALL || SecondAbility_OfBank(bank) == ABILITY_STALL) //[hack] 2026-10-20 2 つ目の特性
 			return -1;
 	}
 
@@ -2342,7 +2404,7 @@ static u32 BoostSpeedByItemEffect(u8 itemEffect, u8 itemQuality, u16 species, u3
 		#ifdef NATIONAL_DEX_PIKACHU
 		//★ 2026-09-24（patches/0066）: でんきだまはすばやさも 1.5 倍（ユーザー要望）
 		case ITEM_EFFECT_LIGHT_BALL:
-			if (SpeciesToNationalPokedexNum(species) == NATIONAL_DEX_PIKACHU)
+			if (GetLightBallClass(species) == LIGHT_BALL_PIKACHU_LINE)
 				speed = (speed * 15) / 10;
 			break;
 		#endif
@@ -2367,8 +2429,11 @@ u32 SpeedCalc(u8 bank)
 	speed = (rawSpeed * gStatStageRatios[gBattleMons[bank].statStages[STAT_STAGE_SPEED-1]][0]) / gStatStageRatios[gBattleMons[bank].statStages[STAT_STAGE_SPEED-1]][1];
 
 	//Check for abilities that alter speed
-	speed = BoostSpeedInWeather(ability, itemEffect, speed);
 	speed = HackVolcarona_BoostSpeed(bank, speed);   //★ 2026-10-11 たいようのちょう（晴れで 1.5 倍・src/hack_volcarona.c）
+
+	for (u8 abPass = 0; abPass < 2; ++abPass) { //[hack] 2026-10-20 2 つ目の特性も同じ判定（重ねて効く）
+	ability = abPass == 0 ? ABILITY(bank) : SecondAbility_OfBank(bank);
+	speed = BoostSpeedInWeather(ability, itemEffect, speed);
 
 	switch (ability) {
 		case ABILITY_UNBURDEN:
@@ -2388,6 +2453,8 @@ u32 SpeedCalc(u8 bank)
 			if (gNewBS->paradoxBoostStats[bank] == STAT_SPD)
 				speed = (speed * 15) / 10;
 	}
+	}
+	ability = ABILITY(bank);
 
 	speed = BoostSpeedByItemEffect(itemEffect, itemQuality, SPECIES(bank), speed, IsDynamaxed(bank));
 
@@ -2418,7 +2485,7 @@ u32 SpeedCalc(u8 bank)
 		#endif
 	}
 
-	return speed;
+	return Lv200CustomMove_ModifySpeed(bank, speed);
 }
 
 u32 SpeedCalcMon(u8 side, struct Pokemon* mon)

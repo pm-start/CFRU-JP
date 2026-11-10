@@ -1,5 +1,8 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
+#include "shadow_moves.h" //[hack] patches/0955 段 D ダーク技
 #include "../include/battle_string_ids.h"
 #include "../include/random.h"
 #include "../include/constants/items.h"
@@ -12,6 +15,7 @@
 #include "../include/new/dynamax.h"
 #include "../include/new/end_turn.h"
 #include "../include/new/end_turn_battle_scripts.h"
+#include "../include/new/ability_battle_scripts.h" //[hack] patches/0952 gText_StormySeaEnd
 #include "../include/new/form_change.h"
 #include "../include/new/general_bs_commands.h"
 #include "../include/new/item_battle_scripts.h"
@@ -22,6 +26,8 @@
 #include "hack_affection.h" //[hack] patches/0240 なつき度（src/hack_affection.c）
 #include "hack_volcarona.h"   //★ 2026-10-11 たいようのちょう
 #include "hack_creeper_ice.h" //[hack] patches/0333 くりーぱーアイス
+#include "hack_move_evo.h" //[hack] patches/0864 技進化
+#include "hack_delta.h" //[hack] patches/0962 元ひこうのデルタ種のはねやすめの印を消す
 
 /*
 end_turn.c
@@ -104,6 +110,7 @@ enum EndTurnEffects
 	ET_Reactivate_Overworld_Weather,
 	ET_Opportunist,
 	ET_MirrorHerb,
+	ET_MoveEvo, //[hack] patches/0864 技進化（src/hack_move_evo.c）
 	ET_End
 };
 
@@ -251,19 +258,26 @@ u8 TurnBasedEffects(void)
 			__attribute__ ((fallthrough));
 
 			case ET_Weather:
-				if (gBattleWeather & WEATHER_RAIN_ANY)
+				if (Shadow_EndTurnShadowSky()) //[hack] patches/0955 段 D ダークの空は 5 ターン
+					effect++;
+				else if (gBattleWeather & WEATHER_RAIN_ANY)
 				{
 					if (!(gBattleWeather & WEATHER_RAIN_PERMANENT)
 					&& --gWishFutureKnock.weatherDuration == 0)
 					{
+						if (gBattleWeather & WEATHER_RAIN_DOWNPOUR) //[hack] patches/0952 あらしのうみ が おさまる
+						{
+							gBattleStringLoader = gText_StormySeaEnd;
+							gBattleCommunication[MULTISTRING_CHOOSER] = 4;
+						}
+						else
+							gBattleCommunication[MULTISTRING_CHOOSER] = 0;
 						gBattleWeather &= ~WEATHER_RAIN_ANY;
-						gBattleCommunication[MULTISTRING_CHOOSER] = 0;
 						gBattlescriptCurrInstr = BattleScript_EndTurnWeatherEnd;
 					}
-					else if (gBattleWeather & WEATHER_RAIN_DOWNPOUR)
+					else if (gBattleWeather & WEATHER_RAIN_DOWNPOUR) //[hack] patches/0952 あらしのうみ が つづく
 					{
-						gBattleCommunication[MULTISTRING_CHOOSER] = 1;
-						gBattlescriptCurrInstr = BattleScript_RainContinuesOrEnds;
+						gBattlescriptCurrInstr = BattleScript_StormySeaContinues;
 					}
 					else
 					{
@@ -373,6 +387,12 @@ u8 TurnBasedEffects(void)
 							break;
 					}
 
+					if (!effect && SecondAbility_TryEndTurn(gActiveBattler, SECOND_ET_WEATHER)) //[hack] 2026-10-20 2 つ目の特性
+						effect++;
+
+					if (!effect && Shadow_EndTurnShadowSkyDamage(gActiveBattler)) //[hack] patches/0955 段 D ダークの空のダメージ
+						effect++;
+
 					if (!effect)
 					{
 						if (gBattleWeather & WEATHER_HAIL_ANY)
@@ -397,7 +417,7 @@ u8 TurnBasedEffects(void)
 				&& --gWishFutureKnock.futureSightCounter[gActiveBattler] == 0
 				&& gBattleMons[gActiveBattler].hp)
 				{
-					if (gWishFutureKnock.futureSightMove[gActiveBattler] == MOVE_FUTURESIGHT)
+					if (MoveIs(gWishFutureKnock.futureSightMove[gActiveBattler], MOVE_FUTURESIGHT))
 						gBattleCommunication[MULTISTRING_CHOOSER] = 0;
 					else //Doom Desire
 						gBattleCommunication[MULTISTRING_CHOOSER] = 1;
@@ -439,7 +459,7 @@ u8 TurnBasedEffects(void)
 					case ET_Sea_Of_Fire:
 						if (BATTLER_ALIVE(gActiveBattler)
 						&&  BankSideHasSeaOfFire(gActiveBattler)
-						&&	ABILITY(gActiveBattler) != ABILITY_MAGICGUARD
+						&&	!BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD)
 						&&	!IsOfType(gActiveBattler, TYPE_FIRE))
 						{
 							gBattleMoveDamage = GetSeaOfFireDamage(gActiveBattler);
@@ -454,7 +474,7 @@ u8 TurnBasedEffects(void)
 					case ET_G_Max_VineLash:
 						if (BATTLER_ALIVE(gActiveBattler)
 						&&  BankSideHasGMaxVineLash(gActiveBattler)
-						&&	ABILITY(gActiveBattler) != ABILITY_MAGICGUARD
+						&&	!BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD)
 						&&	!IsOfType(gActiveBattler, TYPE_GRASS))
 						{
 							gBattleMoveDamage = GetGMaxVineLashDamage(gActiveBattler);
@@ -469,7 +489,7 @@ u8 TurnBasedEffects(void)
 					case ET_G_Max_Wildfire:
 						if (BATTLER_ALIVE(gActiveBattler)
 						&&  BankSideHasGMaxWildfire(gActiveBattler)
-						&&	ABILITY(gActiveBattler) != ABILITY_MAGICGUARD
+						&&	!BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD)
 						&&	!IsOfType(gActiveBattler, TYPE_FIRE))
 						{
 							gBattleMoveDamage = GetGMaxWildfireDamage(gActiveBattler);
@@ -484,7 +504,7 @@ u8 TurnBasedEffects(void)
 					case ET_G_Max_Cannonade:
 						if (BATTLER_ALIVE(gActiveBattler)
 						&&  BankSideHasGMaxCannonade(gActiveBattler)
-						&&	ABILITY(gActiveBattler) != ABILITY_MAGICGUARD
+						&&	!BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD)
 						&&	!IsOfType(gActiveBattler, TYPE_WATER))
 						{
 							gBattleMoveDamage = GetGMaxCannonadeDamage(gActiveBattler);
@@ -499,7 +519,7 @@ u8 TurnBasedEffects(void)
 					case ET_G_Max_Volcalith:
 						if (BATTLER_ALIVE(gActiveBattler)
 						&&  BankSideHasGMaxVolcalith(gActiveBattler)
-						&&	ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+						&&	!BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD))
 						{
 							gBattleMoveDamage = GetGMaxVolcalithDamage(gActiveBattler);
 							gBattleStringLoader = gText_HurtByGMaxVolcalith;
@@ -594,7 +614,7 @@ u8 TurnBasedEffects(void)
 			case ET_Leech_Seed:
 				if (gStatuses3[gActiveBattler] & STATUS3_LEECHSEED
 				&& BATTLER_ALIVE(gActiveBattler)
-				&& ABILITY(gActiveBattler) != ABILITY_MAGICGUARD
+				&& !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD)
 				&& gBattleMons[gStatuses3[gActiveBattler] & STATUS3_LEECHSEED_BATTLER].hp != 0)
 				{
 					gBankTarget = gStatuses3[gActiveBattler] & STATUS3_LEECHSEED_BATTLER; //funny how the 'target' is actually the bank that receives HP
@@ -646,7 +666,8 @@ u8 TurnBasedEffects(void)
 
 			case ET_Poison:
 				if (BATTLER_ALIVE(gActiveBattler)
-				&& ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+				&& !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD)
+				&& !Lv200CustomMove_IsPoisonHarmless(gActiveBattler)) //どくのおうさま: 毒ダメージ無し（回復はA側の終端処理）
 				{
 					if (gBattleMons[gActiveBattler].status1 & (STATUS_POISON | STATUS_TOXIC_POISON))
 					{
@@ -678,7 +699,7 @@ u8 TurnBasedEffects(void)
 			case ET_Burn:
 				if (gBattleMons[gActiveBattler].status1 & STATUS_BURN
 				&& BATTLER_ALIVE(gActiveBattler)
-				&& ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+				&& !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD))
 				{
 					gBattleMoveDamage = GetBurnDamage(gActiveBattler);
 					BattleScriptExecute(BattleScript_BurnTurnDmg);
@@ -694,7 +715,7 @@ u8 TurnBasedEffects(void)
 					||  ABILITY(gActiveBattler) == ABILITY_COMATOSE)
 					{
 						if (BATTLER_ALIVE(gActiveBattler)
-						&&  ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+						&&  !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD))
 						{
 							gBattleMoveDamage = GetNightmareDamage(gActiveBattler);
 							BattleScriptExecute(BattleScript_NightmareTurnDmg);
@@ -710,7 +731,7 @@ u8 TurnBasedEffects(void)
 			case ET_Curse:
 				if (gBattleMons[gActiveBattler].status2 & STATUS2_CURSED
 				&&  BATTLER_ALIVE(gActiveBattler)
-				&&  ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+				&&  !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD))
 				{
 					gBattleMoveDamage = GetCurseDamage(gActiveBattler);
 					BattleScriptExecute(BattleScript_CurseTurnDmg);
@@ -749,7 +770,7 @@ u8 TurnBasedEffects(void)
 						setBrokeFreeMessage = TRUE; //Will play next turn
 					}
 
-					if (ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+					if (!BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD))
 					{
 						//Damaged by wrap
 						gBattleScripting.animArg1 = gBattleStruct->wrappedMove[gActiveBattler];
@@ -799,7 +820,7 @@ u8 TurnBasedEffects(void)
 			case ET_Saltcure:
 				if (gNewBS->SaltcureBits & gBitTable[gActiveBattler]
 				&&  BATTLER_ALIVE(gActiveBattler)
-				&&  ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+				&&  !BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD))
 				{
 					gBattleMoveDamage = GetSaltcureDamage(gActiveBattler);
 					gBattleStringLoader = gText_HurtBySaltcure;
@@ -978,6 +999,7 @@ u8 TurnBasedEffects(void)
 				break;
 
 			case ET_Roost:
+				gNewBS->hackDeltaRoost &= ~gBitTable[gActiveBattler]; //[hack] patches/0962 元ひこうのデルタ種のはねやすめはここで終わり
 				if (gNewBS->RoostCounter & gBitTable[gActiveBattler])
 				{
 					gNewBS->RoostCounter &= ~(gBitTable[gActiveBattler]);
@@ -1401,6 +1423,9 @@ u8 TurnBasedEffects(void)
 										effect++;
 									break;
 							}
+
+							if (!effect && SecondAbility_TryEndTurn(gActiveBattler, SECOND_ET_SPEEDBOOST)) //[hack] 2026-10-20 2 つ目の特性
+								effect++;
 						}
 						break;
 
@@ -1450,7 +1475,7 @@ u8 TurnBasedEffects(void)
 								}
 								case ITEM_EFFECT_MAISEN: //[hack] patches/0292 2026-10-10 まいせん: 毎ターン 1/10（くっつきバリ と同じ台本）
 								case ITEM_EFFECT_STICKY_BARB:
-									if (ABILITY(gActiveBattler) != ABILITY_MAGICGUARD)
+									if (!BankHasAbility(gActiveBattler, ABILITY_MAGICGUARD))
 									{
 										gLastUsedItem = ITEM(gBattleScripting.bank = gActiveBattler);
 										RecordItemEffectBattle(gActiveBattler, itemEffect);
@@ -1574,7 +1599,7 @@ u8 TurnBasedEffects(void)
 
 						#if (defined SPECIES_WISHIWASHI && defined SPECIES_WISHIWASHI_S)
 						case ABILITY_SCHOOLING:
-							if (species == SPECIES_WISHIWASHI && gBattleMons[gActiveBattler].level >= 20
+							if (species == SPECIES_WISHIWASHI && BM_LEVEL(gBattleMons[gActiveBattler]) >= 20
 							&& gBattleMons[gActiveBattler].hp >= gBattleMons[gActiveBattler].maxHP / 4) //★ Champions（patches/0070） ぎょぐん 1/4 以上
 							{
 								newSpecies = SPECIES_WISHIWASHI_S;
@@ -1584,7 +1609,7 @@ u8 TurnBasedEffects(void)
 								battleScript = BattleScript_StartedSchooling;
 							}
 							else if (species == SPECIES_WISHIWASHI_S
-								&&  (gBattleMons[gActiveBattler].level < 20
+								&&  (BM_LEVEL(gBattleMons[gActiveBattler]) < 20
 								  || gBattleMons[gActiveBattler].hp < gBattleMons[gActiveBattler].maxHP / 4)) //★ Champions（patches/0070）
 							{
 								newSpecies = SPECIES_WISHIWASHI;
@@ -1714,11 +1739,27 @@ u8 TurnBasedEffects(void)
 				}
 				break;
 
+			case ET_MoveEvo: //[hack] patches/0864 技進化: 保留があれば枠を差し替えて文（バンクごと）
+				if (HackMoveEvo_TryApply(gActiveBattler) || HackMoveMastery_TryAnnounce(gActiveBattler)) //patches/0932 熟練度の段が上がったお知らせ
+					++effect;
+				break;
+
 			case ET_End:
 			END_TURN_SKIP:
+		if (Lv200CustomMove_TryEndTurnEffect())
+		{
+			++effect;
+			return effect;
+		}
+		Lv200CustomMove_OnTurnEnd();
 				gBattleStruct->turnEffectsBank = gBattlersCount;
 				gNewBS->endTurnDone = TRUE;
 				gNewBS->megaData.state = 0;
+				gNewBS->hackGibleSwitchLock = 0; //[hack] patches/0791
+				gNewBS->hackGibleDone = 0; //[hack] patches/0792
+				gNewBS->hackGibleSwitched = 0; //[hack] patches/0793
+				gNewBS->hackGibleSecondBank = 0;
+				gNewBS->hackMoveEvoRolled = 0; //[hack] patches/0864
 				gNewBS->calculatedAIPredictions = FALSE;
 				gNewBS->batonPassing = FALSE;
 				gNewBS->NoMoreMovingThisTurn = 0; //May be set during end turn Emergency Exit
@@ -1775,10 +1816,10 @@ u32 GetLeechSeedDamage(u8 bank)
 	u32 damage = 0;
 
 	if (gStatuses3[bank] & STATUS3_LEECHSEED
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 		damage = MathMax(1, GetBaseMaxHP(bank) / 8);
 
-	return damage;
+	return Lv200CustomMove_ModifyLeechSeedDamage(bank, damage);
 }
 
 u32 GetPoisonDamage(u8 bank)
@@ -1786,8 +1827,9 @@ u32 GetPoisonDamage(u8 bank)
 	u32 damage = 0;
 	u16 ability = ABILITY(bank);
 
-	if (ability != ABILITY_MAGICGUARD
-	&& ability != ABILITY_POISONHEAL)
+	if (!BankHasAbility(bank, ABILITY_MAGICGUARD) //[hack] 2026-10-22 2 つ目
+	&& ability != ABILITY_POISONHEAL
+	&& !Lv200CustomMove_IsPoisonHarmless(bank)) //どくのおうさま: 毒ダメージ無し
 	{
 		if (gBattleMons[bank].status1 & STATUS_POISON)
 		{
@@ -1812,12 +1854,11 @@ u32 GetPoisonDamage(u8 bank)
 u32 GetBurnDamage(u8 bank)
 {
 	u32 damage = 0;
-	u16 ability = ABILITY(bank);
 
 	if (gBattleMons[bank].status1 & STATUS_BURN
-	&& ability != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD)) //[hack] 2026-10-20 2 つ目
 	{
-		if (ability == ABILITY_HEATPROOF)
+		if (BankHasAbility(bank, ABILITY_HEATPROOF))
 		{
 			#ifdef OLD_BURN_DAMAGE
 				damage = MathMax(1, GetBaseMaxHP(bank) / 16);
@@ -1844,7 +1885,7 @@ u32 GetNightmareDamage(u8 bank)
 
 	if (gBattleMons[bank].status2 & STATUS2_NIGHTMARE
 	&& gBattleMons[bank].status1 & STATUS_SLEEP
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		damage = MathMax(1, GetBaseMaxHP(bank) / 4);
 	}
@@ -1857,7 +1898,7 @@ u32 GetCurseDamage(u8 bank)
 	u32 damage = 0;
 
 	if (gBattleMons[bank].status2 & STATUS2_CURSED
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		damage = MathMax(1, GetBaseMaxHP(bank) / 4);
 	}
@@ -1871,7 +1912,7 @@ u32 GetTrapDamage(u8 bank)
 
 	if (gBattleMons[bank].status2 & STATUS2_WRAPPED
 	&& !(gNewBS->brokeFreeMessage & gBitTable[bank]) //Trapping isn't about to end
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		if ((gNewBS->sandblastCentiferno[gActiveBattler] & 2) //Trapped by this move and user held Binding Band
 		|| ITEM_EFFECT(gBattleStruct->wrappedBy[bank]) == ITEM_EFFECT_BINDING_BAND)
@@ -1888,7 +1929,7 @@ u32 GetSaltcureDamage(u8 bank)
 	u32 damage = 0;
 
 	if (gNewBS->SaltcureBits & gBitTable[bank]
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		if ((IsOfType(bank, TYPE_WATER) || IsOfType(bank, TYPE_STEEL))) //★ Champions（patches/0070） しおづけは半分に
 			damage = MathMax(1, GetBaseMaxHP(bank) / 8);
@@ -1905,7 +1946,7 @@ u32 GetSeaOfFireDamage(u8 bank)
 
 	if (BankSideHasSeaOfFire(bank)
 	&& !IsOfType(bank, TYPE_FIRE)
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		damage = MathMax(1, GetBaseMaxHP(bank) / 8);
 	}
@@ -1919,7 +1960,7 @@ u32 GetGMaxVineLashDamage(u8 bank)
 
 	if (BankSideHasGMaxVineLash(bank)
 	&& !IsOfType(bank, TYPE_GRASS)
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		damage = MathMax(1, GetBaseMaxHP(bank) / 6);
 	}
@@ -1933,7 +1974,7 @@ u32 GetGMaxWildfireDamage(u8 bank)
 
 	if (BankSideHasGMaxWildfire(bank)
 	&& !IsOfType(bank, TYPE_FIRE)
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		damage = MathMax(1, GetBaseMaxHP(bank) / 6);
 	}
@@ -1947,7 +1988,7 @@ u32 GetGMaxCannonadeDamage(u8 bank)
 
 	if (BankSideHasGMaxCannonade(bank)
 	&& !IsOfType(bank, TYPE_WATER)
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		damage = MathMax(1, GetBaseMaxHP(bank) / 6);
 	}
@@ -1960,7 +2001,7 @@ u32 GetGMaxVolcalithDamage(u8 bank)
 	u32 damage = 0;
 
 	if (BankSideHasGMaxVolcalith(bank)
-	&& ABILITY(bank) != ABILITY_MAGICGUARD)
+	&& !BankHasAbility(bank, ABILITY_MAGICGUARD))
 	{
 		damage = MathMax(1, GetBaseMaxHP(bank) / 6);
 	}
@@ -2230,9 +2271,13 @@ bool8 IsInMiddleOfEndTurnSwitchIn(u8 bank)
 
 extern bool8 HoennArena_TryJudgment(void); //★ src/hoenn_arena.c（patches/0096）
 
+void HackChallengeC_TurnLimit(void); //[hack] patches/0550 縛り C: ？？？との戦いは 6 ターンの終わりで かならず ぜんめつ（src/hack_challenge_c.c）
+
 bool8 HandleDynamaxOnTurnEnd(void)
 {
 	u8 bank;
+
+	HackChallengeC_TurnLimit();
 
 	if (HoennArena_TryJudgment()) //★ バトルアリーナ: 3 ターンたって両方立っていれば審判の判定（倒れた子の入れ替えのあと・エメラルドと同じ順）
 		return TRUE;

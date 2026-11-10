@@ -2686,7 +2686,11 @@ static void UpdateWagerDigit(int direction)
         oldWager = oldWager % d;
         d = d / 10;
     }
-    maxWager = GetCoins();  // Maximum wager is the current coins
+    //[hack] patches/0410 コインは 99,999 枚まで持てる（u32）。u16 に入れると 65,536 枚以上で桁があふれるので、かけきんの上限 9,999 で頭打ちにしてから入れる
+    {
+        u32 coinsNow = GetCoins();
+        maxWager = (coinsNow > 9999) ? 9999 : (u16) coinsNow;  // Maximum wager is the current coins (the wager has 4 digits)
+    }
     
     // wagerDigits[0] = Thousands place
     // wagerDigits[1] = Hundreds place

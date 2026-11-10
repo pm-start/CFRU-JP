@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "defines_battle.h"
 #include "../include/event_data.h"
 #include "../include/fieldmap.h"
 #include "../include/load_save.h"
@@ -12,8 +13,13 @@
 #include "../include/new/build_pokemon.h"
 #include "../include/new/character_customization.h"
 #include "../include/new/frontier.h"
+#include "../include/new/learn_move.h"
 #include "../include/new/util.h"
 #include "Tables/hoenn_script_flags.h"
+#include "hoenn_frontier_level.h"
+#include "hoenn_frontier_rec.h"
+#include "hoenn_yartie.h" //[hack] patches/0817 ロジックアリーナ
+#include "hack_ribbon.h"   //[hack] patches/0977 リボンの表（FEAT-relive-ribbon 段 3）
 
 /*
  * ホウエンのバトルタワー（#5・2026-09-28 ユーザー「実装して」「エメラルドから移植だよね」）
@@ -28,7 +34,7 @@
  *   記録を触る前は 50 / 100（HoennTower_SetRecordLevel）、戦う直前だけ相手のレベル（HoennTower_SetBattleLevel）にする
  */
 
-#define TOWER_FACILITY_VAR 0x403A          //CFRU の BATTLE_FACILITY_NUM（0 = バトルタワー）
+#define TOWER_FACILITY_VAR VAR_BATTLE_FACILITY_NUM /* 0x40FF。0x403A はエレベーターの階のまま */
 #define HOENN_FACILITY_TOWER 0              //HOENN_VAR_FRONTIER_FACILITY
 #define HOENN_FACILITY_PALACE 1
 #define HOENN_FACILITY_ARENA 2
@@ -43,6 +49,8 @@
 
 extern u16 HoennFrontier_ChooseNewTrainer(u16 challengeNum, u16 battleNum); //src/hoenn_frontier.c（この挑戦でまだ出ていない人）
 void HoennTower_SetRecordLevel(void);
+void HoennYartie_End(void); //src/hoenn_yartie.c
+void HoennFacility_ResumeAfterSave(void); //下（施設の中のレポート・patches/0683）
 
 //参加の子の数。タワーのダブルは 4 匹・ほかは 3 匹（パレス・アリーナは 3 匹・エメラルドの FRONTIER_PARTY_SIZE）
 static u8 TowerPartySize(void)
@@ -94,28 +102,55 @@ static bool8 InPyramid(void)
 	return VarGet(HOENN_VAR_FRONTIER_FACILITY) == HOENN_FACILITY_PYRAMID;
 }
 
-//連勝を予約変数に持つ施設（パレス・アリーナ・チューブ・ファクトリー・ドーム・ピラミッド）。タワーは CFRU の gBattleTowerStreaks
+//レベル49・100（別の記録・追加のセーブ領域・src/hoenn_frontier_rec.c）か。タワーも含め全施設で、連勝はこの入れ物に置く
+static bool8 SeparateRec(void)
+{
+	return HOENN_LVL_SEPARATE(VarGet(HOENN_VAR_TOWER_LVL_MODE));
+}
+
+//連勝を予約変数に持つ施設（パレス・アリーナ・チューブ・ファクトリー・ドーム・ピラミッド）。タワーは CFRU の gBattleTowerStreaks（49・100 のときはタワーも別の記録）
 static bool8 HasOwnStreak(void)
 {
-	return InPalace() || InArena() || InPike() || InFactory() || InDome() || InPyramid();
+	return InPalace() || InArena() || InPike() || InFactory() || InDome() || InPyramid() || SeparateRec();
 }
 
 static u16 PalaceStreakVar(bool8 max)
 {
 	if (InPyramid())
-		return (max ? HOENN_VAR_PYRAMID_MAX_STREAK : HOENN_VAR_PYRAMID_STREAK) + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0);
+		return (max ? HOENN_VAR_PYRAMID_MAX_STREAK : HOENN_VAR_PYRAMID_STREAK) + HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 	if (InDome())
 		return (max ? HOENN_VAR_DOME_MAX_STREAK : HOENN_VAR_DOME_STREAK)
-		     + (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0);
+		     + (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 	if (InFactory())
 		return (max ? HOENN_VAR_FACTORY_MAX_STREAK : HOENN_VAR_FACTORY_STREAK)
-		     + (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0);
+		     + (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 	if (InPike())
-		return (max ? HOENN_VAR_PIKE_MAX_STREAK : HOENN_VAR_PIKE_STREAK) + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0);
+		return (max ? HOENN_VAR_PIKE_MAX_STREAK : HOENN_VAR_PIKE_STREAK) + HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 	if (InArena())
-		return (max ? HOENN_VAR_ARENA_MAX_STREAK : HOENN_VAR_ARENA_STREAK) + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0);
+		return (max ? HOENN_VAR_ARENA_MAX_STREAK : HOENN_VAR_ARENA_STREAK) + HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 	return (max ? HOENN_VAR_PALACE_MAX_STREAK : HOENN_VAR_PALACE_STREAK)
-	     + (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + (VarGet(HOENN_VAR_TOWER_LVL_MODE) != 0);
+	     + (VarGet(HOENN_VAR_TOWER_MODE) == 1) * 2 + HOENN_LVL_OPENCLASS(VarGet(HOENN_VAR_TOWER_LVL_MODE));
+}
+
+static u8 RecFacility(void)
+{
+	return MathMin(VarGet(HOENN_VAR_FRONTIER_FACILITY), HFR_FAC_COUNT - 1);
+}
+
+//連勝／最高の連勝を読む・書く（49・100 は別の記録・ほかは予約変数）
+static u16 OwnStreakGet(bool8 max)
+{
+	if (SeparateRec())
+		return HoennFrontierRec_Get(RecFacility(), VarGet(HOENN_VAR_TOWER_MODE) == 1, VarGet(HOENN_VAR_TOWER_LVL_MODE), max);
+	return VarGet(PalaceStreakVar(max));
+}
+
+static void OwnStreakSet(bool8 max, u16 value)
+{
+	if (SeparateRec())
+		HoennFrontierRec_Set(RecFacility(), VarGet(HOENN_VAR_TOWER_MODE) == 1, VarGet(HOENN_VAR_TOWER_LVL_MODE), max, value);
+	else
+		VarSet(PalaceStreakVar(max), value);
 }
 
 static void SetUpFacility(u16 facility)
@@ -125,7 +160,15 @@ static void SetUpFacility(u16 facility)
 	VarSet(VAR_BATTLE_FACILITY_BATTLE_TYPE, (VarGet(HOENN_VAR_TOWER_MODE) == 1) ? BATTLE_FACILITY_DOUBLE : BATTLE_FACILITY_SINGLE);
 	VarSet(VAR_BATTLE_FACILITY_POKE_NUM, TowerPartySize());
 	VarSet(VAR_BATTLE_FACILITY_TIER, BATTLE_FACILITY_STANDARD);
-	VarSet(VAR_BATTLE_FACILITY_POKE_LEVEL, (VarGet(HOENN_VAR_TOWER_LVL_MODE) == 0) ? 50 : MAX_LEVEL);
+	VarSet(VAR_BATTLE_FACILITY_POKE_LEVEL, (VarGet(HOENN_VAR_TOWER_LVL_MODE) == HOENN_LVL_MODE_OPEN) ? MAX_LEVEL : HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE)));
+}
+
+//[hack] patches/0817 ロジックアリーナ（src/hoenn_yartie.c）: 施設の番号 7・レベル 50 固定・シングル・3 匹
+void HoennYartie_SetUpFacilityVars(void)
+{
+	VarSet(HOENN_VAR_TOWER_MODE, 0);
+	VarSet(HOENN_VAR_TOWER_LVL_MODE, HOENN_LVL_MODE_50);
+	SetUpFacility(HOENN_FACILITY_YARTIE);
 }
 
 //施設の設定（ロビー・対戦室に入るたび／挑戦の頭で呼ぶ）。レベルは記録の側（50 / 100）
@@ -151,6 +194,7 @@ void HoennPike_SetUpFacility(void)
 {
 	VarSet(HOENN_VAR_TOWER_MODE, 0);
 	SetUpFacility(HOENN_FACILITY_PIKE);
+	HoennFacility_ResumeAfterSave(); //[fix] patches/0683 チューブの部屋の中のレポートからの「つづきから」
 }
 
 //ファクトリーはシングル・ダブル（モードは受付で HOENN_VAR_TOWER_MODE に入る）
@@ -170,20 +214,39 @@ void HoennPyramid_SetUpFacility(void)
 {
 	VarSet(HOENN_VAR_TOWER_MODE, 0);
 	SetUpFacility(HOENN_FACILITY_PYRAMID);
+	HoennFacility_ResumeAfterSave(); //[fix] patches/0683 施設の中のレポートからの「つづきから」では、挑戦のチームを作り直す
 }
 
 //今の連勝（施設ごとの置き場から）
 static u16 CurrentStreak(void)
 {
 	if (HasOwnStreak())
-		return VarGet(PalaceStreakVar(FALSE));
+		return OwnStreakGet(FALSE);
 	HoennTower_SetRecordLevel();
 	return GetCurrentBattleTowerStreak();
 }
 
+//レベルの選択（メニューの並び: 0 レベル50・1 レベル49・2 レベル100・3 オープン）→ HOENN_VAR_TOWER_LVL_MODE の値（hoenn_frontier_level.h）。
+//既存の 0 = 50・1 = オープンの意味は変えない（ホウエンの 7 施設の受付が共用）
+static const u8 sLvlMenuToMode[4] = {HOENN_LVL_MODE_50, HOENN_LVL_MODE_49, HOENN_LVL_MODE_100, HOENN_LVL_MODE_OPEN};
+
+void HoennTower_SetLvlModeFromMenu(void)
+{
+	VarSet(HOENN_VAR_TOWER_LVL_MODE, sLvlMenuToMode[gSpecialVar_LastResult & 3]);
+}
+
+//ピラミッドの占い師用: メニューの選択 → 記録・表の側（0 = 50 の仲間・1 = オープンの仲間）を LASTRESULT へ
+void HoennTower_LvlMenuToClass(void)
+{
+	u8 mode = sLvlMenuToMode[gSpecialVar_LastResult & 3];
+
+	Var8007 = mode; //選んだ設定そのもの（49・100 は別の記録を引く・src/hoenn_pyramid.c の GetBattlePyramidData）
+	gSpecialVar_LastResult = HOENN_LVL_OPENCLASS(mode);
+}
+
 void HoennTower_SetRecordLevel(void)
 {
-	VarSet(VAR_BATTLE_FACILITY_POKE_LEVEL, (VarGet(HOENN_VAR_TOWER_LVL_MODE) == 0) ? 50 : MAX_LEVEL);
+	VarSet(VAR_BATTLE_FACILITY_POKE_LEVEL, (VarGet(HOENN_VAR_TOWER_LVL_MODE) == HOENN_LVL_MODE_OPEN) ? MAX_LEVEL : HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE)));
 }
 
 void HoennTower_SetBattleLevel(void)
@@ -270,19 +333,22 @@ void HoennTower_PrepareTeam(void)
 	for (i = 0; i < size; ++i)
 	{
 		u8 slot = (packed >> (3 * i)) & 7;
-		u8 level;
+		u16 level;
 
 		if (slot == 0 || slot > PARTY_SIZE)
 			break;
 		Memcpy(&team[i], &gPlayerParty[slot - 1], sizeof(struct Pokemon));
 		level = GetMonData(&team[i], MON_DATA_LEVEL, NULL);
-		if (VarGet(HOENN_VAR_TOWER_LVL_MODE) == 0 && level > TOWER_MAX_LEVEL_50)
+		//[hack] patches/0817 ロジックアリーナは 50 未満の子も 50 に上げる（全員ちょうど Lv50）。ほかの施設は 50 をこえる子だけ下げる
+		if (VarGet(HOENN_VAR_TOWER_LVL_MODE) != HOENN_LVL_MODE_OPEN
+		 && (level > HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE))
+		  || (VarGet(HOENN_VAR_FRONTIER_FACILITY) == HOENN_FACILITY_YARTIE && level != HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE)))))
 		{
 			u16 species = GetMonData(&team[i], MON_DATA_SPECIES, NULL);
 
-			SetMonData(&team[i], MON_DATA_EXP, &gExperienceTables[gBaseStats[species].growthRate][TOWER_MAX_LEVEL_50]);
+			SetMonData(&team[i], MON_DATA_EXP, &gExperienceTables[gBaseStats[species].growthRate][HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE))]);
 			CalculateMonStats(&team[i]);
-			level = TOWER_MAX_LEVEL_50;
+			level = HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE));
 		}
 		HealMon(&team[i]);
 		if (level > highest)
@@ -296,10 +362,40 @@ void HoennTower_PrepareTeam(void)
 	for (i = 0; i < PARTY_SIZE; ++i)
 		gSelectedOrderFromParty[i] = (i < size) ? i + 1 : 0;
 
-	if (VarGet(HOENN_VAR_TOWER_LVL_MODE) == 0)
-		VarSet(HOENN_VAR_TOWER_OPP_LEVEL, 50);
+	if (VarGet(HOENN_VAR_TOWER_LVL_MODE) != HOENN_LVL_MODE_OPEN)
+		VarSet(HOENN_VAR_TOWER_OPP_LEVEL, HOENN_LVL_FIXED(VarGet(HOENN_VAR_TOWER_LVL_MODE)));
 	else
 		VarSet(HOENN_VAR_TOWER_OPP_LEVEL, MathMin(MathMax(highest, TOWER_OPEN_MIN_LEVEL), MAX_LEVEL));
+}
+
+//スケッチで覚えた技を戻す（エメラルドの frontier_resetsketch・frontier_util.c:2192-2215 ResetSketchedMoves）。2026-10-21 ユーザー「A全部修正」。
+//挑戦のチーム（写し）の各技が、元の手持ち（SavePlayerParty の退避・gSaveBlock1->playerParty）の同じ子に無ければ「スケッチ」の枠へ戻す。
+//★ エメラルドはこのあと写しを元の手持ちの枠へ書き戻すが、こちらの写しはレベルを下げた子なので書き戻さない（元の手持ちを書き換えない）
+//タワー・パレス・アリーナの戦いのあとに呼ぶ（ドームは戦のたびにチームを作り直す）。LASTRESULT は変えない
+void HoennTower_ResetSketch(void)
+{
+	u16 packed = VarGet(HOENN_VAR_TOWER_SELECTED);
+	u8 size = TowerPartySize();
+	u32 i, j, k;
+
+	for (i = 0; i < size; ++i)
+	{
+		u8 slot = (packed >> (3 * i)) & 7;
+		struct Pokemon* mon = &gPlayerParty[i];
+		struct Pokemon* orig;
+
+		if (slot < 1 || slot > PARTY_SIZE || GetMonData(mon, MON_DATA_SPECIES, NULL) == SPECIES_NONE)
+			continue;
+		orig = &gSaveBlock1->playerParty[slot - 1];
+		for (j = 0; j < MAX_MON_MOVES; ++j)
+		{
+			for (k = 0; k < MAX_MON_MOVES; ++k)
+				if (GetMonData(orig, MON_DATA_MOVE1 + k, NULL) == GetMonData(mon, MON_DATA_MOVE1 + j, NULL))
+					break;
+			if (k == MAX_MON_MOVES)
+				SetMonMoveSlot(mon, MOVE_SKETCH, j);
+		}
+	}
 }
 
 //次の相手を決める（エメラルドの tower_setopponent）。連勝の周回と何戦目かで範囲を選ぶ（src/hoenn_frontier.c）。
@@ -323,7 +419,7 @@ void HoennTower_SetOpponent(void)
 //表は 30 行（それより先は最後の行）。BP を足して、もらった数を gStringVar1 へ
 void HoennTower_GiveBattlePoints(void)
 {
-	static const u8 sPoints[7][2][30] =
+	static const u8 sPoints[8][2][30] =
 	{
 		{   //バトルタワー
 			{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
@@ -353,10 +449,24 @@ void HoennTower_GiveBattlePoints(void)
 			{5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
 			{5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15},
 		},
+		{   //[hack] patches/0817 ロジックアリーナ（連勝の記録を付けない＝周回は 1 固定・最初の行の値だけ使う）。1 戦ごとに 3 BP（ユーザー決定 2026-10-25）。全員に勝ったら +YARTIE_CLEAR_BP（10＝ブレーン戦と同じ）
+			{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+			{3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3},
+		},
 	};
 	u16 challengeNum, points;
 	u32 total;
 
+	if (VarGet(HOENN_VAR_FRONTIER_FACILITY) == HOENN_FACILITY_YARTIE) //[hack] patches/0817
+	{
+		points = sPoints[HOENN_FACILITY_YARTIE][0][0];
+		if (VarGet(HOENN_VAR_YARTIE_PROGRESS) >= YARTIE_BATTLES)
+			points += YARTIE_CLEAR_BP;
+		total = VarGet(HOENN_VAR_FRONTIER_BP) + points;
+		VarSet(HOENN_VAR_FRONTIER_BP, MathMin(total, 9999));
+		ConvertIntToDecimalStringN(gStringVar1, points, STR_CONV_MODE_LEFT_ALIGN, 2);
+		return;
+	}
 	challengeNum = CurrentStreak() / (InPike() ? 14 : (InDome() ? 1 : 7));
 	if (challengeNum != 0)
 		--challengeNum;
@@ -369,10 +479,65 @@ void HoennTower_GiveBattlePoints(void)
 	ConvertIntToDecimalStringN(gStringVar1, points, STR_CONV_MODE_LEFT_ALIGN, 2);
 }
 
+//[hack] patches/0817 ロジックアリーナ（src/hoenn_yartie.c）: 上の表の 8 行目を引く（HOENN_VAR_FRONTIER_FACILITY が 7 のとき）
+void HoennTower_GiveYartieBattlePoints(void)
+{
+	HoennTower_GiveBattlePoints();
+}
+
 //今の連勝（記録のレベルで）→ LASTRESULT。ロビーで「つぎは 50 にんめ」を出すかに使う
 void HoennTower_GetStreak(void)
 {
 	gSpecialVar_LastResult = CurrentStreak();
+}
+
+//★ FEAT-relive-ribbon 段 3（patches/0977）: バトルタワーの連勝リボン（エメラルドの AwardBattleTowerRibbons・battle_tower.c:2769）
+//  タワーだけ（ロビー台本は 7 施設共用）・連勝 56 以上（エメラルドは > 55）・参加した子（HOENN_VAR_TOWER_SELECTED）のうち、まだ持たない子にだけ付ける。
+//  付けた子が 1 匹でもいれば GAME_STAT_RECEIVED_RIBBONS + 1・LASTRESULT = 1（無ければ 0）。
+//  エメラルドのテレビ番組（TryPutSpotTheCutiesOnAir）は、この改造に無いので省略。
+//  モードごとの付与はこの表 1 つ（0 = 付けない）。ユーザー決定「バトルタワーB」（2026-11-09）: 49＝ウイニング・100＝ビクトリー（50＝ウイニング・オープン＝ビクトリー）
+#define TOWER_RIBBON_WINNING (1u << 16)   /* hack_ribbon.h の RIBBON_BIT と同じ（80 バイト形 +0x08 の bit16／17） */
+#define TOWER_RIBBON_VICTORY (1u << 17)
+#define TOWER_RIBBON_MIN_STREAK 56
+static const u32 sTowerRibbonByLvlMode[4] =
+{
+	[HOENN_LVL_MODE_50]   = TOWER_RIBBON_WINNING,
+	[HOENN_LVL_MODE_OPEN] = TOWER_RIBBON_VICTORY,
+	[HOENN_LVL_MODE_49]   = TOWER_RIBBON_WINNING,
+	[HOENN_LVL_MODE_100]  = TOWER_RIBBON_VICTORY,
+};
+
+void HoennTower_GiveRibbons(void)
+{
+	u16 packed = VarGet(HOENN_VAR_TOWER_SELECTED);
+	u8 size = TowerPartySize();
+	u32 bit, i;
+	bool8 any = FALSE;
+
+	gSpecialVar_LastResult = 0;
+	if (VarGet(HOENN_VAR_FRONTIER_FACILITY) != HOENN_FACILITY_TOWER)
+		return;
+	bit = sTowerRibbonByLvlMode[VarGet(HOENN_VAR_TOWER_LVL_MODE) & 3];
+	if (bit == 0 || CurrentStreak() < TOWER_RIBBON_MIN_STREAK)
+		return;
+	for (i = 0; i < size; ++i)
+	{
+		u8 slot = (packed >> (3 * i)) & 7;
+		struct BoxPokemon* box;
+
+		if (slot < 1 || slot > PARTY_SIZE)
+			continue;
+		box = (struct BoxPokemon*) &gPlayerParty[slot - 1];
+		if (box->substruct0.species == SPECIES_NONE || box->substruct3.isEgg || (HackRibbon_Bits(box) & bit))
+			continue;
+		HackRibbon_AddBits(box, bit);
+		any = TRUE;
+	}
+	if (any)
+	{
+		IncrementGameStat(GAME_STAT_RECEIVED_RIBBONS);
+		gSpecialVar_LastResult = 1;
+	}
 }
 
 //★ 2026-10-11 実績「れんしょうの はじまり」「フロンティアの はしゃ」（GAME_STAT_BATTLE_FACILITY_BEST_STREAK）を自前の連勝の施設でも上げる
@@ -389,12 +554,12 @@ void HoennTower_IncrementStreak(void)
 {
 	if (HasOwnStreak())
 	{
-		u16 streak = VarGet(PalaceStreakVar(FALSE));
+		u16 streak = OwnStreakGet(FALSE);
 
 		if (streak < PALACE_MAX_STREAK)
-			VarSet(PalaceStreakVar(FALSE), ++streak);
-		if (streak > VarGet(PalaceStreakVar(TRUE)))
-			VarSet(PalaceStreakVar(TRUE), streak);
+			OwnStreakSet(FALSE, ++streak);
+		if (streak > OwnStreakGet(TRUE))
+			OwnStreakSet(TRUE, streak);
 		HoennFrontier_NoteBestStreak(streak);
 		return;
 	}
@@ -407,7 +572,7 @@ void HoennTower_ResetStreak(void)
 {
 	if (HasOwnStreak())
 	{
-		VarSet(PalaceStreakVar(FALSE), 0);
+		OwnStreakSet(FALSE, 0);
 		return;
 	}
 	HoennTower_SetRecordLevel();
@@ -472,6 +637,220 @@ void HoennTower_SaveGame(void)
 	gSpecialVar_LastResult = (TrySavingData(SAVE_NORMAL) == SAVE_STATUS_OK);
 	if (midChallenge)
 		ClearContinueGameWarpStatus2();
+}
+
+//[pyramid-save-begin]
+/* ---- 施設の中のレポート（patches/0683・BUG-pyramid-party-restore） -------------------------------------
+ * ★ 症状（遊んでいる人の報告 v0.59.1）: ピラミッドの中でレポートを書いて受付に戻ると、手持ちが選んだ 3 匹になってしまう。
+ * ★ 原因: 素のレポート（スタートメニュー→ special 0x5D → TrySavingData → HandleSavingData）は SaveSerializedGame の中で
+ *   SavePlayerParty（gPlayerParty → gSaveBlock1->playerParty）を行う。ところが受付の SP_SAVE_PARTY が元の手持ちを「退避」している先も
+ *   同じ gSaveBlock1->playerParty。挑戦中の gPlayerParty は 3 匹の写しなので、レポートを書くと退避先（＝セーブの手持ち）が 3 匹で上書きされ、
+ *   元の手持ちがセーブから消える。タワーなどの「やすむ」は SP_LOAD_PARTY で元に戻してから書くので無事。
+ * ★ 施設ごとの扱い（HoennFacility_SaveMode）:
+ *   1 差し替え: 歩き回れる階・部屋（ピラミッドの階・頂上／チューブの三つ又・普通・野生の部屋）。スタートメニューのレポートを使える。
+ *   2 ふさぐ: 台本で動かされる部屋（タワー・アリーナ・パレス・ドーム・ファクトリーの通路・対戦部屋と、チューブの通路・ゴール）。
+ *     操作できる間はほぼ無いが、入った直後のわずかな間にスタートメニューを開ける。続きから作り直せる材料（ファクトリーの貸し出し・ドームの
+ *     2 匹など）が足りないので、レポートの項目を出さない（src/bw_start_menu.c）。
+ *   0 何もしない: 受付（元の手持ちのまま）・挑戦中でないとき。
+ * ★ 差し替えの直し: (1) 挑戦のチームの様子（HP・状態・PP・持ち物）を変数に取る（HOENN_VAR_PIKE_PARTY・チューブのやすむと共用・
+ *   同時に挑めない）(2) 状態に印（0x100）を付ける (3) gPlayerParty を退避先の元の手持ちに差し替えて書く (4) 書き終えたら挑戦のチームと状態に戻す。
+ *   つづきから では、その施設の ON_TRANSITION（Hoenn〜_SetUpFacility）が印を見つけて元の手持ちから挑戦のチームを作り直し
+ *   （HoennTower_PrepareTeam）、様子を戻して（HoennPike_LoadPartyState）印を消す。
+ *   セーブの形は変えない（手持ち 6 匹の枠・変数 0x5140 の上位 1 ビット・既存の変数 0x511F〜）。古い版で開いても元の手持ちは残り、状態が
+ *   どの比較にも当たらないだけ（挑戦は受付で片付く）。
+ */
+#define PYRAMID_SAVE_MARK 0x100
+#define HOENN_FRONTIER_GROUP 69
+#define HOENN_FACILITY_PYRAMID_ID 6
+bool8 HoennPyramid_OnFloorOrTop(void); //src/hoenn_pyramid.c
+void HoennPike_SavePartyState(void);   //src/hoenn_pike.c
+void HoennPike_LoadPartyState(void);
+bool8 HoennPike_OnRoamingMap(void);    //src/hoenn_pike.c: 三つ又・普通・野生の部屋
+
+//施設ごとの 受付の地図の番号（HOENN_FACILITY_* の順: タワー・パレス・アリーナ・チューブ・ファクトリー・ドーム・ピラミッド）
+static const u8 sFacilityLobbyMap[8] = {5, 22, 28, 34, 31, 18, 25, 42}; //[hack] patches/0817 8 つ目＝ロジックアリーナの受付（群 69 の 42・交換所）
+#define FRONTIER_MAP_FIRST 5
+#define FRONTIER_MAP_LAST 39
+
+//0 何もしない／1 差し替える／2 レポートをふさぐ
+u8 HoennFacility_SaveMode(void)
+{
+	u16 status = VarGet(HOENN_VAR_TOWER_STATUS);
+	u16 facility = VarGet(HOENN_VAR_FRONTIER_FACILITY);
+	u8 map = gSaveBlock1->location.mapNum;
+
+	//[hack] patches/0817 ロジックアリーナ（施設 7）: 戦いの間だけ手持ちが Lv50 の写し（SP_SAVE_PARTY〜SP_LOAD_PARTY・FLAG_BATTLE_FACILITY が立つ間）→ 2（ふさぐ）。
+	//  それ以外（受付・戦と戦の間）は手持ちが元の 6 匹のまま → 0（素のレポートで安全）。台本が動く間はスタートメニューも開けない
+	if (facility == HOENN_FACILITY_YARTIE)
+		return (FlagGet(FLAG_BATTLE_FACILITY) && FlagGet(HACK_FLAG_YARTIE_ACTIVE)) ? 2 : 0;
+	if (status < 1 || status == 2 /* ST_PAUSED: 手持ちは元のまま */ || status > HOENN_ST_WON_BRAIN || !FlagGet(FLAG_BATTLE_FACILITY))
+		return 0;
+	if (gSaveBlock1->location.mapGroup != HOENN_FRONTIER_GROUP || map < FRONTIER_MAP_FIRST || map > FRONTIER_MAP_LAST)
+		return 0;
+	//[BUG-pyramid-party-lost・patches/0821] SaveMode に明示の分岐が無い施設（番号が HOENN_FACILITY_PYRAMID_ID より大きい）は ふさぐ（2）。
+	//  以前は 0（何もしない）で、挑戦のチームを作って受付に元の手持ちを退避する施設を足すと、挑戦中のレポートが退避先を 3 匹で上書きし、元の手持ちが消えた
+	//  （ピラミッド 0.59.1 の不具合と同じ形）。新しい施設は、自分の番号の分岐（1 差し替え／2 ふさぐ／0 何もしない）と sFacilityLobbyMap の受付をここに足す。
+	//  足し忘れは検算 tools/frontier/verify_pyramid_party_restore.py が見つける。
+	if (facility > HOENN_FACILITY_PYRAMID_ID)
+		return 2;
+	if (map == sFacilityLobbyMap[facility])
+		return 0;
+	if (facility == HOENN_FACILITY_PYRAMID_ID)
+		return HoennPyramid_OnFloorOrTop() ? 1 : 2;
+	if (facility == HOENN_FACILITY_PIKE)
+		return HoennPike_OnRoamingMap() ? 1 : 2;
+	return 2;
+}
+
+//レポートを書く前（src/save.c の HandleSavingData）。差し替えたときは挑戦のチームの写しを返す（HoennFacility_SaveEnd に渡す）。何もしないときは NULL
+struct Pokemon* HoennFacility_SaveBegin(void)
+{
+	u16 status = VarGet(HOENN_VAR_TOWER_STATUS);
+	struct Pokemon* team;
+
+	if (HoennFacility_SaveMode() != 1)
+		return NULL;
+	if (gSaveBlock1->playerPartyCount == 0 || GetMonData(&gSaveBlock1->playerParty[0], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
+		return NULL; //退避先が空（元の手持ちが無い）ときは差し替えない
+	team = Calloc(sizeof(struct Pokemon) * PARTY_SIZE);
+	if (team == NULL)
+		return NULL;
+	Memcpy(team, gPlayerParty, sizeof(struct Pokemon) * PARTY_SIZE);
+	HoennPike_SavePartyState();
+	VarSet(HOENN_VAR_TOWER_STATUS, status | PYRAMID_SAVE_MARK);
+	Memcpy(gPlayerParty, gSaveBlock1->playerParty, sizeof(struct Pokemon) * PARTY_SIZE);
+	CalculatePlayerPartyCount();
+	return team;
+}
+
+//書き終えたあと。挑戦のチームと状態に戻す
+void HoennFacility_SaveEnd(struct Pokemon* team)
+{
+	if (team == NULL)
+		return;
+	Memcpy(gPlayerParty, team, sizeof(struct Pokemon) * PARTY_SIZE);
+	Free(team);
+	CalculatePlayerPartyCount();
+	VarSet(HOENN_VAR_TOWER_STATUS, VarGet(HOENN_VAR_TOWER_STATUS) & ~PYRAMID_SAVE_MARK);
+}
+
+//つづきから（階・部屋の ON_TRANSITION）: 印があれば挑戦のチームを作り直す。退避先（gSaveBlock1->playerParty）は元の手持ちのまま
+void HoennFacility_ResumeAfterSave(void)
+{
+	u16 status = VarGet(HOENN_VAR_TOWER_STATUS);
+
+	if (!(status & PYRAMID_SAVE_MARK))
+		return;
+	VarSet(HOENN_VAR_TOWER_STATUS, status & ~PYRAMID_SAVE_MARK);
+	if (HoennFacility_SaveMode() != 1)
+		return; //差し替える地図でなければ印だけ消す（手持ちは元のまま）
+	Memcpy(gPlayerParty, gSaveBlock1->playerParty, sizeof(struct Pokemon) * PARTY_SIZE); //LoadPlayerParty と同じ
+	CalculatePlayerPartyCount();
+	FlagSet(FLAG_BATTLE_FACILITY);
+	HoennTower_PrepareTeam();
+	HoennPike_LoadPartyState();
+}
+//受付の QuitWithoutSaving（レポートを書かずにやめた）の守り（patches/0731）。挑戦のチームのまま（退避先にまだ元の手持ちがある）受付に着いたときだけ、
+//元の手持ちを戻す。ふつうの遊びでは受付に着くのは SP_LOAD_PARTY のあと（勝ち・負け）か、受付で書いたセーブを読み直したとき（手持ちと退避先が同じ）なので何もしない。
+//条件: 施設の旗が立っている・退避先に元の手持ちがある・今の手持ちが退避先と違う（退避先が空なら読まない＝手持ちを消さない）
+void HoennFacility_RestoreIfNotRestored(void)
+{
+	u32 i;
+
+	if (!FlagGet(FLAG_BATTLE_FACILITY))
+		return;
+	if (gSaveBlock1->playerPartyCount == 0 || GetMonData(&gSaveBlock1->playerParty[0], MON_DATA_SPECIES, NULL) == SPECIES_NONE)
+		return;
+	for (i = 0; i < sizeof(struct Pokemon) * PARTY_SIZE; ++i)
+	{
+		if (((u8*) gPlayerParty)[i] != ((u8*) gSaveBlock1->playerParty)[i])
+			break;
+	}
+	if (i == sizeof(struct Pokemon) * PARTY_SIZE)
+		return; //同じ（ふつうの道）
+	Memcpy(gPlayerParty, gSaveBlock1->playerParty, sizeof(struct Pokemon) * PARTY_SIZE); //LoadPlayerParty と同じ
+	CalculatePlayerPartyCount();
+}
+
+//[pyramid-save-end]
+
+/* ---- 緊急脱出（patches/0750・src/hack_emergency_escape.c）---------------------------------------------------
+ * 施設の挑戦の途中で別の場所（最寄りのポケセン）へ送るとき、挑戦を「やめた」扱いにして元の手持ち・バッグに戻す。受付の QuitWithoutSaving と同じ後始末:
+ *   元の手持ちを戻す（RestoreIfNotRestored）→ ピラミッドはバトルバッグを返して連勝の旗を下ろす → 連勝をなしに → ファクトリーは交換の回数 0 → ドームは「挑戦した」を立てる
+ *   → FLAG_BATTLE_FACILITY を下ろす → 状態を 0 に（レポートの印 0x100 も消える）。
+ * 「挑戦中」= 旗が立っている、または 状態が 1・3・4・5（2 の一時中断は手持ちが元のまま・旗も下りているので触らない）。
+ * タイトルの「つづきから」から呼ぶときも同じ（施設の部屋の中のレポートを読んだ状態＝手持ちは元の 6 匹・旗は立ったまま）。
+ * 連勝を消すときの変数（VAR_BATTLE_FACILITY_NUM＝0x40FF などの施設の一時変数）は SetUpFacility で今の施設に合わせてから（タイトルでは地図の読み込みが走っていない）。
+ * 下の数字は台本の .equ と同じ（検算 tools/rom/verify_emergency_escape.py が突き合わせる）:
+ *   ピラミッド F_SET_DATA 2・D_WIN_STREAK_ACTIVE 2 / ドーム F_SET_DATA 2・D_ATTEMPTED_CHALLENGE 6
+ */
+void HoennPyramid_CallFunction(void);   //src/hoenn_pyramid.c
+void HoennPyramid_ReturnBattleBag(void);
+void HoennDome_CallFunction(void);      //src/hoenn_dome.c
+void HoennFactory_ResetRents(void);     //src/hoenn_factory.c
+#define ESCAPE_PYRAMID_F_SET_DATA 2
+#define ESCAPE_PYRAMID_D_WIN_STREAK_ACTIVE 2
+#define ESCAPE_DOME_F_SET_DATA 2
+#define ESCAPE_DOME_D_ATTEMPTED_CHALLENGE 6
+
+void HoennFacility_EscapeCleanup(void)
+{
+	u16 status = VarGet(HOENN_VAR_TOWER_STATUS) & ~PYRAMID_SAVE_MARK;
+	u16 facility = VarGet(HOENN_VAR_FRONTIER_FACILITY);
+
+	if (!FlagGet(FLAG_BATTLE_FACILITY) && !(status >= 1 && status != 2 && status <= HOENN_ST_WON_BRAIN))
+		return;
+	HoennFacility_RestoreIfNotRestored();   //挑戦のチームのまま（退避先に元の手持ちが残っている）なら元に戻す
+	if (facility <= HOENN_FACILITY_PYRAMID_ID)
+	{
+		if (facility == HOENN_FACILITY_PYRAMID_ID)
+			HoennPyramid_ReturnBattleBag();   //バトルバッグを返してふつうのバッグに戻す
+		SetUpFacility(facility);
+		HoennTower_ResetStreak();
+		if (facility == HOENN_FACILITY_PYRAMID_ID)
+		{
+			Var8004 = ESCAPE_PYRAMID_F_SET_DATA;
+			Var8005 = ESCAPE_PYRAMID_D_WIN_STREAK_ACTIVE;
+			Var8006 = 0;
+			HoennPyramid_CallFunction();   //連勝中の旗を下ろす
+		}
+		else if (facility == HOENN_FACILITY_FACTORY)
+			HoennFactory_ResetRents();
+		else if (facility == HOENN_FACILITY_DOME)
+		{
+			Var8004 = ESCAPE_DOME_F_SET_DATA;
+			Var8005 = ESCAPE_DOME_D_ATTEMPTED_CHALLENGE;
+			Var8006 = 1;
+			HoennDome_CallFunction();
+		}
+	}
+	if (facility == HOENN_FACILITY_YARTIE)
+		HoennYartie_End(); //[hack] patches/0817 ロジックアリーナ: 挑戦をやめた扱い（印と進みを戻す・手持ちは上で RestoreIfNotRestored が戻している）
+	FlagClear(FLAG_BATTLE_FACILITY);
+	VarSet(HOENN_VAR_TOWER_STATUS, 0);
+}
+
+/* ---- 版が上がった つづきから の施設の後始末（2026-10-28・段 1・洗い出し C・src/hack_save_version.c の HackSaveVersion_OnContinue から）--------
+ * 施設の挑戦中にレポートしたセーブを版が上がってから つづきから すると、ポケセンへ飛ぶだけで旗 0x930・状態・バトルバッグ・連勝が残るのを、
+ * 緊急脱出の施設の後始末（HoennFacility_EscapeCleanup）と同じ処理で「挑戦をやめた扱い」にする。タイトルから地図へ入る前に呼ばれる（地図も物体も無い・
+ * 緊急脱出のタイトル経路と同じ）。何度呼んでも同じ（後始末のあとは状態 0・旗なし）。
+ * 守ったこと（EscapeCleanup 単独の既知の問題を踏まない）:
+ *   ・B-1（レビュー）: トレーナーヒルは FLAG_BATTLE_FACILITY を立てるが SP_SAVE_PARTY をしない（退避先が古い）。EscapeCleanup は旗だけでも入るので、
+ *     旗だけで呼ばない。ここは「状態が 1・3・4・5（受付から始めた挑戦中）」のときだけ呼ぶ＝状態を使わないトレーナーヒル・ロジックアリーナ・旗だけ残った古い値には触らない（手持ちも）。
+ *   ・B-2（レビュー）: 施設の変数 HOENN_VAR_FRONTIER_FACILITY が古いまま残ると別の施設の後始末が走る。状態が挑戦中を示す時だけ読み、値がタワー〜ピラミッド（0〜6）のときだけ呼ぶ
+ *     （ロジックアリーナ 7 以降・範囲の外は触らない）。
+ *   ・手持ちの巻き戻し: 呼ぶ先の RestoreIfNotRestored は 手持ちと退避先が違うときだけ読む。つづきからで読んだ直後は 手持ちは退避先と同じ（LoadPlayerParty）なので何もしない
+ *     ＝古い退避先で今の手持ちを巻き戻すことは起きない（差し替えレポートの 0.59.2 以降は退避先が元の手持ち・それ以前は元の手持ちが既に失われていて戻せないだけ）。
+ */
+void HackVersionFix_GiveUpFacility(void)
+{
+	u16 status = VarGet(HOENN_VAR_TOWER_STATUS) & ~PYRAMID_SAVE_MARK;
+
+	if (status < 1 || status == 2 || status > HOENN_ST_WON_BRAIN)
+		return;   //挑戦中でない（2 の一時中断は手持ちが元のまま・旗も下りている）
+	if (VarGet(HOENN_VAR_FRONTIER_FACILITY) > HOENN_FACILITY_PYRAMID_ID)
+		return;   //古い値・ロジックアリーナ（状態を使わない）は触らない
+	HoennFacility_EscapeCleanup();
 }
 
 /* ---- エレベーター（エメラルドの MoveElevator・pokeemerald src/field_specials.c） ----------------
@@ -630,7 +1009,8 @@ void HoennDept_MoveElevator(void)
 #define BRAIN_STREAK      3
 #define BRAIN_STREAK_LONG 4
 
-//こちらの施設（HOENN_VAR_FRONTIER_FACILITY）→ エメラルドの施設の番号・出番（sFrontierBrainStreakAppearances: 銀・金・金のあとの間隔・足す数）
+//sEmFacility: こちらの施設（HOENN_VAR_FRONTIER_FACILITY）→ エメラルドの施設の番号（シンボルのビットの位置）
+//sBrainAppearances: 出番（銀・金・金のあとの間隔・足す数）。**こちらの施設の並びで引く**（エメラルドの sFrontierBrainStreakAppearances は施設の番号の並びが違うので、行は施設名で突き合わせてある・verify_frontier_palace.py）
 static const u8 sEmFacility[] = {0, 2, 3, 5, 4, 1, 6};         //タワー 0・パレス 2・アリーナ 3・チューブ 5・ファクトリー 4・ドーム 1・ピラミッド 6
 static const u8 sBrainAppearances[][4] = {{35, 70, 35, 1}, {21, 42, 21, 1}, {28, 56, 28, 1}, {28, 140, 56, 1}, {21, 42, 21, 1}, {4, 9, 5, 0}, {21, 70, 35, 0}};
 
@@ -707,20 +1087,30 @@ void HoennFrontier_GiveSymbol(void)
 {
 	u8 shift = sEmFacility[Facility()] * 2;
 	u16 v = VarGet(HOENN_VAR_FRONTIER_SYMBOLS);
-	u8 level = MathMin(((v >> shift) & 3) + 1, 2);
+	u8 old = (v >> shift) & 3;
+	u16 level = MathMin(old + 1, 2);
 
 	VarSet(HOENN_VAR_FRONTIER_SYMBOLS, (v & ~(3 << shift)) | (level << shift));
 }
 
-//前口上を聞いたか → LASTRESULT・聞いた印を立てる（エメラルドの FRONTIER_DATA_HEARD_BRAIN_SPEECH・予約フラグ）
+//前口上の「聞いた」印の旗（エメラルドの sBattledBrainBitFlags[施設][hasSymbol]・frontier_util.c:596-605,846-847,881-883）
+//  エメラルドは hasSymbol＝シンボルの数（2 個は 1 個と同じ＝2 → 1）で、[施設][0]＝銀の段（シンボル無し）・[施設][1]＝金の段（1 個以上）の別ビット。
+//  こちらは SymbolLevel()（0 → 銀の段・1 以上 → 金の段）で旗を選ぶ: 銀の段 HOENN_FLAG_FRONTIER_HEARD_BRAIN（0x13E3〜）・金の段 HOENN_FLAG_FRONTIER_HEARD_BRAIN_GOLD（0xFC8〜）。
+//  どちらも + エメラルドの施設の番号（0 タワー〜6 ピラミッド）
+static u16 HeardBrainFlag(void)
+{
+	return (SymbolLevel() == 0 ? HOENN_FLAG_FRONTIER_HEARD_BRAIN : HOENN_FLAG_FRONTIER_HEARD_BRAIN_GOLD) + sEmFacility[Facility()];
+}
+
+//前口上を聞いたか → LASTRESULT・聞いた印を立てる（エメラルドの FRONTIER_DATA_HEARD_BRAIN_SPEECH）。印は今の段（銀 / 金）のもの
 void HoennFrontier_GetHeardBrainSpeech(void)
 {
-	gSpecialVar_LastResult = FlagGet(HOENN_FLAG_FRONTIER_HEARD_BRAIN + sEmFacility[Facility()]);
+	gSpecialVar_LastResult = FlagGet(HeardBrainFlag());
 }
 
 void HoennFrontier_SetHeardBrainSpeech(void)
 {
-	FlagSet(HOENN_FLAG_FRONTIER_HEARD_BRAIN + sEmFacility[Facility()]);
+	FlagSet(HeardBrainFlag());
 }
 
 //ブレーンの表の番号（施設 × 2 + 金なら 1・HoennFrontier_SetBrainOpponent と同じ）。バトルドームの対戦表がヒースの 3 匹を引くのに使う

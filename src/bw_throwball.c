@@ -5,6 +5,7 @@
 #include "../include/task.h"
 #include "../include/new/catching.h"
 #include "bw_throwball_pos.h"
+#include "hack_player_mei_pics.h" //★ FEAT-player-mei-2（BW_HELD_BALL_MEI_DX/DY・GetPlayerGender3）
 
 /*
 bw_throwball.c
@@ -122,14 +123,21 @@ void BwCreateHeldBall(u8 playerSpriteId)
 		ballType = BALL_TYPE_POKE_BALL;
 
 	LoadBallGfx(ballType);
+	/* ★ FEAT-player-mei-2: メイの背面には握りこぶしだけでボールが描かれておらず、消した跡の穴も無いので、
+	   うしろ（31）に出すと主人公の絵に隠れて見えない。手の上（29＝主人公 30 より手前）に出して「持っている」ように見せる */
 	spriteId = CreateSprite(&gBallSpriteTemplates[ballType], 0, 0,
-	                        BW_HELD_BALL_SUBPRIORITY);
+	                        GetPlayerGender3() == PLAYER_GENDER3_MEI ? 29 : BW_HELD_BALL_SUBPRIORITY);
 	if (spriteId >= MAX_SPRITES)
 		return;
 
 	gSprites[spriteId].tPlayerSpriteId = playerSpriteId;
 	gSprites[spriteId].tTimer = 0;
-	if (gSaveBlock2->playerGender != 0)
+	if (GetPlayerGender3() == PLAYER_GENDER3_MEI) //★ FEAT-player-mei-2: メイは背面コマ 1〜2 の握りこぶしの位置
+	{
+		gSprites[spriteId].tDx = BW_HELD_BALL_MEI_DX;
+		gSprites[spriteId].tDy = BW_HELD_BALL_MEI_DY;
+	}
+	else if (gSaveBlock2->playerGender != 0)
 	{
 		gSprites[spriteId].tDx = BW_HELD_BALL_FEMALE_DX;
 		gSprites[spriteId].tDy = BW_HELD_BALL_FEMALE_DY;

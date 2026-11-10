@@ -32,7 +32,7 @@
 																																							\
 	CreateMon(&party[i], speciesToCreate, lvl, baseIV, TRUE, personalityValue, otIdType, otid);																\
 	TryFixMiniorForm(&party[i]);																															\
-	party[i].metLevel = structure[i].lvl;																													\
+	HackMetLevel_Set((struct BoxPokemon*) &party[i], structure[i].lvl);																						\
 }
 
 #define SET_MOVES(structure)										        \
@@ -121,6 +121,8 @@ enum
 #define TERA_TYPE_DARK     0x12
 #define TERA_TYPE_FAIRY	   0x18
 #define TERA_TYPE_STELLAR  0x19
+#define TERA_TYPE_RIL      0x1A   //[hack] patches/0408 #110: トレーナーの持ち物（spread）の teraType は「タイプ番号 + 1」（0 ＝ 既定）。リル 0x19 + 1
+#define TERA_TYPE_SHADOW   0x1B   //[hack] patches/0955 段 D: ダーク 0x1A + 1（フロンティアの生成器の上限は変えない＝テラスタイプには選べない）
 
 #define TRAINER_EV_CLASS_BALL 0xFE
 #define TRAINER_EV_RANDOM_BALL 0xFF

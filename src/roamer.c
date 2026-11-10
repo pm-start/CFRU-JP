@@ -105,7 +105,7 @@ static RoamerLocationSet* GetRoamerLocationTable(u8 group, u32* numSets)
 }
 
 //This file's functions:
-static void CreateInitialRoamerMon(u16 species, u8 level, bool8 allowedOnLand, bool8 allowedOnWater, u8 group);
+static void CreateInitialRoamerMon(u16 species, u16 level, bool8 allowedOnLand, bool8 allowedOnWater, u8 group);
 static bool8 IsRoamerAt(u8 mapGroup, u8 mapNum, u8 id);
 static void CreateRoamerMonInstance(u8 id);
 
@@ -114,7 +114,7 @@ void ClearRoamersData(void)
 	memset(gRoamers, 0, sizeof(struct Roamer) * MAX_NUM_ROAMERS);
 }
 
-static void CreateInitialRoamerMon(u16 species, u8 level, bool8 allowedOnLand, bool8 allowedOnWater, u8 group)
+static void CreateInitialRoamerMon(u16 species, u16 level, bool8 allowedOnLand, bool8 allowedOnWater, u8 group)
 {
 	int i;
 	u32 numSets;
@@ -152,7 +152,7 @@ static void CreateInitialRoamerMon(u16 species, u8 level, bool8 allowedOnLand, b
 		//Count pre-existing perfect stats
 		for (int i = 0; i < NUM_STATS; ++i)
 		{
-			if (GetMonData(&gEnemyParty[0], MON_DATA_HP_IV + i, NULL) >= 31)
+			if (GetMonData(&gEnemyParty[0], MON_DATA_HP_IV + i, NULL) >= HACK_IV_MAX) //[hack] patches/0677
 			{
 				perfectStats[i] = TRUE;
 				++numPerfectStats;
@@ -247,7 +247,7 @@ void sp129_InitRoamer(void)
 
 //[hack] patches/0093: ホウエンを徘徊させる（ラティ兄妹・src/hoenn_league.c の HoennLeague_OnHallOfFame から）。
 //陸でも水でも出る（エメラルドと同じ）。同じ種族が徘徊中なら何もしない（CreateInitialRoamerMon が弾く）
-void CreateHoennRoamer(u16 species, u8 level)
+void CreateHoennRoamer(u16 species, u16 level)
 {
 	CreateInitialRoamerMon(species, level, TRUE, TRUE, HOENN_ROAMING_MAP_BANK);
 }

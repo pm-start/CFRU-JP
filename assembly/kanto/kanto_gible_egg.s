@@ -16,6 +16,8 @@
 
 .equ KANTO_FLAG_GIBLE_EGG, 0x12FB     @ build_hoenn_scripts.RESERVED_FLAGS と同じ
 .equ KANTO_FLAG_GIBLE_STONES, 0x12FA  @ 同上
+.equ KANTO_FLAG_GIBLE_X, 0x12DD       @ 同上（★ 2026-10-25 ガブリアスナイトX をもらった印・patches/0813）
+.equ ITEM_GARCHOMPITE_X, 0x367        @ 同上（include/constants/items.h）
 .equ ITEM_GARCHOMPITE, 0x23E          @ include/constants/items.h
 .equ ITEM_ZA_GARCHOMPITE_Z, 0x31D     @ 同上（tools/megas/za_megas_ids.json）
 .equ OBJ_EVENT_GFX_COOLTRAINER_F, 42
@@ -96,6 +98,11 @@ KantoGibleEgg_Declined:
 	end
 
 KantoGibleEgg_AlreadyGiven:
+	@ ★ 2026-10-23 FEAT-gible-reitonoou（Redmine #58・patches/0790）: Lv200 のとくべつなガブリアスが手持ちにいたら れーとのおうの印を付けるか聞く
+	callasm HackGibleEgg_ReitonoouCheck  @ LASTRESULT 1 = いる（Var8004・名前 gStringVar1）/ 2 = Lv200 に届かない子だけ / 0 = いない
+	compare LASTRESULT 1
+	if 0x1 _goto KantoGibleEgg_ReitoOffer
+KantoGibleEgg_AlreadyGivenNormal:
 	@ v0.11 だけの「もう 1 回」（印 0x12F9）は v0.12 で外した。印は予約に残す
 	checkflag KANTO_FLAG_GIBLE_STONES
 	if 0x1 _goto KantoGibleEgg_AllDone
@@ -113,9 +120,7 @@ KantoGibleEgg_AlreadyGiven:
 	obtainitem ITEM_ZA_GARCHOMPITE_Z 1
 	setflag KANTO_FLAG_GIBLE_STONES
 	msgbox gText_KantoGibleEgg_StonesAfter MSG_KEEPOPEN
-	closemessage
-	release
-	end
+	goto KantoGibleEgg_TryX                @ ★ 2026-10-25 とくべつなガブリアスがいれば ガブリアスナイトX もこのまま渡す
 
 KantoGibleEgg_NoGarchomp:
 	msgbox gText_KantoGibleEgg_AlreadyGiven MSG_KEEPOPEN
@@ -130,7 +135,63 @@ KantoGibleEgg_BagFull:
 	end
 
 KantoGibleEgg_AllDone:
+	checkflag KANTO_FLAG_GIBLE_X
+	if 0x1 _goto KantoGibleEgg_AllDoneNoX
+	callasm HackGibleEgg_HasSpecialForX     @ ★ 2026-10-25 patches/0813 とくべつなガブリアス（れーとのおうの印 か クラブ産）が手持ちにいれば ガブリアスナイトXを 1 回だけ
+	compare LASTRESULT 1
+	if 0x1 _goto KantoGibleEgg_GiveX
+KantoGibleEgg_AllDoneNoX:
+	callasm HackGibleEgg_ReitonoouCheck
+	compare LASTRESULT 2
+	if 0x1 _goto KantoGibleEgg_ReitoHint
 	msgbox gText_KantoGibleEgg_AllDone MSG_KEEPOPEN
 	closemessage
 	release
 	end
+
+@ ガブリアスナイトZ のあと（同じ会話の続き）: まだ X をもらっていなくて、とくべつなガブリアスがいれば渡す。いなければここで終わる
+KantoGibleEgg_TryX:
+	checkflag KANTO_FLAG_GIBLE_X
+	if 0x1 _goto KantoGibleEgg_EndTalk
+	callasm HackGibleEgg_HasSpecialForX
+	compare LASTRESULT 1
+	if 0x1 _goto KantoGibleEgg_GiveX
+KantoGibleEgg_EndTalk:
+	closemessage
+	release
+	end
+
+KantoGibleEgg_GiveX:
+	msgbox gText_KantoGibleEgg_SawSpecial MSG_KEEPOPEN
+	checkitemspace ITEM_GARCHOMPITE_X 1
+	compare LASTRESULT 0
+	if 0x1 _goto KantoGibleEgg_BagFull
+	callasm HackGibleEgg_MarkForX            @ v0.10 で印が消えた子には うんめいの印を付ける（付けないと X が効かない）
+	obtainitem ITEM_GARCHOMPITE_X 1
+	setflag KANTO_FLAG_GIBLE_X
+	msgbox gText_KantoGibleEgg_XAfter MSG_KEEPOPEN
+	closemessage
+	release
+	end
+
+KantoGibleEgg_ReitoHint:
+	msgbox gText_KantoGibleEgg_ReitoHint MSG_KEEPOPEN
+	closemessage
+	release
+	end
+
+KantoGibleEgg_ReitoOffer:
+	msgbox gText_KantoGibleEgg_ReitoOffer MSG_YESNO
+	compare LASTRESULT 1
+	if 0x5 _goto KantoGibleEgg_ReitoDeclined
+	callasm HackGibleEgg_ReitonoouApply  @ Var8004 の子に印（PokemonSubstruct3.blank の bit0・src/hack_gible_egg.c）
+	fanfare MUS_OBTAIN_ITEM
+	msgbox gText_KantoGibleEgg_ReitoDone MSG_KEEPOPEN
+	waitfanfare
+	closemessage
+	release
+	end
+
+KantoGibleEgg_ReitoDeclined:
+	msgbox gText_KantoGibleEgg_ReitoDeclined MSG_KEEPOPEN
+	goto KantoGibleEgg_AlreadyGivenNormal

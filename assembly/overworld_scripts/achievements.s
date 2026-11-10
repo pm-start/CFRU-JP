@@ -14,6 +14,7 @@
 .global EventScript_AchievementUnlocked
 EventScript_AchievementUnlocked:
 	lockall
+AchievementUnlocked_Announce:
 	callasm AchievementsPreparePopup @ LASTRESULT: 0=1つだけ / 1=まとめて / 2=解除なし(報酬だけ)
 	compare LASTRESULT 0x2
 	if equal _goto AchievementUnlocked_Reward
@@ -28,6 +29,7 @@ AchievementUnlocked_Many:
 
 AchievementUnlocked_Wait:
 	waitfanfare
+	goto AchievementUnlocked_Announce @ 2026-10-16 まだ知らせていない解除があれば続けて知らせる（ごほうびを待たせないため、知らせはこの台本の中でまとめて行う）
 
 AchievementUnlocked_Reward:
 	callasm AchievementsPrepareAutoReward @ LASTRESULT: 0=なし / 1=もらえた
@@ -36,6 +38,7 @@ AchievementUnlocked_Reward:
 	playfanfare MUS_FANFA1
 	msgbox gText_Ach_Reward MSG_NORMAL
 	waitfanfare
+	goto AchievementUnlocked_Reward @ 2026-10-16 ほかにも届いたごほうびがあれば続けて渡す（0 になるまで・バッグがいっぱいなら止まる）
 
 AchievementUnlocked_Done:
 	callasm AchievementsPrepareAutoGift @ LASTRESULT: 1=ピカチュウを渡す番 (ACH_REWARDS_VIA_NPC が有効なら常に0 = NPCから受け取る)

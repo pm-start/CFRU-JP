@@ -9,6 +9,7 @@
 #include "../include/pokemon_storage_system.h"
 #include "../include/new/pokemon_storage_system.h"
 #include "hack_mon_id.h"
+#include "hack_daycare_region.h" //[hack] patches/0640
 
 /*
  * Moemonボタン（ITEM_MOEMON_SWITCH 0x347・たいせつなもの・2026-10-08）。
@@ -30,6 +31,8 @@
  *   通信対戦では手持ちがまるごと相手へ送られるので、DPE の src/hack_moemon.c が相手（と味方）のポケモンはこのビットで決める。
  */
 #define HACK_FLAG_MOEMON_ON 0x12E9   //build_hoenn_scripts.RESERVED_FLAGS
+
+void HackMoemonGen_FieldTick(void);   //src/hack_moemon_gen.c（0.63.1）
 
 #ifndef HACK_NO_MOEMON
 #define MOEMON_OLD_MAGIC 0x584F4F4D   //'MOOX'＝1/16 のころの一覧（当たりは上 4 ビットが 0xA の子だけ）
@@ -109,7 +112,7 @@ static void MoemonLink_MarkParty(void)
 static void MoemonOld_ScanStep(void)
 {
 	struct MoemonOldList* list = MOEMON_OLD_LIST;
-	u32 i;
+	u32 i, j;
 
 	//1/16 に戻した（2026-10-08）: 'MOOX'（1/16）の一覧は足し直さない。一覧が無ければ 1/16 の一覧を作る
 	if (list->magic != MOEMON_OLD_MAGIC && list->magic != MOEMON_OLD_MAGIC_UPGRADE && list->magic != MOEMON_OLD_MAGIC_8)
@@ -135,6 +138,15 @@ static void MoemonOld_ScanStep(void)
 		{
 			if (GetBoxMonData(&gSaveBlock1->daycare.mons[i].mon, MON_DATA_SPECIES, NULL) != SPECIES_NONE)
 				MoemonOld_Add(GetBoxMonData(&gSaveBlock1->daycare.mons[i].mon, MON_DATA_PERSONALITY, NULL));
+		}
+		//[hack] patches/0640: ほかの地方の育て屋（控え）の子も前からいた子
+		for (j = 0; j < 3; ++j)
+		{
+			struct DayCare* st = HackDaycare_GetStashed(j);
+			if (st == NULL) continue;
+			for (i = 0; i < DAYCARE_MON_COUNT; ++i)
+				if (GetBoxMonData(&st->mons[i].mon, MON_DATA_SPECIES, NULL) != SPECIES_NONE)
+					MoemonOld_Add(GetBoxMonData(&st->mons[i].mon, MON_DATA_PERSONALITY, NULL));
 		}
 	}
 	else
@@ -188,6 +200,7 @@ void HackMoemonSwitch_FieldTick(void)
 {
 	#ifndef HACK_NO_MOEMON
 	MoemonOld_ScanStep();
+	HackMoemonGen_FieldTick();   //★ 0.63.1 Moémon の絵の世代の控え（src/hack_moemon_gen.c・控え済みなら状態を 1 回見るだけ）
 	//★ 2026-10-09 ユーザー「フィールド歩いてるときにカクつく」: 一覧（最大 392 件）を 6 匹ぶん毎コマ探していたので 16 コマに 1 回に
 	//  （ビットを読むのは通信を始めてから＝フィールドで 16 コマより長くかかる・状態は持てない 6.13 のでコマの数で間引く）
 	if ((gMain.vblankCounter2 & 0xF) == 0)

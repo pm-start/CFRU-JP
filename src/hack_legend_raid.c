@@ -6,9 +6,10 @@
 #include "../include/new/dynamax.h"
 #include "../include/new/frontier.h"
 #include "../include/new/ram_locs.h"
+#include "hack_stat_access.h" //[hack] patches/0677 u16 窓口
 
 /*
- * 伝説レイド（2026-10-06）: バトルフロンティアの広場の人に話しかけるたび、ちがう伝説・幻と ★6 のレイドバトル。
+ * 伝説レイド（2026-10-06）: バトルフロンティアの広場の人に話しかけるたび、ちがう伝説・幻（2026-10-23 からウルトラビースト・パラドックスも）と ★6 のレイドバトル。
  * ユーザー「バトルフロンティアに話しかけるたびに異なる伝説とレイドバトルが始まるところ作ってほしい」→
  * 広場に人・全世代の伝説と幻・勝ったら捕まえられる・★6・「味方の助っ人主人公のアイコンとか使えない？ポケモンもかなり強く」。
  * レイドの仕組み（紹介画面・助っ人・ダイマックス・捕獲）は CFRU のまま。印 HACK_FLAG_LEGEND_RAID が立っている間だけ、
@@ -45,10 +46,33 @@ static const u16 sLegendRaidSpecies[] =
 	SPECIES_TERAPAGOS, SPECIES_PECHARUNT,
 };
 
+u16 HackWonder_UbParadoxCount(void); //src/hack_wonder_trade.c（#48）
+u16 HackWonder_UbParadoxAt(u16 i);
+
 //★ 2026-10-11 ホウエンのミラクル交換（src/hack_wonder_trade.c）が同じ一覧から引く
 u16 HackLegendRaid_RandomSpecies(void)
 {
 	return sLegendRaidSpecies[Random() % ARRAY_COUNT(sLegendRaidSpecies)];
+}
+
+//★ 2026-10-16 patches/0429 ミラクル交換のバッジの数の制限・ごほうび（src/hack_wonder_trade.c）が同じ一覧を読む
+u16 HackLegendRaid_Count(void)
+{
+	return ARRAY_COUNT(sLegendRaidSpecies);
+}
+
+u16 HackLegendRaid_At(u16 i)
+{
+	return i < ARRAY_COUNT(sLegendRaidSpecies) ? sLegendRaidSpecies[i] : SPECIES_NONE;
+}
+
+bool8 HackLegendRaid_IsLegend(u16 species)
+{
+	u32 i;
+	for (i = 0; i < ARRAY_COUNT(sLegendRaidSpecies); ++i)
+		if (sLegendRaidSpecies[i] == species)
+			return TRUE;
+	return FALSE;
 }
 
 bool8 HackLegendRaid_Active(void)
@@ -62,10 +86,16 @@ void HackLegendRaid_Begin(void)
 	u16 last = VarGet(HACK_VAR_LEGEND_RAID_SPECIES);
 	u16 species;
 
+	//★ 2026-10-23 #48 伝説・幻 92 種 + ウルトラビースト・パラドックス（ベベノムを除く 30 匹）をまとめて 1 回で引く。
+	//  UB・パラドックスの一覧は hack_wonder_trade.c のものを共有（sLegendRaidSpecies には足さない＝IsLegend・ミラクル交換・乱数化は不変）
+	u32 total = ARRAY_COUNT(sLegendRaidSpecies) + HackWonder_UbParadoxCount();
+
 	do
 	{
-		species = sLegendRaidSpecies[Random() % ARRAY_COUNT(sLegendRaidSpecies)];
-	} while (species == last);
+		u32 idx = Random() % total;
+		species = idx < ARRAY_COUNT(sLegendRaidSpecies) ? sLegendRaidSpecies[idx]
+		        : HackWonder_UbParadoxAt(idx - ARRAY_COUNT(sLegendRaidSpecies));
+	} while (species == last || species == SPECIES_POIPOLE); //ベベノムは進化前なので入れない（ユーザー決定）
 
 	VarSet(HACK_VAR_LEGEND_RAID_SPECIES, species);
 	FlagSet(HACK_FLAG_LEGEND_RAID);
@@ -110,12 +140,10 @@ void HackLegendRaid_Partners(bool8* checkedPartners)
 void HackLegendRaid_StrengthenBoss(void)
 {
 	struct Pokemon* mon = &gEnemyParty[0];
-	u8 iv = 31;
-	u8 ev = 252;
 	u32 i;
 
 	for (i = 0; i < NUM_STATS; ++i)
-		SetMonData(mon, MON_DATA_HP_IV + i, &iv);
-	SetMonData(mon, MON_DATA_HP_EV, &ev);
+		HackMon_SetIv(mon, i, HACK_IV_MAX); //[hack] patches/0677
+	HackMon_SetEv(mon, STAT_HP, HACK_EV_PER_STAT_CAP);
 	CalculateMonStats(mon);
 }

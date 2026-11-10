@@ -1,6 +1,7 @@
 #include "defines.h"
 #include "../include/sprite.h"
 #include "Tables/bw_card_pic.h"
+#include "hack_player_mei_pics.h" //★ FEAT-player-mei-2
 
 /*
     殿堂入りの主人公を「縮めない全身」にする（#20・2026-09-23）
@@ -17,14 +18,14 @@
     ★ 絵の入れ物は CreatePicSprite が Alloc したもので、アニメは 0 コマ目だけ
       （gTrainerFrontAnimsPtrTable[0]）。作った直後（最初の AnimateSprites より前）に
       上書きするので、その絵が VRAM へ送られる。
-    ★ 2 枚とも 8 画素上げる（pos2.y）。素のまま（中心 y=72）だと足先が y 112 付近になり、
-      あとで出る会話の窓にかかる。殿堂入りの処理が動かすのは x だけ（192 まで 1 画素ずつ）。
+    ★ 2 枚とも 13 画素上げる（pos2.y・2026-10-12 に 8 → 13）。足もとを 79 行目にそろえた（0.42.2）ぶん、8 だと足先が y 112 付近で
+      あとで出る会話の窓（y 113〜）に隠れた。殿堂入りの処理が動かすのは x だけ（192 まで 1 画素ずつ）。
 
     入口: 素の Task_Hof_SpawnPlayerPic の中、CreateTrainerPicSprite の直後
     （080F367C・assembly/bwplayer/bw_hof_hook.s）。
 */
 
-#define HOF_LIFT 8                  /* 2 枚とも上げる画素 */
+#define HOF_LIFT 13                 /* 2 枚とも上げる画素 */
 #define HOF_BOTTOM_Y 48             /* 2 枚目の中心 = 1 枚目の中心 + 32 + 16 */
 
 static const struct OamData sHofBottomOam =
@@ -34,6 +35,7 @@ static const struct OamData sHofBottomOam =
 };
 static const struct SpriteFrameImage sHofBottomMale[] = {{gBwHofPicMaleBottom, BW_HOF_PIC_BOTTOM_SIZE, 0}};
 static const struct SpriteFrameImage sHofBottomFemale[] = {{gBwHofPicFemaleBottom, BW_HOF_PIC_BOTTOM_SIZE, 0}};
+static const struct SpriteFrameImage sHofBottomMei[] = {{gBwMeiHofBottom, BW_HOF_PIC_BOTTOM_SIZE, 0}}; //★ FEAT-player-mei-2
 
 static void SpriteCB_HofBottom(struct Sprite *sprite)
 {
@@ -67,7 +69,14 @@ void BwHofPlayerPic(u8 spriteId)
     if (!parent->inUse || parent->images == NULL)
         return;
 
-    if (gSaveBlock2->playerGender != 0)
+    if (GetPlayerGender3() == PLAYER_GENDER3_MEI) //★ FEAT-player-mei-2: 立ち絵 64x96（高さ 78 に縮め・足もと 79 行目）
+    {
+        top = gBwMeiHofTop;
+        t.images = sHofBottomMei;
+        /* 立ち絵は正面（205 番）とパレットが別。作った 1 枚目が読んだ OBJ パレット（slot＝paletteNum）を立ち絵のものに替える */
+        LoadPalette(gBwMeiTallPal, 0x100 + parent->oam.paletteNum * 16, 32);
+    }
+    else if (gSaveBlock2->playerGender != 0)
     {
         top = gBwHofPicFemaleTop;
         t.images = sHofBottomFemale;

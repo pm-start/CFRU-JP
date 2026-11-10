@@ -910,7 +910,38 @@ enum
 #define ITEM_EXP_CANDY_XXL 0x357  //★ 2026-10-11 けいけんアメXXL（経験値 100,000・src/exp_candy.c・patches/0323）
 #define ITEM_ALOLA_STONE 0x358  //★ 2026-10-11 アローラのいし（進化前に使うと アローラの姿へ・ヒスイのいしと同じ作り・patches/0327・5e の割り当て）
 #define ITEM_CREEPER_ICE 0x359  //★ 2026-10-11 くりーぱーアイス（もたせる道具・毎ターン 1/16 回復・じばく系 20%・5 ターンで爆発・src/hack_creeper_ice.c・patches/0333）
-#define ITEMS_COUNT (ITEM_CREEPER_ICE + 1)
+#define ITEM_START_BALL 0x35A  //★ 2026-10-15 STARTボール（捕獲率 1.3 倍・210 円・トキワのフレンドリィショップから・patches/0393・BALL_TYPE_START_BALL）
+// WATASHI_BALLS_BEGIN items
+#define ITEM_MOON_PETAL_BALL 0x35B  //★ 2026-10-15 ムーンペタルボール（ムーンペタルボール・捕獲率 2 倍・1200 円・わたしたち りる のボール・patches/0393）
+#define ITEM_MEMORY_VEIL_BALL 0x35C  //★ 2026-10-15 メモリベールボール（メモリーヴェールボール・捕獲率 2 倍・1200 円・わたしたち うい のボール・patches/0393）
+#define ITEM_TEAR_WISTERIA_BALL 0x35D  //★ 2026-10-15 ウィステリアボール（ティアウィステリアボール・捕獲率 2 倍・1200 円・わたしたち しだれ のボール・patches/0393）
+#define ITEM_SWEET_HEART_BALL 0x35E  //★ 2026-10-15 スイトハートボール（スイートハートボール・捕獲率 2 倍・1200 円・わたしたち みるく のボール・patches/0393）
+#define ITEM_SILENT_HALO_BALL 0x35F  //★ 2026-10-15 サイレントボール（サイレントヘイローボール・捕獲率 2 倍・1200 円・わたしたち なお のボール・patches/0393）
+#define ITEM_GAME_PULSE_BALL 0x360  //★ 2026-10-15 ゲームパルスボール（ゲームパルスボール・捕獲率 2 倍・1200 円・わたしたち かいり のボール・patches/0393）
+#define ITEM_WINTER_BLOSSOM_BALL 0x361  //★ 2026-10-15 ウィンターボール（ウィンターブロッサムボール・捕獲率 2 倍・1200 円・わたしたち りっか のボール・patches/0393）
+#define ITEM_THORN_HEART_BALL 0x362  //★ 2026-10-15 ソーンハートボール（ソーンハートボール・捕獲率 2 倍・1200 円・わたしたち しぃ のボール・patches/0393）
+#define ITEM_FOX_SPIRIT_BALL 0x363  //★ 2026-10-15 フォックスボール（フォックススピリットボール・捕獲率 2 倍・1200 円・わたしたち らん のボール・patches/0393）
+#define ITEM_BERRY_BLOOM_BALL 0x364  //★ 2026-10-15 ベリブルームボール（ベリーブルームボール・捕獲率 2 倍・1200 円・わたしたち いちご のボール・patches/0393）
+// WATASHI_BALLS_END items
+#define ITEM_RUSTY_CROWN 0x365  //★ 2026-10-16 さびたおうかん（バッグで つかうと 好きな能力の個体値を 0 にする・王冠の逆・src/hack_rusty_crown.c・patches/0433）
+#define ITEM_RIRU_LOVE 0x366  //★ 2026-10-19 リルの あいじょう（効果なしのもたせる道具・しばり「ぜんぶレントラー」のレントラーが持ち・戦闘のうばう技と もちもの メニューで はずせない・お店／お母さん／実績の道具の置き換え先・src/hack_luxray_love.c・patches/0617）
+#define ITEM_GARCHOMPITE_X 0x367  //★ 2026-10-25 ガブリアスナイトX（とくべつなガブリアス専用のメガストーン・持たせるとメガシンカし、メガ↔メガZ を自分で切り替える・売れない・取られない・src/hack_gible_switch.c・patches/0813）
+#define ITEM_TM121 0x368  //★ 2026-10-26 わざマシン121 やけっぱち（SV の TM 専用技・patches/0861・Redmine #59）
+#define ITEM_TM122 0x369  //★ 2026-10-26 わざマシン122 サンダーダイブ（SV の TM 専用技・patches/0861・Redmine #59）
+#define ITEM_TM123 0x36A  //★ 2026-10-26 わざマシン123 ハードプレス（SV の TM 専用技・patches/0861・Redmine #59）
+#define ITEM_TM124 0x36B  //★ 2026-10-26 わざマシン124 ドラゴンエール（SV の TM 専用技・patches/0861・Redmine #59）
+#define ITEM_TM125 0x36C  //★ 2026-10-26 わざマシン125 みわくのボイス（SV の TM 専用技・patches/0861・Redmine #59）
+#define ITEM_TM126 0x36D  //★ 2026-10-26 わざマシン126 サイコノイズ（SV の TM 専用技・patches/0861・Redmine #59）
+#define ITEM_TM127 0x36E  //★ 2026-10-26 わざマシン127 はやてがえし（SV の TM 専用技・patches/0861・Redmine #59）
+#define ITEM_GENNAMA 0x36F //★ 2026-10-26 げんなま（ハルカ／ヒカリに「あげる」と好感度が一気に上がる隠しの裏技の道具・ゲームコーナーの景品交換で何回でも・値段 0＝売れない・patches/0868）
+#define ITEM_EXPLORER_KIT 0x370  //★ 2026-10-26 たんけんセット（たいせつなもの・野外でつかうと ちかつうろ の ひろばへ もぐる・src/hack_mining.c・patches/0873・FEAT-sinnoh-underground）。0x36F は げんなま（FEAT-gennama）の番号＝まとめで足し合う（この枝では gItemData／絵の表に空きの置き場）
+#define ITEM_KYOGA_FOSSIL 0x371 //★ 2026-11-02 きょがのカセキ（ちかつうろの化石ほりで出る・グレンの研究所で よみがえらせると コシャル Lv5・src/hack_kyoga_fossil.c・patches/0952・Redmine #230）。0x36F は げんなま（本流）・0x370 は たんけんセット
+#define ITEM_SNATCH_BALL 0x372 //★ 2026-11-08 スナッチボール（組織のトレーナーのダークだけに使えて必ず捕まえる・戦闘は続く・BALL_TYPE_SNATCH_BALL 39・店では売らない・src/hack_snatch_ball.c・patches/0961・FEAT-shadow-f）
+#define ITEM_JOY_SCENT 0x373 //★ 2026-11-08 ルンルンのかおり（ダークの子の心のゲージを少し開く・patches/0965・段 G・src/shadow_relive.c）
+#define ITEM_EXCITE_SCENT 0x374 //★ ワクワクのかおり（2 倍）
+#define ITEM_VIVID_SCENT 0x375 //★ ドキドキのかおり（3 倍）
+#define ITEM_SECRET_POTION 0x376 //★ 2026-11-10 ひでんのくすり（たいせつなもの・タンバのくすりやで もらい アサギのとうだいのミカンに わたす・使えない・FEAT-johto-s1・番号は仮＝Commander が割り当てる）
+#define ITEMS_COUNT (ITEM_SECRET_POTION + 1)
 
 //For Pokemon Unbound
 #ifdef UNBOUND

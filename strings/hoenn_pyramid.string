@@ -1,0 +1,5 @@
+// バトルピラミッドのバトルバッグ（BUG-pyramid-held-items-B・2026-10-21）。文は日本語版エメラルドの ROM（0x5C9556 の gText_DadsAdvice）から。
+
+#org @gText_Pyramid_DadsAdvice
+おとうさんの ことば……\n[PLAYER]！ こういうものには\lつかいどきが あるんだ！
+

@@ -1326,14 +1326,17 @@ XSpDefStatBoostHook:
 	bx r0
 
 .pool
-@0x8016650 with r0
+@0x8016650 with r0 (JP は 8015E64)
+@[hack] patches/0720: JP の 8015F1A 以降の機械語は r6 = gBattlescriptCurrInstr の番地・r9 = 台本の表 (0x81BD9A0)・r10 = gCurrentActionFuncId の番地を前提にする
+@  （JP の 8015E44〜8015E4C の Dire Hit の道が同じ入れ方）。BPRE 版の r9／r6 の割り当てのままだと表を ROM（r6）に書いて台本が進まず、
+@  gBattlescriptCurrInstr が 0 のまま BIOS を台本として読み続けて AI が X 系の道具を使う戦闘が固まる。
 AIXItemStringHook:
 	bl PrepareStringForAIUsingXItem
-	ldr r0, =gBattlescriptCurrInstr
+	ldr r6, =gBattlescriptCurrInstr
+	ldr r0, =0x81BD9A0
 	mov r9, r0
 	ldr r0, =gCurrentActionFuncId
 	mov r10, r0
-	ldr r6, =0x81BD9A0
 	ldr r0, =0x8015F1A | 1
 	bx r0
 
@@ -1358,7 +1361,8 @@ SummaryScreen_TradeMonMetLocationHook:
 	add r0, r4 @Mon
 	mov r1, r5 @Met Location
 	bl TryReplaceSummaryScreenLocationWithFarAwayLocation
-	mov r5, r0
+	lsl r0, r0, #0x18 @L 案: 戻りは u16 になったが素の要約画面は 8 ビットで続ける
+	lsr r5, r0, #0x18
 	ldr r1, =0x8137F3C | 1
 	bx r1
 
@@ -1569,6 +1573,20 @@ ChooseFaintedMonCancelHook:
 	ldrb r0, [r0, #0xB]
 	cmp r0, #0xF
 	beq NotCancel
+	@ [hack] patches/0985 コンテスト S5b: 手持ち画面の種類が CONTEST（2）なら「さんかを やめますか？」（HackContest_PartyCancel・src/hack_contest_party.c）
+	ldr r0, =0x203B014
+	ldrb r1, [r0, #0x8]
+	lsl r1, r1, #0x1C
+	lsr r1, r1, #0x1C
+	cmp r1, #0x2
+	bne NotContestCancel
+	add r0, r4, #0x0
+	bl HackContest_PartyCancel
+	pop {r4-r5}
+	pop {r0}
+	bx r0
+
+NotContestCancel:
 	ldr r0, =0x8120580 | 1
 	bx r0
 

@@ -1,5 +1,8 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
+#include "shadow_moves.h" //[hack] patches/0955 段 D ダーク技
 #include "../include/battle_anim.h"
 #include "../include/battle_string_ids.h"
 #include "../include/money.h"
@@ -36,6 +39,8 @@
 #include "../include/new/move_tables.h"
 #include "../include/new/multi.h"
 #include "../include/new/pickup_items.h"
+#include "hack_dummy_battle.h" //[hack] patches/0602 ポケセン 3F のダミー（ネコにこばんの賞金を出さない）
+#include "hack_item_restore.h" //[hack] 使いきった持ち物を戦いのあと戻す
 #include "../include/new/stat_buffs.h"
 #include "../include/new/switching.h"
 #include "../include/new/set_z_effect.h"
@@ -43,6 +48,7 @@
 #include "../include/new/util.h"
 #include "hack_affection.h" //[hack] patches/0240 なつき度（src/hack_affection.c）
 #include "hack_debug_menu.h" //[hack] patches/0342
+#include "hack_challenge.h" //[hack] patches/0510 しばり（？？？はひんしにならない）
 
 /*
 general_bs_commands.c
@@ -75,7 +81,7 @@ static bool8 IsSingleTargetOfDoublesSpreadMove(void);
 static bool8 IsDoubleSpreadMove(void);
 static bool8 DoesBankNegateDamage(u8 bank, u16 move);
 static void TryContraryChangeStatAnim(u8 bank, u16* argumentPtr);
-static item_t ChoosePickupItem(u8 level);
+static item_t ChoosePickupItem(u16 level);
 
 const u16 gMissStringIds[] =
 {
@@ -188,7 +194,7 @@ void atk02_attackstring(void)
 
 		if (gCurrentMove != MOVE_STRUGGLE && !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE))
 		{
-			if ((ABILITY(gBankAttacker) == ABILITY_PROTEAN || ABILITY(gBankAttacker) == ABILITY_LIBERO)
+			if ((BankHasAbility(gBankAttacker, ABILITY_PROTEAN) || ABILITY(gBankAttacker) == ABILITY_LIBERO)
 			&& !(gMoveResultFlags & MOVE_RESULT_FAILED)
 			&& !CheckTableForMove(gCurrentMove, gMovesThatCallOtherMoves)
 			&& !IsTerastal(gBankAttacker)
@@ -244,9 +250,9 @@ void atk03_ppreduce(void) {
 			default:
 				if (gCurrentMove == MOVE_IMPRISON
 				|| gCurrentMove == MOVE_SNATCH
-				|| (gBattleMoves[gCurrentMove].effect == EFFECT_SPIKES && gCurrentMove != MOVE_STICKYWEB)) //No Sticky Web is assumed GF bug
+				|| (gBattleMoves[gCurrentMove].effect == EFFECT_SPIKES && !MoveIs(gCurrentMove, MOVE_STICKYWEB))) //No Sticky Web is assumed GF bug
 					ppToDeduct += AbilityBattleEffects(ABILITYEFFECT_COUNT_OTHER_SIDE, gBankAttacker, ABILITY_PRESSURE, 0, 0);
-				else if (SIDE(gBankAttacker) != SIDE(gBankTarget) && ABILITY(gBankTarget) == ABILITY_PRESSURE)
+				else if (SIDE(gBankAttacker) != SIDE(gBankTarget) && BankHasAbility(gBankTarget, ABILITY_PRESSURE))
 					ppToDeduct++;
 				break;
 		}
@@ -255,6 +261,8 @@ void atk03_ppreduce(void) {
 	if (!(gHitMarker & (HITMARKER_NO_PPDEDUCT | HITMARKER_NO_ATTACKSTRING))
 	&& gNewBS->ParentalBondOn != 1
 	&& !gNewBS->DancerInProgress
+&& !IsShadowMove(gCurrentMove) //[hack] patches/0955 段 D ダーク技は PP を使わない
+&& Lv200CustomMove_ShouldConsumePP(gCurrentMove, gBankAttacker, TRUE)
 	&& gBattleMons[gBankAttacker].pp[gCurrMovePos]) {
 		gProtectStructs[gBankAttacker].notFirstStrike = 1;
 
@@ -487,7 +495,7 @@ void atk09_attackanimation(void)
 		return;
 
 #if (defined SPECIES_CRAMORANT && defined SPECIES_CRAMORANT_GORGING && defined SPECIES_CRAMORANT_GULPING)
-	if ((move == MOVE_SURF || move == MOVE_DIVE)
+	if ((MoveIs(move, MOVE_SURF) || MoveIs(move, MOVE_DIVE))
 	&& ABILITY(gBankAttacker) == ABILITY_GULPMISSILE
 	&& !IsDynamaxed(gBankAttacker))
 	{
@@ -516,9 +524,9 @@ void atk09_attackanimation(void)
 		resultFlags = UpdateEffectivenessResultFlagsForDoubleSpreadMoves(resultFlags);
 
 	if (((gHitMarker & HITMARKER_NO_ANIMATIONS)
-	 && (move != MOVE_TRANSFORM && move != MOVE_SUBSTITUTE
-	  && move != MOVE_ELECTRICTERRAIN && move != MOVE_PSYCHICTERRAIN
-	  && move != MOVE_MISTYTERRAIN && move != MOVE_GRASSYTERRAIN && move != MOVE_SHEDTAIL)) //Terrain animations always need to play and reload BG
+	 && (move != MOVE_TRANSFORM && !MoveIs(move, MOVE_SUBSTITUTE)
+	  && !MoveIs(move, MOVE_ELECTRICTERRAIN) && !MoveIs(move, MOVE_PSYCHICTERRAIN)
+	  && !MoveIs(move, MOVE_MISTYTERRAIN) && !MoveIs(move, MOVE_GRASSYTERRAIN) && move != MOVE_SHEDTAIL)) //Terrain animations always need to play and reload BG
 	|| gNewBS->tempIgnoreAnimations)
 	{
 		if (!(resultFlags & MOVE_RESULT_NO_EFFECT))
@@ -562,7 +570,8 @@ void atk09_attackanimation(void)
 		else if (gBattleScripting.animTargetsHit > 0
 			&& (moveTarget & (MOVE_TARGET_BOTH | MOVE_TARGET_FOES_AND_ALLY | MOVE_TARGET_DEPENDS)
 			  || move == MOVE_DEFOG
-			  || move == MOVE_SHELLSMASH
+			  || MoveIs(move, MOVE_SHELLSMASH)
+			  || move == MOVE_LV200_BUG_140 //[hack] だっぴのごうし（殻破りの台本を使う・アニメの二重再生を防ぐ #35 P2）
 			  || move == MOVE_HOWL))
 		{
 			gBattlescriptCurrInstr++;
@@ -741,21 +750,29 @@ void atk0B_healthbarupdate(void)
 
 void atk0C_datahpupdate(void)
 {
+	bool8 isMoveDamage;
+	bool8 hitSubstitute;
+	bool8 substituteBroke = FALSE;
+
 	if (gBattleExecBuffer) return;
 
 #ifdef HACK_DEBUG_MENU
 	HackDebugMenu_AdjustDamage(GetBankForBattleScript(gBattlescriptCurrInstr[1])); //[hack] patches/0342 「むてき」「いちげき」（デバッグ版だけ）
 #endif
+	HackChallenge_AdjustDamage(GetBankForBattleScript(gBattlescriptCurrInstr[1])); //[hack] patches/0510 ？？？（しばり）へのダメージは 0
 
 	if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT) || (gHitMarker & HITMARKER_NON_ATTACK_DMG))
 	{
 		gActiveBattler = GetBankForBattleScript(gBattlescriptCurrInstr[1]);
+		isMoveDamage = gBattlescriptCurrInstr[1] == BS_GET_TARGET
+					&& !(gHitMarker & HITMARKER_NON_ATTACK_DMG);
+		hitSubstitute = gBattleMons[gActiveBattler].status2 & STATUS2_SUBSTITUTE
+					 && gDisableStructs[gActiveBattler].substituteHP
+					 && !(gHitMarker & HITMARKER_IGNORE_SUBSTITUTE)
+					 && !gNewBS->bypassSubstitute;
 
 		//If Substitute Up
-		if (gBattleMons[gActiveBattler].status2 & STATUS2_SUBSTITUTE
-		&& gDisableStructs[gActiveBattler].substituteHP
-		&& !(gHitMarker & HITMARKER_IGNORE_SUBSTITUTE)
-		&& !gNewBS->bypassSubstitute)
+		if (hitSubstitute)
 		{
 			if (gDisableStructs[gActiveBattler].substituteHP >= gBattleMoveDamage)
 			{
@@ -776,6 +793,10 @@ void atk0C_datahpupdate(void)
 			//Check Substitute Fading
 			if (gDisableStructs[gActiveBattler].substituteHP == 0)
 			{
+				substituteBroke = TRUE;
+				if (isMoveDamage)
+					Lv200CustomMove_OnMoveHit(gCurrentMove, gBankAttacker, gActiveBattler,
+											gHpDealt, TRUE, TRUE);
 				gBattlescriptCurrInstr += 2;
 				BattleScriptPushCursor();
 				gBattlescriptCurrInstr = BattleScript_SubstituteFade;
@@ -941,6 +962,9 @@ void atk0C_datahpupdate(void)
 			gHitMarker &= ~(HITMARKER_NON_ATTACK_DMG);
 			EmitSetMonData(0, REQUEST_HP_BATTLE, 0, 2, &gBattleMons[gActiveBattler].hp);
 			MarkBufferBankForExecution(gActiveBattler);
+		if (isMoveDamage && !substituteBroke)
+			Lv200CustomMove_OnMoveHit(gCurrentMove, gBankAttacker, gActiveBattler,
+									gHpDealt, hitSubstitute, FALSE);
 		}
 	}
 	else
@@ -1403,6 +1427,8 @@ void atk19_tryfaintmon(void)
 		if (TryDoBenjaminButterfree(7))
 			return;
 
+		HackChallenge_KeepLentrantAlive(gActiveBattler); //[hack] patches/0510 ？？？（しばり）は HP 0 でもひんしにならない（ダメージ以外の道も止める）
+
 		if (!(gAbsentBattlerFlags & gBitTable[gActiveBattler])
 		&& gBattleMons[gActiveBattler].hp == 0)
 		{
@@ -1508,6 +1534,7 @@ void atk1B_cleareffectsonfaint(void) {
 
 			case Faint_ClearEffects:
 				gBattleMons[gActiveBattler].status1 = 0;
+				Lv200CustomMove_OnStatusCured(gActiveBattler);
 				EmitSetMonData(0, REQUEST_STATUS_BATTLE, 0, 0x4, &gBattleMons[gActiveBattler].status1);
 				MarkBufferBankForExecution(gActiveBattler);
 
@@ -1698,7 +1725,7 @@ void atk1B_cleareffectsonfaint(void) {
 							else
 								statId = STAT_STAGE_SPATK;
 
-							if (ABILITY(raidBank) == ABILITY_CONTRARY)
+							if (BankHasAbility(raidBank, ABILITY_CONTRARY))
 								increase *= -1; //So it still gets the boost
 							gBattleScripting.statChanger = statId | SET_STAT_BUFF_VALUE(increase);
 
@@ -1838,7 +1865,7 @@ void atk1F_jumpifsideaffecting(void)
 			flags |= SIDE_STATUS_SAFEGUARD;
 		if (BankSideHasMist(gBankTarget))
 			flags |= SIDE_STATUS_MIST;
-		if (ABILITY(gBankTarget) == ABILITY_INFILTRATOR)
+		if (BankHasAbility(gBankTarget, ABILITY_INFILTRATOR))
 			flags &= ~(SIDE_STATUS_SAFEGUARD | SIDE_STATUS_MIST);
 	}
 
@@ -1883,7 +1910,7 @@ void atk1E_jumpifability(void)
 	else
 	{
 		battlerId = GetBankForBattleScript(gBattlescriptCurrInstr[1]);
-		if (ABILITY(battlerId) == ability)
+		if (BankHasAbility(battlerId, ability)) //[hack] 2026-10-20 2 つ目（ヘドロえき等）
 		{
 			gLastUsedAbility = ability;
 			gBattlescriptCurrInstr = jumpPtr;
@@ -1964,7 +1991,7 @@ void atk43_jumpifabilitypresent(void)
 #define CASE_MULTIPLE_MINUS(by) case (STAT_ANIM_MULTIPLE_MINUS##by): value = STAT_ANIM_PLUS##by; break;
 static void TryContraryChangeStatAnim(u8 bank, u16* argumentPtr)
 {
-	if (ABILITY(bank) == ABILITY_CONTRARY)
+	if (BankHasAbility(bank, ABILITY_CONTRARY))
 	{
 		u8 value = 0;
 		switch (*argumentPtr)
@@ -2391,6 +2418,8 @@ void atk6A_removeitem(void)
 
 	if (gLastUsedItem != ITEM_NONE)
 	{
+		HackItemRestore_NoteConsumed(bank, gLastUsedItem); //[hack] 使いきった持ち物（きのみ以外）は戦いのあと戻す（ふうせんのようにリサイクルできない物も・src/hack_item_restore.c）
+
 		if (!gNewBS->IncinerateCounters[bank]) //Item can be restored
 		{
 			if (IsBerry(gLastUsedItem) && ABILITY(bank) == ABILITY_CUDCHEW)
@@ -2480,7 +2509,7 @@ void atk77_setprotect(void)
 	u16 divisor = 1;
 	int i;
 
-	switch (gLastResultingMoves[gBankAttacker]) {
+	switch (EffectiveMove(gLastResultingMoves[gBankAttacker])) {
 		case MOVE_PROTECT:
 		case MOVE_DETECT:
 		case MOVE_ENDURE:
@@ -2495,6 +2524,11 @@ void atk77_setprotect(void)
 		case MOVE_MAX_GUARD:
 		case MOVE_SILKTRAP:
 		case MOVE_BURNINGBULWARK:
+		case MOVE_LV200_FLYING_150: //[hack] 独自効果の守る系（#35 P2）。連続使用の判定を元技と同じにつなぐ
+		case MOVE_LV200_FIRE_150:
+		case MOVE_LV200_FIGHTING_190:
+		case MOVE_LV200_ROCK_110:
+		case MOVE_LV200_GHOST_200:
 			break;
 		default:
 			gDisableStructs[gBankAttacker].protectUses = 0;
@@ -2503,7 +2537,7 @@ void atk77_setprotect(void)
 	if (gCurrentTurnActionNumber == (gBattlersCount - 1))
 		notLastTurn = FALSE;
 
-	if (gCurrentMove == MOVE_WIDEGUARD || gCurrentMove == MOVE_QUICKGUARD || gCurrentMove == MOVE_CRAFTYSHIELD || gCurrentMove == MOVE_MATBLOCK)
+	if (MoveIs(gCurrentMove, MOVE_WIDEGUARD) || MoveIs(gCurrentMove, MOVE_QUICKGUARD) || gCurrentMove == MOVE_CRAFTYSHIELD || gCurrentMove == MOVE_MATBLOCK)
 		divisor = 1; //These moves increase the fail rate, but can't fail themselves
 	else
 	{
@@ -2514,7 +2548,7 @@ void atk77_setprotect(void)
 	if (udivsi(rate, divisor) >= Random() && notLastTurn)
 	{
 		u8 atkSide = SIDE(gBankAttacker);
-		switch (gCurrentMove) {
+		switch (EffectiveMove(gCurrentMove)) {
 			case MOVE_KINGSSHIELD:
 				gProtectStructs[gBankAttacker].KingsShield = 1;
 				gBattleCommunication[MULTISTRING_CHOOSER] = 0;
@@ -2563,6 +2597,9 @@ void atk77_setprotect(void)
 				break;
 
 			case MOVE_ENDURE:
+			case MOVE_LV200_FIGHTING_190: //[hack] さいごのたたかい・ガーネットガード・ふみとどまりはこらえる(ENDURE)の枝（#35 P2）
+			case MOVE_LV200_ROCK_110:
+			case MOVE_LV200_GHOST_200:
 				gProtectStructs[gBankAttacker].endured = 1;
 				gBattleCommunication[MULTISTRING_CHOOSER] = 1;
 				break;
@@ -2573,6 +2610,7 @@ void atk77_setprotect(void)
 				break;
 
 			case MOVE_BURNINGBULWARK:
+			case MOVE_LV200_FIRE_150: //[hack] ほのおのころも（#35 P2）
 				gProtectStructs[gBankAttacker].BurningBulwark = 1;
 				gBattleCommunication[MULTISTRING_CHOOSER] = 0;
 				break;
@@ -2657,7 +2695,7 @@ void atk7B_tryhealhalfhealth(void)
 		gBattlescriptCurrInstr = failPtr;
 	else
 	{
-		if (gCurrentMove == MOVE_LIFEDEW || gCurrentMove == MOVE_JUNGLEHEALING || gCurrentMove == MOVE_LUNARBLESSING)
+		if (MoveIs(gCurrentMove, MOVE_LIFEDEW) || gCurrentMove == MOVE_JUNGLEHEALING || gCurrentMove == MOVE_LUNARBLESSING)
 			gBattleMoveDamage = MathMax(1, GetBaseMaxHP(gBankTarget) / 4); //25 %
 		else
 			gBattleMoveDamage = MathMax(1, GetBaseMaxHP(gBankTarget) / 2); //50 %
@@ -2794,13 +2832,13 @@ void atk81_trysetrest(void)
 		gBattlescriptCurrInstr = BattleScript_ButItFailed;
 		fail = TRUE;
 	}
-	else if (IsOfType(gActiveBattler, TYPE_GRASS) && ABILITY(gActiveBattler) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(gActiveBattler, TYPE_GRASS) && BankHasAbility(gActiveBattler, ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = gActiveBattler;
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
 		fail = TRUE;
 	}
-	else if (IsOfType(gActiveBattler, TYPE_GRASS) && IS_DOUBLE_BATTLE && ABILITY(PARTNER(gActiveBattler)) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(gActiveBattler, TYPE_GRASS) && IS_DOUBLE_BATTLE && BankHasAbility(PARTNER(gActiveBattler), ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = PARTNER(gActiveBattler);
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
@@ -2834,7 +2872,7 @@ void atk81_trysetrest(void)
 
 	if (!fail)
 	{
-		switch (ABILITY(gActiveBattler)) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (ABILITY(gActiveBattler)) : SecondAbility_OfBank(gActiveBattler); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_INSOMNIA:
 			#ifdef ABILITY_VITALSPIRIT
 			case ABILITY_VITALSPIRIT:
@@ -2863,7 +2901,7 @@ void atk81_trysetrest(void)
 				}
 				break;
 			#endif
-		}
+		} }
 	}
 
 	if (!fail)
@@ -2915,8 +2953,8 @@ void atk84_jumpifcantmakeasleep(void)
 	|| defAbility == ABILITY_COMATOSE
 	|| defAbility == ABILITY_SWEETVEIL
 	|| defAbility == ABILITY_PURIFYINGSALT
-	|| (defAbility == ABILITY_LEAFGUARD && WEATHER_HAS_EFFECT && gBattleWeather & WEATHER_SUN_ANY)
-	|| (defAbility == ABILITY_FLOWERVEIL && IsOfType(bankDef, TYPE_GRASS) && gCurrentMove != MOVE_REST))
+	|| ((defAbility == ABILITY_LEAFGUARD || SecondAbility_OfBank(bankDef) == ABILITY_LEAFGUARD) && WEATHER_HAS_EFFECT && gBattleWeather & WEATHER_SUN_ANY)
+	|| (defAbility == ABILITY_FLOWERVEIL && IsOfType(bankDef, TYPE_GRASS) && !MoveIs(gCurrentMove, MOVE_REST)))
 	{
 		gLastUsedAbility = defAbility;
 		gBattleCommunication[MULTISTRING_CHOOSER] = 2;
@@ -2924,7 +2962,7 @@ void atk84_jumpifcantmakeasleep(void)
 		RecordAbilityBattle(bankDef, gLastUsedAbility);
 	}
 	else if (defPartnerAbility == ABILITY_SWEETVEIL
-	|| (defPartnerAbility == ABILITY_FLOWERVEIL && IsOfType(bankDef, TYPE_GRASS) && gCurrentMove != MOVE_REST))
+	|| (defPartnerAbility == ABILITY_FLOWERVEIL && IsOfType(bankDef, TYPE_GRASS) && !MoveIs(gCurrentMove, MOVE_REST)))
 	{
 		gLastUsedAbility = defPartnerAbility;
 		gBattlescriptCurrInstr = jump_loc;
@@ -3037,7 +3075,7 @@ void atk90_tryconversiontypechange(void)
 {
 	u8* failScript = T1_READ_PTR(gBattlescriptCurrInstr + 1);
 
-	if (gCurrentMove != MOVE_REFLECTTYPE) //Conversion
+	if (!MoveIs(gCurrentMove, MOVE_REFLECTTYPE)) //Conversion
 	{
 		u8 moveType = gBattleMoves[gBattleMons[gBankAttacker].moves[0]].type;
 
@@ -3126,7 +3164,7 @@ void atk91_givepaydaymoney(void)
 	int i;
 	u32 money = 0;
 
-	if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_TOWER)))
+	if (!(gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER | BATTLE_TYPE_TRAINER_TOWER)) && !HackDummy_Active()) //[hack] patches/0602 ダミーの戦いは ネコにこばんも 0 円
 	{
 		for (i = 0; i < PARTY_SIZE; ++i)
 			money += (gPlayerParty[i].level * 5) * gNewBS->PayDayByPartyIndices[i];
@@ -3183,7 +3221,7 @@ void atk93_tryKO(void)
 
 	gStringBank = bankDef;
 
-	if (defAbility == ABILITY_STURDY)
+	if (defAbility == ABILITY_STURDY || SecondAbility_OfBank(bankDef) == ABILITY_STURDY) //[hack] 2026-10-22 2 つ目（ポップアップの名前は台本の Hack_SturdyPopup）
 	{
 		gMoveResultFlags |= MOVE_RESULT_MISSED;
 		gBattleScripting.bank = gBankTarget;
@@ -3202,7 +3240,7 @@ void atk93_tryKO(void)
 				baseAcc = gBattleMoves[gCurrentMove].accuracy;
 		#endif
 
-		if (gBattleMons[bankAtk].level >= gBattleMons[bankDef].level)
+		if (BM_LEVEL(gBattleMons[bankAtk]) >= BM_LEVEL(gBattleMons[bankDef]))
 		{
 			if (HasRaidShields(gBankTarget)) //Shields can be used outside of Raid Battles now
 			{
@@ -3229,7 +3267,7 @@ void atk93_tryKO(void)
 			}
 			else
 			{
-				chance = baseAcc + (gBattleMons[bankAtk].level - gBattleMons[bankDef].level);
+				chance = baseAcc + (BM_LEVEL(gBattleMons[bankAtk]) - BM_LEVEL(gBattleMons[bankDef]));
 				if (umodsi(Random(), 100) + 1 < chance)
 					chance = TRUE;
 				else
@@ -3285,12 +3323,12 @@ void atk93_tryKO(void)
 		{
 			gMoveResultFlags |= MOVE_RESULT_MISSED;
 			#ifdef NO_SHEER_COLD_NERF
-				if (gBattleMons[bankAtk].level >= gBattleMons[bankDef].level && !IsDynamaxed(bankDef))
+				if (BM_LEVEL(gBattleMons[bankAtk]) >= BM_LEVEL(gBattleMons[bankDef]) && !IsDynamaxed(bankDef))
 					gBattleCommunication[MULTISTRING_CHOOSER] = 0;
 				else
 					gBattleCommunication[MULTISTRING_CHOOSER] = 1;
 			#else
-				if (gBattleMons[bankAtk].level < gBattleMons[bankDef].level
+				if (BM_LEVEL(gBattleMons[bankAtk]) < BM_LEVEL(gBattleMons[bankDef])
 				|| IsDynamaxed(bankDef)
 				|| (gCurrentMove == MOVE_SHEERCOLD && IsOfType(bankDef, TYPE_ICE)))
 					gBattleCommunication[MULTISTRING_CHOOSER] = 1;
@@ -3354,7 +3392,7 @@ static bool8 TakesGeneralWeatherDamage(u8 bank)
 	u8 effect = ITEM_EFFECT(bank);
 
 	return WEATHER_HAS_EFFECT
-		&& 	ability != ABILITY_MAGICGUARD
+		&& 	!BankHasAbility(bank, ABILITY_MAGICGUARD) //[hack] 2026-10-22 2 つ目
 		&&	ability != ABILITY_OVERCOAT
 		&&	effect  != ITEM_EFFECT_SAFETY_GOGGLES
 		&& !(gStatuses3[bank] & (STATUS3_UNDERGROUND | STATUS3_UNDERWATER)); //For some strange reason, Pokemon using Shadow/Phantom Force still take weather damage
@@ -3478,7 +3516,7 @@ void atk97_tryinfatuating(void)
 		bankDef = gBankAttacker;
 	}
 
-	if (ABILITY(bankDef) == ABILITY_OBLIVIOUS)
+	if (BankHasAbility(bankDef, ABILITY_OBLIVIOUS))
 	{
 		gBattlescriptCurrInstr = BattleScript_ObliviousPrevents;
 	}
@@ -3715,11 +3753,11 @@ void atk9E_metronome(void)
 
 void atkA0_psywavedamageeffect(void)
 {
-	gBattleMoveDamage = GetPsywaveDamage(gBattleMons[gBankAttacker].level, Random() % 101);
+	gBattleMoveDamage = GetPsywaveDamage(BM_LEVEL(gBattleMons[gBankAttacker]), Random() % 101);
 	++gBattlescriptCurrInstr;
 }
 
-s32 GetPsywaveDamage(u8 level, u8 randDamage)
+s32 GetPsywaveDamage(u16 level, u8 randDamage)
 {
 	return MathMax(1, (level * (randDamage + 50)) / 100);
 }
@@ -3814,7 +3852,7 @@ bool8 CanLastMoveNotBeEncored(u8 bank)
 	u16 lastPrintedMove = gLastPrintedMoves[bank];
 
 	return lastUsedMove == MOVE_STRUGGLE
-		|| lastUsedMove == MOVE_ENCORE
+		|| MoveIs(lastUsedMove, MOVE_ENCORE)
 		|| lastUsedMove == MOVE_DYNAMAXCANNON
 		|| CheckTableForMove(lastUsedMove, gMovesThatCallOtherMoves)
 		|| IsZMove(lastUsedMove)
@@ -3976,6 +4014,8 @@ void atkA8_copymovepermanently(void) // sketch
 	&& lastMove != MOVE_STRUGGLE
 	&& lastMove != MOVE_CHATTER
 	&& lastMove != MOVE_SKETCH
+	&& !IsShadowMove(lastMove) //[hack] patches/0955 段 D スケッチでダーク技は写せない
+	&& !Shadow_IsBattlerDark(gBankAttacker) //[hack] patches/0963 段 E ダークの子の技の並びは組み立てた物＝手持ちの技欄へ写さない
 	&& lastMove != 0
 	&& lastMove != 0xFFFF)
 	{
@@ -4136,6 +4176,7 @@ void atkAE_healpartystatus(void)
 			party = gEnemyParty;
 
 		gBattleMons[gBankAttacker].status1 = 0;
+		Lv200CustomMove_OnStatusCured(gBankAttacker);
 		gBattleMons[gBankAttacker].status2 &= ~(STATUS2_NIGHTMARE);
 
 		gActiveBattler = gBattleScripting.bank = GetBattlerAtPosition(GetBattlerPosition(gBankAttacker) ^ BIT_FLANK);
@@ -4143,10 +4184,11 @@ void atkAE_healpartystatus(void)
 		if (IS_DOUBLE_BATTLE
 		&& !(gAbsentBattlerFlags & gBitTable[gActiveBattler]))
 		{
-			if (ABILITY(gActiveBattler) != ABILITY_SOUNDPROOF
+			if (!BankHasAbility(gActiveBattler, ABILITY_SOUNDPROOF)
 			&& ABILITY(gActiveBattler) != ABILITY_GOODASGOLD)
 			{
 				gBattleMons[gActiveBattler].status1 = 0;
+				Lv200CustomMove_OnStatusCured(gActiveBattler);
 				gBattleMons[gActiveBattler].status2 &= ~(STATUS2_NIGHTMARE);
 			}
 			else
@@ -4187,6 +4229,7 @@ void atkAE_healpartystatus(void)
 			party = gEnemyParty;
 
 		gBattleMons[gBankAttacker].status1 = 0;
+		Lv200CustomMove_OnStatusCured(gBankAttacker);
 		gBattleMons[gBankAttacker].status2 &= ~(STATUS2_NIGHTMARE);
 
 		gActiveBattler = gBattleScripting.bank = GetBattlerAtPosition(GetBattlerPosition(gBankAttacker) ^ BIT_FLANK);
@@ -4194,10 +4237,11 @@ void atkAE_healpartystatus(void)
 		if (IS_DOUBLE_BATTLE
 		&& !(gAbsentBattlerFlags & gBitTable[gActiveBattler]))
 		{
-			if (ABILITY(gActiveBattler) != ABILITY_SAPSIPPER
+			if (!BankHasAbility(gActiveBattler, ABILITY_SAPSIPPER)
 			&& ABILITY(gActiveBattler) != ABILITY_GOODASGOLD)
 			{
 				gBattleMons[gActiveBattler].status1 = 0;
+				Lv200CustomMove_OnStatusCured(gActiveBattler);
 				gBattleMons[gActiveBattler].status2 &= ~(STATUS2_NIGHTMARE);
 			}
 			else
@@ -4231,6 +4275,7 @@ void atkAE_healpartystatus(void)
 		toHeal = 0x3F;
 
 		gBattleMons[gBankAttacker].status1 = 0;
+		Lv200CustomMove_OnStatusCured(gBankAttacker);
 		gBattleMons[gBankAttacker].status2 &= ~(STATUS2_NIGHTMARE);
 
 		gActiveBattler = GetBattlerAtPosition(GetBattlerPosition(gBankAttacker) ^ BIT_FLANK);
@@ -4238,6 +4283,7 @@ void atkAE_healpartystatus(void)
 		&& !(gAbsentBattlerFlags & gBitTable[gActiveBattler]))
 		{
 			gBattleMons[gActiveBattler].status1 = 0;
+			Lv200CustomMove_OnStatusCured(gActiveBattler);
 			gBattleMons[gActiveBattler].status2 &= ~(STATUS2_NIGHTMARE);
 		}
 	}
@@ -4274,7 +4320,7 @@ void atkB0_trysetspikes(void)
 	u8 defSide = atkSide ^ BIT_SIDE;
 	u8 stringcase = 0xFF;
 
-	switch (gCurrentMove) {
+	switch (EffectiveMove(gCurrentMove)) {
 		case MOVE_STEALTHROCK:
 		case MOVE_G_MAX_STONESURGE_P:
 		case MOVE_G_MAX_STONESURGE_S:
@@ -4369,13 +4415,13 @@ void atkB2_trysetperishsong(void)
 	s32 notAffectedCount = 0;
 	bool8 priority = PriorityCalc(gBankAttacker, ACTION_USE_MOVE, gCurrentMove) > 0;
 	bool8 defAbilityBlocksPriority = IsPriorityBlockingAbility(ABILITY(gBankTarget));
-	bool8 attackerIsPrankster = ABILITY(gBankAttacker) == ABILITY_PRANKSTER;
+	bool8 attackerIsPrankster = BankHasAbility(gBankAttacker, ABILITY_PRANKSTER);
 
 	for (i = 0; i < gBattlersCount; ++i)
 	{
 		if (gStatuses3[i] & STATUS3_PERISH_SONG
 		|| gStatuses3[i] & STATUS3_COMMANDER
-		|| ABILITY(i) == ABILITY_SOUNDPROOF
+		|| BankHasAbility(i, ABILITY_SOUNDPROOF)
 		|| ABILITY(i) == ABILITY_GOODASGOLD
 		|| (priority > 0 && i != gBankAttacker && ((gTerrainType == PSYCHIC_TERRAIN && CheckGrounding(i)) || defAbilityBlocksPriority)) //Not affected by priority moves
 		|| (attackerIsPrankster && IsOfType(i, TYPE_DARK)))
@@ -4657,7 +4703,7 @@ void atkBC_maxattackhalvehp(void)
 	gBattleScripting.animArg1 = 0xE + STAT_STAGE_ATK;
 	gBattleScripting.animArg2 = 0;
 
-	if (ABILITY(gBankAttacker) == ABILITY_CONTRARY)
+	if (BankHasAbility(gBankAttacker, ABILITY_CONTRARY))
 	{
 		if (STAT_STAGE(gBankAttacker, STAT_STAGE_ATK) > STAT_STAGE_MIN
 		&& gBattleMons[gBankAttacker].hp > halfHp)
@@ -4742,6 +4788,7 @@ void atkBE_rapidspinfree(void)
 			gSideTimers[sideAtk].srAmount = 0;
 			gSideTimers[sideAtk].stickyWeb = 0;
 			gSideTimers[sideAtk].steelsurge = 0;
+			Lv200CustomMove_OnHazardsCleared(sideAtk);
 			BattleScriptPushCursor();
 			gBattlescriptCurrInstr = BattleScript_PrintCustomString;
 			gBattleStringLoader = RemovedEntryHazardsString;
@@ -4749,8 +4796,9 @@ void atkBE_rapidspinfree(void)
 		else
 		{
 			if (gCurrentMove == MOVE_RAPIDSPIN
-			&& ABILITY(bankAtk) != ABILITY_SHEERFORCE
+			&& !BankHasAbility(bankAtk, ABILITY_SHEERFORCE)
 			&& ABILITY(bankAtk) != ABILITY_DRAGONARMOR //[hack] 2026-10-07 りゅうのよろいに ちからずく（patches/0206）
+			&& ABILITY(bankAtk) != ABILITY_REITONOOU //[hack] 2026-10-23 れーとのおう(patches/0790)
 			&& STAT_CAN_RISE(bankAtk, STAT_STAGE_SPEED)) //From Gen 8
 			{
 				gBattleCommunication[MOVE_EFFECT_BYTE] = MOVE_EFFECT_SPD_PLUS_1 | MOVE_EFFECT_AFFECTS_USER;
@@ -4790,6 +4838,7 @@ void atkBE_rapidspinfree(void)
 				gSideTimers[i].srAmount = 0;
 				gSideTimers[i].stickyWeb = 0;
 				gSideTimers[i].steelsurge = 0;
+				Lv200CustomMove_OnHazardsCleared(i);
 				BattleScriptPushCursor();
 				gBattlescriptCurrInstr = BattleScript_PrintCustomString;
 				gBattleStringLoader = RemovedEntryHazardsString;
@@ -4809,6 +4858,7 @@ void atkBE_rapidspinfree(void)
 			gSideTimers[sideAtk].srAmount = 0;
 			gSideTimers[sideAtk].stickyWeb = 0;
 			gSideTimers[sideAtk].steelsurge = 0;
+			Lv200CustomMove_OnHazardsCleared(sideAtk);
 			BattleScriptPushCursor();
 			gBattlescriptCurrInstr = BattleScript_PrintCustomString;
 			gBattleStringLoader = RemovedEntryHazardsString;
@@ -4821,6 +4871,7 @@ void atkBE_rapidspinfree(void)
 			gSideTimers[sideDef].srAmount = 0;
 			gSideTimers[sideDef].stickyWeb = 0;
 			gSideTimers[sideDef].steelsurge = 0;
+			Lv200CustomMove_OnHazardsCleared(sideDef);
 			BattleScriptPushCursor();
 			gBattlescriptCurrInstr = BattleScript_PrintCustomString;
 			gBattleStringLoader = RemovedEntryHazardsTargetSideString;
@@ -4947,7 +4998,7 @@ void atkC3_trysetfutureattack(void)
 
 void atkC5_setsemiinvulnerablebit(void)
 {
-	switch (gCurrentMove)
+	switch (EffectiveMove(gCurrentMove))
 	{
 		case MOVE_FLY:
 		case MOVE_BOUNCE:
@@ -4955,6 +5006,7 @@ void atkC5_setsemiinvulnerablebit(void)
 			break;
 
 		case MOVE_DIG:
+		case MOVE_LV200_GROUND_120: //[hack] ほりすすむ（#35 P2）
 			gStatuses3[gBankAttacker] |= STATUS3_UNDERGROUND;
 			break;
 
@@ -4987,13 +5039,14 @@ void atkC5_setsemiinvulnerablebit(void)
 
 void atkC6_clearsemiinvulnerablebit(void)
 {
-	switch (gCurrentMove)
+	switch (EffectiveMove(gCurrentMove))
 	{
 		case MOVE_FLY:
 		case MOVE_BOUNCE:
 			gStatuses3[gBankAttacker] &= ~STATUS3_IN_AIR;
 			break;
 		case MOVE_DIG:
+		case MOVE_LV200_GROUND_120:
 			gStatuses3[gBankAttacker] &= ~STATUS3_UNDERGROUND;
 			break;
 		case MOVE_DIVE:
@@ -5140,6 +5193,7 @@ void atkCD_cureifburnedparalysedorpoisoned(void) // refresh
 	if (gBattleMons[gBankAttacker].status1 & (STATUS1_POISON | STATUS1_BURN | STATUS1_PARALYSIS | STATUS1_TOXIC_POISON))
 	{
 		gBattleMons[gBankAttacker].status1 = 0;
+		Lv200CustomMove_OnStatusCured(gBankAttacker);
 		gBattlescriptCurrInstr += 5;
 		gActiveBattler = gBankAttacker;
 		EmitSetMonData(0, REQUEST_STATUS_BATTLE, 0, 4, &gBattleMons[gActiveBattler].status1);
@@ -5608,7 +5662,7 @@ void atkE5_pickupitemcalculation(void)
 	#endif
 }
 
-static item_t ChoosePickupItem(u8 level)
+static item_t ChoosePickupItem(u16 level)
 {
 	u32 row_num = (level - 1) / 10;
 	if (row_num > 9) //[hack] patches/0284: 表は Lv100 まで（10 行）。レベル上限 200（patches/0236）で Lv101 以上は表の外を読んでいた（Lv0 も u32 で大きくなる）
@@ -5694,7 +5748,7 @@ void atkE7_trycastformdatachange(void)
 			#endif
 
 			default:
-				if (ABILITY(bank) == ABILITY_PROTOSYNTHESIS
+				if (BankHasAbility(bank, ABILITY_PROTOSYNTHESIS)
 				&& !gDisableStructs[bank].boosterEnergyActive
 				&& !IS_TRANSFORMED(bank))
 				{

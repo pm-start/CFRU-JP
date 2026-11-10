@@ -20,6 +20,9 @@ LzUnCompDispatch:
     lsr r3, r0, #25             @ 2026-10-07 元が 0x0A000000〜0x0BFFFFFF（ROM の後ろ半分・build_rom.py --split-pics の絵）なら
     cmp r3, #5                  @   src/hack_split_pics.c（直した mGBA はそのまま・SuperCard は SD の PKSPICS.BIN から）
     beq .Lsplit
+    lsr r3, r0, #26             @ 2026-10-23 元が仮想の 0x10000000〜0x13FFFFFF（128MB の ROM の上位 64MB・バンク 2・3＝W）も同じ入口へ
+    cmp r3, #4                  @   （窓の切り替えで RAM へ写してから展開・窓が無ければ SD の PKSW2/3.BIN）
+    beq .Lsplit
 .Lnormal:
     ldrb r3, [r0]
     cmp r3, #0x46

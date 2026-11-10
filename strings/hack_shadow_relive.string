@@ -1,0 +1,20 @@
+//リライブボックス・かおりの文（patches/0965・段 G）。**仮の文**（担当の案・ひらがな/カタカナだけ）。リライブの会話の文は strings/hack_shadow_relive_talk.string。
+//かおりを使ったあと（手持ちの画面）。[BUFFER1] = 子の名前
+#org @gText_ShadowScent_Used
+[BUFFER1]の こころが\nひらいた！
+
+//あずけの断り（PC の画面）。★ patches/0975 案 B: ダークの子は PC のどの箱にも あずけられない（専用の リライブボックスは べんりきのうから）
+#org @gText_Relive_DarkOnlyHere
+ダークは パソコンに\nあずけられません
+
+//箱 26 に残ったダークがいるあいだ、箱 26 では まとめて つかめない
+#org @gText_Relive_NoMulti
+ダークが いるので\nまとめて つかめません
+
+//専用の箱の名前（ダークを捕まえた文の「ボックス『...』に」に入る）
+#org @gText_Relive_BoxName
+リライブボックス
+
+//スナッチボールを投げられない（バッグの断り）: 手持ちが満員で専用のリライブボックスも使えないか満員
+#org @gText_Relive_BoxFull
+リライブボックスが\nいっぱいか つかえず とれない！[FC][09]

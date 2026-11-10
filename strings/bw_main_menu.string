@@ -27,3 +27,49 @@
 
 #org @gText_BwrMain_OldSave2
 ものなので つかえません
+
+#org @gText_BwrMain_NewSave1
+この レポートは あたらしい
+
+#org @gText_BwrMain_NewSave2
+バージョンの ものなので つかえません
+
+#org @gText_BwrMain_NewSave3
+さいしんばんで あそんでください
+
+#org @gText_BwrMain_NewSave4
+さいしょからの レポートで きえます
+
+#org @gText_BwrMain_ConfirmNewGame1
+さいしょから はじめると いまの
+
+#org @gText_BwrMain_ConfirmNewGame2
+レポートが きえます。よろしいですか？
+
+#org @gText_BwrMain_ConfirmYes
+はい
+
+#org @gText_BwrMain_ConfirmNo
+いいえ
+#org @gText_BwrMain_NeedTool1
+この レポートは ふるい かたちです
+#org @gText_BwrMain_NeedTool2
+そのままでは つづけられません
+#org @gText_BwrMain_NeedTool3
+ふぞくの セーブデータいこうツールを
+#org @gText_BwrMain_NeedTool4
+おつかいください
+#org @gText_BwrMain_NeedTool5
+さいしょからの レポートで きえます
+
+#org @gText_BwrMain_GiftChoice1
+ふしぎなもらいものを
+
+#org @gText_BwrMain_GiftChoice2
+どうしますか？
+
+#org @gText_BwrMain_GiftChoiceNormal
+ふつうに うけとる
+
+#org @gText_BwrMain_GiftChoiceCode
+シリアルコードを いれる

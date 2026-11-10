@@ -60,6 +60,8 @@ static const species_t sBannedBackupSpecies[] =
 
 //This file's functions:
 u8 HackDragonBoulder_Type2(const struct Pokemon* mon, u16 species, u8 type2); //[hack] patches/0207 りゅうのいわお（src/hack_dragon_boulder.c・特別なガブリアスZ は 2 つ目のタイプが いわ）
+u8 HackDebugMon_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0422 デバッグモン（src/hack_debug_mon.c・配る版は base をそのまま返す）
+u8 HackDelta_Type(const struct Pokemon* mon, u16 species, u8 slot, u8 base); //[hack] patches/0962 デルタ種のタイプ（src/hack_delta.c・印がデルタでなければ base をそのまま返す）
 
 void DoFormChange(u8 bank, u16 species, bool8 ReloadType, bool8 ReloadStats, bool8 reloadAbility)
 {
@@ -97,8 +99,8 @@ void DoFormChange(u8 bank, u16 species, bool8 ReloadType, bool8 ReloadStats, boo
 			UpdateTypesForCamomons(bank);
 		else
 		{
-			gBattleMons[bank].type1 = gBaseStats[species].type1;
-			gBattleMons[bank].type2 = HackDragonBoulder_Type2(GetBankPartyData(bank), species, gBaseStats[species].type2); //[hack] patches/0207 りゅうのいわお
+			gBattleMons[bank].type1 = HackDebugMon_Type(GetBankPartyData(bank), species, 0, HackDelta_Type(GetBankPartyData(bank), species, 0, gBaseStats[species].type1)); //[hack] patches/0422 デバッグモン・patches/0962 デルタ種
+			gBattleMons[bank].type2 = HackDebugMon_Type(GetBankPartyData(bank), species, 1, HackDelta_Type(GetBankPartyData(bank), species, 1, HackDragonBoulder_Type2(GetBankPartyData(bank), species, gBaseStats[species].type2))); //[hack] patches/0207 りゅうのいわお・patches/0422 デバッグモン・patches/0962 デルタ種
 		}
 
 		gBattleMons[bank].type3 = TYPE_BLANK;
@@ -132,7 +134,7 @@ void SwitchOutFormsRevert(u8 bank)
 			if (backupSpecies != SPECIES_NONE)
 				DoFormChange(bank, backupSpecies, FALSE, TRUE, FALSE);
 			else
-				DoFormChange(bank, SPECIES_CHERRIM, FALSE, TRUE, FALSE);
+				DoFormChange(bank, SPECIES_DARMANITAN, FALSE, TRUE, FALSE);
 			break;
 		#endif
 
@@ -457,7 +459,15 @@ void HandleFormChange(void)
 	struct Pokemon* mon = GetBankPartyData(gActiveBattler);
 	struct BattlePokemon* battleMon = (struct BattlePokemon*) &gBattleBufferA[gActiveBattler][3];
 
-	mon->backupSpecies = GetMonData(mon, MON_DATA_SPECIES, NULL);
+	u16 prevSpecies = GetMonData(mon, MON_DATA_SPECIES, NULL);
+
+	//[hack] patches/0987 ジガルデ: パーフェクトフォルム（パワーコンストラクト）のあとのメガシンカで、50%／10% の記憶（backupSpecies）を
+	//パーフェクトで上書きしない（上書きすると戦闘のあと・ひんしのあとにパーフェクトのまま手持ちに入る）。BUG-zygarde-complete-mega
+	#if (defined SPECIES_ZYGARDE && defined SPECIES_ZYGARDE_10 && defined SPECIES_ZYGARDE_COMPLETE)
+	if (!(prevSpecies == SPECIES_ZYGARDE_COMPLETE
+	   && (mon->backupSpecies == SPECIES_ZYGARDE || mon->backupSpecies == SPECIES_ZYGARDE_10)))
+	#endif
+		mon->backupSpecies = prevSpecies;
 	SetMonData(mon, MON_DATA_SPECIES, &battleMon->species);
 
 	SetMonData(mon, MON_DATA_ATK, &battleMon->attack);
@@ -572,7 +582,10 @@ static const u16 sTypeToArceusForm[NUMBER_OF_MON_TYPES] =
 	[TYPE_DARK] =		SPECIES_ARCEUS_DARK,
 	[TYPE_ROOSTLESS] =	SPECIES_ARCEUS_FLYING, //This Arceus should stay in the proper form
 
-	[TYPE_FAIRY] =		SPECIES_ARCEUS_FAIRY
+	[TYPE_FAIRY] =		SPECIES_ARCEUS_FAIRY,
+	[TYPE_STELLAR] =	0, //[hack] patches/0408 #110: ステラ・リルのプレートは無い（表の長さは NUMBER_OF_MON_TYPES なので外は読まない・0 ＝ ふつうのアルセウス）
+	[TYPE_RIL] =		0,
+	[TYPE_SHADOW] =		0 //[hack] patches/0955 段 D: ダークのプレートは無い
 };
 
 const u16 gTypeToSilvallyForm[NUMBER_OF_MON_TYPES] =
@@ -597,7 +610,10 @@ const u16 gTypeToSilvallyForm[NUMBER_OF_MON_TYPES] =
 	[TYPE_DARK] =		SPECIES_SILVALLY_DARK,
 	[TYPE_ROOSTLESS] =	SPECIES_SILVALLY_FLYING, //This Silvally should stay in the proper form
 
-	[TYPE_FAIRY] =		SPECIES_SILVALLY_FAIRY
+	[TYPE_FAIRY] =		SPECIES_SILVALLY_FAIRY,
+	[TYPE_STELLAR] =	0, //[hack] patches/0408 #110: 同上
+	[TYPE_RIL] =		0,
+	[TYPE_SHADOW] =		0 //[hack] patches/0955 段 D: ダークのプレートは無い
 };
 
 void HoldItemFormChange(struct Pokemon* mon, u16 item)

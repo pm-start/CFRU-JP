@@ -86,5 +86,9 @@ NoSecondOpponentSendOut:
 
 PartnerSetupHook:
         bl ChooseProperPartnerController
-        ldr r0, =0x800CE9C | 1
+        @[hack] patches/0721: 素の JP は 0800CE98 で gBattlersCount = 4（ldr r1, =gBattlersCount / movs r0, #4）を入れて 0800CE9C の strb r0, [r1] で書く。
+        @上流（BPRE 向け）の戻り先 0800CE9C のままだと、このフックは r0 = 0800CE9D・r1 = C 関数が最後に使った値のまま strb r0, [r1] を実行して
+        @どこかへ 1 バイト書いてしまう（今のビルドでは r1 が ROM の番地なので無視されるが、C の書き方が変わると RAM を壊す）。
+        @gBattlersCount は C 側（ChooseProperPartnerController）が入れる（レイドは 3）ので、素の書き込みごと飛ばして 0800CE9E（pop {r4}）へ戻す
+        ldr r0, =0x800CE9E | 1
         bx r0

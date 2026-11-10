@@ -46,7 +46,7 @@ bool8 __attribute__((long_call)) CanEncounterUnownInTanobyRuins(void);
 u32 __attribute__((long_call)) GenerateUnownPersonalityByLetter(u8 letter);
 //bool8 __attribute__((long_call)) DoWildEncounterRateDiceRoll(u16 encounterRate);
 bool8 __attribute__((long_call)) DoGlobalWildEncounterDiceRoll(void);
-bool8 __attribute__((long_call)) IsWildLevelAllowedByRepel(u8 level);
+bool8 __attribute__((long_call)) IsWildLevelAllowedByRepel(u16 level);
 void __attribute__((long_call)) ApplyFluteEncounterRateMod(u32 *encRate);
 void __attribute__((long_call)) ApplyCleanseTagEncounterRateMod(u32 *encRate);
 void __attribute__((long_call)) AddToWildEncounterRateBuff(u8 encounterRate);

@@ -14,6 +14,7 @@ et_battle_scripts.s
 .global BattleScript_WeatherDamage
 .global BattleScript_EndTurnWeatherEnd
 .global BattleScript_FogContinues
+.global BattleScript_StormySeaContinues
 .global BattleScript_SeaOfFireDamage
 .global BattleScript_GrassyTerrainHeal
 .global BattleScript_AquaRing
@@ -133,6 +134,15 @@ BattleScript_EndTurnWeatherEnd:
 	printfromtable gWeatherEndStringIds
 	waitmessage DELAY_1SECOND
 	call BS_WEATHER_FORM_CHANGES
+	end2
+
+@;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+BattleScript_StormySeaContinues: @;[hack] patches/0952 2026-11-02 あらしのうみ（雨のアニメを借りる）
+	setword BATTLE_STRING_LOADER gText_StormySeaContinues
+	printstring 0x184
+	waitmessage DELAY_1SECOND
+	playanimation 0x0 0xA 0x0 @;B_ANIM_RAIN_CONTINUES
 	end2
 
 @;@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

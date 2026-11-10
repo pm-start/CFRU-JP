@@ -1,0 +1,35 @@
+#org @gText_NushiNpc_Intro
+わたしは ポケモンの ちからを\nひきだす ひと！\pレベル200に たっした ポケモンを ヌシに\nしてあげよう\pただし してあげられるのは いちど きりだよ\nやってみるかい？
+
+#org @gText_NushiNpc_WhichMon
+どの ポケモンを ヌシに するかね？
+
+#org @gText_NushiNpc_Egg
+たまごは まだ ヌシに できないよ
+
+#org @gText_NushiNpc_LowLevel
+[BUFFER1]は まだ レベル200に\nたっして いないよ
+
+#org @gText_NushiNpc_Already
+[BUFFER1]は もう ヌシじゃないか
+
+#org @gText_NushiNpc_Dark
+ダークポケモンは ヌシに できないんだ
+
+#org @gText_NushiNpc_Delta
+デルタしゅの ポケモンは ヌシに\nできないんだ
+
+#org @gText_NushiNpc_Other
+ヌシは てもちに 1ぴきだけ！\pいまの ヌシを あずけてから また\nきなさい
+
+#org @gText_NushiNpc_Confirm
+[BUFFER1]を ヌシに\nするよ いちどきりだが いいかい？
+
+#org @gText_NushiNpc_Done
+[BUFFER1]は ヌシに なった！
+
+#org @gText_NushiNpc_After
+きみの ヌシは もう いるはずだよ
+
+#org @gText_NushiNpc_Bye
+また きなさい

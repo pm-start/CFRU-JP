@@ -4,7 +4,9 @@
 #include "../include/constants/battle.h"
 #include "../include/battle.h"
 #include "../include/new/ram_locs_battle.h"
+#include "../include/new/catching.h"
 #include "hack_watashitachi.h"
+#include "hack_mon_id.h"
 
 /*
 	隠しトレーナー「わたしたち」10 人（#99・2026-10-11 ユーザーの描いたトレーナーメモ「私たちのトレーナーメモ」）。
@@ -89,6 +91,21 @@ void HackWatashi_ShowFace(void)
 	LoadSpriteSheet(&sheet);
 	LoadSpritePalette(&pal);
 	CreateSprite(&sFaceTemplate, FACE_X, FACE_Y, 0);
+}
+
+//★ 2026-10-15 patches/0393（ユーザー確定）: トレーナー 940〜949 の手持ちは、その人のボール（BALL_TYPE_MOON_PETAL_BALL 28 から 940 の順に 10 個）に入っている・
+//  全員色違い・Moémon（旗 0x12E9 が ON）なら必ず Moémon の見た目（OFF ならふつうの見た目のまま色違い）。
+//  色違い・Moémon は #70 の自身の ID（裏 ID が Moémon の当たり・表 ^ 裏 < 8 で色違い）で決める（性格値は戦うたびに作り直される＝ここで ID を付ける）。
+//  呼ぶのは build_pokemon.c の CreateNPCTrainerParty（手持ちを 1 匹作るごと・HackClassPool_ReplaceMon の次）。それ以外のトレーナーは触らない
+void HackWatashi_FixMon(struct Pokemon* mon, u16 trainerId)
+{
+	u8 ball;
+
+	if (trainerId < WATASHI_TRAINER_FIRST || trainerId >= WATASHI_TRAINER_FIRST + WATASHI_COUNT)
+		return;
+	ball = BALL_TYPE_MOON_PETAL_BALL + (trainerId - WATASHI_TRAINER_FIRST);
+	SetMonData(mon, MON_DATA_POKEBALL, &ball);
+	HackMonId_MakeShinyMoemon((struct BoxPokemon*) mon);
 }
 
 //10 人とのトレーナー戦の相手の手持ちなら WATASHI_BASE_BONUS（50・src/hack_story_partner.c の HackPartner_BaseBonus から）

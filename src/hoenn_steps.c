@@ -12,6 +12,7 @@
 #include "../include/new/roamer.h"
 #include "Tables/hoenn_script_flags.h"
 #include "region_fly.h"
+#include "hack_fly_forbid.h"
 
 /* `assembly/hoenn/fly.s`（tools/rom/build_hoenn_fly.py が生成）*/
 extern const u8 gHoennMapsecKind[];
@@ -286,6 +287,7 @@ static void HoennSplashTick(void);
 #define STEP_ASH_BEHAVIOR 0x24  /* 火山灰の草。ここだけ雲を出す */
 #define STEP_ASH_DELAY 4        /* 素と同じ（AshGrassPerStepCallback）*/
 
+#define STEP_REGION_CACHE 6 /* RegionMapTick が空振りの地図を覚える欄（素の氷は data[1]〜[6]＝data[0]（callback 番号）が 0 のときだけ使う・空のひび割れは [7]〜[11]・[14]）*/
 #define STEP_TIMER 15       /* 使うタスクの欄（素は data[0]〜data[5] まで） */
 #define STEP_LASTX 12       /* 前に見た主人公のマス（1 歩に 1 回にするため）*/
 #define STEP_LASTY 13
@@ -321,8 +323,20 @@ void HoennStepTick(u8 taskId)
     u8 moved;               /* この回にマスが変わったか（灰の雲用） */
 
     HoennFlyVisitTick();    /* いる街の「訪問済み」を立てる */
-    RegionFlyVisitTick();   /* ジョウト・シンオウの町の「訪問済み」（src/region_fly.c・2026-09-30）*/
-    RegionHealTick();       /* ホウエン・ジョウト・シンオウのポケセンにいる間は「最後の回復地点」をその町に */
+    /* ジョウト・シンオウの町の「訪問済み」（RegionFlyVisitTick・2026-09-30）＋ ホウエン・ジョウト・シンオウのポケセンにいる間は
+       「最後の回復地点」をその町に（RegionHealTick）。まとめた版・町でもポケセンでもない地図は data[6] に覚えて表を引かない（2026-11-03） */
+    /* ★★ 2026-11-04 BUG-ice-path-ice: 素の氷（いてだきのどうくつ 1F・setstepcallback STEP_CB_ICE=4）は data[1]〜[6] を使い、
+         data[6]（tDelay）に 4 を入れて割るまで数える。ここへ鍵を書き戻すと 4 が上書きされ、氷が永久に割れなかった（0.63.x perf-region-1 a61d75ce3 で混入）。
+         素の callback が動いている間（data[0] が 0 でない）は鍵を覚えさせない（その地図だけ毎コマ表を引く）。 */
+    if (task->data[0] == 0)
+    {
+        RegionMapTick(&task->data[STEP_REGION_CACHE]);
+    }
+    else
+    {
+        s16 noCache = 0;
+        RegionMapTick(&noCache);
+    }
     HoennDexNavUnlockTick();  /* ずかんをもらったら「ずかんナビ」を使えるように */
     HoennMugshotFlagTick();   /* VS の主人公を BW の絵に（表を使う旗）*/
     HoennRoamerTopUpTick();   /* 3 犬が揃っていなければ一度だけ補う */
@@ -330,6 +344,7 @@ void HoennStepTick(u8 taskId)
     HoennPcMonitorTick();   /* ポケセンの回復モニターをホウエンの絵に */
     HoennGatesTick();       /* ヒワマキジムの回転門（出すだけ） */
     HoennBikeTick();        /* 自転車のモード（旗・絵・ダートの入力の履歴）*/
+    HackSafariGuardTick();  /* [hack] patches/0922 サファリの地図にいるのに旗が無い（壊れたセーブ）を直す */
 
     /* ★ 連れ歩き（#16）。そらをとぶ等の間は隠す。素 FRLG も CFRU も面倒を見ないので、
        毎フレーム動くここに相乗りしている（src/bw_follower.c） */

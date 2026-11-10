@@ -1,5 +1,7 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "lv200_custom_moves.h"
 #include "../include/battle_string_ids.h"
 #include "../include/party_menu.h"
 #include "../include/random.h"
@@ -46,6 +48,35 @@ void atkF8_callasm(void)
 	func();
 
 	gBattlescriptCurrInstr += 5; //Ideally this should be before the function is called, but too late now lol
+}
+
+/*
+ * [hack] patches/0607 jumpifmove／jumpifnotmove（battle_script_macros.s）の本体。
+ * 新技（0x40A〜0x12E1）は効果元の技へ alias する（MoveIs・hack_move_alias.h）。素の cmd 0x2A は gCurrentMove をそのまま比べるので、
+ * 効果元（例 MOVE_MATCHAGOTCHA）の枝へ入らず、既定の枝（やけどのみ・吸収なし）に落ちていた。ここで alias を通して比べる。
+ * 並び: [F8][この関数 4][比較する技 2][飛び先 4]。callasm は戻ったあと +5 するので、
+ * 飛ぶときは 飛び先-5、飛ばないときは 比較・飛び先の 6 バイトを読み飛ばす分 +6。
+ */
+static void Lv200BS_JumpIfMoveCommon(bool8 jumpWhenEqual)
+{
+	u16 compare = T1_READ_16(gBattlescriptCurrInstr + 5);
+	const u8* jump = T1_READ_PTR(gBattlescriptCurrInstr + 7);
+	bool8 equal = MoveIs(gCurrentMove, compare);
+
+	if (equal == jumpWhenEqual)
+		gBattlescriptCurrInstr = jump - 5;
+	else
+		gBattlescriptCurrInstr += 6;
+}
+
+void Lv200BS_JumpIfMove(void)
+{
+	Lv200BS_JumpIfMoveCommon(TRUE);
+}
+
+void Lv200BS_JumpIfNotMove(void)
+{
+	Lv200BS_JumpIfMoveCommon(FALSE);
 }
 
 //sethalfword RAM_OFFSET HWORD
@@ -100,9 +131,9 @@ void atkFD_jumpifabilitypresenttargetfield(void)
 	u16 ability = T1_READ_16(gBattlescriptCurrInstr + 1);
 	u8* ptr = T1_READ_PTR(gBattlescriptCurrInstr + 3);
 
-	if (ABILITY(gBankTarget) == ability)
+	if (BankHasAbility(gBankTarget, ability)) //[hack] 2026-10-20 2 つ目
 		gBattleScripting.bank = gBankTarget;
-	else if (ABILITY(PARTNER(gBankTarget)) == ability)
+	else if (BankHasAbility(PARTNER(gBankTarget), ability))
 		gBattleScripting.bank = PARTNER(gBankTarget);
 	else
 	{
@@ -206,7 +237,7 @@ void atkFF06_setterrain(void)
 			}
 		}
 
-		switch (gCurrentMove) {
+		switch (EffectiveMove(gCurrentMove)) {
 			case MOVE_ELECTRICTERRAIN:
 			SET_ELECTRIC_TERRAIN:
 				type = ELECTRIC_TERRAIN;
@@ -876,7 +907,7 @@ void atkFF1F_flowershieldlooper(void)
 				gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 6);
 				gNewBS->StompingTantrumTimers[gBankAttacker] = 2;
 			}
-			else if (BATTLER_SEMI_INVULNERABLE(bank) && ABILITY(gBankAttacker) != ABILITY_NOGUARD && ABILITY(bank) != ABILITY_NOGUARD)
+			else if (BATTLER_SEMI_INVULNERABLE(bank) && !BankHasAbility(gBankAttacker, ABILITY_NOGUARD) && !BankHasAbility(bank, ABILITY_NOGUARD))
 			{
 				gBattleCommunication[MULTISTRING_CHOOSER] = 0; //Avoided attack
 				gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 6);
@@ -989,6 +1020,7 @@ void atkFE_prefaintmoveendeffects(void)
 		switch (gNewBS->preFaintEffectsState)
 		{
 		case FAINT_SET_UP: //For Emergency Exit to use later
+			SecondAbility_ClearPending(); //[hack] 2026-10-22 2 つ目の接触系の順番待ちを持ち越さない
 			if (gNewBS->MultiHitOn)
 				gNewBS->turnDamageTaken[gBankTarget] += gHpDealt; //Total up damage taken
 			else
@@ -1005,7 +1037,8 @@ void atkFE_prefaintmoveendeffects(void)
 				if (AbilityBattleEffects(ABILITYEFFECT_MOVE_END_ATTACKER, gBankAttacker, 0, 0, 0))
 					effect = TRUE;
 			}
-			gNewBS->preFaintEffectsState++;
+			if (!SecondAbility_PendingNext()) //[hack] 2026-10-22 1 つ目が出て 2 つ目が順番待ちの間は同じ段にもう 1 回戻る
+				gNewBS->preFaintEffectsState++;
 			break;
 
 		case FAINT_ADVERSE_PROTECTION:
@@ -1028,7 +1061,7 @@ void atkFE_prefaintmoveendeffects(void)
 				{
 					gProtectStructs[gBankAttacker].touchedProtectLike = FALSE;
 
-					if (BATTLER_ALIVE(gBankAttacker) && ABILITY(gBankAttacker) != ABILITY_MAGICGUARD)
+					if (BATTLER_ALIVE(gBankAttacker) && !BankHasAbility(gBankAttacker, ABILITY_MAGICGUARD))
 					{
 						gBattleMoveDamage = MathMax(1, GetBaseMaxHP(gBankAttacker) / 8);
 						BattleScriptPushCursor();
@@ -1168,7 +1201,8 @@ void atkFE_prefaintmoveendeffects(void)
 		case FAINT_MOVE_END_ABILITIES: // Such as abilities activating on contact(Poison Spore, Rough Skin, etc.).
 			if (AbilityBattleEffects(ABILITYEFFECT_CONTACT, gBankTarget, 0, 0, 0))
 				effect = TRUE;
-			gNewBS->preFaintEffectsState++;
+			if (!SecondAbility_PendingNext()) //[hack] 2026-10-22 同上
+				gNewBS->preFaintEffectsState++;
 			break;
 
 		case FAINT_ITEM_EFFECTS_CONTACT_TARGET:
@@ -1207,6 +1241,7 @@ void atkFF23_faintpokemonaftermove(void)
 		if (TryDoBenjaminButterfree(3))
 			return;
 
+		Lv200CustomMove_OnFaint(gActiveBattler, gBankAttacker, gCurrentMove, gHpDealt);
 		gNewBS->lastFainted = gActiveBattler;
 		gHitMarker |= HITMARKER_FAINTED(gActiveBattler);
 		BattleScriptPush(gBattlescriptCurrInstr + 3);
@@ -1336,7 +1371,7 @@ void atkFF27_tryactivateprotean(void)
 {
 	u8 moveType = gBattleStruct->dynamicMoveType;
 
-	if ((ABILITY(gBankAttacker) == ABILITY_PROTEAN || ABILITY(gBankAttacker) == ABILITY_LIBERO)
+	if ((BankHasAbility(gBankAttacker, ABILITY_PROTEAN) || ABILITY(gBankAttacker) == ABILITY_LIBERO)
 	&& !(gMoveResultFlags & MOVE_RESULT_FAILED)
 	&& gCurrentMove != MOVE_STRUGGLE
 	&& !(gHitMarker & HITMARKER_UNABLE_TO_USE_MOVE)
@@ -1450,7 +1485,7 @@ void atkFF29_trysetsleep(void)
 		gBattleStringLoader = gText_TargetAlreadyHasStatusCondition; //String not in official games; officially "But it failed!"
 		fail = TRUE;
 	}
-	else if (ABILITY(gBankAttacker) != ABILITY_INFILTRATOR && BankSideHasSafeguard(bank))
+	else if (!BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR) && BankSideHasSafeguard(bank))
 	{
 		gBattleStringLoader = gText_TeamProtectedBySafeguard;
 		fail = TRUE;
@@ -1465,13 +1500,13 @@ void atkFF29_trysetsleep(void)
 		gBattleStringLoader = gText_TargetWrappedInElectricTerrain;
 		fail = TRUE;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && ABILITY(bank) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && BankHasAbility(bank, ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = bank;
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
 		return;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && ABILITY(PARTNER(bank)) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && BankHasAbility(PARTNER(bank), ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = PARTNER(bank);
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
@@ -1498,7 +1533,7 @@ void atkFF29_trysetsleep(void)
 
 	if (!fail)
 	{
-		switch (ABILITY(bank)) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (ABILITY(bank)) : SecondAbility_OfBank(bank); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_INSOMNIA:
 			#ifdef ABILITY_VITALSPIRIT
 			case ABILITY_VITALSPIRIT:
@@ -1522,7 +1557,7 @@ void atkFF29_trysetsleep(void)
 					gBattlescriptCurrInstr = BattleScript_ProtectedByAbility;
 					return;
 				}
-		}
+		} }
 /*
 		if (!fail && DoesSleepClausePrevent(bank))
 		{
@@ -1563,7 +1598,7 @@ void atkD7_setyawn(void)
 		gBattleStringLoader = gText_TargetAlreadyHasStatusCondition; //String not in official games; officially "But it failed!"
 		fail = TRUE;
 	}
-	else if (ABILITY(gBankAttacker) != ABILITY_INFILTRATOR && BankSideHasSafeguard(bank))
+	else if (!BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR) && BankSideHasSafeguard(bank))
 	{
 		gBattleStringLoader = gText_TeamProtectedBySafeguard;
 		fail = TRUE;
@@ -1578,13 +1613,13 @@ void atkD7_setyawn(void)
 		gBattleStringLoader = gText_TargetWrappedInElectricTerrain;
 		fail = TRUE;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && ABILITY(bank) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && BankHasAbility(bank, ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = bank;
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
 		return;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && ABILITY(PARTNER(bank)) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && BankHasAbility(PARTNER(bank), ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = PARTNER(bank);
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
@@ -1611,7 +1646,7 @@ void atkD7_setyawn(void)
 
 	if (!fail)
 	{
-		switch (ABILITY(bank)) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (ABILITY(bank)) : SecondAbility_OfBank(bank); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_INSOMNIA:
 			#ifdef ABILITY_VITALSPIRIT
 			case ABILITY_VITALSPIRIT:
@@ -1635,7 +1670,7 @@ void atkD7_setyawn(void)
 					gBattlescriptCurrInstr = BattleScript_ProtectedByAbility;
 					return;
 				}
-		}
+		} }
 
 		if (!fail && gStatuses3[gBattlerTarget] & STATUS3_YAWN)
 		{
@@ -1675,7 +1710,7 @@ void atkFF2A_trysetparalysis(void)
 	{
 		return;
 	}
-	else if (gCurrentMove == MOVE_THUNDERWAVE && TypeCalc(gCurrentMove, gBankAttacker, bank, NULL, FALSE) & MOVE_RESULT_DOESNT_AFFECT_FOE)
+	else if (MoveIs(gCurrentMove, MOVE_THUNDERWAVE) && TypeCalc(gCurrentMove, gBankAttacker, bank, NULL, FALSE) & MOVE_RESULT_DOESNT_AFFECT_FOE)
 	{
 		gMoveResultFlags |= MOVE_RESULT_DOESNT_AFFECT_FOE;
 		gBattlescriptCurrInstr = BattleScript_PauseResultMessage;
@@ -1704,7 +1739,7 @@ void atkFF2A_trysetparalysis(void)
 		gBattleStringLoader = gText_TargetAlreadyHasStatusCondition; //String not in official games; officially "But it failed!"
 		fail = TRUE;
 	}
-	else if (ABILITY(gBankAttacker) != ABILITY_INFILTRATOR && BankSideHasSafeguard(bank))
+	else if (!BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR) && BankSideHasSafeguard(bank))
 	{
 		gBattleStringLoader = gText_TeamProtectedBySafeguard;
 		fail = TRUE;
@@ -1714,13 +1749,13 @@ void atkFF2A_trysetparalysis(void)
 		gBattleStringLoader = gText_TargetWrappedInMistyTerrain;
 		fail = TRUE;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && ABILITY(bank) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && BankHasAbility(bank, ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = bank;
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
 		return;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && ABILITY(PARTNER(bank)) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && BankHasAbility(PARTNER(bank), ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = PARTNER(bank);
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
@@ -1729,7 +1764,7 @@ void atkFF2A_trysetparalysis(void)
 
 	if (!fail)
 	{
-		switch (ABILITY(bank)) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (ABILITY(bank)) : SecondAbility_OfBank(bank); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_LEAFGUARD:
 				if (WEATHER_HAS_EFFECT && gBattleWeather & WEATHER_SUN_ANY && ITEM_EFFECT(bank) != ITEM_EFFECT_UTILITY_UMBRELLA)
 				{
@@ -1748,7 +1783,7 @@ void atkFF2A_trysetparalysis(void)
 					gBattlescriptCurrInstr = BattleScript_ProtectedByAbility;
 					return;
 				}
-		}
+		} }
 	}
 
 	if (fail)
@@ -1793,7 +1828,7 @@ void atkFF2B_trysetburn(void)
 		gBattleStringLoader = gText_TargetAlreadyHasStatusCondition; //String not in official games; officially "But it failed!"
 		fail = TRUE;
 	}
-	else if (ABILITY(gBankAttacker) != ABILITY_INFILTRATOR && BankSideHasSafeguard(bank))
+	else if (!BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR) && BankSideHasSafeguard(bank))
 	{
 		gBattleStringLoader = gText_TeamProtectedBySafeguard;
 		fail = TRUE;
@@ -1803,13 +1838,13 @@ void atkFF2B_trysetburn(void)
 		gBattleStringLoader = gText_TargetWrappedInMistyTerrain;
 		fail = TRUE;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && ABILITY(bank) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && BankHasAbility(bank, ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = bank;
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
 		return;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && ABILITY(PARTNER(bank)) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && BankHasAbility(PARTNER(bank), ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = PARTNER(bank);
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
@@ -1818,7 +1853,7 @@ void atkFF2B_trysetburn(void)
 
 	if (!fail)
 	{
-		switch (ABILITY(bank)) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (ABILITY(bank)) : SecondAbility_OfBank(bank); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_LEAFGUARD:
 				if (WEATHER_HAS_EFFECT && gBattleWeather & WEATHER_SUN_ANY && ITEM_EFFECT(bank) != ITEM_EFFECT_UTILITY_UMBRELLA)
 				{
@@ -1840,7 +1875,7 @@ void atkFF2B_trysetburn(void)
 					return;
 				}
 				break;
-		}
+		} }
 	}
 
 	if (fail)
@@ -1893,7 +1928,7 @@ void atkFF2C_trysetpoison(void)
 		gBattleStringLoader = gText_TargetAlreadyHasStatusCondition; //String not in official games; officially "But it failed!"
 		fail = TRUE;
 	}
-	else if (ABILITY(gBankAttacker) != ABILITY_INFILTRATOR && BankSideHasSafeguard(bank))
+	else if (!BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR) && BankSideHasSafeguard(bank))
 	{
 		gBattleStringLoader = gText_TeamProtectedBySafeguard;
 		fail = TRUE;
@@ -1903,7 +1938,7 @@ void atkFF2C_trysetpoison(void)
 		gBattleStringLoader = gText_TargetWrappedInMistyTerrain;
 		fail = TRUE;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && ABILITY(bank) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && BankHasAbility(bank, ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = bank;
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
@@ -1915,7 +1950,7 @@ void atkFF2C_trysetpoison(void)
 		gBattlescriptCurrInstr = BattleScript_ProtectedByAbility; //Official SwSh string and not "protected by Pastel Veil"
 		return;
 	}
-	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && ABILITY(PARTNER(bank)) == ABILITY_FLOWERVEIL)
+	else if (IsOfType(bank, TYPE_GRASS) && IS_DOUBLE_BATTLE && BankHasAbility(PARTNER(bank), ABILITY_FLOWERVEIL))
 	{
 		gBattleScripting.bank = PARTNER(bank);
 		gBattlescriptCurrInstr = BattleScript_TeamProtectedByFlowerVeil;
@@ -1930,7 +1965,7 @@ void atkFF2C_trysetpoison(void)
 
 	if (!fail)
 	{
-		switch (ABILITY(bank)) {
+		for (u8 abP2 = 0; abP2 < 2; ++abP2) { /*[hack] 2026-10-20 2 つ目の特性（第2段）*/ u16 abPv = abP2 == 0 ? (ABILITY(bank)) : SecondAbility_OfBank(bank); if (abP2 != 0 && abPv == ABILITY_NONE) break; switch (abPv) {
 			case ABILITY_LEAFGUARD:
 				if (WEATHER_HAS_EFFECT && gBattleWeather & WEATHER_SUN_ANY && ITEM_EFFECT(bank) != ITEM_EFFECT_UTILITY_UMBRELLA)
 				{
@@ -1949,7 +1984,7 @@ void atkFF2C_trysetpoison(void)
 					gBattlescriptCurrInstr = BattleScript_ProtectedByAbility;
 					return;
 				}
-		}
+		} }
 	}
 
 	if (fail)
@@ -2044,7 +2079,7 @@ void atkFF34_canconfuse(void)
 		gBattleStringLoader = gText_TargetAlreadyConfused;
 		fail = TRUE;
 	}
-	else if (ABILITY(gBankAttacker) != ABILITY_INFILTRATOR && BankSideHasSafeguard(bank))
+	else if (!BankHasAbility(gBankAttacker, ABILITY_INFILTRATOR) && BankSideHasSafeguard(bank))
 	{
 		gBattleStringLoader = gText_TeamProtectedBySafeguard;
 		fail = TRUE;
@@ -2221,7 +2256,7 @@ void atkFF38_tryteatimeeatberry(void)
 				gBattleCommunication[MULTISTRING_CHOOSER] = 1; //Protected itself
 				gBattlescriptCurrInstr = T1_READ_PTR(gBattlescriptCurrInstr + 1);
 			}
-			else if (BATTLER_SEMI_INVULNERABLE(bank) && ABILITY(gBankAttacker) != ABILITY_NOGUARD && ABILITY(bank) != ABILITY_NOGUARD)
+			else if (BATTLER_SEMI_INVULNERABLE(bank) && !BankHasAbility(gBankAttacker, ABILITY_NOGUARD) && !BankHasAbility(bank, ABILITY_NOGUARD))
 			{
 				gBattlescriptCurrInstr -= 1;
 			}

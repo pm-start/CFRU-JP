@@ -19,6 +19,9 @@
 #include "../include/new/new_bs_commands.h"
 #include "../include/new/switching.h"
 bool8 HackAI_PreferTerastal(u8 bankAtk, u8 bankDef); //[hack] patches/0121・src/ai_hack.c
+void HackAI_ChooseGimmicks(struct ChooseMoveStruct* moveInfo, u8 chosenMoveId, u16 chosenMove); //[hack] patches/0631・src/ai_hack.c
+#include "hack_dummy_battle.h" //[hack] patches/0602 ポケセン 3F のダミー
+#include "hack_oak_phone.h"
 
 /*
 battle_controller_opponent.c
@@ -26,6 +29,8 @@ battle_controller_opponent.c
 */
 
 //TODO: Update Acupressure Targeting for AI
+
+void HackAI_NoteMoveChosen(u8 bank, u16 move); //[hack] patches/0436 src/hack_difficulty.c
 
 //This file's functions:
 static void TryRechoosePartnerMove(u16 chosenMove);
@@ -39,6 +44,14 @@ void OpponentHandleChooseMove(void)
 	#ifdef VAR_GAME_DIFFICULTY
 	u8 difficulty = VarGet(VAR_GAME_DIFFICULTY);
 	#endif
+
+	if (HackDummy_Active()) //[hack] patches/0602 ポケセン 3F のダミーは何もしない（「はねる」だけ・わるあがきにもならない）
+	{
+		HackDummy_KeepSplash(gActiveBattler);
+		EmitMoveChosen(1, 0, gActiveBattler, 0, 0, 0, FALSE, FALSE);
+		OpponentBufferExecCompleted();
+		return;
+	}
 
 	if ((gBattleTypeFlags & (BATTLE_TYPE_TRAINER | BATTLE_TYPE_OAK_TUTORIAL | BATTLE_TYPE_SAFARI | BATTLE_TYPE_ROAMER))
 	#ifdef FLAG_SMART_WILD
@@ -98,51 +111,13 @@ void OpponentHandleChooseMove(void)
 					}
 				}
 
-				//You get 1 of 3 of the following gimmicks per Pokemon
-				if (moveInfo->possibleZMoves[chosenMoveId]) //Checked first b/c Rayquaza can do all 3
-				{
-					if (ShouldAIUseZMove(gActiveBattler, gBankTarget, moveInfo->moves[chosenMoveId]))
-						gNewBS->zMoveData.toBeUsed[gActiveBattler] = TRUE;
-				}
-				else if (moveInfo->canMegaEvolve)
-				{
-					if (!ShouldAIDelayMegaEvolution(gActiveBattler, gBankTarget, chosenMove))
-					{
-						if (moveInfo->megaVariance != MEGA_VARIANT_ULTRA_BURST)
-							gNewBS->megaData.chosen[gActiveBattler] = TRUE;
-						else if (moveInfo->megaVariance == MEGA_VARIANT_ULTRA_BURST)
-							gNewBS->ultraData.chosen[gActiveBattler] = TRUE;
-					}
-				}
-				else if (moveInfo->possibleMaxMoves[chosenMoveId] && moveInfo->canterastal) //Handles the "Can I Dynamax" checks
-				{
-					if (ShouldAIDynamax(gActiveBattler, gBankTarget))
-					{
-						if (ShouldAITerastal(gActiveBattler, gBankTarget) && HackAI_PreferTerastal(gActiveBattler, gBankTarget)) //[hack] patches/0121 素は 50% の乱数
-							gNewBS->terastalData.chosen[gActiveBattler] = TRUE;
-						else
-							gNewBS->dynamaxData.toBeUsed[gActiveBattler] = TRUE;
-					}
-					else if (ShouldAITerastal(gActiveBattler, gBankTarget))
-					{
-						gNewBS->terastalData.chosen[gActiveBattler] = TRUE;
-					}
-				}
-				else if (moveInfo->possibleMaxMoves[chosenMoveId]) //Handles the "Can I Dynamax" checks
-				{
-					if (ShouldAIDynamax(gActiveBattler, gBankTarget))
-						gNewBS->dynamaxData.toBeUsed[gActiveBattler] = TRUE;
-				}
-				else if (moveInfo->canterastal)
-				{
-					if (ShouldAITerastal(gActiveBattler, gBankTarget))
-						gNewBS->terastalData.chosen[gActiveBattler] = TRUE;
-				}
+				HackAI_ChooseGimmicks(moveInfo, chosenMoveId, chosenMove); //[hack] patches/0631 ここにあったメガ・Z・ダイマ・テラの判定を src/ai_hack.c に切り出した（バトルパレスも使う）
 
 				//This is handled again later, but it's only here to help with the case of choosing Helping Hand when the partner is switching out.
 				gBattleStruct->chosenMovePositions[gActiveBattler] = chosenMoveId;
 				gBattleStruct->moveTarget[gActiveBattler] = gBankTarget;
 				gChosenMovesByBanks[gActiveBattler] = chosenMove;
+				HackAI_NoteMoveChosen(gActiveBattler, chosenMove); //[hack] patches/0436 まもる系・能力アップ系・同じ技の連発の回数（むずかしい以下のふつうのトレーナー戦だけ）
 				TryRemovePartnerDoublesKillingScoreComplete(gActiveBattler, gBankTarget, chosenMove, moveTarget, TRUE); //Allow the partner to choose a new target if its best move was this target
 
 				EmitMoveChosen(1, chosenMoveId, gBankTarget, gNewBS->megaData.chosen[gActiveBattler], gNewBS->ultraData.chosen[gActiveBattler], gNewBS->zMoveData.toBeUsed[gActiveBattler], gNewBS->dynamaxData.toBeUsed[gActiveBattler], gNewBS->terastalData.chosen[gActiveBattler]);
@@ -375,6 +350,9 @@ static u8 LoadCorrectTrainerPicId(void)
 {
 	u8 trainerPicId;
 	u8 position = GetBattlerPosition(gActiveBattler);
+
+	if (FlagGet(HACK_FLAG_OAK_PIC))
+		return TRAINER_PIC_PROF_OAK;
 
 	if (gTrainerBattleOpponent_A == TRAINER_SECRET_BASE)
 	{

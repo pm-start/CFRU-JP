@@ -24,11 +24,39 @@ extern struct SaveSection gSaveDataBuffer;
 #define SAVE_BLOCK_PARASITE 0x0203B0E8
 #define PARASITE_SIZE 0xEC4
 
+#include "hack_save_crypt.h" //[hack] 2026-10-21 改造の検出
+#include "hack_tamper.h"
 #include "hack_box_shelf.h" //[hack] patches/0195 ボックスの仮想化（棚・区画 10〜29）
 #ifdef HACK_BOX_PROTO //試験のビルドだけ: 区画を書く処理を包んで電源断をまねる（tools/boxvirt/shelf_test.py）
 u8 BoxShelf_TryWriteSector(u8 sector, u8 *data);
 #define TryWriteSector BoxShelf_TryWriteSector
 #endif
+void HoennFrontierRec_OnLoad(void);        //[hack] src/hoenn_frontier_rec.c（レベル49・100 の記録）
+void HoennFrontierRec_AfterSave(bool8 ok);
+void EggBox_OnLoad(void);                  //[hack] src/hack_egg_box.c（卵専用ボックス・FEAT-save16-B4）
+void EggBox_AfterSave(bool8 ok);
+void ReliveBox_OnLoad(void);               //[hack] src/hack_relive_box.c（リライブボックス・patches/0975）
+void ReliveBox_AfterSave(bool8 ok);
+void Pokeblock_OnLoad(void);                 //[hack] src/hack_pokeblock.c（ポロックケース・patches/0978）
+void Pokeblock_AfterSave(bool8 ok);
+void HackCondition_OnLoad(void);               //[hack] src/hack_condition.c（コンディション 6 値の表・patches/0978）
+void HackCondition_AfterSave(bool8 ok);
+void Winner_OnLoad(void);                  //[hack] src/hack_contest_winner.c（コンテストの優勝者の記録・patches/0985 S6）
+void Winner_AfterSave(bool8 ok);
+void HackStatPool_OnLoad(void);                 //[hack] src/hack_stat_pool.c（上の桁の表・patches/0760）
+void HackStatPool_AfterSave(bool8 ok);
+void HackStatPool_ReportBegin(void);
+void HackMoveCount_OnLoad(void);                 //[hack] src/hack_move_count.c（技進化の使用回数の表・patches/0878）
+void HackMoveCount_AfterSave(bool8 ok);
+void HackRibbon_OnLoad(void);                      //[hack] src/hack_ribbon.c（リボンの表・patches/0977）
+void HackRibbon_AfterSave(bool8 ok);
+u8* HackJohto_FlagPtr(u16 id);                    //[hack] src/hack_johto_save.c（ジョウトの旗・変数の窓・patches/0986）
+u16* HackJohto_VarPtr(u16 id);
+u8* HackJohto_Flag2Ptr(u16 id);                           //[hack] FEAT-johto-p1 旗 0x1B00〜0x1CFF
+void HackJohtoVar_OnLoad(void);
+void HackJohtoVar_AfterSave(bool8 ok);
+void HackJohtoVar_NewGame(void);
+u16* HoennFrontierRec_VarPtr(u16 id);
 
 // old 0x080DA23C table changes
 const struct SaveSectionOffsets gSaveSectionOffsets[] =
@@ -189,10 +217,11 @@ u8 HandleLoadSector(unusedArg u16 a1, const struct SaveBlockChunk* location)
 	u16 id;
 	u16 sector = NUM_SECTORS_PER_SAVE_SLOT * (gSaveCounter % 2);
 	bool8 checksumStatus = FALSE;
+	bool8 tampered = FALSE; //[hack] 2026-10-21 改造の検出（区画ごとの MAC・src/hack_tamper.c）
 
 	for (u8 i = 0; i < NUM_SECTORS_PER_SAVE_SLOT; ++i)
 	{
-		DoReadFlashWholeSection(i + sector, gFastSaveSection);
+		HackSaveCrypt_ReadFlashChecked(i + sector, gFastSaveSection); //[hack] 2026-10-21 DoReadFlashWholeSection と同じ読みに 改造の検出がつく
 
 		id = gFastSaveSection->id;
 		if (id == 0)
@@ -202,6 +231,8 @@ u8 HandleLoadSector(unusedArg u16 a1, const struct SaveBlockChunk* location)
 		if (IsValidFileSignature(gFastSaveSection->signature)
 		&&  gFastSaveSection->checksum == checksum)
 		{
+			if (HackSaveCrypt_IsTampered(gFastSaveSection)) //[hack] 読んだ区画（署名と checksum が合ったもの）だけ数える。印は読んだあと もう見ない
+				tampered = TRUE;
 			Memcpy(location[id].data, gFastSaveSection->data, location[id].size);
 			LoadParasite();
 			checksumStatus = TRUE;
@@ -210,7 +241,21 @@ u8 HandleLoadSector(unusedArg u16 a1, const struct SaveBlockChunk* location)
 
 	//Start of the game don't load jibberish into block
 	if (checksumStatus)
+	{
 		BoxShelf_OnLoad(); //[hack] patches/0195 棚（ページ 0・ボックス・もとの区画 30／31 の中身）。区画 30・31 はもう直に読まない
+		if (tampered || BoxShelf_TamperSeen()) //[hack] 2026-10-21 棚の旗・変数が読み込まれたあとで印を付ける（止めない・消さない）
+			HackTamper_Mark(HACK_TAMPER_REASON_SAVE_MAC);
+	}
+	HoennFrontierRec_OnLoad(); //[hack] レベル49・100 の記録の RAM の写しを捨てる（src/hoenn_frontier_rec.c）
+	EggBox_OnLoad(); //[hack] 卵専用ボックス: 読んだセーブの「正の区画」を覚える（src/hack_egg_box.c）
+	ReliveBox_OnLoad(); //[hack] patches/0975 リライブボックス: 同じ（空なら何も書かない）
+	Pokeblock_OnLoad(); //[hack] patches/0978 ポロックケース: 同じ
+	HackCondition_OnLoad(); //[hack] patches/0978 コンディションの表: 同じ
+	Winner_OnLoad(); //[hack] patches/0985 コンテストの優勝者の記録: 同じ（記録が無ければ何も書かない）
+	HackStatPool_OnLoad(); //[hack] patches/0760 上の桁の表: 読んだセーブの「正の区画」を覚える（空なら何も書かない）
+	HackMoveCount_OnLoad(); //[hack] patches/0878 技進化の使用回数の表: 同じ
+	HackRibbon_OnLoad(); //[hack] patches/0977 リボンの表: 同じ
+	HackJohtoVar_OnLoad(); //[hack] patches/0986 ジョウトの変数の窓: RAM の写しを捨てる（src/hack_johto_save.c）
 
 	return 1;
 }
@@ -403,12 +448,24 @@ u8 HandleWriteSector(u16 chunkId, const struct SaveBlockChunk* location)
 // If chunkId is 0xFFFF, this function will write all of the chunks pointed to by 'chunks'.
 // Otherwise, it will write a single chunk with the given 'chunkId'.
 void HackSaveVersion_OnSave(void); //[hack] patches/0265 src/hack_save_version.c
+struct HackPc3fSave; void HackPc3f_SaveBegin(struct HackPc3fSave* b); void HackPc3f_SaveEnd(const struct HackPc3fSave* b); //[hack] patches/0602 3F のセーブは 入ってきた階段へすり替えて書く（src/hack_dummy_battle.c）
+#include "hack_dummy_battle.h"
+#include "hack_session_key.h" //[hack] patches/0627
+void HackRamCheat_OnSave(void); //[hack] patches/0682 src/hack_ram_cheat.c
 u8 SaveWriteToFlash(u16 chunkId, const struct SaveBlockChunk *chunks)
 {
     u32 retVal;
     u16 i;
+	struct HackPc3fSave pc3f;
 
     gFastSaveSection = &gSaveDataBuffer;
+	if (chunkId == 0xFFFF)
+		HackRamCheat_OnSave(); //[hack] patches/0682 RAM チート検出（セーブの機会・鍵を戻す前＝RAM の中の姿を見る・通常版だけ。止めない）
+	struct HackKeySave keySave; //[hack] patches/0627 お金・コインの鍵は書く間だけ 0 に（書かれるバイトは今までと同じ・src/hack_session_key.c）
+	if (chunkId == 0xFFFF)
+		HackStatPool_ReportBegin(); //[hack] patches/0760 上の桁の表: 満杯に近ければ持ち主のいない件を掃除（SaveBlock1 の状態が確定する前に・鍵を外す前）
+	HackKey_SaveBegin(&keySave);
+	HackPc3f_SaveBegin(&pc3f); //[hack] patches/0602
 	HackSaveVersion_OnSave(); //[hack] patches/0265 最後にレポートを書いた版（src/hack_save_version.c）
 
     if (chunkId != 0xFFFF)  // write single chunk
@@ -438,14 +495,37 @@ u8 SaveWriteToFlash(u16 chunkId, const struct SaveBlockChunk *chunks)
             gSaveCounter = gPrevSaveCounter;
         }
 		BoxShelf_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0195 書き終えた対応表を「今」に
+		if (retVal == SAVE_STATUS_OK && gSaveCounter > 0 && HackSaveCrypt_SlotLegacy(NUM_SECTORS_PER_SAVE_SLOT * ((gSaveCounter - 1) % 2))) //[hack] 2026-10-21 控えの組（前のレポート）が 署名のない前の版のままなら、新しい中身を counter − 1 で 署名つきで書く（控えの順序は変わらない・最初のレポートだけ）
+		{
+			gSaveCounter--;
+			for (i = 0; i < NUM_SECTORS_PER_SAVE_SLOT; i++)
+				HandleWriteSector(i, chunks);
+			gSaveCounter++;
+		}
+		HoennFrontierRec_AfterSave(retVal == SAVE_STATUS_OK); //[hack] レベル49・100 の記録を追加のセーブ領域へ（src/hoenn_frontier_rec.c）
+		EggBox_AfterSave(retVal == SAVE_STATUS_OK); //[hack] 卵専用ボックス: 書き終えた sel を「正」に（src/hack_egg_box.c）
+		ReliveBox_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0975 リライブボックス: 同じ
+		Pokeblock_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0978 ポロックケース: 同じ
+		HackCondition_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0978 コンディションの表: 同じ
+		Winner_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0985 コンテストの優勝者の記録: 同じ
+		HackStatPool_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0760 上の桁の表: 同じ
+		HackMoveCount_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0878 技進化の使用回数の表: 同じ
+		HackRibbon_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0977 リボンの表: 同じ
+		HackJohtoVar_AfterSave(retVal == SAVE_STATUS_OK); //[hack] patches/0986 ジョウトの変数の窓: 変えた写しを正でない区画へ（src/hack_johto_save.c）
     }
 
+	HackPc3f_SaveEnd(&pc3f); //[hack] patches/0602 書き終えたら元の位置へ
+	HackKey_SaveEnd(&keySave); //[hack] patches/0627 鍵を元へ
     return retVal;
 }
+
+struct Pokemon* HoennFacility_SaveBegin(void); //[hack] patches/0683 src/hoenn_tower.c 施設の中のレポートは元の手持ちで書く
+void HoennFacility_SaveEnd(struct Pokemon* team);
 
 u8 HandleSavingData(u8 saveType)
 {
 	u32* backupPtr = gMain.vblankCounter1;
+	struct Pokemon* pyramidTeam = HoennFacility_SaveBegin(); //[hack] patches/0683
 	gMain.vblankCounter1 = NULL;
 	UpdateSaveAddresses();
 	#ifdef VAR_LAST_SAVE
@@ -491,6 +571,7 @@ u8 HandleSavingData(u8 saveType)
 			break;
 		}
 	};
+	HoennFacility_SaveEnd(pyramidTeam); //[hack] patches/0683
 	gMain.vblankCounter1 = backupPtr;
 	return 0;
 }
@@ -513,12 +594,15 @@ u8 SaveDataAfterLinkTrade(void)
 
 void HackDifficulty_SetNewGameDefault(void); //[hack] patches/0146 src/hack_difficulty.c
 void HackSaveVersion_NewGame(void); //[hack] patches/0265 src/hack_save_version.c
+void HackContest_Reset(void); //[hack] patches/0985 src/hack_contest.c
 void NewGameWipeNewSaveData(void)
 {
 	Memset((void*) SAVE_BLOCK_PARASITE, 0, 0x2EA4);
 	BoxShelf_NewGame(); //[hack] patches/0195 棚は空から
 	HackDifficulty_SetNewGameDefault(); //[hack] patches/0146 はじめからは なんいど やさしい
 	HackSaveVersion_NewGame(); //[hack] patches/0265 はじめからを始めた版（src/hack_save_version.c）
+	HackContest_Reset(); //[hack] patches/0985 はじめから: コンテストの状態の語を NULL に
+	HackJohtoVar_NewGame(); //[hack] patches/0986 ジョウトの変数の窓の写しを捨てる
 }
 
 static void Task_SaveErrorStatus_RunPrinter(unusedArg u8 taskId)
@@ -557,6 +641,10 @@ u8* GetExpandedFlagPointer(u16 id)
 	#ifdef SAVE_BLOCK_EXPANSION
 		if (id >= 0x900 && id < 0x1900)
 			return &gExpandedFlags[(id - 0x900) / 8];
+		else if (id >= 0x1900 && id <= 0x1AFF)
+			return HackJohto_FlagPtr(id); //[hack] patches/0986 ジョウトの旗の窓（0x1900〜0x1AFF＝SaveBlock1 +0x3A94〜・トレーナー 1792〜2047 と一般）
+		else if (id >= 0x1B00 && id <= 0x1CFF)
+			return HackJohto_Flag2Ptr(id); //[hack] FEAT-johto-p1 ジョウトの旗の窓 2（0x1B00〜0x1CFF＝追加の区画の中・変数と同じ書き込み・使えない環境は NULL）
 		else if (id >= 0x4000)
 			return NULL;
 		else if (id >= 0x1900)
@@ -577,7 +665,12 @@ u16* GetExpandedVarPointer(u16 id)
 {
 	#ifdef SAVE_BLOCK_EXPANSION
 		if (id >= 0x5000 && id < 0x5200)
-			return &gExpandedVars[id - 0x5000];
+		{
+			u16* moved = (id >= 0x5100 && id <= 0x51ED) ? HoennFrontierRec_VarPtr(id) : NULL; //[hack] フロンティアの変数は追加のセーブ領域の入れ物へ（src/hoenn_frontier_rec.c）
+			return moved != NULL ? moved : &gExpandedVars[id - 0x5000];
+		}
+		else if (id >= 0x5200 && id < 0x5300)
+			return HackJohto_VarPtr(id); //[hack] patches/0986 ジョウトの変数の窓（追加のセーブ領域・使えない環境は (u16*) 1＝0）
 		else if (id >= VARS_START + 0x100 && id < SPECIAL_VARS_START)
 			return (u16*) 1; //Indicates to return NULL
 		else

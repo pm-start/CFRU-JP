@@ -147,3 +147,18 @@ int HackVs_GetRematchTrainerId(u16 trainerId)
 	TryGetRematchTrainerIdGivenGameState(gHackRematches[i].trainerIdxs, &j);
 	return gHackRematches[i].trainerIdxs[j];
 }
+
+//[hack] patches/0352 src/overworld.c の BattleSetup_ConfigureTrainerBattle（話しかけた 1 人の戦い・型 0／2）から（2026-10-12）。
+//素の FR は人の台本ごとに「trainerbattle → ShouldTryRematchBattle → trainerbattle_rematch」の枝を持つが、エメラルドから移したホウエン・シンオウの人の
+//台本には無い＝バトルサーチャーで印が立っても再戦にならなかった（ユーザー報告 2026-10-12・ふつうの戦ったあとの文で終わる）。
+//表の素の 221 行目より後ろ（ホウエン・シンオウ・tools/rom/build_vs_seeker.py が足した行）の人で、倒したことがあり、その localId の印が立っていれば
+//TRUE＝呼び元が型を再戦にする（カントーの人は台本の枝のまま＝ここでは見ない）
+#define HACK_VANILLA_REMATCH_ROWS 221
+bool8 HackVs_TryRematch(u16 opponent)
+{
+	if (HackVs_GetRematchIdx(gHackRematches, opponent) < HACK_VANILLA_REMATCH_ROWS)    //-1（表に無い）もここで落ちる
+		return FALSE;
+	if (!HasTrainerBeenFought(opponent))
+		return FALSE;
+	return IsThisTrainerRematchable(gSpecialVar_LastTalked);
+}

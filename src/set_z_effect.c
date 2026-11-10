@@ -1,5 +1,7 @@
+#include "hack_move_alias.h"
 #include "defines.h"
 #include "defines_battle.h"
+#include "shadow_moves.h" //[hack] patches/0963 段 E ダークの間はメガ・Z 不可
 #include "../include/constants/items.h"
 
 #include "../include/new/battle_util.h"
@@ -67,7 +69,7 @@ static const struct SpecialZMove sSpecialZMoveTable[] =
 //★ Champions（patches/0070） Z パワーで能力が 1 つ変わったときの演出と文章。あまのじゃくなら「さがった」
 static void ZStatChangeScript(u8 statId)
 {
-	bool8 down = ABILITY(gBankAttacker) == ABILITY_CONTRARY;
+	bool8 down = BankHasAbility(gBankAttacker, ABILITY_CONTRARY);
 
 	gBattleScripting.animArg1 = (down ? 0x15 : 0xE) + statId; //STAT_ANIM_MINUS1 / STAT_ANIM_PLUS1 の 1 つ手前
 	gBattleScripting.animArg2 = 0;
@@ -103,8 +105,8 @@ void SetZEffect(void)
 
 		case Z_EFFECT_ALL_STATS_UP_1: //★ Champions（patches/0070） あまのじゃくは下がる・たんじゅんは 2 段階（ユーザー判断）
 		{
-			s8 step = (ABILITY(gBankAttacker) == ABILITY_SIMPLE) ? 2 : 1;
-			bool8 contrary = ABILITY(gBankAttacker) == ABILITY_CONTRARY;
+			s8 step = (BankHasAbility(gBankAttacker, ABILITY_SIMPLE)) ? 2 : 1;
+			bool8 contrary = BankHasAbility(gBankAttacker, ABILITY_CONTRARY);
 			bool8 changed = FALSE;
 
 			for (i = 0; i < STAT_ACC-1; ++i) //Doesn't change Acc or Evsn
@@ -210,8 +212,11 @@ move_t GetTypeBasedZMove(u16 move, u8 bank)
 {
 	u8 moveType = gBattleMoves[move].type;
 
-	if (move == MOVE_WEATHERBALL || move == MOVE_AURAWHEEL || move == MOVE_TERRAINPULSE)
+	if (MoveIs(move, MOVE_WEATHERBALL) || move == MOVE_AURAWHEEL || move == MOVE_TERRAINPULSE)
 		moveType = GetMoveTypeSpecial(bank, move);
+
+	if (moveType > TYPE_FAIRY) //[hack] patches/0408 #110: ステラ（0x18）・リル（0x19）の Z 技は無い。下の式だと Z 技の表の外（別の技）を引くので、ノーマル系にする
+		moveType = TYPE_NORMAL;
 
 	if (moveType < TYPE_FIRE)
 		return MOVE_BREAKNECK_BLITZ_P + (moveType * 2) + CalcMoveSplit(bank, move, bank);
@@ -278,6 +283,9 @@ bool8 DoesZMoveUsageStopDynamaxing(u8 bank)
 move_t CanUseZMove(u8 bank, u8 moveIndex, u16 move)
 {
 	if (IS_TRANSFORMED(bank))
+		return MOVE_NONE;
+
+	if (Shadow_IsBattlerDark(bank)) //[hack] patches/0963 段 E ダークの間は Z 技を使えない
 		return MOVE_NONE;
 
 	if (move == MOVE_NONE)

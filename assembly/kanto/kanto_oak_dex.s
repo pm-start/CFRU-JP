@@ -23,7 +23,7 @@
 .equ VAR_STARTER_MON, 0x4031           @ 0 フシギダネ / 1 ゼニガメ / 2 ヒトカゲ（pokefirered vars.h）
 .equ FLAG_SYS_DEXNAV, 0x91E            @ CFRU src/config.h
 .equ MUS_OBTAIN_KEY_ITEM, 318          @ pokefirered include/constants/songs.h
-.equ TEXT_COLOR_MALE, 0                @ NPC_TEXT_COLOR_MALE（オーキド）
+.equ TEXT_COLOR_FEMALE, 1              @ NPC_TEXT_COLOR_FEMALE（モモカ博士・2026-10-16 男の青 0 から女のピンクへ）
 .equ TEXT_COLOR_NEUTRAL, 3
 .equ ITEM_VENUSAURITE, 0x215           @ include/constants/items.h
 .equ ITEM_CHARIZARDITE_X, 0x216
@@ -33,7 +33,7 @@
 .align 2
 .global KantoOakLab_EventScript_DexExtras
 KantoOakLab_EventScript_DexExtras:
-	textcolor TEXT_COLOR_MALE
+	textcolor TEXT_COLOR_FEMALE
 	msgbox gText_KantoOak_DexNav MSG_KEEPOPEN
 	textcolor TEXT_COLOR_NEUTRAL
 	fanfare MUS_OBTAIN_KEY_ITEM
@@ -41,8 +41,9 @@ KantoOakLab_EventScript_DexExtras:
 	waitmsg
 	waitfanfare
 	setflag FLAG_SYS_DEXNAV
+	textcolor TEXT_COLOR_FEMALE
 	msgbox gText_KantoOak_ExplainDexNav MSG_KEEPOPEN
-	textcolor TEXT_COLOR_MALE
+	textcolor TEXT_COLOR_FEMALE
 	msgbox gText_KantoOak_MegaStone MSG_KEEPOPEN
 	compare VAR_STARTER_MON 0
 	if 0x1 _call KantoOakLab_EventScript_GiveVenusaurite     @ 0x1 = equal

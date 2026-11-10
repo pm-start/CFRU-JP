@@ -1,6 +1,9 @@
+#include "../lv200_custom_move_ai.h"
 #include "../defines.h"
+#include "../lv200_custom_move_ai.h"
 #include "../defines_battle.h"
 #include "../hack_difficulty.h"
+#include "../hack_delta.h" //[hack] patches/0962
 #include "../../include/random.h"
 #include "../../include/constants/items.h"
 #include "../../include/constants/item_effects.h"
@@ -309,6 +312,7 @@ void BattleAI_SetupAIData(u8 defaultScoreMoves)
 
 u32 HackDifficulty_AIFlags(u32 flags); //[hack] patches/0132 src/hack_difficulty.c
 
+bool8 HackHeroine_Active(void); //[hack] patches/0865 #76 src/hack_heroine.c
 u32 GetAIFlags(void)
 {
 	u32 flags;
@@ -327,8 +331,15 @@ u32 GetAIFlags(void)
 		flags = GetAIFlagsInBattleFrontier(gActiveBattler);
 	else if (gBattleTypeFlags & (BATTLE_TYPE_EREADER_TRAINER | BATTLE_TYPE_TRAINER_TOWER) && gTrainerBattleOpponent_A != TRAINER_SECRET_BASE)
 		flags = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_CHECK_GOOD_MOVE;
+	else if (SIDE(gActiveBattler) == B_SIDE_PLAYER && gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && HackHeroine_Active()) //[hack] patches/0865 #76 連れ歩きの相方（B_POSITION_PLAYER_RIGHT）はフロンティアと同じ最大の AI（レイドの助っ人と同じ・patches/0665）
+		flags = GetAIFlagsInBattleFrontier(gActiveBattler);
 	else if (IsRaidBattle())
-		flags = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_CHECK_GOOD_MOVE; //Make partner smart
+	{
+		if (SIDE(gActiveBattler) == B_SIDE_PLAYER) //[hack] patches/0665 FEAT-raid-partner: 助っ人（相方）だけフロンティアと同じ最大の AI（patches/0120）。レイドの相手は今までどおり
+			flags = GetAIFlagsInBattleFrontier(gActiveBattler);
+		else
+			flags = AI_SCRIPT_CHECK_BAD_MOVE | AI_SCRIPT_CHECK_GOOD_MOVE; //Make partner smart
+	}
 	else if (gBattleTypeFlags & BATTLE_TYPE_SCRIPTED_WILD_2) //No idea how these two work
 		flags = AI_SCRIPT_CHECK_BAD_MOVE;
 	else if (gBattleTypeFlags & BATTLE_TYPE_LEGENDARY_FRLG)
@@ -420,8 +431,8 @@ void TryTempMegaEvolveBank(u8 bank, struct BattlePokemon* backupMon, u16* backup
 		}
 		else
 		{
-			gBattleMons[bank].type1 = gBaseStats[mon->species].type1;
-			gBattleMons[bank].type2 = gBaseStats[mon->species].type2;
+			gBattleMons[bank].type1 = HackDelta_Type(mon, mon->species, 0, gBaseStats[mon->species].type1); //[hack] patches/0962 デルタ種
+			gBattleMons[bank].type2 = HackDelta_Type(mon, mon->species, 1, gBaseStats[mon->species].type2);
 		}
 	}
 	else
@@ -443,21 +454,34 @@ void TryRevertTempMegaEvolveBank(u8 bank, struct BattlePokemon* backupMon, u16* 
 	}
 }
 
+bool8 HackAI_MoveBanned(u8 bank, u16 move); //[hack] patches/0436 src/hack_difficulty.c
+bool8 HackAI_MobNoSwitch(u8 bank); //[hack] patches/0435 src/hack_difficulty.c
+
 static u8 FindBestLegalMoves(u8 bankAtk, u8 bankDef, const u8* scores, u8* indices)
 {
     u8 count = 0, bestScore = 0;
     u8 limitations = CheckMoveLimitations(bankAtk, 0, AdjustMoveLimitationFlagsForAI(bankAtk, bankDef));
-    for (u8 i = 0; i < MAX_MON_MOVES; ++i)
+    //[hack] patches/0436 1 回目は「まもる系・能力アップ系・同じ技の連発」の回数の上限に当たった技を外す。外すと 1 つも残らないときは 2 回目で外さずに選ぶ（今までどおり）
+    for (u8 pass = 0; pass < 2; ++pass)
     {
-        if (gBattleMons[bankAtk].moves[i] == MOVE_NONE || (limitations & gBitTable[i]))
-            continue;
-        if (count == 0 || scores[i] > bestScore)
+        count = 0;
+        bestScore = 0;
+        for (u8 i = 0; i < MAX_MON_MOVES; ++i)
         {
-            bestScore = scores[i];
-            count = 0;
+            if (gBattleMons[bankAtk].moves[i] == MOVE_NONE || (limitations & gBitTable[i]))
+                continue;
+            if (pass == 0 && HackAI_MoveBanned(bankAtk, gBattleMons[bankAtk].moves[i]))
+                continue;
+            if (count == 0 || scores[i] > bestScore)
+            {
+                bestScore = scores[i];
+                count = 0;
+            }
+            if (scores[i] == bestScore)
+                indices[count++] = i;
         }
-        if (scores[i] == bestScore)
-            indices[count++] = i;
+        if (count != 0)
+            break;
     }
     return count;
 }
@@ -788,11 +812,14 @@ extern bool8 HoennArena_IsActive(void); //★ src/hoenn_arena.c（patches/0096�
 
 bool8 HackAI_ShouldUseHealItem(u8 bank, u16 healAmount); //[hack] patches/0121・src/ai_hack.c
 bool8 HackAI_ShouldSwitchStatsDropped(void);
+bool8 HackAI_ShouldSwitchYartie(void); //[hack] patches/0819 ロジックアリーナのロンジャの交代（src/ai_hack.c）
 s8 HackAI_SecondAbilitySwitchBonus(struct Pokemon* mon);
 
 static bool8 ShouldSwitch(void)
 {
 	if (gNewBS->ai.switchingCooldown[gActiveBattler])
+		return FALSE;
+	if (HackAI_MobNoSwitch(gActiveBattler)) //[hack] patches/0435 モブのトレーナーは AI が自分から入れ替えない（下の交代の判定は全部ここを通る・ひんしの次の子は別の道）
 		return FALSE;
 	u8 battlerIn1, battlerIn2;
 	u8 firstId, lastId;
@@ -837,6 +864,8 @@ static bool8 ShouldSwitch(void)
 
 	if (availableToSwitch == 0)
 		return FALSE;
+	if (HackAI_ShouldSwitchYartie()) //[hack] patches/0819
+		return TRUE;
 	if (ShouldSwitchIfOnlyBadMovesLeft())
 		return TRUE;
 	if (ShouldSwitchIfPerishSong())
@@ -1475,7 +1504,7 @@ static bool8 IsYawned(void)
 			if (SIDE(i) != activeSide)
 			{
 				if (gBattleMons[i].status2 & STATUS2_WRAPPED
-				&& ABILITY(i) != ABILITY_MAGICGUARD //Taking trap damage
+				&& !BankHasAbility(i, ABILITY_MAGICGUARD) //Taking trap damage
 				&& gBattleStruct->wrappedBy[i] == gActiveBattler)
 					return FALSE;
 			}
@@ -1498,7 +1527,7 @@ static bool8 IsYawned(void)
 		|| MoveEffectInMoveset(EFFECT_SNORE, gActiveBattler)
 		|| MoveEffectInMoveset(EFFECT_SLEEP_TALK, gActiveBattler)
 		|| (CheckGrounding(gActiveBattler)
-		 && (MoveInMoveset(MOVE_ELECTRICTERRAIN, gActiveBattler) || MoveInMoveset(MOVE_MISTYTERRAIN, gActiveBattler))))
+		 && (AIMoveInMoveset(MOVE_ELECTRICTERRAIN, gActiveBattler) || AIMoveInMoveset(MOVE_MISTYTERRAIN, gActiveBattler))))
 			return FALSE;
 
 		//Check if can do major damage instead of switching
@@ -1507,8 +1536,8 @@ static bool8 IsYawned(void)
 			u16 foePrediction = IsValidMovePrediction(foe1, gActiveBattler);
 
 			if (!IsPredictedToSwitch(foe1, gActiveBattler) //Enemy isn't going to switch
-			&&  gBattleMoves[foePrediction].effect != EFFECT_PROTECT //Enemy isn't going to protect
-			&& (gBattleMoves[foePrediction].effect != EFFECT_SEMI_INVULNERABLE || !MoveWouldHitFirst(foePrediction, foe1, gActiveBattler))) //Enemy isn't going to dodge attack first with Fly etc.
+			&&  gBattleMoves[Lv200MoveAIBase(foePrediction)].effect != EFFECT_PROTECT //Enemy isn't going to protect
+			&& (gBattleMoves[Lv200MoveAIBase(foePrediction)].effect != EFFECT_SEMI_INVULNERABLE || !MoveWouldHitFirst(foePrediction, foe1, gActiveBattler))) //Enemy isn't going to dodge attack first with Fly etc.
 			{
 				if (!MoveWouldHitFirst(foePrediction, foe2, gActiveBattler)) //AI goes first
 				{
@@ -1542,6 +1571,7 @@ static bool8 IsYawned(void)
 static bool8 IsTakingAnnoyingSecondaryDamage(void)
 {
 	if (GetPredictedAIAbility(gActiveBattler, FOE(gActiveBattler)) != ABILITY_MAGICGUARD
+	&& SecondAbility_OfBank(gActiveBattler) != ABILITY_MAGICGUARD //[hack] 2026-10-22 2 つ目
 	&& !CanKillAFoe(gActiveBattler)
 	&& !IsDynamaxed(gActiveBattler)
 	&& AIFlagsHaveStrategy(AI_THINKING_STRUCT->aiFlags)) //Has smart AI
@@ -1725,7 +1755,7 @@ static bool8 ShouldSwitchIfWonderGuard(void)
 			if (SPLIT(move) != SPLIT_STATUS)
 			{
 				u16 atkAbility = GetAIAbility(bankAtk, bankDef, move);
-				if (atkAbility == ABILITY_MOLDBREAKER
+				if ((atkAbility == ABILITY_MOLDBREAKER || SecondAbility_OfBank(bankAtk) == ABILITY_MOLDBREAKER)
 				||  atkAbility == ABILITY_TERAVOLT
 				||  atkAbility == ABILITY_TURBOBLAZE)
 					return FALSE;
@@ -1736,7 +1766,7 @@ static bool8 ShouldSwitchIfWonderGuard(void)
 			}
 			else if (!MoveBlockedBySubstitute(move, bankAtk, bankDef))
 			{
-				switch (gBattleMoves[move].effect) {
+				switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 					case EFFECT_SLEEP:
 					case EFFECT_YAWN:
 						if (CanBePutToSleep(bankDef, bankAtk, TRUE))
@@ -1780,7 +1810,7 @@ static bool8 ShouldSwitchIfWonderGuard(void)
 							return FALSE;
 						break;
 					case EFFECT_SPIKES:
-						switch (move) {
+						switch (Lv200MoveAIBase(move)) {
 							case MOVE_STEALTHROCK:
 								if (gSideTimers[SIDE(bankDef)].srAmount == 0)
 									return FALSE;
@@ -1822,7 +1852,7 @@ static bool8 ShouldSwitchIfWonderGuard(void)
 							return FALSE;
 						break;
 					case EFFECT_TRICK:
-						if (move == MOVE_TRICK)
+						if (Lv200MoveAIBase(move) == MOVE_TRICK)
 						{
 							u8 atkSpecies = SPECIES(bankAtk);
 							u8 defSpecies = SPECIES(bankDef);
@@ -1854,12 +1884,12 @@ static bool8 ShouldSwitchIfWonderGuard(void)
 							return FALSE;
 						break;
 					case EFFECT_SKILL_SWAP:
-						if (move != MOVE_SKILLSWAP)
+						if (Lv200MoveAIBase(move) != MOVE_SKILLSWAP)
 							return FALSE;
 						break;
 
 					case EFFECT_TYPE_CHANGES:
-						switch (move) {
+						switch (Lv200MoveAIBase(move)) {
 							case MOVE_TRICKORTREAT:
 								if (!IsOfType(bankDef, TYPE_GHOST))
 									return FALSE;
@@ -1871,7 +1901,7 @@ static bool8 ShouldSwitchIfWonderGuard(void)
 						}
 						break;
 					case EFFECT_TEAM_EFFECTS:
-						switch (move) {
+						switch (Lv200MoveAIBase(move)) {
 							case MOVE_TAILWIND:
 								if (gNewBS->TailwindTimers[SIDE(bankAtk)] == 0)
 									return FALSE;
@@ -2102,7 +2132,9 @@ u8 CalcMostSuitableMonToSwitchInto(void)
 
 						if (ability == ABILITY_MOXIE
 						||  ability == ABILITY_SOULHEART
-						||  ability == ABILITY_BEASTBOOST)
+						||  ability == ABILITY_BEASTBOOST
+						||  SecondAbility_OfMonActive(&party[i]) == ABILITY_MOXIE //[hack] 2026-10-20 2 つ目
+						||  SecondAbility_OfMonActive(&party[i]) == ABILITY_BEASTBOOST)
 							scores[i] += SWITCHING_INCREASE_REVENGE_KILL;
 						else
 						{
@@ -2110,7 +2142,7 @@ u8 CalcMostSuitableMonToSwitchInto(void)
 							{
 								move = GetMonData(&party[i], MON_DATA_MOVE1 + k, 0);
 
-								if (gBattleMoves[move].effect == EFFECT_RAPID_SPIN //Includes Defog
+								if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_RAPID_SPIN //Includes Defog
 								&&  gSideStatuses[SIDE(gActiveBattler)] & SIDE_STATUS_SPIKES)
 								{
 									if (IS_SINGLE_BATTLE) //Single Battle
@@ -2145,7 +2177,7 @@ u8 CalcMostSuitableMonToSwitchInto(void)
 						{
 							move = GetMonData(&party[i], MON_DATA_MOVE1 + k, 0);
 
-							if (gBattleMoves[move].effect == EFFECT_RAPID_SPIN //Includes Defog
+							if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_RAPID_SPIN //Includes Defog
 							&&  gSideStatuses[SIDE(gActiveBattler)] & SIDE_STATUS_SPIKES)
 							{
 								if (!IS_DOUBLE_BATTLE) //Single Battle
@@ -2687,6 +2719,8 @@ static u8 GetAI_ItemType(u16 itemId, const u8 *itemEffect) //Fixed from vanilla
         return AI_ITEM_NOT_RECOGNIZABLE;
 }
 
+bool8 HackRocketBall_Try(u8 bank); //[hack] patches/0914 src/hack_rocket_ball.c
+
 static bool8 ShouldAIUseItem(void)
 {
 	u32 i;
@@ -2695,6 +2729,14 @@ static bool8 ShouldAIUseItem(void)
 	
 	if (SIDE(gActiveBattler) == B_SIDE_PLAYER)
 		return FALSE;
+
+	if (HackRocketBall_Try(gActiveBattler)) //[hack] patches/0914 ロケットボール: 台本は BattleScript_AIUseGuardSpec の頭で専用に分かれる
+	{
+		EmitTwoReturnValues(1, ACTION_USE_ITEM, 0);
+		gBattleStruct->chosenItem[gActiveBattler & BIT_FLANK] = ITEM_GUARD_SPEC;
+		gBattleStruct->AI_itemType[gActiveBattler & BIT_FLANK] = AI_ITEM_GUARD_SPECS;
+		return TRUE;
+	}
 
 	struct Pokemon* party;
 	u8 firstId, lastId;

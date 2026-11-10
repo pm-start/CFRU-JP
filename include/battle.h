@@ -12,6 +12,7 @@
 #include "battle_ai_switch_items.h"
 #include "battle_gfx_sfx_util.h"
 #include "link.h"
+#include "new/lv200_custom_moves_state.h"
 
 /*
     Banks are a name given to what could be called a 'battlerId' or 'monControllerId'.
@@ -940,6 +941,8 @@ struct NewBattleStruct
 	u16 failedThrownPokeBall;
 	u32 maxGoldrushMoney;
 	u16 itemBackup[PARTY_SIZE];
+	u32 itemBackupPid[PARTY_SIZE]; //[hack] 戦いの前の手持ちの PID（src/hack_item_restore.c・使いきった持ち物を戻すとき並びが変わっても別の子へ戻さない）
+	u8 consumedItemMask; //[hack] 戻す持ち物が使われた子（itemBackup の添字の bit）
 	u8 hiddenHealthboxFlags[MAX_SPRITES / 8]; //~2017AD8
 	u8 ringChallengeBannedTypes[3];
 	u16 knockedOffWildItem;
@@ -1058,6 +1061,108 @@ struct NewBattleStruct
 	u8 hackAffectionUsed; //[hack] patches/0240 この戦いで技を出した自分の手持ち（番号のビット）
 	u8 hackCreeperIceTurns[MAX_BATTLERS_COUNT]; //[hack] patches/0333 くりーぱーアイス: 場ごとの ターンの数（5 で爆発）
 	u8 hackCreeperIceMon[MAX_BATTLERS_COUNT]; //[hack] patches/0333 その数を数えている手持ちの番号 + 1（別の子が出たら 0 から）
+	u8 hackMashActive; //[hack] patches/0423 A 連打を数えるタスクが動いている（1）／いない（0）
+	u8 hackMashCount; //[hack] patches/0423 その間に押した A の回数（10 で頭打ち・判定のあと 0 に戻す）
+	u8 hackSecondAbilityIgnored; //[hack] 2026-10-20 かたやぶり系に無視されている間の 2 つ目の特性（バンクのビット・src/second_ability.c）
+	u8 hackSecondPendCase; //[hack] 2026-10-22 接触系の特性で 1 つ目が出たあと 2 つ目を出す順番待ち（AbilityBattleEffects の caseID + 1・0 は待ちなし・src/second_ability.c）
+	u8 hackSecondPendBank; //[hack] その特性の持ち主
+	u8 hackSecondPendAct; //[hack] 同 gCurrentTurnActionNumber
+	u16 hackSecondPendMove; //[hack] 同 gCurrentMove
+	#ifdef HACK_DEBUG_MENU
+	u8 hackCatchInfoLastMult; //[hack] patches/0425 デバッグ版だけ: GetBaseBallCatchOdds が最後に使ったボールの補正値（10 が 1 倍）
+	u8 hackCatchInfoSprite[2]; //[hack] patches/0425 捕獲情報の窓のスプライト番号 + 1（0 は無し）
+	u8 hackCatchInfoTimer; //[hack] patches/0425 計算し直す間隔のコマ数
+	u32 hackCatchInfoSig; //[hack] patches/0425 最後に描いた内容の印（変わったときだけ描き直す）
+	#endif
+	struct HackAiMoveLog //[hack] patches/0436 相手の AI が選んだ技の数（相手側の手持ちの位置ごと・戦闘の間だけ・src/hack_difficulty.c）
+	{
+		u16 repeatMove;      //いま続けて選んでいる攻撃技（0 = なし）
+		u16 prevRepeatMove;  //1 つ前のターンの選び直し（ダブルの選び直し）に戻すための控え
+		u16 lastNoted;       //このターンに数えた技（同じターンの選び直しで数え直す）
+		u8 repeatCount;      //続けて選んだ回数
+		u8 prevRepeatCount;
+		u8 protectUsed;      //まもる系を選んだ回数
+		u8 boostUsed;        //能力アップ系を選んだ回数
+		u8 notedTurn;        //数えたターン + 1（0 = まだ）
+		u8 lastKind;         //数えた技の種類（1 = まもる系・2 = 能力アップ系）
+	} hackAiLog[PARTY_SIZE];
+	/* patches/0593: 独自技190件の戦闘中状態。既存欄のoffsetを保つため末尾。 */
+	struct Lv200CustomMovesAState lv200CustomMovesA;
+	struct Lv200CustomMovesBState lv200CustomMovesB;
+	struct Lv200CustomCommonState lv200CustomCommon; //P3 共通部品の効果キュー
+	u8 hackGibleSwitchLock; //[hack] patches/0791 このターンもう判断した／メガシンカしたバンクのビット（ターンの終わりで 0・src/hack_gible_switch.c）
+	u8 hackGibleDone; //[hack] patches/0792 このターン2回目を使ったバンクのビット（ターンの終わりで 0・src/hack_gible_ai.c）
+	u16 hackGibleHpStart[MAX_BATTLERS_COUNT]; //[hack] patches/0792 ターン始めのHP
+	u8 hackGibleSwitched; //[hack] patches/0793 このターン姿を切り替えたバンクのビット（ターンの終わりで 0）
+	u8 hackGibleSecondBank; //[hack] patches/0793 2 回目の前の切り替え判断を予約したバンク + 1（0 = なし）
+	u16 hackGibleSecondMove; //[hack] patches/0793 その 2 回目の技
+	/* patches/0641 (#142): 技を選ぶ画面で 2 タイプの技の 2 つのタイプを交互に出す状態（既存欄のoffsetを保つため末尾・src/move_menu.c）。 */
+	u16 hackDualKey;   //前に出した技 + 1（技が変わったら 1 つ目に戻す）
+	u8 hackDualPhase;  //0 = 1 つ目のタイプ・1 = 2 つ目のタイプ
+	u8 hackDualTimer;  //交互までのフレーム数
+	/* patches/0796: 戦闘中のレベルの上位 8 ビット（BM_LEVEL・既存欄のoffsetを保つため末尾・src/hack_bm_level.c）。BattlePokemon の中に置くと素の機械語が書き潰す。戦闘の始めに 0 埋め・MAX_LEVEL ≦ 254 のあいだ常に 0 */
+	u8 hackLevelHi[MAX_BATTLERS_COUNT];
+	/* patches/0860: 戦闘中の進化（src/hack_mid_battle_evo.c・Redmine #91）。戦闘中の RAM だけ（セーブに入らない）。後ろに足したので既存の欄の位置は動かない */
+	struct
+	{
+		bool8 active;
+		u8 cancelledParty;
+		u8 battler;
+		u8 savedTerrain;
+		u8 savedCommunication[BATTLE_COMMUNICATION_ENTRIES_COUNT];
+		u16 originalMoves[MAX_MON_MOVES];
+	} midBattleEvolution;
+	/* patches/0864: 技進化（独自）段 1（src/hack_move_evo.c）。既存欄の offset を保つため末尾の 1 か所。#91 の midBattleEvolution も末尾に足すので、つなぐときは両方残す。 */
+	u8 hackMoveEvoSlot[MAX_BATTLERS_COUNT]; //保留中の技の枠 + 1（0 = なし）
+	u8 hackMoveEvoEntry[MAX_BATTLERS_COUNT]; //その表の行 + 1
+	u8 hackMoveEvoRolled; //このターン抽選したバンクのビット（ターンの終わりで 0）
+	/* patches/0878: 技進化の使用回数（src/hack_move_evo.c・hack_move_count.c）。手持ちの何番目かごとの RAM の写し。戦闘の終わり（EndOfBattleThings）に dirty の分だけ表へ書く。末尾に足す（#91 の midBattleEvolution と両方残す） */
+	struct HackMoveEvoCount
+	{
+		u32 monId;
+		u16 move[4];
+		u8 count[4];
+		u8 loaded; //1 = 表から読んだ（見つからなければ空）・2 = 使えない環境（数えない）
+		u8 dirty;
+		u8 mastery; //patches/0932 下位 4 ビット = move[] の欄ごとの「じゅくれん」（構造体は 20 バイトのまま＝詰め物の 1 バイトを使う）
+	} hackMoveEvoCount[PARTY_SIZE];
+	u8 hackMsMode[4]; //[hack] patches/0930 技を選ぶ画面の枠ごとのカーソルの状態（0 なし・1 選択・2 入れ替えでつかんだ技・3 入れ替え先・src/move_menu.c）
+	u8 hackRocketUses; //[hack] patches/0914 ロケットボール: この戦いでロケット団が投げた回数（4 で打ち止め・src/hack_rocket_ball.c・末尾に足したので既存の欄の位置は動かない）
+	u16 hackMasteryMove[MAX_BATTLERS_COUNT]; //[hack] patches/0932 技の熟練度: 段が上がった技（ターンの終わりのお知らせ待ち・0 = なし）
+	u8 hackMasteryLv[MAX_BATTLERS_COUNT]; //その新しい段（0 = なし）
+	/* 縛り F わざガチャ（src/hack_chf_rotgacha.c）: 戦闘のあいだだけ。子ごとの元の技・PP と引いた 4 つの技。戦闘のあと手持ちを元に戻す控え（末尾に足したので既存の欄の位置は動かない・セーブに入らない） */
+	struct HackChfGachaEntry
+	{
+		u32 pid;                       //手持ちの子の性格値（戦闘中に並びが入れ替わるので 性格値で探す）
+		u16 realMoves[MAX_MON_MOVES];  //元の技
+		u8 realPP[MAX_MON_MOVES];      //元の PP
+		u8 realBonus;                  //元の PP ポイントアップ
+		u8 used;                       //1 = この欄を使っている
+		u16 gachaMoves[MAX_MON_MOVES]; //引いた 4 つの技
+		u8 gachaPP[MAX_MON_MOVES];     //その PP（出るときに控える）
+	} hackChfGacha[PARTY_SIZE];
+	u8 hackChfGachaOn;                 //1 = この戦いはわざガチャ
+	u8 hackAuraRevealed;               //[hack] patches/0956 オーラ（src/hack_aura.c）: 登場の演出を出した相手の手持ちの番号のビット（この戦闘で 1 回）
+	u8* hackAuraRevealBuf[2];          //登場・ひんしのときの絵の写し（右の相手の分・戦闘の終わりに解放）
+	u8 shadowHalfNext;                 //[hack] patches/0955 段 D: ダークハーフが次に見る戦闘位置（0〜3）
+	/* ダーク技の組み立て（段 E・patches/0963・src/shadow_battle.c）: 戦闘のあいだだけ。子ごとの元の技・PP の控えと今の並びの由来（セーブに入らない・末尾に足したので既存の欄の位置は動かない） */
+	struct HackShadowViewEntry
+	{
+		u32 pid;                       //子の性格値（戦闘中に並びが入れ替わるので 性格値と陣営で探す）
+		u16 own[MAX_MON_MOVES];        //手持ちの技（元の技）
+		u8 realPP[MAX_MON_MOVES];      //元の技の PP（元の枠の順）
+		u8 realBonus;                  //元の PP ポイントアップ
+		u16 view[MAX_MON_MOVES];       //今の並び
+		u8 src[MAX_MON_MOVES];         //その由来（0〜3 元の枠・0xFF ダーク技・0xFE 空き）
+		u8 side;                       //陣営
+		u8 used;                       //1 = この欄を使っている
+	} hackShadowView[PARTY_SIZE * 2];
+	u8 hackShadowSent;                 //プレイヤー側で この戦闘にもう場に出た手持ちの番号（ビット・ゲージは 1 戦闘に 1 回だけ減る）
+	u8 snatchPartyCount;               //[hack] patches/0961 スナッチボール: 捕まえる前の手持ちの数（箱へ送ったか見る）
+	u8 snatchActive;                   //[hack] patches/0961 スナッチボールで捕まえている最中（1）。ジングルの hook が戦闘 BGM を続きから鳴らすために見る
+	u16 snatchJingleWait;              //[hack] patches/0961 ジングルを待っているコマ数（0＝待っていない）
+	u8 hackDeltaRoost;                 //[hack] patches/0962 はねやすめ中の「元ひこうのデルタ種」のバンクのビット（そのターンの終わりまで地面に着く・末尾に足したので既存の欄の位置は動かない）
+	u8 hackSafariPkblCounter;          //[hack] patches/0978 ホウエンのサファリ: この戦いでポロックをなげた回数（3 で打ち止め・原文 safariPkblThrowCounter の別枠＝素のえさカウンタ +0x7A は CFRU の AI が見るので触らない・src/hack_safari_pokeblock.c・末尾に足したので既存の欄の位置は動かない）
 };
 
 extern struct NewBattleStruct* gNewBS; //0x203E038

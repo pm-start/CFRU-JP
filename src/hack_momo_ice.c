@@ -1,7 +1,13 @@
 #include "defines.h"
+#include "hack_delta.h" //[hack] patches/0962
+#include "hack_base_stats_wide.h" //[hack] patches/0678 種族値の u16 の窓口
+#include "hack_stat_calc.h" //[hack] patches/0678
+#include "../include/main.h" //gMain.vblankCounter2（2026-11-03 perf-region-2）
 #include "../include/pokemon.h"
 #include "../include/constants/items.h"
 #include "../include/constants/species.h"
+#include "hack_iv_over100.h" //[hack] patches/0591 #128
+#include "hack_kind.h" //[hack] patches/0964 ダークは交換に出せない
 
 /*
 hack_momo_ice.c
@@ -86,11 +92,10 @@ static bool8 MaxHPMatchesItem(struct Pokemon* mon)
 	if (species == SPECIES_SHEDINJA)
 		return TRUE;
 	#endif
-	iv = (mon->hyperTraining & gBitTable[STAT_HP]) ? 31 : mon->hpIV;
+	iv = (mon->hyperTraining & gBitTable[STAT_HP]) ? HACK_IV_MAX : mon->hpIV; //[hack] patches/0677
 	level = mon->level;
-	maxHP = (((2 * gBaseStats[species].baseHP + iv + mon->hpEv / 4) * level) / 100) + level + 10;
-	if (maxHP > 0xFFFF)
-		maxHP = 0xFFFF;
+	iv = HackIv_Effective(iv, level); //[hack] patches/0591 #128 CalculateMonStatsNew と同じ実効の個体値（違うと毎コマ計算し直しになる）
+	maxHP = HackStat_MaxHp(2 * HackNushi_Base(mon, HackBaseStat(species, STAT_HP)), iv, mon->hpEv, level); //[hack] patches/0678 CalculateMonStatsNew と同じ式・patches/0962 ヌシは HP の種族値も ×11/10（外すと毎コマ計算し直しになる）
 	return mon->maxHP == HackMomoIce_MaxHP(mon, species, maxHP);
 }
 
@@ -110,13 +115,32 @@ void HackMomoIce_RefreshParty(void)
 	}
 }
 
+//フィールドの毎コマ（overworld_speedup.c）: 1 コマに 1 匹だけ見る（2026-11-03 perf-region-2）。全員を毎コマ見ると約 640 サイクル（1 匹 約 100）・
+//1 匹なら約 110。手持ちは 8 コマで一巡する（GetMonData ではなく欄を直接読む MaxHPMatchesItem なので 1 匹の判定は RefreshParty と同じ）。
+//ももアイスを持たせた／外したのはバッグ・手持ちの画面で、野外に戻ってから反映まで最大 8 コマ（0.13 秒）。ステータス画面は
+//今までどおり HackMomoIce_RefreshParty で全員（bw_summary_screen.c）
+void HackMomoIce_RefreshPartyTick(void)
+{
+	u32 counter = gMain.vblankCounter2;
+	u32 slot = (counter + (counter >> 3)) & 7;   //割り算（ソフトの除算）を避ける。処理落ちで呼びが 2 コマおき・4 コマおきでも かたよらない（8 コマごとに 1 ずつずらす＝全部の枠に回る・状態は持たない＝6.13）・6 と 7 は休み
+	struct Pokemon* mon;
+
+	if (slot >= PARTY_SIZE)
+		return;
+	mon = &gPlayerParty[slot];
+	if (mon->species == SPECIES_NONE)
+		return;
+	if (!MaxHPMatchesItem(mon))
+		CalculateMonStats(mon);
+}
+
 /* ---- 交換に出せない（2026-10-09 ユーザー「ももアイスをトレード不可アイテムに」→「持たせた子を交換に出せない」・
  * 通信交換・ミラクル交換・ゲームの中の人との交換）---- */
 
 //通信交換: 素の CanTradeSelectedMon（0804F1E4）の入口（assembly/hack_momo_ice/momo_ice_hooks.s）から。TRUE なら交換に出せない
 bool8 HackMomoIce_TradeBlocked(struct Pokemon* party, u32 idx)
 {
-	return idx < PARTY_SIZE && HackMomoIce_Held(&party[idx]);
+	return idx < PARTY_SIZE && (HackMomoIce_Held(&party[idx]) || HackKind_IsTradeRefused((struct BoxPokemon*) &party[idx]));   //[hack] patches/0964 ダークも出せない（段 I）
 }
 
 //ゲームの中の人との交換: 素の GetTradeSpecies（special 0xFF・080535F0）の置き換え（routinepointers 08163464）。
@@ -125,7 +149,7 @@ u16 HackMomoIce_GetTradeSpecies(void)
 {
 	struct Pokemon* mon = &gPlayerParty[*(u16*) 0x02036FF6];   //gSpecialVar_0x8005
 
-	if (GetMonData(mon, MON_DATA_IS_EGG, NULL) || HackMomoIce_Held(mon))
+	if (GetMonData(mon, MON_DATA_IS_EGG, NULL) || HackMomoIce_Held(mon) || HackKind_IsTradeRefused((struct BoxPokemon*) mon))   //[hack] patches/0964 ダークも出せない（段 I）
 		return SPECIES_NONE;
 	return GetMonData(mon, MON_DATA_SPECIES, NULL);
 }

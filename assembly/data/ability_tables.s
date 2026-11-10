@@ -65,6 +65,13 @@ gRolePlayBannedAbilities:
 .hword ABILITY_TERASHELL
 .hword ABILITY_TERAFORMZERO
 .hword ABILITY_DRAGONARMOR @ [hack] 2026-10-03 りゅうのよろい（1 匹だけの特性・写させない）
+.hword ABILITY_REITONOOU @ [hack] 2026-10-23 れーとのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GEKIKOU @ [hack] 2026-10-25 げきこう（1 匹だけの特性・写させない）
+.hword ABILITY_HOMURANOAGO @ [hack] 2026-10-25 ほむらのあご（1 匹だけの特性・写させない）
+.hword ABILITY_HAKUANOOU @ [hack] 2026-10-25 はくあのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GENSHINOUZU @ [hack] 2026-11-02 ゲンシのうず（1 匹だけの特性・写させない）
+.hword ABILITY_YOROIPLATE @ [hack] 2026-11-08 よろいプレート（カセキメラ専用の特性・写させない）
+.hword ABILITY_KOORINOUROKO @ [hack] 2026-11-08 こおりのうろこ（カセキメラ専用の特性・写させない）
 .hword ABILITY_TABLES_TERMIN
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -125,6 +132,13 @@ gSkillSwapBannedAbilities:
 .hword ABILITY_TERASHELL
 .hword ABILITY_TERAFORMZERO
 .hword ABILITY_DRAGONARMOR @ [hack] 2026-10-03 りゅうのよろい（1 匹だけの特性・写させない）
+.hword ABILITY_REITONOOU @ [hack] 2026-10-23 れーとのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GEKIKOU @ [hack] 2026-10-25 げきこう（1 匹だけの特性・写させない）
+.hword ABILITY_HOMURANOAGO @ [hack] 2026-10-25 ほむらのあご（1 匹だけの特性・写させない）
+.hword ABILITY_HAKUANOOU @ [hack] 2026-10-25 はくあのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GENSHINOUZU @ [hack] 2026-11-02 ゲンシのうず（1 匹だけの特性・写させない）
+.hword ABILITY_YOROIPLATE @ [hack] 2026-11-08 よろいプレート（カセキメラ専用の特性・写させない）
+.hword ABILITY_KOORINOUROKO @ [hack] 2026-11-08 こおりのうろこ（カセキメラ専用の特性・写させない）
 .hword ABILITY_TABLES_TERMIN
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -212,6 +226,13 @@ gEntrainmentBannedAbilitiesAttacker:
 .hword ABILITY_TERASHELL
 .hword ABILITY_TERAFORMZERO
 .hword ABILITY_DRAGONARMOR @ [hack] 2026-10-03 りゅうのよろい（1 匹だけの特性・写させない）
+.hword ABILITY_REITONOOU @ [hack] 2026-10-23 れーとのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GEKIKOU @ [hack] 2026-10-25 げきこう（1 匹だけの特性・写させない）
+.hword ABILITY_HOMURANOAGO @ [hack] 2026-10-25 ほむらのあご（1 匹だけの特性・写させない）
+.hword ABILITY_HAKUANOOU @ [hack] 2026-10-25 はくあのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GENSHINOUZU @ [hack] 2026-11-02 ゲンシのうず（1 匹だけの特性・写させない）
+.hword ABILITY_YOROIPLATE @ [hack] 2026-11-08 よろいプレート（カセキメラ専用の特性・写させない）
+.hword ABILITY_KOORINOUROKO @ [hack] 2026-11-08 こおりのうろこ（カセキメラ専用の特性・写させない）
 .hword ABILITY_TABLES_TERMIN
 
 gSimpleBeamBannedAbilities:
@@ -237,6 +258,13 @@ gEntrainmentBannedAbilitiesTarget:
 .hword ABILITY_ZEROTOHERO
 .hword ABILITY_TERASHIFT
 .hword ABILITY_DRAGONARMOR @ [hack] 2026-10-03 りゅうのよろい（1 匹だけの特性・写させない）
+.hword ABILITY_REITONOOU @ [hack] 2026-10-23 れーとのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GEKIKOU @ [hack] 2026-10-25 げきこう（1 匹だけの特性・写させない）
+.hword ABILITY_HOMURANOAGO @ [hack] 2026-10-25 ほむらのあご（1 匹だけの特性・写させない）
+.hword ABILITY_HAKUANOOU @ [hack] 2026-10-25 はくあのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GENSHINOUZU @ [hack] 2026-11-02 ゲンシのうず（1 匹だけの特性・写させない）
+.hword ABILITY_YOROIPLATE @ [hack] 2026-11-08 よろいプレート（カセキメラ専用の特性・写させない）
+.hword ABILITY_KOORINOUROKO @ [hack] 2026-11-08 こおりのうろこ（カセキメラ専用の特性・写させない）
 .hword ABILITY_TABLES_TERMIN
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -282,6 +310,13 @@ gReceiverBannedAbilities:
 .hword ABILITY_TERASHELL
 .hword ABILITY_TERAFORMZERO
 .hword ABILITY_DRAGONARMOR @ [hack] 2026-10-03 りゅうのよろい（1 匹だけの特性・写させない）
+.hword ABILITY_REITONOOU @ [hack] 2026-10-23 れーとのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GEKIKOU @ [hack] 2026-10-25 げきこう（1 匹だけの特性・写させない）
+.hword ABILITY_HOMURANOAGO @ [hack] 2026-10-25 ほむらのあご（1 匹だけの特性・写させない）
+.hword ABILITY_HAKUANOOU @ [hack] 2026-10-25 はくあのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GENSHINOUZU @ [hack] 2026-11-02 ゲンシのうず（1 匹だけの特性・写させない）
+.hword ABILITY_YOROIPLATE @ [hack] 2026-11-08 よろいプレート（カセキメラ専用の特性・写させない）
+.hword ABILITY_KOORINOUROKO @ [hack] 2026-11-08 こおりのうろこ（カセキメラ専用の特性・写させない）
 .hword ABILITY_TABLES_TERMIN
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -326,6 +361,13 @@ gTraceBannedAbilities:
 .hword ABILITY_TERASHELL
 .hword ABILITY_TERAFORMZERO
 .hword ABILITY_DRAGONARMOR @ [hack] 2026-10-03 りゅうのよろい（1 匹だけの特性・写させない）
+.hword ABILITY_REITONOOU @ [hack] 2026-10-23 れーとのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GEKIKOU @ [hack] 2026-10-25 げきこう（1 匹だけの特性・写させない）
+.hword ABILITY_HOMURANOAGO @ [hack] 2026-10-25 ほむらのあご（1 匹だけの特性・写させない）
+.hword ABILITY_HAKUANOOU @ [hack] 2026-10-25 はくあのおう（1 匹だけの特性・写させない）
+.hword ABILITY_GENSHINOUZU @ [hack] 2026-11-02 ゲンシのうず（1 匹だけの特性・写させない）
+.hword ABILITY_YOROIPLATE @ [hack] 2026-11-08 よろいプレート（カセキメラ専用の特性・写させない）
+.hword ABILITY_KOORINOUROKO @ [hack] 2026-11-08 こおりのうろこ（カセキメラ専用の特性・写させない）
 .hword ABILITY_TABLES_TERMIN
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

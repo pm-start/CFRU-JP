@@ -1,5 +1,8 @@
 #include "defines.h"
 #include "defines_battle.h"
+#include "hack_xram_battle.h"
+#include "hack_aura.h" //[hack] patches/0956 オーラの後始末
+#include "lv200_custom_moves.h"
 #include "../include/event_data.h"
 #include "../include/field_weather.h"
 #include "../include/item_menu.h"
@@ -8,6 +11,7 @@
 #include "../include/malloc.h"
 #include "../include/random.h"
 #include "../include/constants/maps.h"
+#include "../include/constants/items.h" //[hack] patches/0617 ITEM_RIRU_LOVE
 #include "../include/constants/songs.h"
 #include "../include/constants/trainer_classes.h"
 
@@ -25,6 +29,12 @@
 #include "../include/new/multi.h"
 #include "../include/new/terastal.h"
 #include "hack_affection.h" //[hack] patches/0240 なつき度（src/hack_affection.c）
+#include "hack_challenge.h" //[hack] patches/0510 しばり
+#include "hack_dummy_battle.h" //[hack] patches/0602 ポケセン 3F のダミー
+#include "hack_chf_rotgacha.h" //[hack] 縛り F
+#include "shadow_battle.h" //[hack] patches/0963 段 E ダーク技の組み立て
+#include "hack_oak_phone.h"
+#include "hack_item_restore.h" //[hack] 使いきった持ち物を戦いのあと戻す
 /*
 end_battle.c
 	handles all battle termination logic and data resetting/saving
@@ -134,6 +144,7 @@ const u16 gEndBattleFlagClearTable[] =
 
 	FLAG_TAG_BATTLE,
 	FLAG_TWO_OPPONENTS,
+	HACK_FLAG_OAK_PIC,
 };
 
 //This file's functions:
@@ -250,6 +261,13 @@ void HandleEndTurn_BattleWon(void)
 void HandleEndTurn_BattleLost(void)
 {
 	gCurrentActionFuncId = 0;
+	if (HackDummy_Active()) //[hack] patches/0602 ポケセン 3F のダミー: 全滅しても「にげた」で終える（ぜんめつの文・所持金を半分にする処理・ワープが走らない）
+	{
+		gBattleOutcome = B_OUTCOME_RAN;
+		HandleEndTurn_RanFromBattle();
+		return;
+	}
+	HackChallenge_OnBattleLost(); //[hack] patches/0510 ぜんめつで戻されたときはポケセンに入ったと数えない（しばり）
 
 	if (gBattleTypeFlags & BATTLE_TYPE_LINK)
 	{
@@ -410,7 +428,9 @@ u8 IsRunningFromBattleImpossible(void)
 	gStringBank = gActiveBattler;
 	gBattleCommunication[MULTISTRING_CHOOSER] = 0;
 
-	if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER))
+	if (HackDummy_Active() && SIDE(gActiveBattler) == B_SIDE_PLAYER) //[hack] patches/0602 ポケセン 3F のダミーからは いつでも にげられる（にげる／R・特性やわざで とじこめられていても）
+		return FALSE;
+	else if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_FRONTIER))
 		return FALSE;
 	else if (RAID_BATTLE_END)
 		return FALSE;
@@ -441,7 +461,8 @@ u8 IsRunningFromBattleImpossible(void)
 	}
 
 	if ((gBattleMons[gActiveBattler].status2 & (STATUS2_ESCAPE_PREVENTION | STATUS2_WRAPPED))
-	|| (gStatuses3[gActiveBattler] & STATUS3_SKY_DROP_TARGET))
+	|| (gStatuses3[gActiveBattler] & STATUS3_SKY_DROP_TARGET)
+	|| !Lv200CustomMove_CanSwitch(gActiveBattler, TRUE)) //[hack] FIX-moves-P6 しんけんしょうぶ・まよいごのさそい（A のタイマー）でも にげられない（ゴーストは上で FALSE を返す）
 	{
 		gBattleCommunication[MULTISTRING_CHOOSER] = 0;
 		return TRUE;
@@ -482,7 +503,11 @@ bool8 TryRunFromBattle(u8 bank)
 	itemEffect = ITEM_EFFECT(bank);
 	gStringBank = bank;
 
-	if (AreAllKindsOfRunningPrevented())
+	if (HackDummy_Active() && SIDE(bank) == B_SIDE_PLAYER) //[hack] patches/0602 ポケセン 3F のダミーからは かならず にげきれる
+	{
+		++effect;
+	}
+	else if (AreAllKindsOfRunningPrevented())
 	{
 		return FALSE;
 	}
@@ -581,11 +606,25 @@ void BattleUseFunc_PokeDoll(u8 taskId)
 }
 
 void HackMomSavings_WildWin(void); //[hack] patches/0224
+void HackGymTier_OnBattleEnd(void); //[hack] patches/0470
+void HackBadgeReplay_OnBattleEnd(void); //[hack] patches/0594 バッジリセット後のストーリー再戦
+
+void HackBadgeSquash_Restore(void); //[hack] patches/0580 上限をこえた子の戻し（src/hack_battle_squash.c）
+void HackRocketBall_Restore(void); //[hack] patches/0914 ロケットボール: 奪われた子を戻す（src/hack_rocket_ball.c）
+void HackChallengeC_MonoRestore(void); //[hack] patches/0550 縛り C モノタイプ（src/hack_challenge_c.c）
+void HackMoveEvo_OnBattleEnd(void); //[hack] patches/0878 技進化の使用回数を表へ書く（src/hack_move_evo.c）
+void HackHeroine_AfterBattle(void); //[hack] patches/0875 #76 連れ歩き中のハルカ・ヒカリが戦闘のあと手持ちを回復（src/hack_heroine.c）
 
 void EndOfBattleThings(void)
 {
 	if (gNewBS != NULL) //Hasn't been cleared yet
 	{
+		ShadowBattle_OnBattleEnd(); //0963
+		HackChFGacha_OnBattleEnd(); //[hack] 縛り F わざガチャ: 手持ちの技が元のままの枠の PP・ポイントアップを戻す（全部の戻しの最初）
+		HackMoveEvo_OnBattleEnd(); //[hack] patches/0878 技進化の使用回数: 変わった分だけ表へ（gNewBS を捨てる前・勝ち／負け／逃げ／捕獲の全部がここを通る）
+		HackRocketBall_Restore(); //[hack] patches/0914 奪われた子を控えのまま戻す（ひんしでお別れ・BringBackTheDead・上限の戻しより前）
+		Lv200CustomMove_OnBattleEnd();
+		HackChallengeC_MonoRestore(); //[hack] patches/0550 出せないため ひんしにした子の HP を戻す（ひんしでお別れ＝縛り A の「外す」より前）
 		TryRestoreEnemyTeam();
 		NaturalCureHeal();
 		RestoreNonConsumableItems();
@@ -598,9 +637,18 @@ void EndOfBattleThings(void)
 		EndPartnerBattlePartyRestore();
 		EndSkyBattlePartyRestore();
 		RecalcAllStats();
+		HackBadgeSquash_Restore(); //[hack] patches/0580 戦闘のあいだだけ上限のレベルにした子を元のレベル・経験値に戻す（HP は割合・印が無ければ何もしない）
+		HackDummy_Rescue(); //[hack] patches/0602 ポケセン 3F のダミー: 自分の側が全滅していたら全回復（BringBackTheDead の前）
 		BringBackTheDead();
+		if (!HackDummy_Active()) //[hack] patches/0602 ポケセン 3F のダミーの戦いは 貯金・再戦の段階・なつき度・ひんしでお別れ の どれも動かさない
+		{
 		HackMomSavings_WildWin(); //[hack] patches/0224 野生に勝ったらお母さんの貯金（src/hack_mom_savings.c）
+		HackGymTier_OnBattleEnd(); //[hack] patches/0470 ジムリーダーの再戦に勝ったら段階 +1（src/hack_gym_tiers.c）
+	HackBadgeReplay_OnBattleEnd(); //[hack] patches/0594 勝った専用再戦をこの一周では選べなくする
 		HackAffection_BattleEnd(); //[hack] patches/0240 勝ったら技を出した子を 30% で なつき度 +2（src/hack_affection.c）
+		HackChallenge_BuryFainted(); //[hack] patches/0530 しばり「ひんしでお別れ」: ひんしの子を手持ちから外す（全員ならゲームオーバー）
+		HackHeroine_AfterBattle(); //[hack] patches/0875 #76 連れ歩き中のハルカ・ヒカリが回復（ひんしでお別れの外し方より後＝外した子は起きない・全滅・通信・施設は除く）
+		}
 		EndBattleFlagClear();
 		HealPokemonInFrontier();
 		gTerrainType = 0; //Reset now b/c normal reset is after BG is loaded
@@ -660,6 +708,8 @@ static void RestoreNonConsumableItems(void)
 	{
 		for (int i = 0; i < PARTY_SIZE; ++i)
 		{
+			if (items[i] == ITEM_NONE && gPlayerParty[i].item == ITEM_RIRU_LOVE) //[hack] patches/0617 戦闘中に捕まえた子（レイド）が持つ リルの あいじょうを「持ち物なし」に戻さない
+				continue;
 			if (frontierRestore
 			||  keepConsumables
 			||  items[i] == ITEM_NONE
@@ -674,6 +724,8 @@ static void RestoreNonConsumableItems(void)
 			}
 		}
 	}
+
+	HackItemRestore_Apply(); //[hack] 使いきった持ち物（きのみ以外）を野生戦でもトレーナー戦でも戻す（通信・施設・チューブは除く・src/hack_item_restore.c）
 }
 
 static void RevertDynamax(void)
@@ -757,7 +809,7 @@ static void EndPartnerBattlePartyRestore(void)
 	}
 }
 
-static void EndSkyBattlePartyRestore(void)
+static void EndSkyBattlePartyRestoreWithTeam(struct Pokemon* tempTeam)
 {
 	u32 i;
 	u8 counter = 0;
@@ -766,7 +818,6 @@ static void EndSkyBattlePartyRestore(void)
 	if (backup != NULL)
 	{
 		u8 newLeveledUpInBattle = 0;
-		struct Pokemon tempTeam[PARTY_SIZE] = {0};
 		bool8 slotFilled[PARTY_SIZE] = {FALSE};
 
 		for (i = 0; i < PARTY_SIZE; ++i)
@@ -799,10 +850,30 @@ static void EndSkyBattlePartyRestore(void)
 	}
 }
 
+/* 対応環境の通常経路へ、大きな配列のスタック枠を持ち込まない。 */
+static void __attribute__((noinline)) EndSkyBattlePartyRestoreLegacy(void)
+{
+	struct Pokemon tempTeam[PARTY_SIZE] = {0};
+	EndSkyBattlePartyRestoreWithTeam(tempTeam);
+}
+
+static void EndSkyBattlePartyRestore(void)
+{
+	struct Pokemon* tempTeam;
+	if (ExtensionState.skyBattlePartyBackup == NULL)
+		return;
+	tempTeam = HackXramBattle_TempTeam();
+	if (tempTeam != NULL)
+		EndSkyBattlePartyRestoreWithTeam(tempTeam);
+	else
+		EndSkyBattlePartyRestoreLegacy();
+}
+
 static void EndBattleFlagClear(void)
 {
 	u32 i;
 
+	HackPhone_OakOnBattleEnd();
 	for (i = 0; i < ARRAY_COUNT(gEndBattleFlagClearTable); ++i)
 		FlagClear(gEndBattleFlagClearTable[i]);
 
@@ -846,7 +917,9 @@ static void EndBattleFlagClear(void)
 	VarSet(VAR_BATTLE_TRANSITION_LOGO, 0);
 	#endif
 	gFishingByte = FALSE;
-	FREE_AND_SET_NULL(gNewBS);
+	HackAura_RestoreMixer(); //[hack] patches/0956 オーラの曲の音量・リバーブ・写しを戻す（gNewBS を解放する前）
+	HackXramBattle_Free(gNewBS);
+	gNewBS = NULL;
 
 	//Handle DexNav Chain
 	if (gDexNavStartedBattle

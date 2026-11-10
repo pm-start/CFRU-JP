@@ -50,6 +50,7 @@ extern const u16 Terastal_Trigger_DragonPal[];
 extern const u16 Terastal_Trigger_DarkPal[];
 extern const u16 Terastal_Trigger_FairyPal[];
 extern const u16 Terastal_Trigger_StellarPal[];
+extern const u16 Terastal_Trigger_RilPal[]; //[hack] patches/0408 #110
 extern const u8 Terastal_Indicator_NormalTiles[];
 extern const u8 Terastal_Indicator_FightingTiles[];
 extern const u8 Terastal_Indicator_FlyingTiles[];
@@ -69,6 +70,7 @@ extern const u8 Terastal_Indicator_DragonTiles[];
 extern const u8 Terastal_Indicator_DarkTiles[];
 extern const u8 Terastal_Indicator_FairyTiles[];
 extern const u8 Terastal_Indicator_StellarTiles[];
+extern const u8 Terastal_Indicator_RilTiles[]; //[hack] patches/0408 #110
 extern const u16 Terastal_Indicator_NormalPal[];
 extern const u16 Terastal_Indicator_FightingPal[];
 extern const u16 Terastal_Indicator_FlyingPal[];
@@ -88,10 +90,11 @@ extern const u16 Terastal_Indicator_DragonPal[];
 extern const u16 Terastal_Indicator_DarkPal[];
 extern const u16 Terastal_Indicator_FairyPal[];
 extern const u16 Terastal_Indicator_StellarPal[];
+extern const u16 Terastal_Indicator_RilPal[]; //[hack] patches/0408 #110
 extern const u8 Last_Ball_TriggerTiles[];
 extern const u16 Last_Ball_TriggerPal[];
 
-const u16* const Terastal_TriggerPals[] =
+const u16* const Terastal_TriggerPals[NUMBER_OF_MON_TYPES] = //[hack] patches/0408 #110: 長さを書く（6.79）
 {
 	Terastal_TriggerPal,
 	Terastal_Trigger_FightingPal,
@@ -118,6 +121,8 @@ const u16* const Terastal_TriggerPals[] =
 	Terastal_TriggerPal,
 	Terastal_Trigger_FairyPal,
 	Terastal_Trigger_StellarPal,
+	Terastal_Trigger_RilPal,
+	Terastal_Trigger_GhostPal, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）はゴーストの絵・色で穴埋め
 };
 
 static bool8 IsIgnoredTriggerColour(u16 colour);
@@ -126,6 +131,7 @@ static u16 ConvertColorToGrayscale(u16 colour);
 static u16 LightUpTriggerSymbol(u16 clra);
 static void SpriteCB_MegaTrigger(struct Sprite* self);
 static void SpriteCB_MegaIndicator(struct Sprite* self);
+bool8 BwCaughtMarkerActive(u8 battlerId); //[hack] patches/0664 src/bw_hpbar.c
 static void SpriteCB_ZTrigger(struct Sprite* self);
 static void SpriteCB_DynamaxTrigger(struct Sprite* self);
 static void SpriteCB_RaidShield(struct Sprite* sprite);
@@ -219,6 +225,8 @@ static const struct SpritePalette sTerastalTriggerPalette[NUMBER_OF_MON_TYPES] =
 	{Terastal_TriggerPal, GFX_TAG_TERASTAL_TRIGGER},
 	{Terastal_Trigger_FairyPal, GFX_TAG_TERASTAL_TRIGGER},
 	{Terastal_Trigger_StellarPal, GFX_TAG_TERASTAL_TRIGGER},
+	{Terastal_Trigger_RilPal, GFX_TAG_TERASTAL_TRIGGER}, //[hack] patches/0408 #110
+	{Terastal_Trigger_GhostPal, GFX_TAG_TERASTAL_TRIGGER}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet0[NUMBER_OF_MON_TYPES] = 
@@ -248,6 +256,8 @@ static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet0[NUMBER_
 	{Terastal_Indicator_NormalTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR},
 	{Terastal_Indicator_FairyTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR},
 	{Terastal_Indicator_StellarTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR},
+	{Terastal_Indicator_RilTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet1[NUMBER_OF_MON_TYPES] = 
@@ -277,6 +287,8 @@ static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet1[NUMBER_
 	{Terastal_Indicator_NormalTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT},
 	{Terastal_Indicator_FairyTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT},
 	{Terastal_Indicator_StellarTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT},
+	{Terastal_Indicator_RilTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet2[NUMBER_OF_MON_TYPES] = 
@@ -306,6 +318,8 @@ static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet2[NUMBER_
 	{Terastal_Indicator_NormalTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT},
 	{Terastal_Indicator_FairyTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT},
 	{Terastal_Indicator_StellarTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT},
+	{Terastal_Indicator_RilTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet3[NUMBER_OF_MON_TYPES] = 
@@ -335,6 +349,8 @@ static const struct CompressedSpriteSheet sTerastalIndicatorSpriteSheet3[NUMBER_
 	{Terastal_Indicator_NormalTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT},
 	{Terastal_Indicator_FairyTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT},
 	{Terastal_Indicator_StellarTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT},
+	{Terastal_Indicator_RilTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostTiles, (8 * 8) / 2, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct CompressedSpriteSheet* sTerastalIndicatorSpriteSheet[] = 
@@ -372,6 +388,8 @@ static const struct SpritePalette sTerastalIndicatorPalette0[NUMBER_OF_MON_TYPES
 	{Terastal_Indicator_NormalPal, GFX_TAG_TERASTAL_INDICATOR},
 	{Terastal_Indicator_FairyPal, GFX_TAG_TERASTAL_INDICATOR},
 	{Terastal_Indicator_StellarPal, GFX_TAG_TERASTAL_INDICATOR},
+	{Terastal_Indicator_RilPal, GFX_TAG_TERASTAL_INDICATOR}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostPal, GFX_TAG_TERASTAL_INDICATOR}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct SpritePalette sTerastalIndicatorPalette1[NUMBER_OF_MON_TYPES] = 
@@ -401,6 +419,8 @@ static const struct SpritePalette sTerastalIndicatorPalette1[NUMBER_OF_MON_TYPES
 	{Terastal_Indicator_NormalPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT},
 	{Terastal_Indicator_FairyPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT},
 	{Terastal_Indicator_StellarPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT},
+	{Terastal_Indicator_RilPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_LEFT}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct SpritePalette sTerastalIndicatorPalette2[NUMBER_OF_MON_TYPES] = 
@@ -430,6 +450,8 @@ static const struct SpritePalette sTerastalIndicatorPalette2[NUMBER_OF_MON_TYPES
 	{Terastal_Indicator_NormalPal, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT},
 	{Terastal_Indicator_FairyPal, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT},
 	{Terastal_Indicator_StellarPal, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT},
+	{Terastal_Indicator_RilPal, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostPal, GFX_TAG_TERASTAL_INDICATOR_PLAYER_RIGHT}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct SpritePalette sTerastalIndicatorPalette3[NUMBER_OF_MON_TYPES] = 
@@ -459,6 +481,8 @@ static const struct SpritePalette sTerastalIndicatorPalette3[NUMBER_OF_MON_TYPES
 	{Terastal_Indicator_NormalPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT},
 	{Terastal_Indicator_FairyPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT},
 	{Terastal_Indicator_StellarPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT},
+	{Terastal_Indicator_RilPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT}, //[hack] patches/0408 #110
+	{Terastal_Indicator_GhostPal, GFX_TAG_TERASTAL_INDICATOR_OPPONENT_RIGHT}, //[hack] patches/0955 段 D: ダーク（TYPE_SHADOW）は仮にゴーストの絵・色を使う（テラスタイプには現れない・表の外を読まないための穴埋め）
 };
 
 static const struct SpritePalette* sTerastalIndicatorPalette[] = 
@@ -992,6 +1016,10 @@ static void SpriteCB_MegaIndicator(struct Sprite* self)
 		{
 			shift = 98;     // 印（8x8）の左端が枠の左端 +94 に来る
 			fixedShift = TRUE;
+			// ★ 2026-10-23 BUG-dynamax-shiny-icon-overlap（Redmine #45・patches/0664）: 野生の相手のボール／色違いの星（src/bw_hpbar.c の 16x8・
+			//   枠の左端 +88〜103）が出ているときは、同じ場所に重なるので その右（+104〜111）へ避ける。トレーナー戦などで星が出ないときは今までの +94
+			if (BwCaughtMarkerActive(INDICATOR_BANK))
+				shift += 10;
 		}
 		// ★ 味方（シングル）も「Lv」の上に乗っていた（2026-09-29 ユーザー「メガ進化アイコンとレベルが重なっている」・
 		//   バトルタワーのメガガブリアス）。写真の画素で: 印のいま 198〜205 ＝「Lv」の真上・「Lv」198〜205・
@@ -1615,9 +1643,14 @@ static void DestroyZTrigger(struct Sprite* sprite)
 	FreeSpriteTilesByTag(GFX_TAG_Z_TRIGGER);
 }
 
+bool8 HackDynamax_PlayerBlocked(u8 bank); //[hack] patches/0402 src/hack_kanto_dynamax.c
+
 void TryLoadDynamaxTrigger(void)
 {
 	u8 spriteId, i;
+
+	if (HackDynamax_PlayerBlocked(gActiveBattler)) //[hack] patches/0402 わたしたち戦は主人公がわのトリガーを出さない
+		return;
 
 	if (gBattleTypeFlags & (BATTLE_TYPE_SAFARI | BATTLE_TYPE_POKE_DUDE | BATTLE_TYPE_OLD_MAN))
 		return;

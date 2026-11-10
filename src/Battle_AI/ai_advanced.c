@@ -1,4 +1,6 @@
+#include "../lv200_custom_move_ai.h"
 #include "../defines.h"
+#include "../lv200_custom_move_ai.h"
 #include "../defines_battle.h"
 #include "../../include/random.h"
 #include "../../include/constants/items.h"
@@ -335,7 +337,7 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 		for (i = 0; i < MAX_MON_MOVES; ++i)
 		{
 			u16 move = moves[i];
-			u8 moveEffect = gBattleMoves[move].effect;
+			u8 moveEffect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 
 			if (move == MOVE_NONE)
 				continue;
@@ -368,7 +370,7 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 						break;
 
 					case EFFECT_REFLECT:
-						switch (move) {
+						switch (Lv200MoveAIBase(move)) {
 							case MOVE_AURORAVEIL:
 								if (!gNewBS->AuroraVeilTimers[SIDE(bank)]) //Don't check Hail b/c being a Screener helps set up Hail
 									auroraVeil = TRUE; //Same as having two screen moves
@@ -431,7 +433,7 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 
 				case EFFECT_SPIKES:
 					//Consider hazards already set up
-					switch (move) {
+					switch (Lv200MoveAIBase(move)) {
 						case MOVE_STEALTHROCK:
 							if (gSideTimers[SIDE(FOE(bank))].srAmount == 0)
 								++entryHazardNum;
@@ -503,12 +505,12 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 		for (i = 0; i < MAX_MON_MOVES; ++i)
 		{
 			u16 move = moves[i];
-			u8 moveEffect = gBattleMoves[move].effect;
+			u8 moveEffect = gBattleMoves[Lv200MoveAIBase(move)].effect;
 
 			if (move == MOVE_NONE)
 				continue;
 
-			if (move == MOVE_TRICKROOM)
+			if (Lv200MoveAIBase(move) == MOVE_TRICKROOM)
 			{
 				hasTrickRoom = TRUE;
 			}
@@ -563,7 +565,7 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 						break;
 
 					case EFFECT_EVASION_UP:
-						if (move == MOVE_ACUPRESSURE)
+						if (Lv200MoveAIBase(move) == MOVE_ACUPRESSURE)
 							hasPartnerHelpingMoves = TRUE;
 						break;
 
@@ -584,7 +586,7 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 						break;
 
 					case EFFECT_TEAM_EFFECTS:
-						if (move != MOVE_MAGNETRISE)
+						if (Lv200MoveAIBase(move) != MOVE_MAGNETRISE)
 							hasTeamSupport = TRUE;
 						break;
 
@@ -599,12 +601,12 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 						break;
 
 					case EFFECT_FAKE_OUT:
-						if (move == MOVE_FAKEOUT)
+						if (Lv200MoveAIBase(move) == MOVE_FAKEOUT)
 							hasFakeOut = TRUE;
 						break;
 
 					case EFFECT_PROTECT:
-						if (move == MOVE_QUICKGUARD || move == MOVE_WIDEGUARD || move == MOVE_CRAFTYSHIELD)
+						if (Lv200MoveAIBase(move) == MOVE_QUICKGUARD || Lv200MoveAIBase(move) == MOVE_WIDEGUARD || move == MOVE_CRAFTYSHIELD)
 						{
 							//hasTeamProtect = TRUE;
 						}
@@ -615,7 +617,7 @@ u8 PredictFightingStyle(const u16* const moves, const u16 ability, const u8 item
 								hasTeamProtect = TRUE;
 							*/
 						}
-						else if (move != MOVE_ENDURE) //The rest of protects
+						else if (Lv200MoveAIBase(move) != MOVE_ENDURE) //The rest of protects
 							hasPersonalProtect = TRUE;
 						break;
 				}
@@ -713,9 +715,9 @@ u16 GetAmountToRecoverBy(u8 bankAtk, u8 bankDef, u16 move)
 	u16 maxHp = GetBaseMaxHP(bankAtk);
 	u8 itemEffect = ITEM_EFFECT(bankAtk);
 
-	switch (gBattleMoves[move].effect) {
+	switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 		case EFFECT_RESTORE_HP:
-			if (move == MOVE_LIFEDEW || move == MOVE_JUNGLEHEALING)
+			if (Lv200MoveAIBase(move) == MOVE_LIFEDEW || move == MOVE_JUNGLEHEALING)
 				amountToRecover = MathMax(1, maxHp / 4);
 			else
 				amountToRecover = MathMax(1, maxHp / 2);
@@ -769,7 +771,7 @@ u16 GetAmountToRecoverBy(u8 bankAtk, u8 bankDef, u16 move)
 			{
 				u16 predictedDmg = GetFinalAIMoveDamage(move, bankAtk, bankDef, 1, NULL);
 
-				if (move == MOVE_OBLIVIONWING || move == MOVE_DRAININGKISS)
+				if (move == MOVE_OBLIVIONWING || Lv200MoveAIBase(move) == MOVE_DRAININGKISS)
 					amountToRecover = MathMax(1, (75 * predictedDmg) / 100);
 				else
 					amountToRecover = MathMax(1, predictedDmg / 2);
@@ -802,7 +804,7 @@ u16 GetAmountToRecoverBy(u8 bankAtk, u8 bankDef, u16 move)
 			for (int i = 0; i < gBattlersCount; ++i)
 			{
 				if (gStatuses3[i] & STATUS3_LEECHSEED
-				&&  ABILITY(i) != ABILITY_MAGICGUARD
+				&&  !BankHasAbility(i, ABILITY_MAGICGUARD)
 				&& (gStatuses3[i] & STATUS3_LEECHSEED_BATTLER) == bankAtk)
 				{
 					amountToRecover += MathMax(1, GetBaseMaxHP(i) / 8);
@@ -886,16 +888,16 @@ static bool8 BankHoldingUsefulItemToProtectFor(u8 bank)
 	&& (ability == ABILITY_POISONHEAL
 	 || ability == ABILITY_TOXICBOOST
 	 || ability == ABILITY_QUICKFEET
-	 || ability == ABILITY_MAGICGUARD
-	 || MoveInMoveset(MOVE_FACADE, bank)))
+	 || ability == ABILITY_MAGICGUARD || SecondAbility_OfBank(bank) == ABILITY_MAGICGUARD //[hack] 2026-10-22 2 つ目
+	 || AIMoveInMoveset(MOVE_FACADE, bank)))
 		return TRUE;
 
 	if (itemEffect == ITEM_EFFECT_FLAME_ORB
 	&& CanBeBurned(bank, bank, FALSE)
-	&& (ability == ABILITY_GUTS
+	&& (ability == ABILITY_GUTS || SecondAbility_OfBank(bank) == ABILITY_GUTS
 	 || ability == ABILITY_FLAREBOOST
-	 || ability == ABILITY_MAGICGUARD
-	 || MoveInMoveset(MOVE_FACADE, bank)))
+	 || ability == ABILITY_MAGICGUARD || SecondAbility_OfBank(bank) == ABILITY_MAGICGUARD //[hack] 2026-10-22 2 つ目
+	 || AIMoveInMoveset(MOVE_FACADE, bank)))
 		return TRUE;
 
 	return FALSE;
@@ -924,13 +926,13 @@ static bool8 BankHasAbilityUsefulToProtectFor(u8 bankAtk, u8 bankDef)
 u8 ShouldProtect(u8 bankAtk, u8 bankDef, u16 move)
 {
 	u16 predictedMove = IsValidMovePrediction(bankDef, bankAtk);
-	u8 predictedMoveEffect = gBattleMoves[predictedMove].effect;
+	u8 predictedMoveEffect = gBattleMoves[Lv200MoveAIBase(predictedMove)].effect;
 	u16 defAbility = ABILITY(bankDef);
 	bool8 isAtkDynamaxed = IsDynamaxed(bankAtk);
 
 	if (WillFaintFromSecondaryDamage(bankAtk)
-	&&  defAbility != ABILITY_MOXIE
-	&&  defAbility != ABILITY_BEASTBOOST)
+	&&  (defAbility != ABILITY_MOXIE && SecondAbility_OfBank(bankDef) != ABILITY_MOXIE)
+	&&  (defAbility != ABILITY_BEASTBOOST && SecondAbility_OfBank(bankDef) != ABILITY_BEASTBOOST))
 		return FALSE; //Don't protect if you're going to faint after protecting and foe can't get boosts from your KO
 
 	if (IsBankIncapacitated(bankDef))
@@ -977,13 +979,13 @@ u8 ShouldProtect(u8 bankAtk, u8 bankDef, u16 move)
 		{
 			u16 partnerMove = GetAIChosenMove(partner, bankDef);
 
-			if (ABILITY(bankAtk) != ABILITY_TELEPATHY)
+			if (!BankHasAbility(bankAtk, ABILITY_TELEPATHY))
 			{
 
 				if (partnerMove != MOVE_NONE
 				&& !isAtkDynamaxed
 				&&  gBattleMoves[partnerMove].target & MOVE_TARGET_ALL
-				&&  ABILITY(bankAtk) != ABILITY_TELEPATHY
+				&&  !BankHasAbility(bankAtk, ABILITY_TELEPATHY)
 				&& !(AI_SpecialTypeCalc(partnerMove, partner, bankAtk) & MOVE_RESULT_NO_EFFECT))
 				{
 					return PROTECT_FROM_ALLIES; //Protect if partner is going to use a move that damages the whole field
@@ -1029,7 +1031,7 @@ bool8 ShouldPhaze(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 				else
 				{
 				ROAR_CHECK:
-					switch (gBattleMoves[move].effect)
+					switch (gBattleMoves[Lv200MoveAIBase(move)].effect)
 					{
 						case EFFECT_ROAR:
 							if (gSideTimers[SIDE(bankDef)].srAmount > 0 //Has some hurtful hazard
@@ -1050,7 +1052,7 @@ bool8 ShouldPhaze(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 		{
 			if (!CanKnockOut(bankAtk, bankDef)) //KO if you can
 			{
-				switch (gBattleMoves[move].effect)
+				switch (gBattleMoves[Lv200MoveAIBase(move)].effect)
 				{
 					case EFFECT_ROAR:
 						if (gSideTimers[SIDE(bankDef)].srAmount > 0 //Has some hurtful hazard
@@ -1103,7 +1105,7 @@ bool8 ShouldUseWishAromatherapy(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 
 			if (GetMonData(&party[i], MON_DATA_STATUS, NULL) != STATUS1_NONE)
 			{
-				if (move != MOVE_HEALBELL || GetMonAbility(&party[i]) != ABILITY_SOUNDPROOF)
+				if (Lv200MoveAIBase(move) != MOVE_HEALBELL || GetMonAbility(&party[i]) != ABILITY_SOUNDPROOF)
 					hasStatus = TRUE;
 			}
 		}
@@ -1111,7 +1113,7 @@ bool8 ShouldUseWishAromatherapy(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 
 	if (IS_SINGLE_BATTLE && IsClassCleric(class))
 	{
-		switch (gBattleMoves[move].effect) {
+		switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 			case EFFECT_WISH:
 				if (needHealing)
 					return TRUE;
@@ -1124,7 +1126,7 @@ bool8 ShouldUseWishAromatherapy(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 	}
 	else if (IS_DOUBLE_BATTLE)
 	{
-		switch (gBattleMoves[move].effect) {
+		switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 			case EFFECT_WISH:
 				return ShouldRecover(bankAtk, bankDef, move); //Switch recovery isn't good idea in doubles
 
@@ -1165,7 +1167,7 @@ bool8 ShouldSetUpScreens(u8 bankAtk, u8 bankDef, u16 move)
 {
 	if (!gNewBS->AuroraVeilTimers[SIDE(bankAtk)])
 	{
-		if (move == MOVE_AURORAVEIL
+		if (Lv200MoveAIBase(move) == MOVE_AURORAVEIL
 		&& gBattleWeather & WEATHER_HAIL_ANY
 		&& !((gSideStatuses[bankAtk] & (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN)) == (SIDE_STATUS_REFLECT | SIDE_STATUS_LIGHTSCREEN)))
 			return TRUE;
@@ -1174,7 +1176,7 @@ bool8 ShouldSetUpScreens(u8 bankAtk, u8 bankDef, u16 move)
 			bool8 defPhysicalMoveInMoveset = MoveSplitInMoveset(bankDef, SPLIT_PHYSICAL);
 			bool8 defSpecialMoveInMoveset = MoveSplitInMoveset(bankDef, SPLIT_SPECIAL);
 
-			switch (gBattleMoves[move].effect) {
+			switch (gBattleMoves[Lv200MoveAIBase(move)].effect) {
 				case EFFECT_REFLECT:
 					if (MoveSplitOnTeam(bankDef, SPLIT_PHYSICAL))
 					{
@@ -1182,7 +1184,7 @@ bool8 ShouldSetUpScreens(u8 bankAtk, u8 bankDef, u16 move)
 							return TRUE; //Target has no attacking moves so no point in doing Light Screen check
 
 						if (defPhysicalMoveInMoveset
-						|| !MoveInMoveset(MOVE_LIGHTSCREEN, bankAtk) || !defSpecialMoveInMoveset)
+						|| !AIMoveInMoveset(MOVE_LIGHTSCREEN, bankAtk) || !defSpecialMoveInMoveset)
 							return TRUE;
 					}
 					break;
@@ -1194,7 +1196,7 @@ bool8 ShouldSetUpScreens(u8 bankAtk, u8 bankDef, u16 move)
 							return TRUE; //Target has no attacking moves so no point in doing Light Screen check
 
 						if (defSpecialMoveInMoveset
-						|| !MoveInMoveset(MOVE_REFLECT, bankAtk) || !defPhysicalMoveInMoveset)
+						|| !AIMoveInMoveset(MOVE_REFLECT, bankAtk) || !defPhysicalMoveInMoveset)
 							return TRUE;
 					}
 					break;
@@ -1209,7 +1211,7 @@ bool8 ShouldUseFakeOut(u8 bankAtk, u8 bankDef)
 {
 	if (gDisableStructs[bankAtk].isFirstTurn
 	&& IsUsefulToFlinchTarget(bankDef)
-	&& ABILITY(bankDef) != ABILITY_INNERFOCUS
+	&& !BankHasAbility(bankDef, ABILITY_INNERFOCUS)
 	&& !MoveBlockedBySubstitute(MOVE_FAKEOUT, bankAtk, bankDef))
 	{
 		if (IS_DOUBLE_BATTLE)
@@ -1286,7 +1288,7 @@ bool8 ShouldPivot(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 					&& SPLIT(move) != SPLIT_STATUS //Damaging move
 					&& (switchScore >= SWITCHING_INCREASE_RESIST_ALL_MOVES + SWITCHING_INCREASE_KO_FOE //Or remove hazards
 					 || (BATTLER_MAX_HP(bankDef)
-					    && (IsBankHoldingFocusSash(bankDef) || defAbility == ABILITY_STURDY || defAbility == ABILITY_MULTISCALE || defAbility == ABILITY_SHADOWSHIELD || defAbility == ABILITY_DRAGONARMOR)))) //Pivot to break the sash/sturdy/multiscale
+					    && (IsBankHoldingFocusSash(bankDef) || (defAbility == ABILITY_STURDY || SecondAbility_OfBank(bankDef) == ABILITY_STURDY) || (defAbility == ABILITY_MULTISCALE || SecondAbility_OfBank(bankDef) == ABILITY_MULTISCALE) || (defAbility == ABILITY_SHADOWSHIELD || SecondAbility_OfBank(bankDef) == ABILITY_SHADOWSHIELD) || defAbility == ABILITY_DRAGONARMOR || defAbility == ABILITY_REITONOOU)))) //Pivot to break the sash/sturdy/multiscale
 						return PIVOT;
 				}
 				else if (!hasUsefulStatBoost) //3HKO+ the foe
@@ -1294,7 +1296,7 @@ bool8 ShouldPivot(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 					if (IsClassDamager(class)
 					&& BATTLER_MAX_HP(bankDef)
 					&& SPLIT(move) != SPLIT_STATUS //Damaging move
-					&& (IsBankHoldingFocusSash(bankDef) || defAbility == ABILITY_STURDY || defAbility == ABILITY_MULTISCALE || defAbility == ABILITY_SHADOWSHIELD || defAbility == ABILITY_DRAGONARMOR)) //Pivot to break the sash/sturdy/multiscale
+					&& (IsBankHoldingFocusSash(bankDef) || (defAbility == ABILITY_STURDY || SecondAbility_OfBank(bankDef) == ABILITY_STURDY) || (defAbility == ABILITY_MULTISCALE || SecondAbility_OfBank(bankDef) == ABILITY_MULTISCALE) || (defAbility == ABILITY_SHADOWSHIELD || SecondAbility_OfBank(bankDef) == ABILITY_SHADOWSHIELD) || defAbility == ABILITY_DRAGONARMOR || defAbility == ABILITY_REITONOOU)) //Pivot to break the sash/sturdy/multiscale
 						return PIVOT;
 
 					if (IsClassDamager(class) && switchScore >= SWITCHING_INCREASE_WALLS_FOE)
@@ -1337,7 +1339,7 @@ bool8 ShouldPivot(u8 bankAtk, u8 bankDef, u16 move, u8 class)
 		{
 			if (CanKnockOut(bankDef, bankAtk))
 			{
-				if (gBattleMoves[move].effect == EFFECT_TELEPORT)
+				if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_TELEPORT)
 					return DONT_PIVOT; //If you're going to faint because you'll go second, use a different move
 				else
 					return CAN_TRY_PIVOT; //You're probably going to faint anyways so if for some reason you don't, better switch
@@ -1563,8 +1565,8 @@ void IncreaseStatusViability(s16* originalViability, u8 class, u8 boost, u8 bank
 static bool8 ShouldTryToSetUpStat(u8 bankAtk, u8 bankDef, u16 move, u8 stat, u8 statLimit)
 {
 	if (ABILITY(bankDef) == ABILITY_UNAWARE
-	&& !MoveInMoveset(MOVE_STOREDPOWER, bankAtk)
-	&& !MoveInMoveset(MOVE_POWERTRIP, bankAtk))
+	&& !AIMoveInMoveset(MOVE_STOREDPOWER, bankAtk)
+	&& !AIMoveInMoveset(MOVE_POWERTRIP, bankAtk))
 		return FALSE; //Don't set up if foe has Unaware
 
 	if (WillFaintFromSecondaryDamage(bankAtk))
@@ -2025,7 +2027,7 @@ void IncreaseEntryHazardsViability(s16* originalViability, u8 class, u8 bankAtk,
 			break;
 
 		case FIGHT_CLASS_TEAM_SUPPORT_BATON_PASS:
-			if (gBattleMoves[move].effect == EFFECT_SPIKES) //Entry Hazards
+			if (gBattleMoves[Lv200MoveAIBase(move)].effect == EFFECT_SPIKES) //Entry Hazards
 			{
 				if (MoveWouldHitFirst(move, bankAtk, bankDef))
 				{
@@ -2064,7 +2066,7 @@ void IncreaseEntryHazardsViability(s16* originalViability, u8 class, u8 bankAtk,
 			break;
 
 		case FIGHT_CLASS_ENTRY_HAZARDS:
-			switch (move) {
+			switch (Lv200MoveAIBase(move)) {
 				case MOVE_STICKYWEB:
 					INCREASE_VIABILITY(7);
 					break;
@@ -2096,7 +2098,7 @@ void IncreaseEntryHazardsViability(s16* originalViability, u8 class, u8 bankAtk,
 				INCREASE_STATUS_VIABILITY(1); //Treat like a low-priority status move in multis
 			else
 			{
-				if (move == MOVE_STEALTHROCK)
+				if (Lv200MoveAIBase(move) == MOVE_STEALTHROCK)
 					INCREASE_VIABILITY(13);
 				else
 					INCREASE_STATUS_VIABILITY(2); //Treat like a middle-priority status move
@@ -2139,13 +2141,13 @@ void IncreaseFakeOutViability(s16* originalViability, u8 class, u8 bankAtk, u8 b
 {
 	s16 viability = *originalViability;
 
-	if (move == MOVE_FAKEOUT && IS_DOUBLE_BATTLE)
+	if (Lv200MoveAIBase(move) == MOVE_FAKEOUT && IS_DOUBLE_BATTLE)
 	{
 		u8 partner = PARTNER(bankAtk);
 		u16 partnerMove = GetAIChosenMove(partner, bankDef);
 
 		if (BATTLER_ALIVE(partner)
-		&&  partnerMove == MOVE_FAKEOUT
+		&&  Lv200MoveAIBase(partnerMove) == MOVE_FAKEOUT
 		&&  gBattleStruct->moveTarget[partner] == bankDef)
 			return; //No benefit to using Fake Out twice on the same opponent
 	}

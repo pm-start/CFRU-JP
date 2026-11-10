@@ -99,6 +99,7 @@ gBattleAnims_General:
 .word ANIM_SALTCURE_END_TURN
 .word ANIM_SYRUPBOMB_END_TURN
 .word ANIM_AI_ITEM_HEAL
+.word HACK_ANIM_POKEBLOCK_THROW	@ ホウエンのサファリ「ポロックをなげる」（原文 B_ANIM_POKEBLOCK_THROW・段 6b）・表の最後（番号＝ANIM_AI_ITEM_HEAL の次・hack_safari_pokeblock.h の HACK_PKBL_THROW_ANIM）
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 .pool
@@ -1216,6 +1217,28 @@ ANIM_AI_ITEM_HEAL:
 	playsound2 0xE8 SOUND_PAN_ATTACKER
 	launchtask AnimTask_StatusClearedEffect 0x2 0x1 FALSE
 	waitanimation
+	endanimation
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@ 原文 参考/pokeemerald/data/battle_anim_scripts.s の General_PokeblockThrow（FEAT-pokeblock 段 6b・patches/0978）。
+@ 素の FR（JP）の General_BaitThrow（0x081B9BC8）と命令列が同じ（日本語版エメラルド ROM の 0x002864C1 付近とも、音の番号と関数の番地を除いて同じ）。
+@   FR の AnimTask_SafariOrGhost_DecideAnimSides（0x080F2BED）＝原文の AnimTask_SetAttackerTargetLeftPos と同じ処理
+@   スプライトの型 0x083D23C4＝FR の gSafariBaitSpriteTemplate（tag 0x281D・16x16・コールバックは SafariBaitOrRock_Init）＝原文の gPokeblockSpriteTemplate と同じ値
+@   音: 0x88（ジャンプキックの音）・0xA0（しっぽをふるの音）は FR の曲の番号（原文の 0x8F・0xA7 と同じ効果音）
+@   AnimTask_FreeBaitGfx（0x080F2A75）＝原文の AnimTask_FreePokeblockGfx と同じ（札 0x281D の絵とパレットを解放）
+@ 違うのは絵とパレットだけ: AnimTask_LoadBaitGfx の代わりに AnimTask_HackPokeblockLoadGfx（src/hack_safari_pokeblock.c）で日本語版エメラルドの絵を読む
+.pool
+HACK_ANIM_POKEBLOCK_THROW:
+	launchtask 0x80F2BED 0x2 0x1 0x0
+	launchtask AnimTask_HackPokeblockLoadGfx 0x2 0x0
+	pause 0x0
+	playsoundwait 0x88 SOUND_PAN_ATTACKER 0x16
+	launchtemplate 0x83D23C4 0x83 0x4 0xFFEE 0xC 0x0 0x20
+	pause 0x32
+	soundcomplex 0xA0 SOUND_PAN_TARGET 0x13 0x2
+	launchtask AnimTask_SwayMon 0x5 0x5 0x1 0x8 0x600 0x2 0x1
+	waitanimation
+	launchtask 0x80F2A75 0x2 0x0
 	endanimation
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

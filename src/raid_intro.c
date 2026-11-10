@@ -419,6 +419,10 @@ static void Task_RaidBattleIntroFadeOut(u8 taskId)
 	}
 }
 
+//[hack] patches/0666 FEAT-raid-partner: 「使っている枠」は graphicsId != 0 ではなく team[0] で見る。EVENT_OBJ_GFX_RED_NORMAL（トウヤ）が 0 番で、
+//  graphicsId == 0 を「列の終わり」と見ると 女の主人公の助っ人トウヤが 紹介画面に出なかった（Calloc 済みなので 使っていない枠の team[0] は SPECIES_NONE）
+#define PARTNER_SLOT_USED(i) (sRaidBattleIntroPtr->partners[(i)].team[0] != SPECIES_NONE)
+
 static void Task_RaidBattleIntroWaitForKeyPress(u8 taskId)
 {
 	u8 i;
@@ -461,7 +465,7 @@ static void Task_RaidBattleIntroWaitForKeyPress(u8 taskId)
 		PlaySE(SE_SELECT);
 		for (i = 0; i < MAX_TEAM_SIZE; ++i)
 		{
-			if (sRaidBattleIntroPtr->partners[i].graphicsId != 0)
+			if (PARTNER_SLOT_USED(i))
 				++numTeams;
 		}
 
@@ -475,7 +479,7 @@ static void Task_RaidBattleIntroWaitForKeyPress(u8 taskId)
 		{
 			for (i = 0; i < MAX_TEAM_SIZE; ++i)
 			{
-				if (sRaidBattleIntroPtr->partners[i].graphicsId != 0)
+				if (PARTNER_SLOT_USED(i))
 					++sRaidBattleIntroPtr->selectedTeam;
 				else
 					break;
@@ -492,7 +496,7 @@ static void Task_RaidBattleIntroWaitForKeyPress(u8 taskId)
 		++sRaidBattleIntroPtr->selectedTeam;
 
 		if (sRaidBattleIntroPtr->selectedTeam >= MAX_TEAM_SIZE
-		||  sRaidBattleIntroPtr->partners[sRaidBattleIntroPtr->selectedTeam].graphicsId == 0)
+		||  !PARTNER_SLOT_USED(sRaidBattleIntroPtr->selectedTeam))
 			sRaidBattleIntroPtr->selectedTeam = 0;
 	}
 }
@@ -602,7 +606,7 @@ static void ShowPartnerTeams(void)
 
 	for (i = 0; i < MAX_NUM_PARTNERS; ++i)
 	{
-		if (sRaidBattleIntroPtr->partners[i].graphicsId != 0)
+		if (PARTNER_SLOT_USED(i))
 		{
 			AddPseudoEventObject(sRaidBattleIntroPtr->partners[i].graphicsId, SpriteCallbackDummy, 126, 59 + (i * 33), 0);
 

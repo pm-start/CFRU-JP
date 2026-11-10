@@ -15,6 +15,13 @@
 #include "hack_difficulty.h"               //[hack] patches/0321 なんいど りるアイス: 買い値は半額（HackDifficulty_BuyPrice）
 #include "Tables/hoenn_script_flags.h"      //HOENN_VAR_DIFFICULTY
 #include "Tables/mega_shop_items.h"
+#include "Tables/bp_shop_items.h"      //[hack] patches/0815 バトルフロンティアの交換所の BP 売り場
+#include "../include/main.h"
+#include "../include/money.h"
+#include "../include/sound.h"
+#include "../include/task.h"
+#include "../include/constants/songs.h"
+#include "../include/constants/game_stat.h"
 
 /*
     タマムシデパートのメガストーン売り場（2026-10-01）
@@ -42,12 +49,114 @@ extern const u8 gText_MegaShopTitle[];
 extern const u8 gText_ZCrystalShopTitle[];
 extern const u8 gText_DangerLeafShopTitle[];
 extern const u8 gText_MegaShopConfirm[];
+extern const u8 gText_BpShopTitle[];
+extern const u8 gText_BpShopLabel[];
+extern const u8 gText_BpShopUnit[];
+extern const u8 gText_BpShopConfirm[];
+extern const u8 gText_BpShopNotEnough[];
+
+/* ---- バトルフロンティアの交換所の BP 売り場（2026-10-25・Redmine #115・patches/0815）----
+   売り場の画面・1 個買いはメガストーン売り場と同じ。違うのは代金が BP（変数 HOENN_VAR_FRONTIER_BP）なこと。
+   見分け方も同じく gShopData.itemList が 3 つの表（gBpShop1Items〜3）のどれか。値段は難易度の補正をかけない。
+   BP を使う所: 足りるか BpShop_Enough（item.c の CheckBuyableTm）・引く BpShop_Subtract（item.c の買い終わり）・
+   左上の窓 PrintMoneyAmountInMoneyBox の置き換え（functionrewrites）・一覧の値段・確認の文 */
+static u8 BpShop_Which(void)
+{
+	if (gShopData.itemList == gBpShop1Items)
+		return 1;
+	if (gShopData.itemList == gBpShop2Items)
+		return 2;
+	if (gShopData.itemList == gBpShop3Items)
+		return 3;
+	return 0;
+}
+
+bool8 BpShop_IsOpen(void)
+{
+	return BpShop_Which() != 0;
+}
+
+//係 1・2 は売り場の画面（メガ売り場と同じ）。係 3 はわざマシンなので素のわざマシンの売り場の画面（技の説明の窓つき・martType 1）のまま、代金だけ BP
+static bool8 BpShop_MegaScreen(void)
+{
+	u8 w = BpShop_Which();
+
+	return w == 1 || w == 2;
+}
+
+static u32 BpShop_PriceOf(u16 item)
+{
+	u32 i;
+
+	switch (BpShop_Which())
+	{
+		case 1:
+			for (i = 0; i < BP_SHOP1_COUNT; ++i)
+				if (gBpShop1Items[i] == item)
+					return sBpShop1Prices[i];
+			break;
+		case 2:
+			for (i = 0; i < BP_SHOP2_COUNT; ++i)
+				if (gBpShop2Items[i] == item)
+					return sBpShop2Prices[i];
+			break;
+		case 3:
+			for (i = 0; i < BP_SHOP3_COUNT; ++i)
+				if (gBpShop3Items[i] == item)
+					return sBpShop3Prices[i];
+			break;
+	}
+	return 0xFFFF;   //表に無い品は買えない値段（来ない）
+}
+
+bool8 BpShop_Enough(u32 price)
+{
+	return VarGet(HOENN_VAR_FRONTIER_BP) >= price;
+}
+
+void BpShop_Subtract(u32 price)
+{
+	u16 bp = VarGet(HOENN_VAR_FRONTIER_BP);
+
+	VarSet(HOENN_VAR_FRONTIER_BP, (bp > price) ? bp - price : 0);
+}
+
+/* 買い終わり（item.c の ReloadMartListForTmPurchase が、素の BuyMenuSubtractMoney の代わりに渡す）。素と同じ順: 回数 → 引く → 音 → 窓 → 戻る */
+void Task_BpShopSubtract(u8 taskId);
+void Task_ReturnToItemListAfterItemPurchase(u8 taskId);
+void Task_BpShopSubtract(u8 taskId)
+{
+	IncrementGameStat(GAME_STAT_SHOPPED);
+	BpShop_Subtract(gShopData.itemPrice);
+	PlaySE(SE_MONEY);
+	PrintMoneyAmountInMoneyBox(0, 0, 0);
+	gTasks[taskId].func = Task_ReturnToItemListAfterItemPurchase;
+}
+
+/* 左上の窓（素のおこづかい）。素の PrintMoneyAmountInMoneyBox（0809FD20）の置き換え（functionrewrites）。
+   素は PrintMoneyAmount(windowId, 0, 12, amount, speed)（PrintMoneyAmount は 0809FD40）。BP 売り場の窓 0 だけ、窓ぜんぶを塗り直して「BP」と数を出す */
+#define PrintMoneyAmount_ ((void (*)(u8, u8, u8, int, u8)) (0x0809FD40 | 1))
+void BpShop_PrintMoneyAmountInMoneyBox(u8 windowId, int amount, u8 speed)
+{
+	/* gShopData は売り場を出たあとも残るので、売り場の画面のあいだ（初期化か本体の CB2）だけ BP にする */
+	if (windowId == 0 && BpShop_IsOpen() && (gMain.callback2 == (MainCallback) (0x0809A830 | 1) || gMain.callback2 == (MainCallback) (0x0809A800 | 1)))
+	{
+		FillWindowPixelBuffer(0, PIXEL_FILL(1));
+		AddTextPrinterParameterized(0, 0, gText_BpShopLabel, 0, 0, 0xFF, NULL);
+		ConvertIntToDecimalStringN(gStringVar1, VarGet(HOENN_VAR_FRONTIER_BP), STR_CONV_MODE_RIGHT_ALIGN, 4);
+		//単位の「BP」は見出し（上の行）が出すので数の後ろには付けない（2026-10-26 二重表示の直し）
+		AddTextPrinterParameterized(0, 0, gStringVar1, 0, 12, 0xFF, NULL);
+		CopyWindowToVram(0, COPYWIN_GFX);
+		return;
+	}
+	PrintMoneyAmount_(windowId, 0, 12, amount, speed);
+}
 
 /* 2026-10-01 追記: 2 人目の店員の Z クリスタルの売り場（gZCrystalShopItems・一律 5 万円）も同じ画面・同じ仕組み */
 bool8 MegaShop_IsOpen(void)
 {
 	return gShopData.itemList == gMegaShopItems || gShopData.itemList == gZCrystalShopItems
-	    || gShopData.itemList == gDangerLeafShopItems;   //★ 2026-10-09 あぶないはっぱ（6F の警備員）
+	    || gShopData.itemList == gDangerLeafShopItems || BpShop_MegaScreen();   //★ 2026-10-09 あぶないはっぱ（6F の警備員）
 }
 
 /* ★ 2026-10-09 あぶないはっぱは買うたびに 1.5 倍（ユーザー「買うたびに値段高くできる？」→「1 個ごとに 1.5 倍」「1 回に 1 個だけ」・
@@ -108,6 +217,8 @@ u32 MegaShop_Price(u16 item)
 {
 	u32 i;
 
+	if (BpShop_IsOpen())
+		return BpShop_PriceOf(item);   //BP（難易度の補正は無し）
 	if (gShopData.itemList == gMegaShopItems)
 	{
 		for (i = 0; i < MEGA_SHOP_COUNT; ++i)
@@ -181,7 +292,7 @@ void MegaShop_BuyMenuInitWindows(bool32 isSellingTM)
 		PutWindowTilemap(6);
 		DrawStdFrameWithCustomTileAndPalette(6, FALSE, 0xA, 15);
 		FillWindowPixelBuffer(6, PIXEL_FILL(1));
-		AddTextPrinterParameterized(6, 2, (gShopData.itemList == gZCrystalShopItems) ? gText_ZCrystalShopTitle
+		AddTextPrinterParameterized(6, 2, BpShop_MegaScreen() ? gText_BpShopTitle : (gShopData.itemList == gZCrystalShopItems) ? gText_ZCrystalShopTitle
 		: (gShopData.itemList == gDangerLeafShopItems) ? gText_DangerLeafShopTitle : gText_MegaShopTitle, 0, 1, 0xFF, NULL);
 		CopyWindowToVram(6, COPYWIN_BOTH);
 	}
@@ -263,10 +374,18 @@ bool8 MegaShop_PrintPrice(u8 windowId, u16 item, u8 y)
 
 	ConvertIntToDecimalStringN(gStringVar1, MegaShop_Price(item), 0, 7);
 	x = 7 - StringLength(gStringVar1);
+	if (BpShop_IsOpen() && x > 0)
+		--x;   /* patches/0918 「BP」は「円」より 1 字長く、右の端で「P」が切れていた＝空白を 1 字減らして右端をそろえる */
 	loc = gStringVar4;
 	while (x-- > 0)
 		*loc++ = 0;      /* 空白（8 画素） */
-	StringExpandPlaceholders(loc, (void*) 0x083DDDAB);   /* 「{STR_VAR_1}円」 */
+	if (BpShop_IsOpen())   /* 「n」＋「BP」（円ではなく） */
+	{
+		loc = StringCopy(loc, gStringVar1);
+		StringAppend(loc, gText_BpShopUnit);
+	}
+	else
+		StringExpandPlaceholders(loc, (void*) 0x083DDDAB);   /* 「{STR_VAR_1}円」 */
 	BuyMenuPrint(windowId, 0, gStringVar4, 28 * 8 - 8 * 8 - 4, y, 0, 0, 0xFF, 1);
 	return TRUE;
 }
@@ -274,12 +393,12 @@ bool8 MegaShop_PrintPrice(u8 windowId, u16 item, u8 y)
 /* 確認の文（CFRU の CheckTmPurchase の頭から）。1 個ずつ買う */
 bool8 MegaShop_CheckPurchase(u16 item, u8 taskId)
 {
-	if (!MegaShop_IsOpen())
+	if (!MegaShop_IsOpen() && !BpShop_IsOpen())
 		return FALSE;
 
 	CopyItemName(item, gStringVar1);
 	ConvertIntToDecimalStringN(gStringVar2, MegaShop_Price(item), 3, 8);
-	BuyMenuDisplayMessage(taskId, gText_MegaShopConfirm, BuyMenuConfirmPurchase);
+	BuyMenuDisplayMessage(taskId, BpShop_IsOpen() ? gText_BpShopConfirm : gText_MegaShopConfirm, BuyMenuConfirmPurchase);
 	return TRUE;
 }
 
@@ -328,8 +447,12 @@ struct ListMenuItem *Shop_BuildListStrings(void)
    素の ItemId_GetPrice（0809A30C・functionrewrites）の置き換え。売値は「値段の半分」（素の売る処理のまま）。
    メガストーンは道具の表の値段が 0（売り場の 50 万円は u16 に入らないので売り場の中だけの表）で、値段 0 は売れない。
    → 表の値段が 0 のメガストーンだけ 60000（売値 3 万円）、売り場で 1 万円のもの（リザードナイト Y など）は 10000（売値 5 千円）。
+   ★ 2026-10-15 から売値はどのメガストーンも 100 円（MEGA_SELL_OUTSIDE_SHOP_PRICE）。下の 60000 と表は買う画面だけで使う。
    ★ 売り場で買うときは MegaShop_Price（売り場の中だけの表）を通るので、ここの値段は使われない */
 #define MEGA_SELL_TABLE_PRICE 60000
+/* ★ 2026-10-15 ユーザー「メガストーンの売るときの価格100円に」（プレイヤーが売る値）: 買う画面の外では、メガストーンは
+   どれも値段 200（売値はその半分＝100 円）。買う画面（CB2_BuyMenu）の値段は今までどおり（売り場は MegaShop_Price） */
+#define MEGA_SELL_OUTSIDE_SHOP_PRICE 200
 extern const struct Item gItemData[];
 
 /* ★ 2026-10-05 シルフカンパニー 1F のマスターボール（assembly/kanto/kanto_silph_master_ball.s）:
@@ -347,7 +470,7 @@ u16 MegaShop_ItemIdGetPrice(u16 item)
 
 	if (gMain.callback2 == CB2_BuyMenu || gMain.callback2 == CB2_InitBuyMenu)
 		price = HackDifficulty_BuyPrice(price, VarGet(HOENN_VAR_DIFFICULTY));
-	return price;
+	return price > 0xFFFF ? 0xFFFF : price;   //★ 2026-10-12 むずかしい ×1.5・ももアイス ×3 で u16 をこえる品（ふつうの店）は 65535 で止める（一覧は 5 桁・合計は 7 桁）
 }
 
 static u16 ItemIdGetBasePrice(u16 item)
@@ -358,6 +481,8 @@ static u16 ItemIdGetBasePrice(u16 item)
 		return SILPH_MASTER_BALL_PRICE;
 	if (item >= ITEMS_COUNT)
 		item = ITEM_NONE;
+	if (gItemData[item].holdEffect == ITEM_EFFECT_MEGA_STONE && gMain.callback2 != CB2_BuyMenu && gMain.callback2 != CB2_InitBuyMenu)
+		return MEGA_SELL_OUTSIDE_SHOP_PRICE;
 	if (gItemData[item].price != 0 || gItemData[item].holdEffect != ITEM_EFFECT_MEGA_STONE)
 		return gItemData[item].price;
 	for (i = 0; i < MEGA_SHOP_COUNT; ++i)
@@ -368,3 +493,9 @@ static u16 ItemIdGetBasePrice(u16 item)
 	return MEGA_SELL_TABLE_PRICE;
 }
 
+
+/* 足りないときの文（item.c の CheckBuyableTm から） */
+void BpShop_NotEnoughMessage(u8 taskId)
+{
+	BuyMenuDisplayMessage(taskId, gText_BpShopNotEnough, BuyMenuReturnToItemList);
+}

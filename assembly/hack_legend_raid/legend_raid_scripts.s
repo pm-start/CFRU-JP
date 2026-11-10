@@ -36,10 +36,38 @@ HackLegendRaidScr_Talk:
 	special SP_START_RAID_BATTLE
 	waitstate
 	callasm HackLegendRaid_End
+	special2 LASTRESULT 0xB4
+	compare LASTRESULT 0x1
+	if equal _goto HackLegendRaidScr_Reward
+	compare LASTRESULT 0x7
+	if equal _goto HackLegendRaidScr_Reward
+HackLegendRaidScr_After:
 	msgbox gText_LegendRaid_After MSG_KEEPOPEN
 	closemessage
 	release
 	end
+
+@ 報酬（src/hack_raid_rewards.c・FEAT-raid-rewards）: 勝ち(1)・捕獲(7)のときだけ。1 つずつ「〇〇を てにいれた！」。バッグに入らなければパソコンのどうぐへ
+HackLegendRaidScr_Reward:
+	setvar 0x4000 0x0
+HackLegendRaidScr_RewardNext:
+	callasm HackRaidRewards_Next
+	compare LASTRESULT 0x0
+	if equal _goto HackLegendRaidScr_After
+	copyvar 0x8004 0x8000
+	copyvar 0x8005 0x8001
+	callstd MSG_OBTAIN
+	compare LASTRESULT 0x0
+	if notequal _goto HackLegendRaidScr_RewardNext
+	callasm HackRaidRewards_ToPc
+	bufferitem 0x0 0x8004
+	compare LASTRESULT 0x0
+	if equal _goto HackLegendRaidScr_RewardLost
+	msgbox gText_LegendRaid_RewardToPc MSG_KEEPOPEN
+	goto HackLegendRaidScr_RewardNext
+HackLegendRaidScr_RewardLost:
+	msgbox gText_LegendRaid_RewardLost MSG_KEEPOPEN
+	goto HackLegendRaidScr_RewardNext
 
 HackLegendRaidScr_Cancel:
 	callasm HackLegendRaid_End

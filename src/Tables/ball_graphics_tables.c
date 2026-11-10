@@ -70,6 +70,21 @@ extern const u8 gInterfaceGfx_SportBallTiles[];
 extern const u8 gInterfaceGfx_BeastBallTiles[];
 extern const u8 gInterfaceGfx_DreamBallTiles[];
 extern const u8 gInterfaceGfx_DynamaxBallTiles[];
+extern const u8 gInterfaceGfx_StartBallTiles[]; //[hack] patches/0393 STARTボール（tools/balls/build_start_ball.py）
+// WATASHI_BALLS_BEGIN ext_tiles
+extern const u8 gInterfaceGfx_MoonPetalBallTiles[];
+extern const u8 gInterfaceGfx_MemoryVeilBallTiles[];
+extern const u8 gInterfaceGfx_TearWisteriaBallTiles[];
+extern const u8 gInterfaceGfx_SweetHeartBallTiles[];
+extern const u8 gInterfaceGfx_SilentHaloBallTiles[];
+extern const u8 gInterfaceGfx_GamePulseBallTiles[];
+extern const u8 gInterfaceGfx_WinterBlossomBallTiles[];
+extern const u8 gInterfaceGfx_ThornHeartBallTiles[];
+extern const u8 gInterfaceGfx_FoxSpiritBallTiles[];
+extern const u8 gInterfaceGfx_BerryBloomBallTiles[];
+// WATASHI_BALLS_END ext_tiles
+extern const u8 gInterfaceGfx_RocketBallTiles[]; //[hack] patches/0914 ロケットボール
+extern const u8 gInterfaceGfx_SnatchBallTiles[]; //[hack] patches/0961 スナッチボール（tools/balls/build_snatch_ball.py）
 
 /*#define gInterfacePal_PokeBall (const u8*) 0x8D017E0
 #define gInterfacePal_GreatBall (const u8*) 0x8D018BC
@@ -111,6 +126,21 @@ extern const u8 gInterfaceGfx_SportBallPal[];
 extern const u8 gInterfaceGfx_BeastBallPal[];
 extern const u8 gInterfaceGfx_DreamBallPal[];
 extern const u8 gInterfaceGfx_DynamaxBallPal[];
+extern const u8 gInterfaceGfx_StartBallPal[];
+// WATASHI_BALLS_BEGIN ext_pal
+extern const u8 gInterfaceGfx_MoonPetalBallPal[];
+extern const u8 gInterfaceGfx_MemoryVeilBallPal[];
+extern const u8 gInterfaceGfx_TearWisteriaBallPal[];
+extern const u8 gInterfaceGfx_SweetHeartBallPal[];
+extern const u8 gInterfaceGfx_SilentHaloBallPal[];
+extern const u8 gInterfaceGfx_GamePulseBallPal[];
+extern const u8 gInterfaceGfx_WinterBlossomBallPal[];
+extern const u8 gInterfaceGfx_ThornHeartBallPal[];
+extern const u8 gInterfaceGfx_FoxSpiritBallPal[];
+extern const u8 gInterfaceGfx_BerryBloomBallPal[];
+// WATASHI_BALLS_END ext_pal
+extern const u8 gInterfaceGfx_RocketBallPal[];
+extern const u8 gInterfaceGfx_SnatchBallPal[];
 
 #define sBallOamData (const struct OamData*) 0x821D0A8
 #define sBallAnimSequences (const union AnimCmd* const*) 0x821D0F0
@@ -176,6 +206,21 @@ enum BallTags
 	GFX_TAG_BEASTBALL,
 	GFX_TAG_DREAMBALL,
 	GFX_TAG_DYNAMAXBALL,
+	GFX_TAG_STARTBALL, //[hack] patches/0393（0xFF10）
+// WATASHI_BALLS_BEGIN tag
+	GFX_TAG_MOON_PETAL_BALL = 0xFF11,
+	GFX_TAG_MEMORY_VEIL_BALL = 0xFF12,
+	GFX_TAG_TEAR_WISTERIA_BALL = 0xFF13,
+	GFX_TAG_SWEET_HEART_BALL = 0xFF14,
+	GFX_TAG_SILENT_HALO_BALL = 0xFF15,
+	GFX_TAG_GAME_PULSE_BALL = 0xFF16,
+	GFX_TAG_WINTER_BLOSSOM_BALL = 0xFF17,
+	GFX_TAG_THORN_HEART_BALL = 0xFF18,
+	GFX_TAG_FOX_SPIRIT_BALL = 0xFF19,
+	GFX_TAG_BERRY_BLOOM_BALL = 0xFF1A,
+// WATASHI_BALLS_END tag
+	GFX_TAG_ROCKET_BALL = 0xFF1B, //[hack] patches/0914
+	GFX_TAG_SNATCH_BALL = 0xFF1C, //[hack] patches/0961
 };
 
 enum BallOpenParticleTags
@@ -196,6 +241,21 @@ enum BallOpenParticleTags
 	TAG_BALL_OPEN_BEAST,
 	TAG_BALL_OPEN_DREAM,
 	TAG_BALL_OPEN_DYNAMAX,
+	TAG_BALL_OPEN_START, //[hack] patches/0393（0xFE10）
+// WATASHI_BALLS_BEGIN ptag
+	TAG_BALL_OPEN_MOON_PETAL = 0xFE11,
+	TAG_BALL_OPEN_MEMORY_VEIL = 0xFE12,
+	TAG_BALL_OPEN_TEAR_WISTERIA = 0xFE13,
+	TAG_BALL_OPEN_SWEET_HEART = 0xFE14,
+	TAG_BALL_OPEN_SILENT_HALO = 0xFE15,
+	TAG_BALL_OPEN_GAME_PULSE = 0xFE16,
+	TAG_BALL_OPEN_WINTER_BLOSSOM = 0xFE17,
+	TAG_BALL_OPEN_THORN_HEART = 0xFE18,
+	TAG_BALL_OPEN_FOX_SPIRIT = 0xFE19,
+	TAG_BALL_OPEN_BERRY_BLOOM = 0xFE1A,
+// WATASHI_BALLS_END ptag
+	TAG_BALL_OPEN_ROCKET = 0xFE1B, //[hack] patches/0914
+	TAG_BALL_OPEN_SNATCH = 0xFE1C, //[hack] patches/0961
 };
 
 const struct CompressedSpriteSheet gBallSpriteSheets[POKEBALL_COUNT + 1] =
@@ -227,6 +287,21 @@ const struct CompressedSpriteSheet gBallSpriteSheets[POKEBALL_COUNT + 1] =
 	[BALL_TYPE_SPORT_BALL] = 	{gInterfaceGfx_SportBallTiles, 		(16 * 48) / 2, GFX_TAG_SPORTBALL},
 	[BALL_TYPE_BEAST_BALL] = 	{gInterfaceGfx_BeastBallTiles, 		(16 * 48) / 2, GFX_TAG_BEASTBALL},
 	[BALL_TYPE_DREAM_BALL] = 	{gInterfaceGfx_DreamBallTiles, 		(16 * 48) / 2, GFX_TAG_DREAMBALL},
+	[BALL_TYPE_START_BALL] = 	{gInterfaceGfx_StartBallTiles, 		(16 * 48) / 2, GFX_TAG_STARTBALL},
+// WATASHI_BALLS_BEGIN sheets
+	[BALL_TYPE_MOON_PETAL_BALL] = 	{gInterfaceGfx_MoonPetalBallTiles, 		(16 * 48) / 2, GFX_TAG_MOON_PETAL_BALL},
+	[BALL_TYPE_MEMORY_VEIL_BALL] = 	{gInterfaceGfx_MemoryVeilBallTiles, 		(16 * 48) / 2, GFX_TAG_MEMORY_VEIL_BALL},
+	[BALL_TYPE_TEAR_WISTERIA_BALL] = 	{gInterfaceGfx_TearWisteriaBallTiles, 		(16 * 48) / 2, GFX_TAG_TEAR_WISTERIA_BALL},
+	[BALL_TYPE_SWEET_HEART_BALL] = 	{gInterfaceGfx_SweetHeartBallTiles, 		(16 * 48) / 2, GFX_TAG_SWEET_HEART_BALL},
+	[BALL_TYPE_SILENT_HALO_BALL] = 	{gInterfaceGfx_SilentHaloBallTiles, 		(16 * 48) / 2, GFX_TAG_SILENT_HALO_BALL},
+	[BALL_TYPE_GAME_PULSE_BALL] = 	{gInterfaceGfx_GamePulseBallTiles, 		(16 * 48) / 2, GFX_TAG_GAME_PULSE_BALL},
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] = 	{gInterfaceGfx_WinterBlossomBallTiles, 		(16 * 48) / 2, GFX_TAG_WINTER_BLOSSOM_BALL},
+	[BALL_TYPE_THORN_HEART_BALL] = 	{gInterfaceGfx_ThornHeartBallTiles, 		(16 * 48) / 2, GFX_TAG_THORN_HEART_BALL},
+	[BALL_TYPE_FOX_SPIRIT_BALL] = 	{gInterfaceGfx_FoxSpiritBallTiles, 		(16 * 48) / 2, GFX_TAG_FOX_SPIRIT_BALL},
+	[BALL_TYPE_BERRY_BLOOM_BALL] = 	{gInterfaceGfx_BerryBloomBallTiles, 		(16 * 48) / 2, GFX_TAG_BERRY_BLOOM_BALL},
+// WATASHI_BALLS_END sheets
+	[BALL_TYPE_ROCKET_BALL] = 	{gInterfaceGfx_RocketBallTiles, 		(16 * 48) / 2, GFX_TAG_ROCKET_BALL}, //[hack] patches/0914
+	[BALL_TYPE_SNATCH_BALL] = 	{gInterfaceGfx_SnatchBallTiles, 		(16 * 48) / 2, GFX_TAG_SNATCH_BALL}, //[hack] patches/0961
 	[POKEBALL_COUNT] =		 	{gInterfaceGfx_DynamaxBallTiles, 	(16 * 48) / 2, GFX_TAG_DYNAMAXBALL},
 };
 
@@ -259,6 +334,21 @@ const struct CompressedSpritePalette gBallSpritePalettes[POKEBALL_COUNT + 1] =
 	[BALL_TYPE_SPORT_BALL] = 	{gInterfaceGfx_SportBallPal, 	GFX_TAG_SPORTBALL},
 	[BALL_TYPE_BEAST_BALL] = 	{gInterfaceGfx_BeastBallPal, 	GFX_TAG_BEASTBALL},
 	[BALL_TYPE_DREAM_BALL] = 	{gInterfaceGfx_DreamBallPal, 	GFX_TAG_DREAMBALL},
+	[BALL_TYPE_START_BALL] = 	{gInterfaceGfx_StartBallPal, 	GFX_TAG_STARTBALL},
+// WATASHI_BALLS_BEGIN pals
+	[BALL_TYPE_MOON_PETAL_BALL] = 	{gInterfaceGfx_MoonPetalBallPal, 	GFX_TAG_MOON_PETAL_BALL},
+	[BALL_TYPE_MEMORY_VEIL_BALL] = 	{gInterfaceGfx_MemoryVeilBallPal, 	GFX_TAG_MEMORY_VEIL_BALL},
+	[BALL_TYPE_TEAR_WISTERIA_BALL] = 	{gInterfaceGfx_TearWisteriaBallPal, 	GFX_TAG_TEAR_WISTERIA_BALL},
+	[BALL_TYPE_SWEET_HEART_BALL] = 	{gInterfaceGfx_SweetHeartBallPal, 	GFX_TAG_SWEET_HEART_BALL},
+	[BALL_TYPE_SILENT_HALO_BALL] = 	{gInterfaceGfx_SilentHaloBallPal, 	GFX_TAG_SILENT_HALO_BALL},
+	[BALL_TYPE_GAME_PULSE_BALL] = 	{gInterfaceGfx_GamePulseBallPal, 	GFX_TAG_GAME_PULSE_BALL},
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] = 	{gInterfaceGfx_WinterBlossomBallPal, 	GFX_TAG_WINTER_BLOSSOM_BALL},
+	[BALL_TYPE_THORN_HEART_BALL] = 	{gInterfaceGfx_ThornHeartBallPal, 	GFX_TAG_THORN_HEART_BALL},
+	[BALL_TYPE_FOX_SPIRIT_BALL] = 	{gInterfaceGfx_FoxSpiritBallPal, 	GFX_TAG_FOX_SPIRIT_BALL},
+	[BALL_TYPE_BERRY_BLOOM_BALL] = 	{gInterfaceGfx_BerryBloomBallPal, 	GFX_TAG_BERRY_BLOOM_BALL},
+// WATASHI_BALLS_END pals
+	[BALL_TYPE_ROCKET_BALL] = 	{gInterfaceGfx_RocketBallPal, 	GFX_TAG_ROCKET_BALL},
+	[BALL_TYPE_SNATCH_BALL] = 	{gInterfaceGfx_SnatchBallPal, 	GFX_TAG_SNATCH_BALL},
 	[POKEBALL_COUNT] =		 	{gInterfaceGfx_DynamaxBallPal,	GFX_TAG_DYNAMAXBALL},
 };
 
@@ -534,6 +624,138 @@ const struct SpriteTemplate gBallSpriteTemplates[POKEBALL_COUNT + 1] =
 		.affineAnims = sBallAffineAnimSequences,
 		.callback = SpriteCB_TestBallThrow,
 	},
+	[BALL_TYPE_START_BALL] =
+	{
+		.tileTag = GFX_TAG_STARTBALL,
+		.paletteTag = GFX_TAG_STARTBALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+// WATASHI_BALLS_BEGIN templates
+	[BALL_TYPE_MOON_PETAL_BALL] =
+	{
+		.tileTag = GFX_TAG_MOON_PETAL_BALL,
+		.paletteTag = GFX_TAG_MOON_PETAL_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_MEMORY_VEIL_BALL] =
+	{
+		.tileTag = GFX_TAG_MEMORY_VEIL_BALL,
+		.paletteTag = GFX_TAG_MEMORY_VEIL_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_TEAR_WISTERIA_BALL] =
+	{
+		.tileTag = GFX_TAG_TEAR_WISTERIA_BALL,
+		.paletteTag = GFX_TAG_TEAR_WISTERIA_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_SWEET_HEART_BALL] =
+	{
+		.tileTag = GFX_TAG_SWEET_HEART_BALL,
+		.paletteTag = GFX_TAG_SWEET_HEART_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_SILENT_HALO_BALL] =
+	{
+		.tileTag = GFX_TAG_SILENT_HALO_BALL,
+		.paletteTag = GFX_TAG_SILENT_HALO_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_GAME_PULSE_BALL] =
+	{
+		.tileTag = GFX_TAG_GAME_PULSE_BALL,
+		.paletteTag = GFX_TAG_GAME_PULSE_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] =
+	{
+		.tileTag = GFX_TAG_WINTER_BLOSSOM_BALL,
+		.paletteTag = GFX_TAG_WINTER_BLOSSOM_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_THORN_HEART_BALL] =
+	{
+		.tileTag = GFX_TAG_THORN_HEART_BALL,
+		.paletteTag = GFX_TAG_THORN_HEART_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_FOX_SPIRIT_BALL] =
+	{
+		.tileTag = GFX_TAG_FOX_SPIRIT_BALL,
+		.paletteTag = GFX_TAG_FOX_SPIRIT_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_BERRY_BLOOM_BALL] =
+	{
+		.tileTag = GFX_TAG_BERRY_BLOOM_BALL,
+		.paletteTag = GFX_TAG_BERRY_BLOOM_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+// WATASHI_BALLS_END templates
+	[BALL_TYPE_ROCKET_BALL] =
+	{
+		.tileTag = GFX_TAG_ROCKET_BALL,
+		.paletteTag = GFX_TAG_ROCKET_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
+	[BALL_TYPE_SNATCH_BALL] = //[hack] patches/0961
+	{
+		.tileTag = GFX_TAG_SNATCH_BALL,
+		.paletteTag = GFX_TAG_SNATCH_BALL,
+		.oam = sBallOamData,
+		.anims = sBallAnimSequences,
+		.images = NULL,
+		.affineAnims = sBallAffineAnimSequences,
+		.callback = SpriteCB_TestBallThrow,
+	},
 	[POKEBALL_COUNT] =
 	{
 		.tileTag = GFX_TAG_DYNAMAXBALL,
@@ -575,6 +797,21 @@ const struct CompressedSpriteSheet gBallParticleSpritesheets[POKEBALL_COUNT + 1]
 	[BALL_TYPE_SPORT_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_SPORT},
 	[BALL_TYPE_BEAST_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_BEAST},
 	[BALL_TYPE_DREAM_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_DREAM},
+	[BALL_TYPE_START_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_START},
+// WATASHI_BALLS_BEGIN psheets
+	[BALL_TYPE_MOON_PETAL_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_MOON_PETAL},
+	[BALL_TYPE_MEMORY_VEIL_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_MEMORY_VEIL},
+	[BALL_TYPE_TEAR_WISTERIA_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_TEAR_WISTERIA},
+	[BALL_TYPE_SWEET_HEART_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_SWEET_HEART},
+	[BALL_TYPE_SILENT_HALO_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_SILENT_HALO},
+	[BALL_TYPE_GAME_PULSE_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_GAME_PULSE},
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_WINTER_BLOSSOM},
+	[BALL_TYPE_THORN_HEART_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_THORN_HEART},
+	[BALL_TYPE_FOX_SPIRIT_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_FOX_SPIRIT},
+	[BALL_TYPE_BERRY_BLOOM_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_BERRY_BLOOM},
+// WATASHI_BALLS_END psheets
+	[BALL_TYPE_ROCKET_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_ROCKET},
+	[BALL_TYPE_SNATCH_BALL] =	{gBattleAnimSpriteSheet_Particles, 							(8 * 64) / 2, TAG_BALL_OPEN_SNATCH}, //[hack] patches/0961
 	[POKEBALL_COUNT] =			{gBattleAnimSpriteSheet_ParticlesDynamaxBallTiles, 			(8 * 64) / 2, TAG_BALL_OPEN_DYNAMAX},
 };
 
@@ -607,6 +844,21 @@ const struct CompressedSpritePalette gBallParticlePalettes[POKEBALL_COUNT + 1] =
 	[BALL_TYPE_SPORT_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_SPORT},
 	[BALL_TYPE_BEAST_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_BEAST},
 	[BALL_TYPE_DREAM_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_DREAM},
+	[BALL_TYPE_START_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_START},
+// WATASHI_BALLS_BEGIN ppals
+	[BALL_TYPE_MOON_PETAL_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_MOON_PETAL},
+	[BALL_TYPE_MEMORY_VEIL_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_MEMORY_VEIL},
+	[BALL_TYPE_TEAR_WISTERIA_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_TEAR_WISTERIA},
+	[BALL_TYPE_SWEET_HEART_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_SWEET_HEART},
+	[BALL_TYPE_SILENT_HALO_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_SILENT_HALO},
+	[BALL_TYPE_GAME_PULSE_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_GAME_PULSE},
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_WINTER_BLOSSOM},
+	[BALL_TYPE_THORN_HEART_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_THORN_HEART},
+	[BALL_TYPE_FOX_SPIRIT_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_FOX_SPIRIT},
+	[BALL_TYPE_BERRY_BLOOM_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_BERRY_BLOOM},
+// WATASHI_BALLS_END ppals
+	[BALL_TYPE_ROCKET_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_ROCKET},
+	[BALL_TYPE_SNATCH_BALL] = 	{gBattleAnimSpritePalette_136, 							TAG_BALL_OPEN_SNATCH}, //[hack] patches/0961
 	[POKEBALL_COUNT] =			{gBattleAnimSpriteSheet_ParticlesDynamaxBallPal,		TAG_BALL_OPEN_DYNAMAX},
 };
 
@@ -639,6 +891,21 @@ const u8 gBallOpenParticleAnimNums[POKEBALL_COUNT + 1] =
 	[BALL_TYPE_SPORT_BALL] = 	BALL_OPEN_STICKS, 			//Sport Ball
 	[BALL_TYPE_BEAST_BALL] = 	BALL_OPEN_BLUE_BUBBLES, 	//Beast Ball
 	[BALL_TYPE_DREAM_BALL] = 	BALL_OPEN_HEARTS, 			//Dream Ball
+	[BALL_TYPE_START_BALL] = 	BALL_OPEN_YELLOW_STARS, 	//START Ball（金の星）
+// WATASHI_BALLS_BEGIN anims
+	[BALL_TYPE_MOON_PETAL_BALL] = 	BALL_OPEN_HEARTS, 	//ムーンペタルボール
+	[BALL_TYPE_MEMORY_VEIL_BALL] = 	BALL_OPEN_BLUE_BUBBLES, 	//メモリーヴェールボール
+	[BALL_TYPE_TEAR_WISTERIA_BALL] = 	BALL_OPEN_BLUE_BUBBLES, 	//ティアウィステリアボール
+	[BALL_TYPE_SWEET_HEART_BALL] = 	BALL_OPEN_HEARTS, 	//スイートハートボール
+	[BALL_TYPE_SILENT_HALO_BALL] = 	BALL_OPEN_BLUE_BUBBLES, 	//サイレントヘイローボール
+	[BALL_TYPE_GAME_PULSE_BALL] = 	BALL_OPEN_BLUE_BUBBLES, 	//ゲームパルスボール
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] = 	BALL_OPEN_BLUE_BUBBLES, 	//ウィンターブロッサムボール
+	[BALL_TYPE_THORN_HEART_BALL] = 	BALL_OPEN_HEARTS, 	//ソーンハートボール
+	[BALL_TYPE_FOX_SPIRIT_BALL] = 	BALL_OPEN_YELLOW_STARS, 	//フォックススピリットボール
+	[BALL_TYPE_BERRY_BLOOM_BALL] = 	BALL_OPEN_HEARTS, 	//ベリーブルームボール
+// WATASHI_BALLS_END anims
+	[BALL_TYPE_ROCKET_BALL] = 	BALL_OPEN_STICKS, 	//ロケットボール
+	[BALL_TYPE_SNATCH_BALL] = 	BALL_OPEN_STICKS, 	//スナッチボール [hack] patches/0961
 	[POKEBALL_COUNT] =			BALL_OPEN_RAINBOW_CIRCLES,	//Dynamax Ball
 };
 
@@ -671,6 +938,21 @@ const TaskFunc gBallOpenParticleAnimationFuncs[POKEBALL_COUNT + 1] =
 	[BALL_TYPE_SPORT_BALL] = 	PokeBallOpenParticleAnimation, //Sport Ball
 	[BALL_TYPE_BEAST_BALL] = 	MasterBallOpenParticleAnimation, //Beast Ball
 	[BALL_TYPE_DREAM_BALL] = 	RepeatBallOpenParticleAnimation, //Dream Ball
+	[BALL_TYPE_START_BALL] = 	MasterBallOpenParticleAnimation, //START Ball
+// WATASHI_BALLS_BEGIN funcs
+	[BALL_TYPE_MOON_PETAL_BALL] = 	RepeatBallOpenParticleAnimation, //ムーンペタルボール
+	[BALL_TYPE_MEMORY_VEIL_BALL] = 	MasterBallOpenParticleAnimation, //メモリーヴェールボール
+	[BALL_TYPE_TEAR_WISTERIA_BALL] = 	MasterBallOpenParticleAnimation, //ティアウィステリアボール
+	[BALL_TYPE_SWEET_HEART_BALL] = 	RepeatBallOpenParticleAnimation, //スイートハートボール
+	[BALL_TYPE_SILENT_HALO_BALL] = 	MasterBallOpenParticleAnimation, //サイレントヘイローボール
+	[BALL_TYPE_GAME_PULSE_BALL] = 	MasterBallOpenParticleAnimation, //ゲームパルスボール
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] = 	MasterBallOpenParticleAnimation, //ウィンターブロッサムボール
+	[BALL_TYPE_THORN_HEART_BALL] = 	RepeatBallOpenParticleAnimation, //ソーンハートボール
+	[BALL_TYPE_FOX_SPIRIT_BALL] = 	MasterBallOpenParticleAnimation, //フォックススピリットボール
+	[BALL_TYPE_BERRY_BLOOM_BALL] = 	RepeatBallOpenParticleAnimation, //ベリーブルームボール
+// WATASHI_BALLS_END funcs
+	[BALL_TYPE_ROCKET_BALL] = 	PokeBallOpenParticleAnimation, //ロケットボール
+	[BALL_TYPE_SNATCH_BALL] = 	PokeBallOpenParticleAnimation, //スナッチボール [hack] patches/0961
 	[POKEBALL_COUNT] =			MasterBallOpenParticleAnimation, //Dynamax Ball
 };
 
@@ -703,6 +985,21 @@ const u16 gBallOpenMonFadePal[] = //gUnknown_085E5310 in Emerald
 	[BALL_TYPE_SPORT_BALL] = 	RGB(30, 17, 17), //Sport Ball - Pinkish Red
 	[BALL_TYPE_BEAST_BALL] = 	RGB(7, 12, 31), //Beast Ball - Royal Blue
 	[BALL_TYPE_DREAM_BALL] = 	RGB(31, 12, 20), //Dream Ball - Deep Pink
+	[BALL_TYPE_START_BALL] = 	RGB(30, 22, 6), //START Ball - Gold
+// WATASHI_BALLS_BEGIN fade
+	[BALL_TYPE_MOON_PETAL_BALL] = 	RGB(25, 20, 31), //ムーンペタルボール
+	[BALL_TYPE_MEMORY_VEIL_BALL] = 	RGB(22, 18, 31), //メモリーヴェールボール
+	[BALL_TYPE_TEAR_WISTERIA_BALL] = 	RGB(14, 18, 31), //ティアウィステリアボール
+	[BALL_TYPE_SWEET_HEART_BALL] = 	RGB(31, 22, 27), //スイートハートボール
+	[BALL_TYPE_SILENT_HALO_BALL] = 	RGB(20, 19, 31), //サイレントヘイローボール
+	[BALL_TYPE_GAME_PULSE_BALL] = 	RGB(10, 26, 31), //ゲームパルスボール
+	[BALL_TYPE_WINTER_BLOSSOM_BALL] = 	RGB(25, 24, 31), //ウィンターブロッサムボール
+	[BALL_TYPE_THORN_HEART_BALL] = 	RGB(26, 8, 16), //ソーンハートボール
+	[BALL_TYPE_FOX_SPIRIT_BALL] = 	RGB(31, 18, 8), //フォックススピリットボール
+	[BALL_TYPE_BERRY_BLOOM_BALL] = 	RGB(31, 14, 20), //ベリーブルームボール
+// WATASHI_BALLS_END fade
+	[BALL_TYPE_ROCKET_BALL] = 	RGB(31, 8, 8), //ロケットボール - 赤
+	[BALL_TYPE_SNATCH_BALL] = 	RGB(20, 8, 28), //スナッチボール - 紫 [hack] patches/0961
 	[POKEBALL_COUNT] =			RGB(27, 12, 23), //Dynamax Ball - Shiny Pink
 
 	RGB(0, 0, 0), //No idea what these lower values are for
@@ -954,6 +1251,125 @@ const struct SpriteTemplate gBallParticleSpriteTemplates[POKEBALL_COUNT + 1] =
 	{ //GFX_TAG_DREAMBALL
 		.tileTag = TAG_BALL_OPEN_DREAM,
 		.paletteTag = TAG_BALL_OPEN_DREAM,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_STARTBALL
+		.tileTag = TAG_BALL_OPEN_START,
+		.paletteTag = TAG_BALL_OPEN_START,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+// WATASHI_BALLS_BEGIN ptemplates
+	{ //GFX_TAG_MOON_PETAL_BALL
+		.tileTag = TAG_BALL_OPEN_MOON_PETAL,
+		.paletteTag = TAG_BALL_OPEN_MOON_PETAL,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_MEMORY_VEIL_BALL
+		.tileTag = TAG_BALL_OPEN_MEMORY_VEIL,
+		.paletteTag = TAG_BALL_OPEN_MEMORY_VEIL,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_TEAR_WISTERIA_BALL
+		.tileTag = TAG_BALL_OPEN_TEAR_WISTERIA,
+		.paletteTag = TAG_BALL_OPEN_TEAR_WISTERIA,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_SWEET_HEART_BALL
+		.tileTag = TAG_BALL_OPEN_SWEET_HEART,
+		.paletteTag = TAG_BALL_OPEN_SWEET_HEART,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_SILENT_HALO_BALL
+		.tileTag = TAG_BALL_OPEN_SILENT_HALO,
+		.paletteTag = TAG_BALL_OPEN_SILENT_HALO,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_GAME_PULSE_BALL
+		.tileTag = TAG_BALL_OPEN_GAME_PULSE,
+		.paletteTag = TAG_BALL_OPEN_GAME_PULSE,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_WINTER_BLOSSOM_BALL
+		.tileTag = TAG_BALL_OPEN_WINTER_BLOSSOM,
+		.paletteTag = TAG_BALL_OPEN_WINTER_BLOSSOM,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_THORN_HEART_BALL
+		.tileTag = TAG_BALL_OPEN_THORN_HEART,
+		.paletteTag = TAG_BALL_OPEN_THORN_HEART,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_FOX_SPIRIT_BALL
+		.tileTag = TAG_BALL_OPEN_FOX_SPIRIT,
+		.paletteTag = TAG_BALL_OPEN_FOX_SPIRIT,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_BERRY_BLOOM_BALL
+		.tileTag = TAG_BALL_OPEN_BERRY_BLOOM,
+		.paletteTag = TAG_BALL_OPEN_BERRY_BLOOM,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+// WATASHI_BALLS_END ptemplates
+	{ //GFX_TAG_ROCKET_BALL
+		.tileTag = TAG_BALL_OPEN_ROCKET,
+		.paletteTag = TAG_BALL_OPEN_ROCKET,
+		.oam = gOamData_AffineOff_ObjNormal_8x8,
+		.anims = sAnims_BallParticles,
+		.images = NULL,
+		.affineAnims = gDummySpriteAffineAnimTable,
+		.callback = SpriteCallbackDummy,
+	},
+	{ //GFX_TAG_SNATCH_BALL [hack] patches/0961
+		.tileTag = TAG_BALL_OPEN_SNATCH,
+		.paletteTag = TAG_BALL_OPEN_SNATCH,
 		.oam = gOamData_AffineOff_ObjNormal_8x8,
 		.anims = sAnims_BallParticles,
 		.images = NULL,

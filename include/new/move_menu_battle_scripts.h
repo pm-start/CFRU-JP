@@ -22,6 +22,7 @@ extern const u8 BattleScript_SelectingNotAllowedGravity[];
 extern const u8 BattleScript_SelectingNotAllowedThroatChop[];
 extern const u8 BattleScript_SelectingNotAllowedHealBlock[];
 extern const u8 BattleScript_SelectingNotAllowedGigatonHammer[];
+extern const u8 BattleScript_SelectingSealedMove[]; //[hack] patches/0560 ふういんルーレット
 
 //Strings
 extern const u8 StringNull[];

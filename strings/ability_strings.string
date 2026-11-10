@@ -180,3 +180,12 @@
 
 #org @gText_CommanderActivate
 [SCRIPTING_BANK]は\nしれいとう として\l[ATTACKER]に のみこまれた！
+
+#org @gText_StormySeaActivate
+うみが あらしに つつまれた！
+
+#org @gText_StormySeaContinues
+あらしの うみが あれくるっている！
+
+#org @gText_StormySeaEnd
+あらしの うみが おさまった！

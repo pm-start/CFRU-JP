@@ -35,9 +35,12 @@ KantoCeladonDept4F_Items:
 .equ ITEM_PP_MINI, 0x33F
 
 .align 1
+.equ ITEM_START_BALL, 0x35A	@ 2026-10-15 STARTボール（210 円・patches/0393）・最初のフレンドリィショップ＝トキワだけに並べる
+
 .global KantoViridianMart_Items
 KantoViridianMart_Items:
 	.2byte 4	@ ITEM_POKE_BALL
+	.2byte ITEM_START_BALL
 	.2byte 13	@ ITEM_POTION
 	.2byte ITEM_PP_MINI
 	.2byte 14	@ ITEM_ANTIDOTE
@@ -113,4 +116,5 @@ KantoCeladonDept5F_Vitamins:
 	.2byte 0x303	@ ITEM_JOLLY_MINT
 	.2byte 0x304	@ ITEM_NAIVE_MINT
 	.2byte 0x305	@ ITEM_SERIOUS_MINT
+	.2byte 0x365	@ ITEM_RUSTY_CROWN さびたおうかん（2026-10-16 ユーザー「5F にも並べる」・5000 円・patches/0433）
 	.2byte 0

@@ -1,4 +1,5 @@
 #include "defines.h"
+#include "hack_move_alias.h"
 #include "defines_battle.h"
 #include "../include/battle_setup.h"
 #include "../include/event_data.h"
@@ -25,8 +26,15 @@
 #include "../include/new/battle_util.h"
 #include "../include/new/build_pokemon.h"
 #include "map_region.h" //[hack] patches/0091
+#include "hack_met_level.h" //[hack] 2026-10-16 出会ったレベル 128 以上
+#include "hack_oak_phone.h" //[hack] オーキド戦の手持ち 6 匹
+#include "hack_stat_calc.h" //[hack] patches/0678 u16 入れ物・u32 で計算して頭打ち
+#include "hack_base_stats_wide.h" //[hack] patches/0678 種族値の u16 の窓口
+#include "hack_stat_access.h" //[hack] patches/0678
+#include "hack_iv_over100.h" //[hack] patches/0591 #128 Lv100 をこえた子の実効の個体値
 void HackDifficulty_AdjustTrainerMon(struct Pokemon* mon, u8 side); //[hack] patches/0132 src/hack_difficulty.c
-void HackDifficulty_AdjustFrontierMon(struct Pokemon* mon, bool8 forPlayer); //[hack] patches/0314 ももアイスは施設の相手も Lv+5（src/hack_difficulty.c・味方の相方・助っ人は触らない）
+void HackWatashi_FixMon(struct Pokemon* mon, u16 trainerId); //[hack] patches/0393 src/hack_watashitachi.c（わたしたち 10 人の手持ちのボール・色違い・Moémon）
+void HackDifficulty_AdjustFrontierMon(struct Pokemon* mon, bool8 forPlayer, bool8 isBrain); //[hack] patches/0924 isBrain＝フロンティアブレーン（−3／−2 を掛けない）／patches/0314 ももアイスは施設の相手も Lv+5（src/hack_difficulty.c・味方の相方・助っ人は触らない）
 #include "../include/new/build_pokemon_2.h"
 #include "../include/new/catching.h"
 #include "../include/new/damage_calc.h"
@@ -48,9 +56,14 @@ void HackDifficulty_AdjustFrontierMon(struct Pokemon* mon, bool8 forPlayer); //[
 #include "Tables/raid_partners.h"
 #include "Tables/trainers_with_evs_table.h"
 #include "hack_volcarona.h"   //[hack] 2026-10-11 特別なウルガモス
+#include "../include/new/achievements.h"   //[hack] patches/0500 Achievements_Notify
+u32 HackTrainerBasisBst(u16 species); //[hack] hack_class_pool.c・トレーナーの手持ちを合計で選ぶ所は底上げ前の合計
 //[hack] patches/0143 トレーナーヒル（src/hoenn_trainer_hill.c）
 bool8 HoennHill_InHillBattle(void);
 const struct BattleTowerSpread* HoennHill_MakeSpread(struct BattleTowerSpread* out, u16 tableId, u8 slot);
+bool8 HoennYartie_InBattle(void); //[hack] patches/0817 ロジックアリーナ（src/hoenn_yartie.c）
+const struct BattleTowerSpread* HoennYartie_MakeSpread(struct BattleTowerSpread* out, u16 tableId, u8 slot);
+void HoennYartie_SetNickname(struct Pokemon* mon, u16 tableId, u8 slot);
 
 /*
 build_pokemon.c
@@ -166,6 +179,7 @@ static u8 GetTrainerMonGender(const struct Trainer* trainer);
 static u8 GetTrainerMonMovePPBonus(void);
 static u8 GetTrainerMonMovePP(u16 move, u8 index);
 #if (defined SCALED_TRAINERS && !defined  DEBUG_NO_LEVEL_SCALING)
+u16 HackBadgeSquash_CapLevel(u16 level); //[hack] patches/0580 src/hack_battle_squash.c
 static u8 GetPlayerBiasedAverageLevel(u8 maxLevel);
 static bool8 CanTrainerEvolveMon(void);
 static bool8 IsPseudoBossTrainerPartyForLevelScaling(u8 trainerPartyFlags);
@@ -179,7 +193,8 @@ static void GiveMon2BestBaseStatEVs(struct Pokemon* mon);
 static u8 BuildFrontierParty(struct Pokemon* const party, const u16 trainerNum, const u8 tier, const bool8 firstTrainer, const bool8 forPlayer, const u8 side);
 static void BuildFrontierMultiParty(u8 multiId);
 static void BuildRaidMultiParty(void);
-static void CreateFrontierMon(struct Pokemon* mon, const u8 level, const struct BattleTowerSpread* spread, const u16 trainerId, const u8 trainerNum, const u8 trainerGender, const bool8 forPlayer);
+bool8 HackHeroine_Active(void); //[hack] patches/0865 #76 src/hack_heroine.c
+static void CreateFrontierMon(struct Pokemon* mon, const u16 level, const struct BattleTowerSpread* spread, const u16 trainerId, const u8 trainerNum, const u8 trainerGender, const bool8 forPlayer);
 static void TryFixMiniorForm(struct Pokemon* mon);
 static u16 ConvertFrontierAbilityNumToAbility(const u8 abilityNum, const u16 species);
 static bool8 BaseStatsTotalGEAlreadyOnTeam(const u16 toCheck, const u8 partySize, u16* speciesArray);
@@ -203,9 +218,11 @@ static void SwapMons(struct Pokemon* party, u8 i, u8 j);
 static void PostProcessTeam(struct Pokemon* party, struct TeamBuilder* builder);
 static void TryShuffleMovesForCamomons(struct Pokemon* party, u8 tier, u16 trainerId);
 static u8 GetPartyIdFromPartyData(struct Pokemon* mon);
-static u8 GetHighestMonLevel(const struct Pokemon* const party);
+static u16 GetHighestMonLevel(const struct Pokemon* const party);
 static void CheckShinyMon(struct Pokemon* mon);
 bool8 HackGiftShiny_IsStarterRoll(void); //[hack] src/hack_gift_shiny.c
+bool8 HackGiftShiny_IsStarterLab(void); //[hack] patches/0426 src/hack_gift_shiny.c
+bool8 HackGiftShiny_IsStarterGift(void); //[hack] patches/0500 src/hack_gift_shiny.c（研究所の 3 匹 + じっせきの「最初のポケモン」）
 bool8 HackShiningCharm_Roll(void); //[hack] src/hack_shining_charm.c
 extern u8 GetCurrentLevelCap(void); //Must be implemented yourself
 
@@ -373,7 +390,7 @@ void BuildTrainerPartySetup(void)
 				ReducePartyToThree(); //Well... sometimes can be less than 3
 				Memset(&gPlayerParty[3], 0x0, sizeof(struct Pokemon) * 3);
 
-				if (IsRaidBattle() && VarGet(VAR_PARTNER) == RAID_BATTLE_MULTI_TRAINER_TID)
+				if (VarGet(VAR_PARTNER) == RAID_BATTLE_MULTI_TRAINER_TID) //[hack] patches/0865 #76 連れ歩きの相方もレイドの助っ人の表から（0939 FIX-galactic-ow-size-double: シンオウ 6 章のタッグ戦のヒカリも同じ道＝連れ歩き・レイドの条件は外した。この値は相方がレイドの表の人のときにだけ置かれる）
 					BuildRaidMultiParty();
 				else
 					CreateNPCTrainerParty(&gPlayerParty[3], VarGet(VAR_PARTNER), FALSE, B_SIDE_PLAYER);
@@ -409,6 +426,8 @@ void BuildTrainerPartySetup(void)
 	//Try change Zacian and Zamazenta's form
 	TryCrownZacianZamazenta(gPlayerParty);
 	TryCrownZacianZamazenta(gEnemyParty);
+
+	HackPhone_OakFillParty(); //[hack] オーキドの電話。借りた 1 匹を 6 匹に差し替える
 
 	if (ViableMonCount(gEnemyParty) <= 1 && !IsRaidBattle() && !(gBattleTypeFlags & BATTLE_TYPE_LINK)) //Error prevention
 		gBattleTypeFlags &= ~(BATTLE_TYPE_INGAME_PARTNER | BATTLE_TYPE_TWO_OPPONENTS | BATTLE_TYPE_DOUBLE);
@@ -598,7 +617,7 @@ void sp0E7_CreateFrontierOpponentTeamBeforeBattle(void)
 
 u16 GiveRandomFrontierMonByTier(u8 side, u8 tier, u16 spreadType)
 {
-	u8 level;
+	u16 level;
 	u16 spreadCount;
 	struct Pokemon mon;
 	const struct BattleTowerSpread* spread;
@@ -696,18 +715,42 @@ void sp06B_ReplacePlayerTeamWithMultiTrainerTeam(void)
 
 //Returns the number of Pokemon
 extern u16 HoennLeagueRematchTrainer(u16 trainerId); //★ src/hoenn_league.c（patches/0072）
+u16 HackGymTier_MapTrainer(u16 id); //[hack] patches/0470 src/hack_gym_tiers.c
+void HackGymTier_AdjustMon(struct Pokemon* mon, u16 id, u8 side, u8 i); //[hack] patches/0470
 bool8 HackGoldenWedding_PickParty(u16 trainerId, bool8 firstTrainer, struct Trainer* copy, struct TrainerMonItemCustomMoves* party); //[hack] patches/0243
 void HackClassPool_ReplaceMon(struct Pokemon* mon, struct Pokemon* party, u8 index, u16 trainerId, u8 side); //[hack] patches/0305
+void HackClassPool_FixNpcMoves(struct Pokemon* mon, u16 trainerId, u8 side); //[hack] patches/0600 npc_ok=N の新技を敵トレーナーの手持ちから外す（src/hack_class_pool.c）
+void HackChallengeC_RandomTrainerMon(struct Pokemon* mon, u16 trainerId, u8 side, u8 index); //[hack] patches/0550 縛り C ランダム
 extern const struct BattleTowerSpread* HoennFrontier_MakeSpread(struct BattleTowerSpread* out, u16 tableId); //★ src/hoenn_frontier.c（patches/0078）
 extern const struct BattleTowerSpread* HoennFrontier_MakeBrainSpread(struct BattleTowerSpread* out, u16 tableId, u8 slot); //★ src/hoenn_frontier.c（patches/0087）
 extern const struct BattleTowerSpread* HoennFactory_OpponentSpread(struct BattleTowerSpread* out, u8 slot); //★ src/hoenn_factory.c（patches/0128）
 extern bool8 HoennFactory_InFactoryBattle(void); //★ src/hoenn_factory.c（patches/0128）
 
+void HackCapScaling_ClampOpponentMon(struct Pokemon* mon, u8 side, u8 designed); //[hack] patches/0620 src/hack_cap_scaling.c
+void HackGruntStats_Apply(struct Pokemon* mon, u8 side, u8 trainerClass, const u8* trainerName); //[hack] patches/0660 src/hack_grunt_stats.c
+void HackKind_RollTrainer(struct Pokemon* mon, u8 side, u8 trainerClass, const u8* trainerName, u16 trainerId, u32 partyIndex); //[hack] patches/0960 src/hack_kind_roll.c
+
+//[hack] patches/0620 トレーナーの表の i 番目の子のレベル（スケーリング前）
+static u8 HackCapScaling_DesignedLevel(const struct Trainer* trainer, u32 i)
+{
+	switch (trainer->partyFlags) {
+		case 0:
+			return trainer->party.NoItemDefaultMoves[i].lvl;
+		case PARTY_FLAG_CUSTOM_MOVES:
+			return trainer->party.NoItemCustomMoves[i].lvl;
+		case PARTY_FLAG_HAS_ITEM:
+			return trainer->party.ItemDefaultMoves[i].lvl;
+		default:
+			return trainer->party.ItemCustomMoves[i].lvl;
+	}
+}
+
 static u8 CreateNPCTrainerParty(struct Pokemon* const party, const u16 trainerIdIn, const bool8 firstTrainer, const bool8 side)
 {
 	//★ ホウエンリーグの強化版（patches/0072・2026-09-25）: 1 回制覇したあとの四天王・チャンピオンは
 	//  強化版の手持ちで作る。この関数の中はすべて差し替えた番号で引く（手持ちだけ変わる。印は元の番号のまま）
-	const u16 trainerId = HoennLeagueRematchTrainer(trainerIdIn);
+	//★ ジムリーダーの再戦の段階（patches/0470・#117）: 段階 0 の番号で始まった再戦は、今の段階のトレーナーの手持ちで作る（src/hack_gym_tiers.c）
+	const u16 trainerId = HackGymTier_MapTrainer(HoennLeagueRematchTrainer(trainerIdIn));
 	u32 i, j, nameHash;
 	unusedArg u8 monsCount, baseIV, setMonGender, trainerNameLengthOddness, minPartyLevel, maxPartyLevel,
 	   modifiedAveragePlayerLevel, highestPlayerLevel, canEvolveMon, canEvolveMonBackup, levelScaling, setCustomMoves;
@@ -738,11 +781,11 @@ static u8 CreateNPCTrainerParty(struct Pokemon* const party, const u16 trainerId
 		#ifdef VAR_GAME_DIFFICULTY
 		u8 gameDifficulty = VarGet(VAR_GAME_DIFFICULTY);
 		if (gameDifficulty >= OPTIONS_EXPERT_DIFFICULTY && side != B_SIDE_PLAYER) //Not partner
-			baseIV = 31;
+			baseIV = HACK_IV_MAX; //[hack] patches/0677
 		else
 		#endif
 		{
-			baseIV = MathMin(gBaseIVsByTrainerClass[trainer->trainerClass], 31);
+			baseIV = MathMin(gBaseIVsByTrainerClass[trainer->trainerClass], HACK_IV_MAX); //[hack] patches/0677
 			if (baseIV == 0) //No data in the table
 				baseIV = STANDARD_IV;
 		}
@@ -962,7 +1005,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon* const party, const u16 trainerId
 
 			//Assign Trainer information to mon
 			u8 otGender = trainer->gender;
-			const u8* name = TryGetRivalNameByTrainerClass(gTrainers[trainerId].trainerClass);
+			const u8* name = TryGetRivalNameByTrainerId(trainerId); //[hack] patches/0386 足したチャンピオン（シロナ・ワタル）の子の親の名前は自分の名前
 			if (name == NULL) //Not Rival or Rival name isn't tied to Trainer class
 				SetMonData(mon, MON_DATA_OT_NAME, &trainer->trainerName);
 			else
@@ -1005,7 +1048,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon* const party, const u16 trainerId
 				{
 					SET_EVS(spread);
 					if (spread->ivs != 0) //Otherwise use default class values
-						SET_IVS_SINGLE_VALUE(MathMin(31, spread->ivs));
+						SET_IVS_SINGLE_VALUE(MathMin(HACK_IV_MAX, spread->ivs)); //[hack] patches/0677
 				}
 
 				if (MoveInMonMoveset(MOVE_TRICKROOM, mon)
@@ -1030,7 +1073,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon* const party, const u16 trainerId
 					#endif
 						break;
 					case TRAINER_EV_RANDOM_BALL:
-						ballType = Random() % NUM_BALLS; //Set Random Ball
+						ballType = umodsi(Random(), BALL_TYPE_ROCKET_BALL); //Set Random Ball（0〜37・ロケットボールは含めない・patches/0914）
 						break;
 					default:
 						ballType = MathMin(spread->ball, LAST_BALL_INDEX);
@@ -1092,11 +1135,19 @@ static u8 CreateNPCTrainerParty(struct Pokemon* const party, const u16 trainerId
 			}
 
 			HackClassPool_ReplaceMon(mon, party, i, trainerId, side); //[hack] patches/0305 クラスごとの手持ちの候補から選び直す（src/hack_class_pool.c）
+			HackChallengeC_RandomTrainerMon(mon, trainerId, side, i); //[hack] patches/0550 縛り C ランダム: 相手の手持ちの種族を入れ替える（src/hack_challenge_c.c）
+			HackWatashi_FixMon(mon, trainerId); //[hack] patches/0393 わたしたち 10 人（940〜949）の手持ち: その人のボール・色違い・Moémon の当たり（src/hack_watashitachi.c）
 			HackDifficulty_AdjustTrainerMon(mon, side); //[hack] patches/0132 なんいど「やさしい」: 努力値 0・持ち物なし・レベル -3（src/hack_difficulty.c）
+			HackCapScaling_ClampOpponentMon(mon, side, HackCapScaling_DesignedLevel(trainer, i)); //[hack] patches/0620 相手の子のレベルは 自分に効いている上限をこえない（表のレベルより下には下げない・ももアイス／しゃかりきのあと＝上限が勝つ・src/hack_cap_scaling.c）
+			HackGymTier_AdjustMon(mon, trainerId, side, i); //[hack] patches/0470 ジムリーダーの再戦の手持ち: 段階のぶんのレベルを足し、バッジの数の上限（32 個で 180）で止める（ももアイス +5・レベルスケーリングで超える分も・src/hack_gym_tiers.c）
+			HackClassPool_FixNpcMoves(mon, trainerId, side); //[hack] patches/0600 Lv1〜100／Lv101〜200 の新技のうち npc_ok=N（大博打など）を、敵の手持ちから外して その子が覚える安全な最新の技に入れ替える（難易度・再戦のレベル調整のあと・src/hack_class_pool.c）
+
+			HackKind_RollTrainer(mon, side, trainer->trainerClass, trainer->trainerName, trainerId, i); //[hack] patches/0960 個体の印（ヌシ・デルタ種・ダーク）のランダム付与: トレーナーの入口はここ 1 か所（呼び元 4 か所は全部この関数・能力の計算に印を反映するため CalculateMonStatsNew の前・src/hack_kind_roll.c）
 
 			//Caluate stats and set to full health
 			CalculateMonStatsNew(mon);
 			HealMon(mon);
+			HackGruntStats_Apply(mon, side, trainer->trainerClass, trainer->trainerName); //[hack] patches/0660 ロケット団のしたっぱ: 実数値 攻撃・とくこう・すばやさ ×1.3／HP・防御・とくぼう ×0.7（HealMon のあと＝中で HP を最大に戻す・src/hack_grunt_stats.c）
 
 			//Status Inducers
 			TryStatusInducer(mon);
@@ -1205,7 +1256,7 @@ static u8 GetPlayerBiasedAverageLevel(u8 maxLevel)
 	
 		if (species != SPECIES_NONE && species != SPECIES_EGG) //Viable mon
 		{
-			u8 level = GetMonData(&gPlayerParty[i], MON_DATA_LEVEL, NULL);
+			u16 level = HackBadgeSquash_CapLevel(GetMonData(&gPlayerParty[i], MON_DATA_LEVEL, NULL)); //[hack] patches/0580 上限をこえた子は 戦闘で上限のレベルになる
 			
 			if (maxLevel - level <= 5) //This level is within 5 levels of the max
 			{
@@ -1396,7 +1447,7 @@ static void ModifySpeciesAndLevelForBossBattle(unusedArg u16* species, unusedArg
 	#endif
 }
 
-u8 GetScaledWildBossLevel(u8 level)
+u16 GetScaledWildBossLevel(u16 level)
 {
 	#if (defined SCALED_TRAINERS && !defined DEBUG_NO_LEVEL_SCALING)
 	u8 newLevel;
@@ -1487,7 +1538,7 @@ static u8 BuildFrontierParty(struct Pokemon* const party, const u16 trainerId, c
 	u8 trainerGender = 0;
 	u8 battleTowerPokeNum = VarGet(VAR_BATTLE_FACILITY_POKE_NUM);
 	u8 battleType = VarGet(VAR_BATTLE_FACILITY_BATTLE_TYPE);
-	u8 level = GetBattleFacilityLevel(tier);
+	u16 level = GetBattleFacilityLevel(tier);
 	u16 tableId = VarGet(VAR_FACILITY_TRAINER_ID + (firstTrainer ^ 1));
 
 	if (!forPlayer)
@@ -1640,7 +1691,7 @@ static u8 BuildFrontierParty(struct Pokemon* const party, const u16 trainerId, c
 									else
 										spread = &gLittleCupSpreads[Random() % TOTAL_LITTLE_CUP_SPREADS];
 
-									u16 bst = GetBaseStatsTotal(spread->species);
+									u16 bst = HackTrainerBasisBst(spread->species);
 									if (bst > 350 || bst < 250)
 										goto SPECIAL_TRAINER_350_SPREADS; //Reroll if doesn't have viable stats
 									break;
@@ -1669,6 +1720,11 @@ static u8 BuildFrontierParty(struct Pokemon* const party, const u16 trainerId, c
 							if ((trainerId == BATTLE_TOWER_SPECIAL_TID || trainerId == FRONTIER_BRAIN_TID) && !forPlayer && HoennFactory_InFactoryBattle())
 							{	//★ バトルファクトリー: 先に決めた相手の 3 匹（ダツラも同じ・src/hoenn_factory.c・patches/0128）
 								spread = HoennFactory_OpponentSpread(&hoennSpread, i);
+								hoennFixed = TRUE;
+							}
+							else if (trainerId == BATTLE_TOWER_SPECIAL_TID && !forPlayer && HoennYartie_InBattle()) //[hack] patches/0817 ロジックアリーナ: 相手が選んだ決まった 3 匹（src/hoenn_yartie.c）
+							{
+								spread = HoennYartie_MakeSpread(&hoennSpread, tableId, i);
 								hoennFixed = TRUE;
 							}
 							else if (trainerId == BATTLE_TOWER_SPECIAL_TID && !forPlayer && HoennHill_InHillBattle()) //★ トレーナーヒル: 決まった 3 匹（src/hoenn_trainer_hill.c・patches/0143）
@@ -1747,7 +1803,7 @@ static u8 BuildFrontierParty(struct Pokemon* const party, const u16 trainerId, c
 									else
 										spread = &gLittleCupSpreads[Random() % TOTAL_LITTLE_CUP_SPREADS];
 
-									u16 bst = GetBaseStatsTotal(spread->species);
+									u16 bst = HackTrainerBasisBst(spread->species);
 									if (bst > 350 || bst < 250)
 										goto MULTI_PARTNER_350_SPREADS; //Reroll if doesn't have viable stats
 									break;
@@ -1841,7 +1897,7 @@ static u8 BuildFrontierParty(struct Pokemon* const party, const u16 trainerId, c
 								case 1:
 									spread = &gLittleCupSpreads[Random() % TOTAL_LITTLE_CUP_SPREADS];
 
-									u16 bst = GetBaseStatsTotal(spread->species);
+									u16 bst = HackTrainerBasisBst(spread->species);
 									if (bst > 350 || bst < 250)
 										goto REGULAR_350_SPREADS; //Reroll if doesn't have viable stats
 									break;
@@ -2028,6 +2084,8 @@ static u8 BuildFrontierParty(struct Pokemon* const party, const u16 trainerId, c
 
 		UpdateBuilderAfterSpread(builder, spread, species, ability, item, itemEffect, i);
 		CreateFrontierMon(&party[i], level, spread, trainerId, firstTrainer ^ 1, trainerGender, forPlayer);
+		if (!forPlayer && trainerId == BATTLE_TOWER_SPECIAL_TID && HoennYartie_InBattle()) //[hack] patches/0817 ロンジャのポケモンのニックネーム（ヤ入り・src/hoenn_yartie.c）
+			HoennYartie_SetNickname(&party[i], tableId, i);
 	}
 
 	PostProcessTeam(party, builder);
@@ -2047,7 +2105,7 @@ static void BuildFrontierMultiParty(u8 multiId)
 	int i;
 	u8 numRegMonsOnTeam = 0;
 	u8 tier = VarGet(VAR_BATTLE_FACILITY_TIER);
-	u8 level = GetBattleFacilityLevel(tier);
+	u16 level = GetBattleFacilityLevel(tier);
 	const struct BattleTowerSpread* spread = NULL;
 	const struct MultiBattleTowerTrainer* multiPartner = &gFrontierMultiBattleTrainers[multiId];
 	u8 idOnTeam[multiPartner->regSpreadSize];
@@ -2144,20 +2202,99 @@ const struct BattleTowerSpread* GetRaidMultiSpread(u8 multiId, u8 index, u8 numS
 	return spread;
 }
 
+//[hack] patches/0665 FEAT-raid-partner: 助っ人のレベル＝主人公の手持ちのいちばん高いレベル（上限なし・伝説レイドも通常レイドも同じ）。
+//  戦闘の直前に ReducePartyToThree が 3 匹に減らす（残りは ExtensionState.partyBackup）ので、今の手持ちと退避した分の両方から求める。
+//  フロンティアのデモ（FLAG_BATTLE_FACILITY）は今までどおり施設のレベル。static の値は使わない（6.13）。
+static u8 HackRaidPartner_Level(void)
+{
+	u8 max = 1;
+	u32 i;
+
+	if (FlagGet(FLAG_BATTLE_FACILITY))
+		return GetRandomRaidLevel();
+
+	for (i = 0; i < PARTY_SIZE * 2; ++i)
+	{
+		const struct Pokemon* mon = (i < PARTY_SIZE) ? &gPlayerParty[i]
+									: (ExtensionState.partyBackup != NULL ? &((struct Pokemon*) ExtensionState.partyBackup)[i - PARTY_SIZE] : NULL);
+		u16 species;
+		u16 level;
+
+		if (mon == NULL)
+			break;
+		species = GetMonData(mon, MON_DATA_SPECIES2, NULL);
+		if (species == SPECIES_NONE || species == SPECIES_EGG)
+			continue;
+		level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+		if (level > max)
+			max = level;
+	}
+
+	return max;
+}
+
 static void BuildRaidMultiParty(void)
 {
 	int i;
 	u8 metLoc = 0;
-	u8 numStars = gRaidBattleStars;
+	u8 numStars = IsRaidBattle() ? gRaidBattleStars : SIX_STAR_RAID; //[hack] patches/0865 #76 レイドでなければ 6 つ星の型
 	u8 multiId = VarGet(VAR_FACILITY_TRAINER_ID_PARTNER);
+	u8 size = gRaidPartners[multiId].spreadSizes[numStars];
+	u8 order[PARTY_SIZE];
+
+	//[hack] patches/0870 #76 段 3: 連れ歩きの相方（ハルカ・ヒカリ）の型が 4 匹以上あるときは、戦闘のたびに 3 匹を重ならないように無作為に選ぶ。
+	//  レイドの助っ人（IsRaidBattle）と 3 匹以下の型は今までどおり先頭から（order は 0, 1, 2, …のまま）
+	if (size > PARTY_SIZE)
+		size = PARTY_SIZE;
+	for (i = 0; i < size; ++i)
+		order[i] = i;
+	//  メガストーンを持つ子・Z クリスタルを持つ子は、選ぶ 3 匹のうちそれぞれ 1 匹まで（ユーザー決定・メガ 1 匹と Z 1 匹が一緒に出るのは可）。
+	//  重なったら引き直す（32 回まで）＝「メガ 1 以下・Z 1 以下の組み合わせ」の中でどれも同じ確率（メガ／Z の子だけ極端に出にくくならない）。
+	//  32 回でも決まらなければ先頭 3 匹（型の並びは先頭 3 匹にメガ・Z とも 1 匹以下）
+	if (!IsRaidBattle() && HackHeroine_Active() && size > PARTY_SIZE / 2)
+	{
+		u8 tries;
+
+		for (tries = 0; tries < 32; ++tries)
+		{
+			u8 megas = 0, zs = 0;
+
+			for (i = 0; i < size; ++i)
+				order[i] = i;
+			for (i = 0; i < PARTY_SIZE / 2; ++i)
+			{
+				u8 j = i + Random() % (size - i);
+				u8 tmp = order[i];
+
+				order[i] = order[j];
+				order[j] = tmp;
+			}
+			for (i = 0; i < PARTY_SIZE / 2; ++i)
+			{
+				u16 item = GetRaidMultiSpread(multiId, order[i], numStars)->item;
+
+				if (IsMegaStone(item))
+					++megas;
+				if (IsZCrystal(item))
+					++zs;
+			}
+			if (megas <= 1 && zs <= 1)
+				break;
+		}
+		if (tries >= 32)
+			for (i = 0; i < size; ++i)
+				order[i] = i;
+	}
 
 	//Build Team
-	for (i = 0; i < PARTY_SIZE / 2 && i < gRaidPartners[multiId].spreadSizes[numStars]; ++i)
+	for (i = 0; i < PARTY_SIZE / 2 && i < size; ++i)
 	{
-		const struct BattleTowerSpread* spread = GetRaidMultiSpread(multiId, i, numStars);
-		CreateFrontierMon(&gPlayerParty[i + 3], GetRandomRaidLevel(), spread, RAID_BATTLE_MULTI_TRAINER_TID, 2, gRaidPartners[multiId].gender, FALSE);
+		const struct BattleTowerSpread* spread = GetRaidMultiSpread(multiId, order[i], numStars);
+		CreateFrontierMon(&gPlayerParty[i + 3], HackRaidPartner_Level() /*[hack] patches/0665*/, spread, RAID_BATTLE_MULTI_TRAINER_TID, 2, gRaidPartners[multiId].gender, FALSE);
 		SetMonData(&gPlayerParty[i + 3], MON_DATA_MET_LOCATION, &metLoc); //So they don't say "Battle Frontier"
 
+		//[hack] patches/0665 FEAT-raid-partner: FLAG_POKEMON_RANDOMIZER が無いこの版では、下の条件が「!FlagGet(FLAG_BATTLE_FACILITY)」だけに縮み、助っ人の技が毎回レベル技に上書きされていた（型の技が消える）。乱数化の版だけに囲む
+		#ifdef FLAG_POKEMON_RANDOMIZER
 		if (!FlagGet(FLAG_BATTLE_FACILITY)
 		#ifdef FLAG_POKEMON_RANDOMIZER
 		&& FlagGet(FLAG_POKEMON_RANDOMIZER) //Don't set custom moves when species has been randomized
@@ -2170,10 +2307,11 @@ static void BuildRaidMultiParty(void)
 			Memset(gPlayerParty[i + 3].moves, 0, sizeof(gPlayerParty[i + 3].moves));
 			GiveBoxMonInitialMoveset((void*) &gPlayerParty[i + 3]); //Give the randomized Pokemon moves it would normally have
 		}
+		#endif
 	}
 }
 
-static void CreateFrontierMon(struct Pokemon* mon, const u8 level, const struct BattleTowerSpread* spread, const u16 trainerId, const u8 trainerNum, const u8 trainerGender, const bool8 forPlayer)
+static void CreateFrontierMon(struct Pokemon* mon, const u16 level, const struct BattleTowerSpread* spread, const u16 trainerId, const u8 trainerNum, const u8 trainerGender, const bool8 forPlayer)
 {
 	int i, j;
 	u16 species = spread->species;
@@ -2216,7 +2354,7 @@ static void CreateFrontierMon(struct Pokemon* mon, const u8 level, const struct 
 		mon->metLocation = MAPSEC_TRAINER_TOWER;
 	#endif
 */
-	mon->metLevel = level;
+	HackMetLevel_Set((struct BoxPokemon*) mon, level); //[hack] 2026-10-16 128 以上も持つ
 	mon->obedient = TRUE;
 	mon->friendship = 255;
 
@@ -2249,7 +2387,7 @@ static void CreateFrontierMon(struct Pokemon* mon, const u8 level, const struct 
 	if (spread->ball != BALL_TYPE_RANDOM)
 		ballType = MathMin(LAST_BALL_INDEX, spread->ball);
 	else
-		ballType = umodsi(Random(), NUM_BALLS);
+		ballType = umodsi(Random(), BALL_TYPE_ROCKET_BALL); //[hack] patches/0914 ランダムのボールにロケットボールは含めない（以前の NUM_BALLS＝38 と同じ範囲）
 	SetMonData(mon, MON_DATA_POKEBALL, &ballType);
 
 	if (spread->gigantamax)
@@ -2259,13 +2397,13 @@ static void CreateFrontierMon(struct Pokemon* mon, const u8 level, const struct 
 		mon->teratype = spread->teraType - 1;
 
 	TryFormRevert(mon); //To fix Minior forms
-	HackDifficulty_AdjustFrontierMon(mon, forPlayer); //[hack] patches/0314 ももアイス: 施設の相手も Lv+5（ふつうのトレーナーは CreateNPCTrainerParty の HackDifficulty_AdjustTrainerMon。施設は BuildFrontierParty で先に抜ける＝5e の指摘 2026-10-11。gPlayerParty に作る相方・助っ人は中で外す）
+	HackDifficulty_AdjustFrontierMon(mon, forPlayer, trainerId == FRONTIER_BRAIN_TID); //[hack] patches/0924 ブレーンは難易度でレベルを下げない（0314:  patches/0314 ももアイス: 施設の相手も Lv+5（ふつうのトレーナーは CreateNPCTrainerParty の HackDifficulty_AdjustTrainerMon。施設は BuildFrontierParty で先に抜ける＝5e の指摘 2026-10-11。gPlayerParty に作る相方・助っ人は中で外す）
 	CalculateMonStatsNew(mon);
 	HealMon(mon);
 }
 
 //★ バトルファクトリー（2026-10-03・src/hoenn_factory.c・patches/0128）: レンタルの 1 匹を作る（CreateFrontierMon は static なので入口だけ）
-void HoennFactory_CreateMon(struct Pokemon* mon, u8 level, const struct BattleTowerSpread* spread, bool8 forPlayer)
+void HoennFactory_CreateMon(struct Pokemon* mon, u16 level, const struct BattleTowerSpread* spread, bool8 forPlayer)
 {
 	CreateFrontierMon(mon, level, spread, BATTLE_TOWER_SPECIAL_TID, 0, 0, forPlayer);
 }
@@ -2297,7 +2435,7 @@ u16 GenerateWildMonHeldItem(u16 species, u8 bonus)
 		return gBaseStats[species].item1; //100% chance
 
 	if (!GetMonData(&gPlayerParty[0], MON_DATA_IS_EGG, NULL)
-	&& AbilityIncreasesWildItemChance(GetMonAbility(&gPlayerParty[0]))) //Increased chance of finding an item
+	&& (AbilityIncreasesWildItemChance(GetMonAbility(&gPlayerParty[0])) || AbilityIncreasesWildItemChance(SecondAbility_OfMonActive(&gPlayerParty[0])))) //Increased chance of finding an item //[hack] 2026-10-20 2 つ目
 	{
 		var1 = 20;
 		var2 = 80;
@@ -2384,12 +2522,12 @@ void GiveMonXPerfectIVs(struct Pokemon* mon, u8 totalPerfectStats)
 
 	//Pick potential ivs to set to 31
 	u8 i, numPerfectStats;
-	u8 perfect = 31;
+	u8 perfect = HACK_IV_MAX; //[hack] patches/0677
 	bool8 perfectStats[NUM_STATS] = {0};
 
 	for (i = 0, numPerfectStats = 0; i < NUM_STATS; ++i) //Count how many stats are already perfect
 	{
-		if (GetMonData(mon, MON_DATA_HP_IV + i, NULL) >= 31)
+		if (GetMonData(mon, MON_DATA_HP_IV + i, NULL) >= HACK_IV_MAX) //[hack] patches/0677
 		{
 			perfectStats[i] = TRUE;
 			++numPerfectStats;
@@ -2434,7 +2572,7 @@ static bool8 BaseStatsTotalGEAlreadyOnTeam(const u16 toCheck, const u8 partySize
 {
 	for (int i = 0; i < partySize; ++i)
 	{
-		if (GetBaseStatsTotal(speciesArray[i]) >= toCheck)
+		if (HackTrainerBasisBst(speciesArray[i]) >= toCheck)
 			return TRUE;
 	}
 
@@ -2582,23 +2720,23 @@ static bool8 IsPokemonBannedBasedOnStreak(u16 species, u16 item, u16* speciesArr
 		{
 			if (IsMegaStone(item)
 			||  IsZCrystal(item)
-			||  GetBaseStatsTotal(species) >= 520)
+			||  HackTrainerBasisBst(species) >= 520)
 				return TRUE;
 		}
 		else if (streak < 20)
 		{
 			if (IsMegaStone(item)
-			||  GetBaseStatsTotal(species) >= 540)
+			||  HackTrainerBasisBst(species) >= 540)
 				return TRUE;
 		}
 		else if (streak < 30)
 		{
-			if (GetBaseStatsTotal(species) >= 570)
+			if (HackTrainerBasisBst(species) >= 570)
 				return TRUE;
 		}
 		else if (streak < 50)
 		{
-			if (GetBaseStatsTotal(species) >= 570
+			if (HackTrainerBasisBst(species) >= 570
 			&& BaseStatsTotalGEAlreadyOnTeam(570, monsCount, speciesArray))
 				return TRUE;
 		}
@@ -2907,7 +3045,7 @@ static void AddPlayerMoveTypesToBuilder(struct TeamBuilder* builder, u8 monsCoun
 			{
 				u16 move = GetMonData(&gPlayerParty[i], MON_DATA_MOVE1 + j, NULL);
 
-				switch (move)
+				switch (EffectiveMove(move)) //[hack] FIX-ai-original-moves 新技（ウェザーショット等）も天気技として全タイプを数える
 				{
 					case MOVE_NONE:
 						break;
@@ -3570,7 +3708,7 @@ static void PostProcessTeam(struct Pokemon* party, struct TeamBuilder* builder)
 			{
 				#ifdef UNBOUND
 					u32 k;
-					u16 levelUpMoves[MAX_LEARNABLE_MOVES] = {MOVE_NONE};
+					u16 levelUpMoves[MAX_LEVEL_UP_MOVES] = {MOVE_NONE};
 					GetLevelUpMovesBySpecies(GetMonData(&party[i], MON_DATA_SPECIES, NULL), levelUpMoves);
 
 					for (j = 0; j < ARRAY_COUNT(sDoubleSpreadReplacementMoves); ++j)
@@ -3607,7 +3745,7 @@ static void PostProcessTeam(struct Pokemon* party, struct TeamBuilder* builder)
 										break;
 
 									case LEARN_TYPE_LEVEL_UP:
-										for (k = 0; k < MAX_LEARNABLE_MOVES && levelUpMoves[k] != MOVE_NONE; ++k)
+										for (k = 0; k < MAX_LEVEL_UP_MOVES && levelUpMoves[k] != MOVE_NONE; ++k)
 										{
 											if (levelUpMoves[k] == newMove)
 											{
@@ -3766,7 +3904,7 @@ bool8 IsMonAllowedInBattleTower(struct Pokemon* mon)
 			u16 speciesArray[PARTY_SIZE] = {0};
 			u16 itemArray[PARTY_SIZE] = {0};
 
-			for (int i = 0; gSelectedOrderFromParty[i] != 0 && i < 6; ++i, ++partySize)
+			for (int i = 0; i < 6 && gSelectedOrderFromParty[i] != 0; ++i, ++partySize)
 			{
 				if (gSelectedOrderFromParty[i] - 1 != partyId) //You can't ban yourself
 				{
@@ -3796,13 +3934,21 @@ static u8 GetPartyIdFromPartyData(struct Pokemon* mon)
 	return id;
 }
 
-static u8 GetHighestMonLevel(const struct Pokemon* const party)
+//[hack] patches/0580 上限をこえた子は 戦闘で上限のレベルになる（src/hack_battle_squash.c）ので、相手のレベルスケーリングも上限で数える
+u16 HackBadgeSquash_CapLevel(u16 level);
+static u16 GetHighestMonLevelRaw(const struct Pokemon* const party);
+static u16 GetHighestMonLevel(const struct Pokemon* const party)
 {
-	u8 max = GetMonData(&party[0], MON_DATA_LEVEL, NULL);
+	return HackBadgeSquash_CapLevel(GetHighestMonLevelRaw(party));
+}
+
+static u16 GetHighestMonLevelRaw(const struct Pokemon* const party)
+{
+	u16 max = GetMonData(&party[0], MON_DATA_LEVEL, NULL);
 
 	for (int i = 1; i < PARTY_SIZE; ++i)
 	{
-		u8 level;
+		u16 level;
 		u16 species = GetMonData(&party[i], MON_DATA_SPECIES2, NULL);
 	
 		if (max == MAX_LEVEL || species == SPECIES_NONE)
@@ -3905,13 +4051,33 @@ u8 GetOpenWorldBadgeCount(void)
 }
 
 //unused1 is used to hook in so don't use it for anything
-u8 ScriptGiveMon(u16 species, u8 level, u16 item, unusedArg u32 unused1, unusedArg u32 customGivePokemon, unusedArg u8 ballType)
+u16 HackChallengeC_RandomGift(u16 species); //[hack] patches/0550 縛り C ランダム（src/hack_challenge_c.c）
+
+u16 HackStarterLuxray_Species(u16 species); //[hack] 2026-10-18 src/hack_starter_luxray.c
+void HackStarterLuxray_Finish(struct Pokemon* mon);
+
+void HackBeldumGift_Apply(struct Pokemon* mon, u16 origSpecies); //[hack] 2026-11-09 patches 0979 ダイゴの家のダンバルの贈り物だけ 色違い・Moémon・ヌシの確率を上げる（src/hack_beldum_gift.c）
+
+u8 ScriptGiveMon(u16 species, u16 level, u16 item, unusedArg u32 unused1, unusedArg u32 customGivePokemon, unusedArg u8 ballType)
 {
 	u8 sentToPc;
 	struct Pokemon mon;
+	u16 origSpecies = species; //[hack] 2026-11-09 しばりで入れ替わる前の種族（ダンバルの贈り物の見分け）
 
+	species = HackChallengeC_RandomGift(species); //[hack] patches/0550 ランダム: もらう子（御三家を含む）の種族を入れ替える
+	if (HackGiftShiny_IsStarterLab()) //[hack] 2026-10-18 研究所の最初の 1 匹（名前が かくれた合図、またはデバッグ版の切り替え）→ レントラー（src/hack_starter_luxray.c）
+		species = HackStarterLuxray_Species(species);
 	CreateMon(&mon, species, level, 32, 0, 0, 0, 0);
 	SetMonData(&mon, MON_DATA_HELD_ITEM, &item);
+
+	if (HackGiftShiny_IsStarterLab())
+		HackStarterLuxray_Finish(&mon);
+
+	if (HackGiftShiny_IsStarterGift()) //[hack] patches/0426 モモカ博士が研究所で渡す最初のポケモンは STARTボールに入っている（src/hack_gift_shiny.c）。patches/0500 じっせきの「最初のポケモン」の ほうしゅうも同じ
+	{
+		u8 hackBall = BALL_TYPE_START_BALL;
+		SetMonData(&mon, MON_DATA_POKEBALL, &hackBall);
+	}
 
 	#ifdef GIVEPOKEMON_BALL_HACK
 	if (ballType != 0)
@@ -3986,6 +4152,7 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, unusedArg u32 unused1, unusedA
 		#endif
 	}
 
+	HackBeldumGift_Apply(&mon, origSpecies); //[hack] 2026-11-09 patches 0979 ダイゴの家のダンバルだけ（場所と種族が合うときだけ・ほかは何もしない）
 	HealMon(&mon);
 	sentToPc = GiveMonToPlayer(&mon);
 
@@ -3993,6 +4160,7 @@ u8 ScriptGiveMon(u16 species, u8 level, u16 item, unusedArg u32 unused1, unusedA
 		case 0:
 		case 1:
 			SetMonPokedexFlags(&mon);
+			Achievements_Notify(ACH_EV_PARTY); //[hack] patches/0500 もらった子が手持ちに入ったので、手持ちのじっせきをその場で確かめる
 			break;
 	}
 
@@ -4132,7 +4300,7 @@ u16 GetRandomizedSpecies(u16 species)
 	return species;
 }
 
-void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, bool8 hasFixedPersonality, u32 fixedPersonality, u8 otIdType, u32 fixedOtId)
+void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u16 level, u8 fixedIV, bool8 hasFixedPersonality, u32 fixedPersonality, u8 otIdType, u32 fixedOtId)
 {
 	u32 i, personality, value;
 	u8 speciesName[POKEMON_NAME_LENGTH + 1];
@@ -4172,10 +4340,8 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 	value = GetCurrentRegionMapSectionId();
 	SetBoxMonData(boxMon, MON_DATA_MET_LOCATION, &value);
 	//[hack] patches/0236 2026-10-09 レベル上限 200: 出会ったレベルの欄は 7 ビット（0〜127）→ 128 以上は 127 に（200 が 72 と出た）
-	{
-		u8 metLevel = (level > 127) ? 127 : level;
-		SetBoxMonData(boxMon, MON_DATA_MET_LEVEL, &metLevel);
-	}
+	//  2026-10-16 128 以上は hyperTraining の bit6 と合わせて 254 まで持つ（src/hack_met_level.c）
+	HackMetLevel_Set(boxMon, level);
 	//[hack] patches/0091: シンオウで出会ったら親の版を 12（地名の番号の地方の印・src/map_region.c）
 	value = MapRegion_MetGameHere();
 	SetBoxMonData(boxMon, MON_DATA_MET_GAME, &value);
@@ -4227,7 +4393,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 		//HP IV
 		iv = value & 0x1F;
 		SetBoxMonData(boxMon, MON_DATA_HP_IV, &iv);
-		if (iv >= 31)
+		if (iv >= HACK_IV_MAX) //[hack] patches/0677
 		{
 			++numPerfectStats;
 			perfectStats[STAT_HP] = TRUE;
@@ -4236,7 +4402,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 		//Attack IV
 		iv = (value & 0x3E0) >> 5;
 		SetBoxMonData(boxMon, MON_DATA_ATK_IV, &iv);
-		if (iv >= 31)
+		if (iv >= HACK_IV_MAX) //[hack] patches/0677
 		{
 			++numPerfectStats;
 			perfectStats[STAT_ATK] = TRUE;
@@ -4245,7 +4411,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 		//Defense IV
 		iv = (value & 0x7C00) >> 10;
 		SetBoxMonData(boxMon, MON_DATA_DEF_IV, &iv);
-		if (iv >= 31)
+		if (iv >= HACK_IV_MAX) //[hack] patches/0677
 		{
 			++numPerfectStats;
 			perfectStats[STAT_DEF] = TRUE;
@@ -4259,7 +4425,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 		//Speed IV
 		iv = value & 0x1F;
 		SetBoxMonData(boxMon, MON_DATA_SPEED_IV, &iv);
-		if (iv >= 31)
+		if (iv >= HACK_IV_MAX) //[hack] patches/0677
 		{
 			++numPerfectStats;
 			perfectStats[STAT_SPEED] = TRUE;
@@ -4268,7 +4434,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 		//Sp. Atk IV
 		iv = (value & 0x3E0) >> 5;
 		SetBoxMonData(boxMon, MON_DATA_SPATK_IV, &iv);
-		if (iv >= 31)
+		if (iv >= HACK_IV_MAX) //[hack] patches/0677
 		{
 			++numPerfectStats;
 			perfectStats[STAT_SPATK] = TRUE;
@@ -4277,7 +4443,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 		//Sp. Def IV
 		iv = (value & 0x7C00) >> 10;
 		SetBoxMonData(boxMon, MON_DATA_SPDEF_IV, &iv);
-		if (iv >= 31)
+		if (iv >= HACK_IV_MAX) //[hack] patches/0677
 		{
 			++numPerfectStats;
 			perfectStats[STAT_SPDEF] = TRUE;
@@ -4287,7 +4453,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 		{
 			if (CheckTableForSpecies(species, gSetPerfectXIvList))
 			{
-				u8 perfect = 31;
+				u8 perfect = HACK_IV_MAX; //[hack] patches/0677
 				u8 perfectStatCount = MathMin(CREATE_WITH_X_PERFECT_IVS, NUM_STATS); //Error prevention
 
 				while (numPerfectStats < perfectStatCount) //Harder to get more than 3 perfect since perfect stats from before are already taken into account
@@ -4321,7 +4487,7 @@ void CreateBoxMon(struct BoxPokemon* boxMon, u16 species, u8 level, u8 fixedIV, 
 	TrySetCorrectToxtricityForm(boxMon);
 }
 
-void CreateMonWithNatureLetter(struct Pokemon* mon, u16 species, u8 level, u8 fixedIV, u8 nature, u8 letter)
+void CreateMonWithNatureLetter(struct Pokemon* mon, u16 species, u16 level, u8 fixedIV, u8 nature, u8 letter)
 {
 	u32 personality;
 	letter -= 1;
@@ -4365,35 +4531,38 @@ bool8 GetAlternateHasSpecies(struct BoxPokemon* mon)
 
 #define CALC_STAT(base, iv, ev, statIndex, field)			\
 {															\
-	u32 n = (((2 * base + iv + ev / 4) * level) / 100) + 5; \
-	n = ModifyStatByNature(nature, n, statIndex);			\
+	u16 n = HackStat_ApplyPercent(HackStat_Raw(base, iv, ev, level), HACK_STAT_NATURE_PERCENT(nature, statIndex)); /*[hack] patches/0678 u32 で計算して 65535 で頭打ち*/ \
 	SetMonData(mon, field, &n);								\
 }
 
-u8 HackGibleEgg_BaseStat(const struct Pokemon* mon, u16 species, u8 stat); //[hack] patches/0152 src/hack_gible_egg.c
+u16 HackGibleEgg_BaseStat(const struct Pokemon* mon, u16 species, u8 stat); //[hack] patches/0152 src/hack_gible_egg.c
 u16 HackMomoIce_MaxHP(struct Pokemon* mon, u16 species, u16 maxHP); //[hack] patches/0175 ももアイス src/hack_momo_ice.c
 void HackMomoIce_Stats(struct Pokemon* mon);
+u32 HackNushi_Base(const struct Pokemon* mon, u32 base); //[hack] patches/0962・0980 ヌシは種族値 ×11/10（src/hack_delta.c・印がヌシでなければ base のまま）
 u8 HackPartner_BaseBonus(const struct Pokemon* mon); //[hack] patches/0216 ホウエンのストーリーの相棒は種族値 +20（src/hack_story_partner.c）
 
 void CalculateMonStatsNew(struct Pokemon *mon)
 {
 	u32 i;
 	u16 newMaxHP;
-	u8 ivs[NUM_STATS] = {0};
-	u8 evs[NUM_STATS] = {0};
+	u16 ivs[NUM_STATS] = {0}; //[hack] patches/0678 u8 → u16（窓口 HackMon_GetIv／GetEv・保存の形は不変）
+	u16 evs[NUM_STATS] = {0};
 
 	for (i = STAT_HP; i < NUM_STATS; ++i)
 	{
-		ivs[i] = mon->hyperTraining & gBitTable[i] ? 31 : GetMonData(mon, MON_DATA_HP_IV + i, NULL);
-		evs[i] = GetMonData(mon, MON_DATA_HP_EV + i, NULL);
+		ivs[i] = mon->hyperTraining & gBitTable[i] ? HACK_IV_MAX : HackMon_GetIv(mon, i);
+		evs[i] = HackMon_GetEv(mon, i);
 	}
 
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
 	u16 currentHP = GetMonData(mon, MON_DATA_HP, NULL);
 	u16 oldMaxHP = GetMonData(mon, MON_DATA_MAX_HP, NULL);
-	u8 level = GetLevelFromMonExp(mon);
+	u16 level = GetLevelFromMonExp(mon); //[hack] patches/0678 u16（WP3 でレベル全体を u16 に）
 	u32 baseStatTotal = GetBaseStatsTotal(species);
-	u8 baseHP;
+	u16 baseHP;
+
+	for (i = STAT_HP; i < NUM_STATS; ++i) //[hack] patches/0591 #128 Lv100 をこえた子の実効の個体値（保存する値は 0〜31 のまま・src/hack_iv_over100.h）
+		ivs[i] = HackIv_Effective(ivs[i], level);
 
 	if (IsAverageMonsBattle()) //All base stats are 100
 	{
@@ -4401,10 +4570,12 @@ void CalculateMonStatsNew(struct Pokemon *mon)
 	}
 	else
 	{
-		baseHP = gBaseStats[species].baseHP;
+		baseHP = HackGibleEgg_BaseStat(mon, species, STAT_HP); //[hack] patches/0793 れーとのおうの子は HP も ×1.2（ほかは gBaseStats の baseHP のまま）
 
 		if (Is350CupBattle() && baseStatTotal <= 350)
 			baseHP *= 2;
+		else if (!(IsScaleMonsBattle() && IsSpeciesAffectedByScalemons(species)))
+			baseHP = HackNushi_Base(mon, baseHP); //[hack] patches/0962・0980 ヌシは HP の種族値も ×11/10（アベレージ・350 カップ・スケールモンの縛りには掛けない）
 	}
 
 	SetMonData(mon, MON_DATA_LEVEL, &level);
@@ -4417,8 +4588,8 @@ void CalculateMonStatsNew(struct Pokemon *mon)
 	else
 	#endif
 	{
-		u32 n = 2 * (baseHP + HackPartner_BaseBonus(mon)) + ivs[STAT_HP]; //[hack] patches/0216 相棒は +20
-		newMaxHP = MathMin((((n + evs[STAT_HP] / 4) * level) / 100) + level + 10, 0xFFFF);
+		u32 n = 2 * (baseHP + HackPartner_BaseBonus(mon)); //[hack] patches/0216 相棒は +20
+		newMaxHP = HackStat_MaxHp(n, ivs[STAT_HP], evs[STAT_HP], level); //[hack] patches/0678
 	}
 	newMaxHP = HackMomoIce_MaxHP(mon, species, newMaxHP); //[hack] patches/0175 ももアイスを持っていれば 2 倍
 
@@ -4433,8 +4604,8 @@ void CalculateMonStatsNew(struct Pokemon *mon)
 	{
 		for (i = STAT_ATK; i < NUM_STATS; ++i) //HP doesn't change in Scalemons
 		{
-			u16 base = ((u8*) (&gBaseStats[species].baseHP))[i];
-			base = MathMin((base * (600 - baseHP)) / (baseStatTotal - baseHP), 255); //Max 255
+			u32 base = HackBaseStat(species, i); //[hack] patches/0678
+			base = MathMin((base * (600 - baseHP)) / (baseStatTotal - baseHP), HACK_BASE_STAT_MAX); //Max 255 //[hack] patches/0677
 			CALC_STAT(base, ivs[i], evs[i], i, MON_DATA_ATK + (i - 1));
 		}
 	}
@@ -4450,7 +4621,7 @@ void CalculateMonStatsNew(struct Pokemon *mon)
 	{
 		for (i = STAT_ATK; i < NUM_STATS; ++i) //HP doesn't change in Scalemons
 		{
-			u16 base = ((u8*) (&gBaseStats[species].baseHP))[i] * 2;
+			u32 base = HackBaseStat(species, i) * 2; //[hack] patches/0678
 			CALC_STAT(base, ivs[i], evs[i], i, MON_DATA_ATK + (i - 1));
 		}
 	}
@@ -4458,7 +4629,8 @@ void CalculateMonStatsNew(struct Pokemon *mon)
 	{
 		for (i = STAT_ATK; i < NUM_STATS; ++i)
 		{
-			u16 base = HackGibleEgg_BaseStat(mon, species, i); //[hack] patches/0152 とくべつなガブリアスのメガは、ガブリアスの種族値に上がる分だけ足す
+			u32 base = HackGibleEgg_BaseStat(mon, species, i); //[hack] patches/0152 とくべつなガブリアスのメガは、ガブリアスの種族値に上がる分だけ足す
+			base = HackNushi_Base(mon, base); //[hack] patches/0962・0980 ヌシは ×11/10（相棒の +20 を足す前）
 			base += HackPartner_BaseBonus(mon); //[hack] patches/0216 ホウエンのストーリーの相棒は +20
 			CALC_STAT(base, ivs[i], evs[i], i, MON_DATA_ATK + (i - 1));
 		}
@@ -4493,12 +4665,15 @@ void CalculateMonStatsNew(struct Pokemon *mon)
 }
 
 u16 HackGibleEgg_SpecialAbility(const struct Pokemon* mon, u16 species); //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150） src/hack_gible_egg.c
+u16 HackDebugMon_Ability(const struct Pokemon* mon, u16 species); //[hack] patches/0422 デバッグモン src/hack_debug_mon.c
 u16 GetMonAbility(const struct Pokemon* mon)
 {
 	u16 ability;
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
 
-	ability = HackGibleEgg_SpecialAbility(mon, species); //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150） クチバのフカマルの子はメガシンカしても
+	ability = HackDebugMon_Ability(mon, species); //[hack] patches/0422 デバッグモンで特性を選んであればその特性（配る版は ABILITY_NONE）
+	if (ability == ABILITY_NONE)
+		ability = HackGibleEgg_SpecialAbility(mon, species); //[hack] 2026-10-03 りゅうのよろい（ABILITY_DRAGONARMOR・patches/0150） クチバのフカマルの子はメガシンカしても
 	if (ability == ABILITY_NONE)
 		ability = HackVolcarona_SpecialAbility(mon, species); //[hack] 2026-10-11 たいようのけしん（特別なウルガモスだけ・src/hack_volcarona.c・#95）
 	if (ability != ABILITY_NONE)
@@ -4531,7 +4706,7 @@ void SetMonExpWithMaxLevelCheck(struct Pokemon *mon, u16 species, unusedArg u8 u
 bool8 HackTryIncrementMonLevel(struct Pokemon *mon)
 {
 	u16 species = GetMonData(mon, MON_DATA_SPECIES, NULL);
-	u8 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
+	u16 level = GetMonData(mon, MON_DATA_LEVEL, NULL);
 	u8 newLevel = level + 1;
 	u32 exp = GetMonData(mon, MON_DATA_EXP, NULL);
 

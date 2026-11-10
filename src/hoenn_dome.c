@@ -1,4 +1,6 @@
 #include "defines.h"
+#include "hack_base_stats_wide.h" //[hack] patches/0678 種族値の u16 の窓口
+#include "hack_stat_calc.h" //[hack] patches/0678
 #include "../include/bg.h"
 #include "../include/event_data.h"
 #include "../include/gpu_regs.h"
@@ -31,8 +33,11 @@
 #include "../include/new/ram_locs.h"
 #include "../include/new/util.h"
 #include "Tables/hoenn_script_flags.h"
+#include "hoenn_frontier_level.h"
+#include "hoenn_frontier_rec.h"
 #include "hoenn_dome_gfx.h"     /* 絵と文字（tools/frontier/build_frontier_dome.py の生成物） */
 #include "hoenn_dome_data.h"    /* 技の点数（同じ） */
+#include "hack_stat_access.h" //[hack] patches/0763 努力値・個体値の窓口
 extern bool16 HoennFrontier_InitWindowsZeroed(const struct WindowTemplate *templates);   //src/hoenn_frontier.c（窓の入れ物を 0 にする InitWindows）
 
 /*
@@ -219,7 +224,7 @@ extern bool16 HoennFrontier_InitWindowsZeroed(const struct WindowTemplate *templ
 #define FRONTIER_PARTY_SIZE 3
 #define TRAINER_FRONTIER_BRAIN 1022
 #define TRAINER_PLAYER 1023
-#define MAX_PER_STAT_IVS 31
+#define MAX_PER_STAT_IVS HACK_IV_MAX //[hack] patches/0677
 #define MAX_FRIENDSHIP 255
 #define FRONTIER_TRAINER_JILL 99
 #define FRONTIER_TRAINER_CHLOE 119
@@ -283,7 +288,7 @@ struct HoennDomeData
 };
 #define HOENN_DOME_DATA_FIRST 0x5151
 #define HOENN_DOME_DATA_LAST 0x51B2
-#define DOME ((struct HoennDomeData *)&gExpandedVars[HOENN_DOME_DATA_FIRST - 0x5000])
+#define DOME ((struct HoennDomeData *)HoennFrontierRec_ExpVar(HOENN_DOME_DATA_FIRST))   //★ 2026-10-20 移した変数は追加のセーブ領域の入れ物の中（src/hoenn_frontier_rec.c）
 #define FRONTIER_BATTLE_NUM (gExpandedVars[HOENN_VAR_TOWER_BATTLE_NUM - 0x5000])
 #define FRONTIER_LVL_MODE (gExpandedVars[HOENN_VAR_TOWER_LVL_MODE - 0x5000])
 
@@ -373,9 +378,28 @@ static u8 DomeAITypeCalc(u16 move, u16 targetSpecies, u16 targetAbility)
     return flags;
 }
 
+//連勝（優勝の回数）と最高。レベル49・100 は別の記録（追加のセーブ領域・src/hoenn_frontier_rec.c）・50 とオープンは今までの予約変数
+static u16 DomeStreakGet(u32 battleMode, bool8 record)
+{
+    if (HOENN_LVL_SEPARATE(FRONTIER_LVL_MODE))
+        return HoennFrontierRec_Get(HFR_FAC_DOME, battleMode, FRONTIER_LVL_MODE, record);
+    return record ? DOME->domeRecordWinStreaks[battleMode][HOENN_LVL_OPENCLASS(FRONTIER_LVL_MODE)]
+                  : DOME->domeWinStreaks[battleMode][HOENN_LVL_OPENCLASS(FRONTIER_LVL_MODE)];
+}
+
+static void DomeStreakSet(u32 battleMode, bool8 record, u16 value)
+{
+    if (HOENN_LVL_SEPARATE(FRONTIER_LVL_MODE))
+        HoennFrontierRec_Set(HFR_FAC_DOME, battleMode, FRONTIER_LVL_MODE, record, value);
+    else if (record)
+        DOME->domeRecordWinStreaks[battleMode][HOENN_LVL_OPENCLASS(FRONTIER_LVL_MODE)] = value;
+    else
+        DOME->domeWinStreaks[battleMode][HOENN_LVL_OPENCLASS(FRONTIER_LVL_MODE)] = value;
+}
+
 static u16 DomeWinStreak(void)
 {
-    return DOME->domeWinStreaks[VarGet(HOENN_VAR_TOWER_MODE) == 1][FRONTIER_LVL_MODE != 0];
+    return DomeStreakGet(VarGet(HOENN_VAR_TOWER_MODE) == 1, FALSE);
 }
 
 //エメラルドの SetFacilityPtrsGetLevel（相手のレベル・オープンは自分の一番高い子・最低 60・src/hoenn_tower.c HoennTower_PrepareTeam）
@@ -412,9 +436,9 @@ static u16 DomePlayerMonMove(u8 slot, u8 moveSlot)
     return GetMonData(&gPlayerParty[slot % FRONTIER_PARTY_SIZE], MON_DATA_MOVE1 + (moveSlot & 3), NULL);
 }
 
-static u8 DomePlayerMonEv(u8 slot, u8 stat)
+static u16 DomePlayerMonEv(u8 slot, u8 stat)
 {
-    return GetMonData(&gPlayerParty[slot % FRONTIER_PARTY_SIZE], MON_DATA_HP_EV + stat, NULL);
+    return HackMon_GetEv(&gPlayerParty[slot % FRONTIER_PARTY_SIZE], stat);
 }
 
 static u8 DomePlayerMonNature(u8 slot)
@@ -2137,16 +2161,16 @@ static void InitDomeChallenge(void)
 
 static void GetDomeData(void)
 {
-    u32 lvlMode = FRONTIER_LVL_MODE;
+    u32 lvlMode = HOENN_LVL_OPENCLASS(FRONTIER_LVL_MODE); //★ 49 は 50 の仲間・100 はオープンの仲間（記録・フラグの置き場）
     u32 battleMode = VarGet(HOENN_VAR_TOWER_MODE);
 
     switch (Var8005)
     {
     case DOME_DATA_WIN_STREAK:
-        gSpecialVar_LastResult = DOME->domeWinStreaks[battleMode][lvlMode];
+        gSpecialVar_LastResult = DomeStreakGet(battleMode, FALSE);
         break;
     case DOME_DATA_WIN_STREAK_ACTIVE:
-        gSpecialVar_LastResult = (DOME->domeWinStreaks[battleMode][lvlMode] != 0); //★ 連勝の旗の代わり（負けたら連勝を 0 にする）
+        gSpecialVar_LastResult = (DomeStreakGet(battleMode, FALSE) != 0); //★ 連勝の旗の代わり（負けたら連勝を 0 にする）
         break;
     case DOME_DATA_ATTEMPTED_SINGLES_50:
         gSpecialVar_LastResult = DOME->domeAttemptedSingles50;
@@ -2205,13 +2229,13 @@ static void GetDomeData(void)
 
 static void SetDomeData(void)
 {
-    u32 lvlMode = FRONTIER_LVL_MODE;
+    u32 lvlMode = HOENN_LVL_OPENCLASS(FRONTIER_LVL_MODE); //★ 49 は 50 の仲間・100 はオープンの仲間（記録・フラグの置き場）
     u32 battleMode = VarGet(HOENN_VAR_TOWER_MODE);
 
     switch (Var8005)
     {
     case DOME_DATA_WIN_STREAK:
-        DOME->domeWinStreaks[battleMode][lvlMode] = Var8006;
+        DomeStreakSet(battleMode, FALSE, Var8006);
         break;
     case DOME_DATA_WIN_STREAK_ACTIVE:
         //★ 連勝の旗は持たない（負けたら連勝を 0 にする）
@@ -2460,11 +2484,10 @@ static void InitDomeTrainers(void)
 
 }
 
-#define CALC_STAT(base, statIndex)                                                          \
+#define CALC_STAT(statIndex)                                                                \
 {                                                                                           \
-    u8 baseStat = gBaseStats[species].base;                                                 \
-    stats[statIndex] = (((2 * baseStat + ivs + evs[statIndex] / 4) * level) / 100) + 5;     \
-    stats[statIndex] = ModifyStatByNature(nature, stats[statIndex], statIndex);             \
+    /*[hack] patches/0678 build_pokemon.c と同じ共通の式（u32 で計算して 65535 で頭打ち）*/ \
+    stats[statIndex] = HackStat_ApplyPercent(HackStat_Raw(HackBaseStat(species, statIndex), ivs, evs[statIndex], level), HACK_STAT_NATURE_PERCENT(nature, statIndex)); \
 }
 
 static void CalcDomeMonStats(u16 species, int level, int ivs, u8 evBits, u8 nature, int *stats)
@@ -2495,15 +2518,14 @@ static void CalcDomeMonStats(u16 species, int level, int ivs, u8 evBits, u8 natu
     }
     else
     {
-        int n = 2 * gBaseStats[species].baseHP;
-        stats[STAT_HP] = (((n + ivs + evs[STAT_HP] / 4) * level) / 100) + level + 10;
+        stats[STAT_HP] = HackStat_MaxHp(2 * HackBaseStat(species, STAT_HP), ivs, evs[STAT_HP], level); //[hack] patches/0678
     }
 
-    CALC_STAT(baseAttack, STAT_ATK);
-    CALC_STAT(baseDefense, STAT_DEF);
-    CALC_STAT(baseSpeed, STAT_SPEED);
-    CALC_STAT(baseSpAttack, STAT_SPATK);
-    CALC_STAT(baseSpDefense, STAT_SPDEF);
+    CALC_STAT(STAT_ATK);
+    CALC_STAT(STAT_DEF);
+    CALC_STAT(STAT_SPEED);
+    CALC_STAT(STAT_SPATK);
+    CALC_STAT(STAT_SPDEF);
 }
 
 static void SwapDomeTrainers(int id1, int id2, u16 *statsArray)
@@ -2940,18 +2962,19 @@ static void SaveDomeChallenge(void)
 
 static void IncrementDomeStreaks(void)
 {
-    u8 lvlMode = FRONTIER_LVL_MODE;
+    u8 lvlMode = HOENN_LVL_OPENCLASS(FRONTIER_LVL_MODE);
     u8 battleMode = VarGet(HOENN_VAR_TOWER_MODE);
+    u16 streak = DomeStreakGet(battleMode, FALSE);
 
-    if (DOME->domeWinStreaks[battleMode][lvlMode] < 999)
-        DOME->domeWinStreaks[battleMode][lvlMode]++;
+    if (streak < 999)
+        DomeStreakSet(battleMode, FALSE, ++streak);
     if (DOME->domeTotalChampionships[battleMode][lvlMode] < 999)
         DOME->domeTotalChampionships[battleMode][lvlMode]++;
 
-    if (DOME->domeWinStreaks[battleMode][lvlMode] > DOME->domeRecordWinStreaks[battleMode][lvlMode])
-        DOME->domeRecordWinStreaks[battleMode][lvlMode] = DOME->domeWinStreaks[battleMode][lvlMode];
+    if (streak > DomeStreakGet(battleMode, TRUE))
+        DomeStreakSet(battleMode, TRUE, streak);
     //★ 2026-10-11 実績の「バトルしせつで ○れんしょう」: ドームの連勝は大会の数なので、勝った戦いの数（1 大会 = 4 戦）で数える
-    HoennFrontier_NoteBestStreak(DOME->domeWinStreaks[battleMode][lvlMode] * DOME_ROUNDS_COUNT);
+    HoennFrontier_NoteBestStreak(streak * DOME_ROUNDS_COUNT);
 }
 
 // For showing the opponent info card of the upcoming trainer
@@ -5197,7 +5220,7 @@ static u16 GetWinningMove(int winnerTournamentId, int loserTournamentId, u8 roun
             else
                 moves[i * MAX_MON_MOVES + j] = HoennFactory_MonMove(DOME_MONS[winnerTournamentId][i], j);
 
-            movePower = gBattleMoves[moves[i * MAX_MON_MOVES + j]].power;
+            movePower = MOVE_POWER(moves[i * MAX_MON_MOVES + j]); //[hack] patches/0582 (#126)
             if (movePower == 0)
                 movePower = 40;
             else if (movePower == 1)
@@ -5999,12 +6022,7 @@ static void DecideRoundWinners(u8 roundId)
                     }
                 }
                 species = HoennFactory_MonSpecies(DOME_MONS[tournamentId1][monId1]);
-                points1 += ( gBaseStats[species].baseHP
-                           + gBaseStats[species].baseAttack
-                           + gBaseStats[species].baseDefense
-                           + gBaseStats[species].baseSpeed
-                           + gBaseStats[species].baseSpAttack
-                           + gBaseStats[species].baseSpDefense) / 10;
+                points1 += HackBaseStatsTotal(species) / 10;
             }
             // Random part of the formula.
             points1 += (Random() & 0x1F);
@@ -6022,12 +6040,7 @@ static void DecideRoundWinners(u8 roundId)
                     }
                 }
                 species = HoennFactory_MonSpecies(DOME_MONS[tournamentId2][monId1]);
-                points2 += ( gBaseStats[species].baseHP
-                           + gBaseStats[species].baseAttack
-                           + gBaseStats[species].baseDefense
-                           + gBaseStats[species].baseSpeed
-                           + gBaseStats[species].baseSpAttack
-                           + gBaseStats[species].baseSpDefense) / 10;
+                points2 += HackBaseStatsTotal(species) / 10;
             }
             // Random part of the formula.
             points2 += (Random() & 0x1F);

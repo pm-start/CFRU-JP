@@ -30,6 +30,7 @@ HoennSafari_EventScript_Exit:
 	goto VANILLA_EXIT_REST
 
 HoennSafari_EventScript_ExitHoenn:
+	callasm HackSafari_Native_ClearFeeders   @ FEAT-pokeblock 段 6（patches/0978）: ポロックのおき場を全部消す（src/hack_safari_pokeblock.c）
 	setvar VAR_HOENN_SAFARI_STATE, 1
 	special SP_EXIT_SAFARI_MODE
 	warp GATE_GROUP, GATE_MAP, 0xFF, 2, 5
@@ -45,6 +46,7 @@ HoennSafari_EventScript_OutOfBallsMidBattle:
 	goto VANILLA_MIDBATTLE_REST
 
 HoennSafari_EventScript_OutOfBallsMidBattleHoenn:
+	callasm HackSafari_Native_ClearFeeders   @ 同上
 	setvar VAR_HOENN_SAFARI_STATE, 1
 	special SP_EXIT_SAFARI_MODE
 	setwarp GATE_GROUP, GATE_MAP, 0xFF, 2, 5

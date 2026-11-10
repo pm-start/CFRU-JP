@@ -1,6 +1,8 @@
 #pragma once
 
 //なつき度で戦いに効く 10 の効果（src/hack_affection.c・patches/0240）
+//せってい「なかよし」（patches/0418・5e の台帳 0xF8F）: 旗が立っていると全部の効果を止める（下りている＝既定・古いセーブは今までどおり効く）
+#define HACK_FLAG_AFFECTION_OFF 0xF8F
 void HackAffection_MoveStart(u8 bankAtk);
 bool8 HackAffection_TryLastMonMessage(u8 bankAtk);
 bool8 HackAffection_TryEndure(u8 bankDef, s32 damage);

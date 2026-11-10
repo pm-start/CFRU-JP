@@ -10,6 +10,15 @@
 #org @gText_HackSlot_Empty
 まだ ありません
 
+#org @gText_HackSlot_Convert
+へんかんが ひつよう
+
+#org @gText_HackSlot_ConvertHint1
+セーブへんかんツールで 16MBに
+
+#org @gText_HackSlot_ConvertHint2
+へんかんしてください
+
 #org @gText_HackSlot_Broken
 よみこめません
 
@@ -24,3 +33,21 @@
 
 #org @gText_HackSlot_NoPressA
 Aボタンで つづける
+
+#org @gText_HackSlot_WaitTitle
+ぼうけんのしょ 2は まだ えらべません
+
+#org @gText_HackSlot_WaitLine1
+ぼうけんのしょ 1で レポートを
+
+#org @gText_HackSlot_WaitLine2
+かいてから ひらきなおしてください
+
+#org @gText_HackSlot_OldTitle
+この ROMは 128MBです
+
+#org @gText_HackSlot_OldLine1
+さいしんの mGBAで
+
+#org @gText_HackSlot_OldLine2
+あそんでください

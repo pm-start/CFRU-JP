@@ -1,0 +1,305 @@
+#org @gText_FeatureGuide_Title
+きのうのせつめい
+
+#org @gText_FeatureGuide_Help
+じゅうじキー:ページ  B:もどる
+
+#org @gText_FeatureGuide_PhoneTitle
+ポケナビ
+
+#org @gText_FeatureGuide_PhoneBody
+ポケナビで ちずを ひらいたり\nでんわを かけたりできます。\nあいてからの ちゃくしんや\nジムさいせんの さそいもあります。
+
+#org @gText_FeatureGuide_AchievementsTitle
+じっせき
+
+#org @gText_FeatureGuide_AchievementsBody
+ぼうけんで たっせいした\nきろくを みられます。\nじょうけんを みたすと\nほうしゅうも あります。
+
+#org @gText_FeatureGuide_DexNavTitle
+ずかんナビ
+
+#org @gText_FeatureGuide_DexNavBody
+そのばしょの ポケモンを\nさがす きのうです。\nずかんを もらったあと\nLからも ひらけます。
+
+#org @gText_FeatureGuide_FollowerTitle
+つれあるき
+
+#org @gText_FeatureGuide_FollowerBody
+てもちの ポケモンと\nいっしょに あるけます。\nはなしかけると ようすをみられ\nなみのりでも すがたが でます。
+
+#org @gText_FeatureGuide_SettingsTitle
+せってい
+
+#org @gText_FeatureGuide_SettingsBody
+きほん・どくじきのう・\nしばりに わかれています。\nぼうけんに あわせて\nきのうを えらべます。
+
+#org @gText_FeatureGuide_ChallengeTitle
+しばり
+
+#org @gText_FeatureGuide_ChallengeBody
+どうぐや もちものなどへ\nせいげんを つけられます。\nポケセンりょうきん ON:100えん\nPCりょうきん ON:500えん\nどちらも OFFなら むりょう
+
+#org @gText_FeatureGuide_SavingsTitle
+ママのちょきん
+
+#org @gText_FeatureGuide_SavingsBody
+しょうきんの いちぶを\nママに あずけられます。\nでんわや じたくで かくにんし\nかわれた どうぐを うけとれます。
+
+#org @gText_FeatureGuide_BoxLinkTitle
+ボックスリンク
+
+#org @gText_FeatureGuide_BoxLinkBody
+たいせつなものから\nボックスを ひらけます。\nばしょによっては\nつかえないことも あります。
+
+#org @gText_FeatureGuide_FlightTitle
+そらをとぶ
+
+#org @gText_FeatureGuide_FlightBody
+てもちで そらをとぶを\nえらび いきさきを きめます。\nせっていの ひこうえんしゅつで\nえんしゅつを ON・OFFできます。
+
+#org @gText_FeatureGuide_FreeFlightTitle
+ゆうらん
+
+#org @gText_FeatureGuide_FreeFlightBody
+そのちほうの バッジ8こなど\nじょうけんを みたすと\nてもちに ゆうらんが でます。\nじゅうじキーで いどう Bでちゃくち\nおりられないときは ひろいあしばへ
+
+#org @gText_FeatureGuide_BallsTitle
+どくじの ボール
+
+#org @gText_FeatureGuide_BallsBody
+STARTボールは つかまえやすさ\n1.3ばい・ねだん210えんです。\nほかにも どくじボールを\nおみせなどで みつけられます。
+
+#org @gText_FeatureGuide_FieldSpeedTitle
+いどうそくど
+
+#org @gText_FeatureGuide_FieldSpeedBody
+フィールドでの うごきを\n1ばいから 4ばいまで\nせっていで えらべます。\nじぶんに あう はやさでどうぞ。
+
+#org @gText_FeatureGuide_DifficultyTitle
+なんいど
+
+#org @gText_FeatureGuide_DifficultyBody
+ポケモンの つよさを\n7しゅるいから えらべます。\nりるアイスが いちばん\nやさしい せっていです。
+
+#org @gText_FeatureGuide_BattleSpeedTitle
+たいせんそくど
+
+#org @gText_FeatureGuide_BattleSpeedBody
+せんとうの はやさを\n1ばいから 4ばいまで\nせっていで えらべます。\nいどうそくどとは べつです。
+
+#org @gText_FeatureGuide_MoemonTitle
+Moemon
+
+#org @gText_FeatureGuide_MoemonBody
+ポケモンの べつの\nみためを だすかどうか\nせっていで えらべます。\nOFFなら もとのすがたです。
+
+#org @gText_FeatureGuide_HabitatTitle
+せいそくち
+
+#org @gText_FeatureGuide_HabitatBody
+カントーと ホウエンの\nやせいポケモンを\nいれかえるか もとのままか\nせっていで えらべます。
+
+#org @gText_FeatureGuide_WonderSettingsTitle
+ミラクルこうかんせってい
+
+#org @gText_FeatureGuide_WonderSettingsBody
+こうかんの ばめんを\nみるか きめられます。\nくるポケモンの 1つめの\nタイプも えらべます。
+
+#org @gText_FeatureGuide_NetButtonTitle
+ネットこうかんキー
+
+#org @gText_FeatureGuide_NetButtonBody
+せっていで つかうにすると\nフィールドで Aを おしながら\nSELECTを おすことで\nネットこうかんを ひらけます。
+
+#org @gText_FeatureGuide_WeatherTitle
+てんき
+
+#org @gText_FeatureGuide_WeatherBody
+そとの てんきが じかんで\nかわる ランダムと\nきまった てんきから\nせっていで えらべます。
+
+#org @gText_FeatureGuide_NicknameTitle
+ニックネーム
+
+#org @gText_FeatureGuide_NicknameBody
+ポケモンを てにいれたとき\nニックネームを つけるか\nきかれるかどうかを\nせっていで えらべます。
+
+#org @gText_FeatureGuide_AffectionTitle
+なかよしこうか
+
+#org @gText_FeatureGuide_AffectionBody
+なかよしどで おこる\nせんとうの とくべつなこうかを\nつかうかどうか\nせっていで えらべます。
+
+#org @gText_FeatureGuide_TrainingPouchTitle
+いくせいポーチ
+
+#org @gText_FeatureGuide_TrainingPouchBody
+たいせつなものから つかい\nSELECTで とうろくできます。\nいくせいの どうぐだけをひらき\nBで いつものバッグへ もどります。
+
+#org @gText_FeatureGuide_TrainingToolsTitle
+いくせいの どうぐ
+
+#org @gText_FeatureGuide_TrainingToolsBody
+どりょくちを すべて0にする\nレベルを 1さげる\nせいべつを きりかえるなどの\nどうぐが あります。
+
+#org @gText_FeatureGuide_TrainingHelpersTitle
+いくせいを たすけるひと
+
+#org @gText_FeatureGuide_TrainingHelpersBody
+テラタイプや つかまえたボールを\nかえる ひとが います。\nおぼえられる わざを\nおしえる ひとも います。
+
+#org @gText_FeatureGuide_SaveSlotsTitle
+2つの ぼうけん
+
+#org @gText_FeatureGuide_SaveSlotsBody
+たいおうした かんきょうでは\n2つの ぼうけんを\nべつべつに ほぞんして\nつづきから あそべます。
+
+#org @gText_FeatureGuide_BoxesTitle
+50この ボックス
+
+#org @gText_FeatureGuide_BoxesBody
+ポケモンを あずけるボックスは\nぜんぶで 50こ あります。\nボックスを えらぶ がめんから\nべつのボックスへ うつれます。
+
+#org @gText_FeatureGuide_NetworkTradeTitle
+ネットこうかん
+
+#org @gText_FeatureGuide_NetworkTradeBody
+ネットを つかった\nミラクルこうかんです。\nタイトルの あとのメニューや\nせっていしたキーで ひらけます。
+
+#org @gText_FeatureGuide_GiftsTitle
+ふしぎな もらいもの
+
+#org @gText_FeatureGuide_GiftsBody
+タイトルの あとのメニューで\n12もじの ことばを いれます。\nうけとるものが あるときは\nポケセン2かいで うけとれます。
+
+#org @gText_FeatureGuide_WonderTradeTitle
+ミラクルこうかん
+
+#org @gText_FeatureGuide_WonderTradeBody
+ポケモンを 1ぴき だして\nだれかの ポケモンと\nこうかんする きのうです。\nこうかんのまえに かくにんできます。
+
+#org @gText_FeatureGuide_WildChainTitle
+やせいの むれ
+
+#org @gText_FeatureGuide_WildChainBody
+むずかしい なんいどでは\nやせいポケモンに かつと\nつづけて ポケモンが\nあらわれることが あります。
+
+#org @gText_FeatureGuide_LegendRaidTitle
+でんせつレイド
+
+#org @gText_FeatureGuide_LegendRaidBody
+バトルフロンティアで\nでんせつや まぼろしの\nつよいポケモンに いどみ\nかったあと つかまえられます。
+
+#org @gText_FeatureGuide_SpecialEncountersTitle
+とくべつな であい
+
+#org @gText_FeatureGuide_SpecialEncountersBody
+バッジを 16こ あつめると\nそとや どうくつの どこかで\nとくべつな ポケモンと\nであえることが あります。
+
+#org @gText_FeatureGuide_StoryPartnerTitle
+とくべつな あいぼう
+
+#org @gText_FeatureGuide_StoryPartnerBody
+ものがたりを すすめると\nとくべつな あいぼうを\n1ぴき えらぶ ばめんが\nあります。えらびなおせません。
+
+#org @gText_FeatureGuide_SpecialItemsTitle
+とくべつな どうぐ
+
+#org @gText_FeatureGuide_SpecialItemsBody
+いろちがいに かかわる\nおまもりや いくせいひん\nとくべつな かせきなど\nどくじの どうぐが あります。
+
+#org @gText_FeatureGuide_HiddenGiftsTitle
+かくされた おくりもの
+
+#org @gText_FeatureGuide_HiddenGiftsBody
+ひとや ものを しらべたり\nものがたりを すすめると\nとくべつな なかまや どうぐを\nもらえることが あります。
+
+#org @gText_FeatureGuide_HiddenTrainersTitle
+かくれた つよいてき
+
+#org @gText_FeatureGuide_HiddenTrainersBody
+ぼうけんを すすめると\nせかいの どこかに\nとても つよいトレーナーが\nあらわれることが あります。
+
+#org @gText_FeatureGuide_RegionalToolsTitle
+ちほうを またぐ どうぐ
+
+#org @gText_FeatureGuide_RegionalToolsBody
+ダウジングマシンや\nバトルサーチャーは\nカントーいがいの ちほうでも\nつかえる ばしょが あります。
+
+#org @gText_FeatureGuide_GameCornerTitle
+ゲームコーナー
+
+#org @gText_FeatureGuide_GameCornerBody
+コインは 50・500・1000まい\nさいだいまで・すうをきめる\nかいかたから えらべます。\nもてるのは 99999まいです。
+
+#org @gText_FeatureGuide_DynamaxTitle
+ダイマックス
+
+#org @gText_FeatureGuide_DynamaxBody
+ぼうけんの はじめに\nダイマックスバンドを もらい\nジムや チャンピオンとの\nとくべつな せんとうで つかえます。
+
+#org @gText_FeatureGuide_StartSupportTitle
+ぼうけんの じゅんび
+
+#org @gText_FeatureGuide_StartSupportBody
+ぼうけんの はじめに\nじたくで ママに はなすと\nランニングや せんとうに\nひつような どうぐが そろいます。
+
+#org @gText_FeatureGuide_MomPikachuTitle
+ママの ピカチュウ
+
+#org @gText_FeatureGuide_MomPikachuBody
+さいしょの ポケモンのあと\nママに はなしかけると\nとくべつな ピカチュウと\nおまもりを うけとれます。
+
+#org @gText_FeatureGuide_MomokaTitle
+モモカはかせ
+
+#org @gText_FeatureGuide_MomokaBody
+ずかんを もらったあとも\nモモカはかせに はなすと\nふたたび ポケモンしょうぶを\nいどめるように なります。
+
+#org @gText_FeatureGuide_ChallengeItemsTitle
+しばり どうぐ
+
+#org @gText_FeatureGuide_ChallengeItemsBody
+アイテムきんしを ONにすると\nせんとうは ボールだけ つかえます。\nそとで かいふくやくも つかえません。\nもちものきんしを ONにすると\nせんとうで もちものが ききません。
+
+#org @gText_FeatureGuide_ChallengeFeesTitle
+しばり りょうきん
+
+#org @gText_FeatureGuide_ChallengeFeesBody
+ポケセンりょうきん ONは100えん\nPCりょうきん ONは500えんです。\nそれぞれ OFFなら\nりょうきんは かかりません。
+
+#org @gText_FeatureGuide_ChallengeIntruderTitle
+しばり なぞのあいて
+
+#org @gText_FeatureGuide_ChallengeIntruderBody
+ポケセンの？？？を ONにすると\nポケセンへ はいったとき\nとくべつな あいてとの\nしょうぶが はじまります。
+
+#org @gText_FeatureGuide_ChallengeATitle
+しばり ぼうけん
+
+#org @gText_FeatureGuide_ChallengeABody
+ONにした しばりだけ はたらきます。\nひんしでおわかれ\nはじめの1ぴきだけ\nニックネームひっすが あります。
+
+#org @gText_FeatureGuide_ChallengeB1Title
+しばり せんとう1
+
+#org @gText_FeatureGuide_ChallengeB1Body
+ONにした しばりだけ はたらきます。\nレベルキャップ・こうたいきんし\nやせいけいけんなしを\nそれぞれ えらべます。
+
+#org @gText_FeatureGuide_ChallengeB2Title
+しばり せんとう2
+
+#org @gText_FeatureGuide_ChallengeB2Body
+ダメージ1.5ばいを ONにすると\nうけるダメージが 1.5ばいです。\nそらをとぶきんし ONでは\nそらをとぶ・ゆうらんが つかえません。
+
+#org @gText_FeatureGuide_ChallengeC1Title
+しばり まち
+
+#org @gText_FeatureGuide_ChallengeC1Body
+ONにした しばりだけ はたらきます。\nポケセンきんし・おみせきんし\nひんしどうぐきんしを\nそれぞれ えらべます。
+
+#org @gText_FeatureGuide_ChallengeC2Title
+しばり ポケモン
+
+#org @gText_FeatureGuide_ChallengeC2Body
+モノタイプを ONにすると\nおなじタイプだけ たたかえます。\nランダムを ONにすると\nであう ポケモンなどが かわります。

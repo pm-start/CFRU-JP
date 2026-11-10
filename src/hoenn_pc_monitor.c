@@ -45,17 +45,20 @@ void HoennPcMonitorTick(void);
 
 void HoennPcMonitorTick(void)
 {
-	u8 i;
+	struct Sprite* sprite;
+	struct Sprite* end;
 
 	if (gSaveBlock1->location.mapGroup < HOENN_PC_MONITOR_GROUP_BASE)
 		return;
 
-	for (i = 0; i < MAX_SPRITES; ++i)
+	//★ 2026-11-03 perf-region-3: gSprites[i] を毎回 0x44 倍して引くのをやめ、ポインタで進める（見る欄・貼り替える条件は前と同じ・約 500 → 約 350 サイクル）。
+	//  「回復の台本の間だけ探す」案は、回復モニターのスプライトが台本の外（FldEff_PokecenterHeal のタスク）で作られる＝合図を安全に取れないので見送り
+	end = gSprites + MAX_SPRITES;
+	for (sprite = gSprites; sprite < end; ++sprite)
 	{
-		if (!gSprites[i].inUse)
+		if (!sprite->inUse)
 			continue;
-		if (gSprites[i].images
-		    == (const struct SpriteFrameImage*) HOENN_PC_MONITOR_PICTABLE)
-			gSprites[i].images = sHoennPcMonitorPics;
+		if (sprite->images == (const struct SpriteFrameImage*) HOENN_PC_MONITOR_PICTABLE)
+			sprite->images = sHoennPcMonitorPics;
 	}
 }

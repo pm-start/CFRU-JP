@@ -300,7 +300,7 @@
 #define VAR_0x40FC                 0x40FC
 #define VAR_0x40FD                 0x40FD
 #define VAR_0x40FE                 0x40FE
-#define VAR_0x40FF                 0x40FF
+#define VAR_BATTLE_FACILITY_NUM    0x40FF /* 施設番号。エレベーターの階 0x403A とは別。配列の最後で、前の欄は動かさない */
 
 #define VARS_END                   0x40FF
 

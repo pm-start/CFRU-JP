@@ -1,0 +1,22 @@
+// 縛り F 6 本（0.63.0・src/hack_challenge_f.c・assembly/hack_challenge/challenge_f_scripts.s）の文。会話の窓の幅（CLAUDE.md 6.25）。
+
+#org @gText_ChallengeF_FinaleInverse
+『さかさバトル』を つらぬきとおした！
+
+#org @gText_ChallengeF_FinaleBonus
+『しばりボーナス』を もらいつづけた！
+
+#org @gText_ChallengeF_FinaleBlind
+『めかくしバトル』を つらぬきとおした！
+
+#org @gText_ChallengeF_FinaleOneshot
+『いっぱつしょうぶ』を つらぬきとおした！
+
+#org @gText_ChallengeF_FinaleRotation
+『ローテーション』を つらぬきとおした！
+
+#org @gText_ChallengeF_FinaleGacha
+『わざガチャ』を つらぬきとおした！
+
+#org @gText_ChallengeF_BonusGet
+しばりボーナス！ [BUFFER1]を\n[BUFFER2]こ もらった！

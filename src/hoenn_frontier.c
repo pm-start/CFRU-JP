@@ -83,7 +83,7 @@ static const struct BattleTowerSpread* MakeMonSpread(struct BattleTowerSpread* o
 		if (mon->evSpread & (1 << i))
 			++numStats;
 	}
-	ev = (numStats == 0) ? 0 : MathMin(255, 510 / numStats);
+	ev = (numStats == 0) ? 0 : MathMin(HACK_EV_FIELD_MAX, HACK_EV_TOTAL_CAP / numStats); //[hack] patches/0677
 	if (mon->evSpread & (1 << 0)) out->hpEv = ev;
 	if (mon->evSpread & (1 << 1)) out->atkEv = ev;
 	if (mon->evSpread & (1 << 2)) out->defEv = ev;

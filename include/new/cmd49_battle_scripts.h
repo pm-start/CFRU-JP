@@ -19,6 +19,7 @@ extern const u8 BattleScript_ObstructStatDecrement[];
 extern const u8 BattleScript_SilkTrapStatDecrement[];
 extern const u8 BattleScript_RageIsBuilding[];
 extern const u8 BattleScript_BeakBlastBurn[];
+extern const u8 BattleScript_HomuraBurn[];
 extern const u8 BattleScript_Magician[];
 extern const u8 BattleScript_Moxie[];
 extern const u8 BattleScript_BattleBondBoost[]; //★ Champions（patches/0070）

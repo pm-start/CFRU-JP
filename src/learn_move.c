@@ -35,12 +35,16 @@ extern const u8 PSSIconsTiles[];
 void GiveBoxMonInitialMoveset(struct BoxPokemon* boxMon)
 {
 	s32 i, k, index;
-	u16 moveStack[MAX_LEARNABLE_MOVES];
+	//[hack] patches/0598: 以前は u16 moveStack[MAX_LEARNABLE_MOVES]（40）に「レベル以下の技を全部」積んでいて、Lv101〜200 の技で
+	//覚える技が 41 個をこえる種族（0.53.0 で 1168/1328 種族）を高レベルで作ると配列の外（保存したレジスタ・戻り番地）を壊した。
+	//使うのは最後の MAX_MON_MOVES 個だけなので、最後の 4 個だけを順番どおりに持つ輪（積み方・技を渡す順は以前と同じ）
+	u16 lastMoves[MAX_MON_MOVES] = {MOVE_NONE};
 
 	u16 species = GetBoxMonData(boxMon, MON_DATA_SPECIES, NULL);
 	s32 level = GetLevelFromBoxMonExp(boxMon);
 
-	for (i = 0, k = 0; !(gLevelUpLearnsets[species][i].level == 0
+	//[hack] patches/0598: 終わりの判定が「level == 0 && level == 0xFF」（常に偽）だった → 「move == 0 && level == 0xFF」
+	for (i = 0, k = 0; !(gLevelUpLearnsets[species][i].move == 0
 				  && gLevelUpLearnsets[species][i].level == 0xFF); ++i)
 	{
 		struct LevelUpMove lvlUpMove = gLevelUpLearnsets[species][i];
@@ -54,45 +58,58 @@ void GiveBoxMonInitialMoveset(struct BoxPokemon* boxMon)
 		if (lvlUpMove.level > level)
 			break;
 
-		moveStack[k++] = move;
+		lastMoves[k++ & (MAX_MON_MOVES - 1)] = move; //k は 4 の倍数ごとに一周（MAX_MON_MOVES は 4＝2 の冪）
 	}
 
 	index = k - MAX_MON_MOVES;
 	if (index < 0)
 		index = 0;
 
-	while (index < k && GiveMoveToBoxMon(boxMon, moveStack[index++]) != 0xFFFF);
+	while (index < k && GiveMoveToBoxMon(boxMon, lastMoves[index++ & (MAX_MON_MOVES - 1)]) != 0xFFFF);
+}
+
+//[hack] patches/0598: sLearningMoveTableID（u8・0x02023F88）は以前「学習表の添字」だった。表が 256 件をこえる種族（0.53.2 で最大 約 410）では
+//u8 が一周して表の先頭へ戻り、同じ技を覚え続ける／終わりを見つけられず固まる。そこで「そのレベルで何個目まで渡したか」（256 未満）の個数にし、
+//添字は毎回表から数え直す（渡す順・内容は以前と同じ）
+//n 番目（0 始まり）の「覚えるレベルが level の技」の添字。無ければ -1。tableLevel0 が TRUE なら level 0 の技も数える（進化直後用）
+static s32 FindLevelUpEntry(u16 species, u16 level, u32 n, bool8 tableLevel0)
+{
+	s32 i;
+
+	for (i = 0; ; ++i)
+	{
+		struct LevelUpMove lvlUpMove = gLevelUpLearnsets[species][i];
+
+		if (lvlUpMove.move == 0 && lvlUpMove.level == 0xFF)
+			return -1;
+
+		if (lvlUpMove.level == level || (tableLevel0 && lvlUpMove.level == 0))
+		{
+			if (n == 0)
+				return i;
+			--n;
+		}
+	}
 }
 
 u16 MonTryLearningNewMove(struct Pokemon* mon, bool8 firstMove)
 {
 	u32 retVal = 0;
 	u16 species = mon->species;
-	u8 level = mon->level;
-	struct LevelUpMove lvlUpMove;
+	u16 level = mon->level;
+	s32 index;
 
 	// since you can learn more than one move per level
 	// the game needs to know whether you decided to
 	// learn it or keep the old set to avoid asking
 	// you to learn the same move over and over again
 	if (firstMove)
-	{
-		sLearningMoveTableID = 0;
-		lvlUpMove = gLevelUpLearnsets[species][sLearningMoveTableID];
+		sLearningMoveTableID = 0; //このレベルで渡した個数
 
-		while (lvlUpMove.level != level)
-		{
-			lvlUpMove = gLevelUpLearnsets[species][++sLearningMoveTableID];
-			if (lvlUpMove.move == 0
-			&&  lvlUpMove.level == 0xFF)
-				return 0;
-		}
-	}
-
-	lvlUpMove = gLevelUpLearnsets[species][sLearningMoveTableID];
-	if (lvlUpMove.level == level)
+	index = FindLevelUpEntry(species, level, sLearningMoveTableID, FALSE);
+	if (index >= 0)
 	{
-		gMoveToLearn = lvlUpMove.move;
+		gMoveToLearn = gLevelUpLearnsets[species][index].move;
 
 		#ifdef FLAG_POKEMON_LEARNSET_RANDOMIZER
 		if (FlagGet(FLAG_POKEMON_LEARNSET_RANDOMIZER) && !FlagGet(FLAG_BATTLE_FACILITY))
@@ -118,28 +135,16 @@ u16 MonTryLearningNewMoveAfterEvolution(struct Pokemon* mon, bool8 firstMove)
 {
 	u32 retVal = 0;
 	u16 species = mon->species;
-	u8 level = mon->level;
-	struct LevelUpMove lvlUpMove;
+	u16 level = mon->level;
+	s32 index;
 
 	if (firstMove)
-		sLearningMoveTableID = 0;
+		sLearningMoveTableID = 0; //ここまでに渡した個数（level 0 の技と今のレベルの技）
 
-	lvlUpMove = gLevelUpLearnsets[species][sLearningMoveTableID];
-	if (lvlUpMove.move == 0 && lvlUpMove.level == 0xFF) //In case just learned last move and reentered into loop
-		return retVal; //0
-
-	while (lvlUpMove.level != 0 && lvlUpMove.level != level)
+	index = FindLevelUpEntry(species, level, sLearningMoveTableID, TRUE);
+	if (index >= 0) //無ければ「最後の技まで渡した」＝0
 	{
-		lvlUpMove = gLevelUpLearnsets[species][++sLearningMoveTableID];
-		if (lvlUpMove.move == 0
-		&&  lvlUpMove.level == 0xFF)
-			return retVal; //0
-	}
-
-	lvlUpMove = gLevelUpLearnsets[species][sLearningMoveTableID];
-	if (lvlUpMove.level == level || lvlUpMove.level == 0)
-	{
-		gMoveToLearn = lvlUpMove.move;
+		gMoveToLearn = gLevelUpLearnsets[species][index].move;
 
 		#ifdef FLAG_POKEMON_LEARNSET_RANDOMIZER
 		if (FlagGet(FLAG_POKEMON_LEARNSET_RANDOMIZER) && !FlagGet(FLAG_BATTLE_FACILITY))
@@ -152,7 +157,6 @@ u16 MonTryLearningNewMoveAfterEvolution(struct Pokemon* mon, bool8 firstMove)
 
 	return retVal;
 }
-
 bool8 HackFullTutor_IsActive(void); //[hack] patches/0171 src/hack_full_tutor.c
 u8 HackFullTutor_GetMoves(struct Pokemon* mon, u16* moves);
 
@@ -161,7 +165,7 @@ u8 GetMoveRelearnerMoves(struct Pokemon* mon, u16* moves)
 	u16 learnedMoves[4];
 	u8 numMoves = 0;
 	u16 species = mon->species;
-	u8 level = mon->level;
+	u16 level = mon->level;
 	int i, j, k;
 
 	if (HackFullTutor_IsActive()) //[hack] patches/0171: the Battle Frontier tutor teaches every learnable move (level-up, egg, TM, tutor)
@@ -183,7 +187,10 @@ u8 GetMoveRelearnerMoves(struct Pokemon* mon, u16* moves)
 	for (i = 0; i < MAX_MON_MOVES; ++i)
 		learnedMoves[i] = mon->moves[i];
 
-	for (i = 0; i < MAX_LEARNABLE_MOVES; ++i) //50 max moves can be relearned
+	//[hack] patches/0598: 以前は「学習表の先頭 40 件」しか見ていた（Lv101〜200 の技は永久に出ない）。いまは表の終わりまで見て、
+	//画面の入れ物（MAX_LEARNABLE_MOVES＝40・素の画面の番地に合わせてあって広げられない）に入りきらないときは新しい方の 40 個を残す。
+	//ぜんぶ見たいときはフロンティアの「なんでも おしえる ひと」（hack_full_tutor.c・ページ送り）
+	for (i = 0; ; ++i)
 	{
 		struct LevelUpMove lvlUpMove = gLevelUpLearnsets[species][i];
 		u16 move = lvlUpMove.move;
@@ -207,7 +214,15 @@ u8 GetMoveRelearnerMoves(struct Pokemon* mon, u16* moves)
 					;
 
 				if (k == numMoves)
+				{
+					if (numMoves >= MAX_LEARNABLE_MOVES) //入れ物がいっぱい: いちばん古い 1 個を押し出す
+					{
+						for (k = 1; k < MAX_LEARNABLE_MOVES; ++k)
+							moves[k - 1] = moves[k];
+						--numMoves;
+					}
 					moves[numMoves++] = move;
+				}
 			}
 		}
 	}
@@ -215,12 +230,13 @@ u8 GetMoveRelearnerMoves(struct Pokemon* mon, u16* moves)
 	return numMoves;
 }
 
-u8 GetLevelUpMovesBySpecies(u16 species, u16* moves)
+u16 GetLevelUpMovesBySpecies(u16 species, u16* moves)
 {
-	u8 numMoves = 0;
+	u16 numMoves = 0;
 	int i;
 
-	for (i = 0; i < MAX_LEARNABLE_MOVES && !(gLevelUpLearnsets[species][i].move == 0
+	//[hack] patches/0598: 上限を 40 → MAX_LEVEL_UP_MOVES。呼ぶ側は MAX_LEVEL_UP_MOVES 個分の入れ物を用意する
+	for (i = 0; i < MAX_LEVEL_UP_MOVES && !(gLevelUpLearnsets[species][i].move == 0
 						&& gLevelUpLearnsets[species][i].level == 0xFF); ++i)
 	{
 		u16 move = gLevelUpLearnsets[species][i].move;
@@ -236,12 +252,12 @@ u8 GetLevelUpMovesBySpecies(u16 species, u16* moves)
 	return numMoves;
 }
 
-u8 GetLevelUpMovePairsBySpecies(u16 species, struct MovePair* moves)
+u16 GetLevelUpMovePairsBySpecies(u16 species, struct MovePair* moves)
 {
-	u8 numMoves = 0;
+	u16 numMoves = 0;
 	int i;
 
-	for (i = 0; i < MAX_LEARNABLE_MOVES && !(gLevelUpLearnsets[species][i].move == 0
+	for (i = 0; i < MAX_LEVEL_UP_MOVES && !(gLevelUpLearnsets[species][i].move == 0
 						&& gLevelUpLearnsets[species][i].level == 0xFF); ++i)
 	{
 		u16 move = gLevelUpLearnsets[species][i].move;
@@ -343,6 +359,27 @@ u16 BuildLearnableMoveset(struct Pokemon* mon, u16* moves)
 				++numTotalMoves;
 				++moves; //Increase Ptr
 			}
+		}
+	}
+
+	//[hack] patches/0630 (#142): まっかなちかい（0x140E）は だいばくはつと同じ経路で覚えられる。レベル・タマゴは習得表・タマゴ技の表に同じ項目を足してある。
+	//  わざマシン 64（だいばくはつ）の種族はここ（思い出し・フロンティアの なんでも おしえる ひと）で同じ技を並べる
+	{
+		u16* start = moves - numTotalMoves;
+		bool8 hasExplosion = FALSE, hasMakkana = FALSE;
+
+		for (u32 i = 0; i < numTotalMoves; ++i)
+		{
+			if (start[i] == MOVE_EXPLOSION)
+				hasExplosion = TRUE;
+			else if (start[i] == MOVE_DUAL_MAKKANA_CHIKAI)
+				hasMakkana = TRUE;
+		}
+
+		if (hasExplosion && !hasMakkana)
+		{
+			*moves = MOVE_DUAL_MAKKANA_CHIKAI;
+			++numTotalMoves;
 		}
 	}
 
